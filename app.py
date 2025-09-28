@@ -1,7 +1,6 @@
 from flask import Flask, request, render_template_string, redirect, session
 import requests
 import os
-from werkzeug.security import check_password_hash
 import urllib.parse
 
 app = Flask(__name__)
@@ -70,10 +69,12 @@ def formulario_lead():
             "persona_contacto": request.form.get("persona_contacto"),
             "telefono": request.form.get("telefono"),
             "email": request.form.get("email"),
+            "administrador_fincas": request.form.get("administrador_fincas"),
+            "numero_ascensores": request.form.get("numero_ascensores"),
             "observaciones": request.form.get("observaciones")
         }
 
-        required = [data["tipo_cliente"], data["direccion"], data["nombre_cliente"], data["localidad"]]
+        required = [data["tipo_cliente"], data["direccion"], data["nombre_cliente"], data["localidad"], data["numero_ascensores"]]
         if any(not field for field in required):
             return "Datos del lead inválidos", 400
 
@@ -103,17 +104,23 @@ def nuevo_equipo():
         equipo_data = {
             "cliente_id": request.form.get("cliente_id"),
             "tipo_equipo": request.form.get("tipo_equipo"),
+            "identificacion": request.form.get("identificacion"),
             "empresa_mantenedora": request.form.get("empresa_mantenedora"),
             "ubicacion": request.form.get("ubicacion"),
             "descripcion": request.form.get("descripcion"),
-            "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato"),
+            "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
             "rae": request.form.get("rae"),
-            "ipo_proxima": request.form.get("ipo_proxima")
+            "ipo_proxima": request.form.get("ipo_proxima") or None
         }
 
-        required = [equipo_data["cliente_id"], equipo_data["tipo_equipo"]]
+        required = [equipo_data["cliente_id"], equipo_data["tipo_equipo"], equipo_data["identificacion"]]
         if any(not field for field in required):
             return "Datos del equipo inválidos", 400
+
+        # Limpiar campos vacíos (convertir strings vacíos a None)
+        for key, value in equipo_data.items():
+            if value == "":
+                equipo_data[key] = None
 
         res = requests.post(f"{SUPABASE_URL}/rest/v1/equipos", json=equipo_data, headers=HEADERS)
         if res.status_code in [200, 201]:
@@ -163,11 +170,13 @@ def leads_dashboard():
 
                     rows.append({
                         "lead_id": lead_id,
-                        "equipo_id": equipo["id"],  # CORREGIDO: Agregado equipo_id
+                        "equipo_id": equipo["id"],
                         "direccion": lead.get("direccion", "-"),
                         "localidad": lead.get("localidad", "-"),
                         "codigo_postal": lead.get("codigo_postal", "-"),
+                        "identificacion": equipo.get("identificacion", "-"),
                         "total_equipos": total_equipos,
+                        "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
                         "empresa_mantenedora": equipo.get("empresa_mantenedora", "-"),
                         "fecha_vencimiento_contrato": fecha_vencimiento,
                         "ipo_proxima": ipo_proxima
@@ -180,7 +189,9 @@ def leads_dashboard():
                     "direccion": lead.get("direccion", "-"),
                     "localidad": lead.get("localidad", "-"),
                     "codigo_postal": lead.get("codigo_postal", "-"),
+                    "identificacion": "-",
                     "total_equipos": 0,
+                    "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
                     "empresa_mantenedora": "-",
                     "fecha_vencimiento_contrato": "-",
                     "ipo_proxima": "-"
@@ -203,9 +214,11 @@ def editar_lead(lead_id):
             "localidad": request.form.get("localidad"),
             "zona": request.form.get("zona"),
             "persona_contacto": request.form.get("persona_contacto"),
-            "telefono": request.form.get("telefono"),  # CORREGIDO: Agregado
-            "email": request.form.get("email"),        # CORREGIDO: Agregado
-            "observaciones": request.form.get("observaciones")  # CORREGIDO: Agregado
+            "telefono": request.form.get("telefono"),
+            "email": request.form.get("email"),
+            "administrador_fincas": request.form.get("administrador_fincas"),
+            "numero_ascensores": request.form.get("numero_ascensores"),
+            "observaciones": request.form.get("observaciones")
         }
         res = requests.patch(
             f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}",
@@ -243,13 +256,19 @@ def editar_equipo(equipo_id):
     if request.method == "POST":
         data = {
             "tipo_equipo": request.form.get("tipo_equipo"),
+            "identificacion": request.form.get("identificacion"),
             "empresa_mantenedora": request.form.get("empresa_mantenedora"),
             "ubicacion": request.form.get("ubicacion"),
             "descripcion": request.form.get("descripcion"),
-            "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato"),
+            "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
             "rae": request.form.get("rae"),
-            "ipo_proxima": request.form.get("ipo_proxima")
+            "ipo_proxima": request.form.get("ipo_proxima") or None
         }
+
+        # Limpiar campos vacíos
+        for key, value in data.items():
+            if value == "":
+                data[key] = None
 
         update_url = f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}"
         res = requests.patch(update_url, json=data, headers=HEADERS)
@@ -425,6 +444,35 @@ FORM_TEMPLATE = """
                 <label>Email:</label><br>
                 <input type="email" name="email"><br><br>
 
+                <label>Administrador de Fincas:</label><br>
+                <input type="text" name="administrador_fincas" placeholder="Nombre de la empresa administradora"><br><br>
+
+                <label>Número de Ascensores:</label><br>
+                <select name="numero_ascensores" required>
+                    <option value="">-- ¿Cuántos ascensores hay? --</option>
+                    <option value="1">1 ascensor</option>
+                    <option value="2">2 ascensores</option>
+                    <option value="3">3 ascensores</option>
+                    <option value="4">4 ascensores</option>
+                    <option value="5">5 ascensores</option>
+                    <option value="6">6 ascensores</option>
+                    <option value="7">7 ascensores</option>
+                    <option value="8">8 ascensores</option>
+                    <option value="9">9 ascensores</option>
+                    <option value="10">10 ascensores</option>
+                    <option value="11">11 ascensores</option>
+                    <option value="12">12 ascensores</option>
+                    <option value="13">13 ascensores</option>
+                    <option value="14">14 ascensores</option>
+                    <option value="15">15 ascensores</option>
+                    <option value="16">16 ascensores</option>
+                    <option value="17">17 ascensores</option>
+                    <option value="18">18 ascensores</option>
+                    <option value="19">19 ascensores</option>
+                    <option value="20">20 ascensores</option>
+                    <option value="20+">Más de 20 ascensores</option>
+                </select><br><br>
+
                 <label>Observaciones:</label><br>
                 <textarea name="observaciones"></textarea><br><br>
 
@@ -473,6 +521,9 @@ EQUIPO_TEMPLATE = """
                     <option value="Otro">Otro</option>
                 </select><br><br>
 
+                <label>Identificación del Ascensor:</label><br>
+                <input type="text" name="identificacion" placeholder="Ej: Ascensor A, Principal, Garaje, etc." required><br><br>
+
                 <label>Empresa Mantenedora:</label><br>
                 <select name="empresa_mantenedora">
                     <option value="">-- Selecciona una empresa --</option>
@@ -506,7 +557,7 @@ EQUIPO_TEMPLATE = """
                 <label>RAE (solo para ascensores):</label><br>
                 <input type="text" name="rae"><br><br>
 
-                <label>IPO Próxima:</label><br>
+                <label>IPO Próxima: <em>(consultar placa del ascensor)</em></label><br>
                 <input type="date" name="ipo_proxima"><br><br>
 
                 <button type="submit" class="button">Registrar Equipo</button>
@@ -610,6 +661,35 @@ EDIT_LEAD_TEMPLATE = """
             <label>Email:</label><br>
             <input type="email" name="email" value="{{ lead.email }}"><br><br>
 
+            <label>Administrador de Fincas:</label><br>
+            <input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br>
+
+            <label>Número de Ascensores:</label><br>
+            <select name="numero_ascensores" required>
+                <option value="">-- ¿Cuántos ascensores hay? --</option>
+                <option value="1" {% if lead.numero_ascensores == '1' %}selected{% endif %}>1 ascensor</option>
+                <option value="2" {% if lead.numero_ascensores == '2' %}selected{% endif %}>2 ascensores</option>
+                <option value="3" {% if lead.numero_ascensores == '3' %}selected{% endif %}>3 ascensores</option>
+                <option value="4" {% if lead.numero_ascensores == '4' %}selected{% endif %}>4 ascensores</option>
+                <option value="5" {% if lead.numero_ascensores == '5' %}selected{% endif %}>5 ascensores</option>
+                <option value="6" {% if lead.numero_ascensores == '6' %}selected{% endif %}>6 ascensores</option>
+                <option value="7" {% if lead.numero_ascensores == '7' %}selected{% endif %}>7 ascensores</option>
+                <option value="8" {% if lead.numero_ascensores == '8' %}selected{% endif %}>8 ascensores</option>
+                <option value="9" {% if lead.numero_ascensores == '9' %}selected{% endif %}>9 ascensores</option>
+                <option value="10" {% if lead.numero_ascensores == '10' %}selected{% endif %}>10 ascensores</option>
+                <option value="11" {% if lead.numero_ascensores == '11' %}selected{% endif %}>11 ascensores</option>
+                <option value="12" {% if lead.numero_ascensores == '12' %}selected{% endif %}>12 ascensores</option>
+                <option value="13" {% if lead.numero_ascensores == '13' %}selected{% endif %}>13 ascensores</option>
+                <option value="14" {% if lead.numero_ascensores == '14' %}selected{% endif %}>14 ascensores</option>
+                <option value="15" {% if lead.numero_ascensores == '15' %}selected{% endif %}>15 ascensores</option>
+                <option value="16" {% if lead.numero_ascensores == '16' %}selected{% endif %}>16 ascensores</option>
+                <option value="17" {% if lead.numero_ascensores == '17' %}selected{% endif %}>17 ascensores</option>
+                <option value="18" {% if lead.numero_ascensores == '18' %}selected{% endif %}>18 ascensores</option>
+                <option value="19" {% if lead.numero_ascensores == '19' %}selected{% endif %}>19 ascensores</option>
+                <option value="20" {% if lead.numero_ascensores == '20' %}selected{% endif %}>20 ascensores</option>
+                <option value="20+" {% if lead.numero_ascensores == '20+' %}selected{% endif %}>Más de 20 ascensores</option>
+            </select><br><br>
+
             <label>Observaciones:</label><br>
             <textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br>
 
@@ -659,7 +739,8 @@ DASHBOARD_TEMPLATE = """
                         <th>Dirección</th>
                         <th>Localidad</th>
                         <th>Código Postal</th>
-                        <th>Total Equipos</th>
+                        <th>Identificación</th>
+                        <th>Equipos Registrados/Previstos</th>
                         <th>Empresa Mantenedora</th>
                         <th>Vencimiento Contrato</th>
                         <th>IPO Próxima</th>
@@ -672,8 +753,9 @@ DASHBOARD_TEMPLATE = """
                         <td><a href='/editar_lead/{{ row.lead_id }}'>{{ row.direccion }}</a></td>
                         <td>{{ row.localidad }}</td>
                         <td>{{ row.codigo_postal }}</td>
+                        <td>{{ row.identificacion }}</td>
                         <td>
-                            <a href='/nuevo_equipo?cliente_id={{ row.lead_id }}'>{{ row.total_equipos }}</a>
+                            <a href='/nuevo_equipo?cliente_id={{ row.lead_id }}'>{{ row.total_equipos }}/{{ row.numero_ascensores_previsto }}</a>
                         </td>
                         <td>{{ row.empresa_mantenedora }}</td>
                         <td>{{ row.fecha_vencimiento_contrato }}</td>
@@ -722,6 +804,9 @@ EQUIPO_EDIT_TEMPLATE = """
             <form method="POST">
                 <label>Tipo de Equipo:</label><br>
                 <input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br>
+
+                <label>Identificación del Ascensor:</label><br>
+                <input type="text" name="identificacion" value="{{ equipo.identificacion }}" required><br><br>
 
                 <label>Empresa Mantenedora:</label><br>
                 <input type="text" name="empresa_mantenedora" value="{{ equipo.empresa_mantenedora }}"><br><br>
