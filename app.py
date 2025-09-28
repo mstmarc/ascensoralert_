@@ -285,6 +285,7 @@ LOGIN_TEMPLATE = """
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
@@ -324,6 +325,7 @@ HOME_TEMPLATE = """
 <html lang='es'>
 <head>
     <meta charset='UTF-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido</title>
     <link rel='stylesheet' href='/static/styles.css'>
 </head>
@@ -356,6 +358,7 @@ FORM_TEMPLATE = """
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario Lead</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
@@ -489,6 +492,7 @@ EQUIPO_TEMPLATE = """
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario Equipo</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
@@ -693,16 +697,15 @@ EDIT_LEAD_TEMPLATE = """
             <label>Observaciones:</label><br>
             <textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br>
 
-            <a href="/nuevo_equipo?cliente_id={{ lead.id }}" class="button">➕ Añadir nuevo equipo</a>
-            <button type="submit" class="button">Actualizar Lead</button>
-        </form>
-    </div>
-</main>
-</body>
-</html>
-"""
-
-# DASHBOARD TEMPLATE CORREGIDO
+EDIT_LEAD_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Lead</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
 DASHBOARD_TEMPLATE = """
 <!DOCTYPE html>
 <html lang='es'>
