@@ -74,6 +74,7 @@ def formulario_lead():
             "telefono": request.form.get("telefono"),
             "email": request.form.get("email"),
             "administrador_fincas": request.form.get("administrador_fincas"),
+            "empresa_mantenedora": request.form.get("empresa_mantenedora"),
             "numero_ascensores": request.form.get("numero_ascensores"),
             "observaciones": request.form.get("observaciones")
         }
@@ -111,7 +112,6 @@ def nuevo_equipo():
             "cliente_id": request.form.get("cliente_id"),
             "tipo_equipo": request.form.get("tipo_equipo"),
             "identificacion": request.form.get("identificacion"),
-            "empresa_mantenedora": request.form.get("empresa_mantenedora"),
             "ubicacion": request.form.get("ubicacion"),
             "descripcion": request.form.get("descripcion"),
             "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
@@ -285,9 +285,13 @@ def leads_dashboard():
             # Añadir a listas de filtros
             localidades_disponibles.add(lead.get("localidad", ""))
             
-            if equipos:
-                for equipo in equipos:
-                    empresas_disponibles.add(equipo.get("empresa_mantenedora", ""))
+            # Empresa mantenedora ahora viene del cliente
+            empresa_mantenedora = lead.get("empresa_mantenedora", "-")
+            if empresa_mantenedora:
+                empresas_disponibles.add(empresa_mantenedora)
+
+if equipos:
+    for equipo in equipos:
                     
                     # Formatear fechas
                     fecha_vencimiento = equipo.get("fecha_vencimiento_contrato", "-")
@@ -313,7 +317,7 @@ def leads_dashboard():
                         "identificacion": equipo.get("identificacion", "-"),
                         "total_equipos": total_equipos,
                         "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
-                        "empresa_mantenedora": equipo.get("empresa_mantenedora", "-"),
+                        "empresa_mantenedora": empresa_mantenedora,
                         "fecha_vencimiento_contrato": fecha_vencimiento,
                         "ipo_proxima": ipo_proxima,
                         "ipo_fecha_original": ipo_fecha_original
@@ -323,7 +327,7 @@ def leads_dashboard():
                     incluir_fila = True
                     
                     # Filtro por empresa
-                    if filtro_empresa and filtro_empresa != equipo.get("empresa_mantenedora", ""):
+                    if filtro_empresa and filtro_empresa != empresa_mantenedora:
                         incluir_fila = False
                     
                     # Filtro por localidad
@@ -377,7 +381,7 @@ def leads_dashboard():
                     "identificacion": "-",
                     "total_equipos": 0,
                     "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
-                    "empresa_mantenedora": "-",
+                    "empresa_mantenedora": empresa_mantenedora,
                     "fecha_vencimiento_contrato": "-",
                     "ipo_proxima": "-",
                     "ipo_fecha_original": None
@@ -673,6 +677,27 @@ FORM_TEMPLATE = '''
                 <label>Administrador de Fincas:</label><br>
                 <input type="text" name="administrador_fincas" placeholder="Nombre de la empresa administradora"><br><br>
 
+                <label>Empresa Mantenedora Actual:</label><br>
+                <select name="empresa_mantenedora">
+                    <option value="">-- Selecciona una empresa --</option>
+                    <option value="FAIN Ascensores">FAIN Ascensores</option>
+                    <option value="KONE">KONE</option>
+                    <option value="Otis">Otis</option>
+                    <option value="Schindler">Schindler</option>
+                    <option value="TKE">TKE</option>
+                    <option value="Orona">Orona</option>
+                    <option value="APlus Ascensores">APlus Ascensores</option>
+                    <option value="Ascensores Canarias">Ascensores Canarias</option>
+                    <option value="Ascensores Domingo">Ascensores Domingo</option>
+                    <option value="Ascensores Vulcano Canarias">Ascensores Vulcano Canarias</option>
+                    <option value="Elevadores Canarios">Elevadores Canarios</option>
+                    <option value="Fedes Ascensores">Fedes Ascensores</option>
+                    <option value="Gratecsa">Gratecsa</option>
+                    <option value="Lift Technology">Lift Technology</option>
+                    <option value="Omega Elevadores">Omega Elevadores</option>
+                    <option value="Q Ascensores">Q Ascensores</option>
+                </select><br><br>
+
                 <label>Número de Ascensores:</label><br>
                 <select name="numero_ascensores" required>
                     <option value="">-- ¿Cuántos ascensores hay? --</option>
@@ -751,28 +776,7 @@ EQUIPO_TEMPLATE = '''
 
                 <label>Identificación del Ascensor:</label><br>
                 <input type="text" name="identificacion" placeholder="Ej: Ascensor A, Principal, Garaje, etc." required><br><br>
-
-                <label>Empresa Mantenedora:</label><br>
-                <select name="empresa_mantenedora">
-                    <option value="">-- Selecciona una empresa --</option>
-                    <option value="FAIN Ascensores">FAIN Ascensores</option>
-                    <option value="KONE">KONE</option>
-                    <option value="Otis">Otis</option>
-                    <option value="Schindler">Schindler</option>
-                    <option value="TKE">TKE</option>
-                    <option value="Orona">Orona</option>
-                    <option value="APlus Ascensores">APlus Ascensores</option>
-                    <option value="Ascensores Canarias">Ascensores Canarias</option>
-                    <option value="Ascensores Domingo">Ascensores Domingo</option>
-                    <option value="Ascensores Vulcano Canarias">Ascensores Vulcano Canarias</option>
-                    <option value="Elevadores Canarios">Elevadores Canarios</option>
-                    <option value="Fedes Ascensores">Fedes Ascensores</option>
-                    <option value="Gratecsa">Gratecsa</option>
-                    <option value="Lift Technology">Lift Technology</option>
-                    <option value="Omega Elevadores">Omega Elevadores</option>
-                    <option value="Q Ascensores">Q Ascensores</option>
-                </select><br><br>
-
+                
                 <label>Ubicación:</label><br>
                 <input type="text" name="ubicacion"><br><br>
 
@@ -896,6 +900,27 @@ EDIT_LEAD_TEMPLATE = '''
 
             <label>Administrador de Fincas:</label><br>
             <input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br>
+
+            <label>Empresa Mantenedora Actual:</label><br>
+            <select name="empresa_mantenedora">
+                <option value="">-- Selecciona una empresa --</option>
+                <option value="FAIN Ascensores" {% if lead.empresa_mantenedora == 'FAIN Ascensores' %}selected{% endif %}>FAIN Ascensores</option>
+                <option value="KONE" {% if lead.empresa_mantenedora == 'KONE' %}selected{% endif %}>KONE</option>
+                <option value="Otis" {% if lead.empresa_mantenedora == 'Otis' %}selected{% endif %}>Otis</option>
+                <option value="Schindler" {% if lead.empresa_mantenedora == 'Schindler' %}selected{% endif %}>Schindler</option>
+                <option value="TKE" {% if lead.empresa_mantenedora == 'TKE' %}selected{% endif %}>TKE</option>
+                <option value="Orona" {% if lead.empresa_mantenedora == 'Orona' %}selected{% endif %}>Orona</option>
+                <option value="APlus Ascensores" {% if lead.empresa_mantenedora == 'APlus Ascensores' %}selected{% endif %}>APlus Ascensores</option>
+                <option value="Ascensores Canarias" {% if lead.empresa_mantenedora == 'Ascensores Canarias' %}selected{% endif %}>Ascensores Canarias</option>
+                <option value="Ascensores Domingo" {% if lead.empresa_mantenedora == 'Ascensores Domingo' %}selected{% endif %}>Ascensores Domingo</option>
+                <option value="Ascensores Vulcano Canarias" {% if lead.empresa_mantenedora == 'Ascensores Vulcano Canarias' %}selected{% endif %}>Ascensores Vulcano Canarias</option>
+                <option value="Elevadores Canarios" {% if lead.empresa_mantenedora == 'Elevadores Canarios' %}selected{% endif %}>Elevadores Canarios</option>
+                <option value="Fedes Ascensores" {% if lead.empresa_mantenedora == 'Fedes Ascensores' %}selected{% endif %}>Fedes Ascensores</option>
+                <option value="Gratecsa" {% if lead.empresa_mantenedora == 'Gratecsa' %}selected{% endif %}>Gratecsa</option>
+                <option value="Lift Technology" {% if lead.empresa_mantenedora == 'Lift Technology' %}selected{% endif %}>Lift Technology</option>
+                <option value="Omega Elevadores" {% if lead.empresa_mantenedora == 'Omega Elevadores' %}selected{% endif %}>Omega Elevadores</option>
+                <option value="Q Ascensores" {% if lead.empresa_mantenedora == 'Q Ascensores' %}selected{% endif %}>Q Ascensores</option>
+            </select><br><br>
 
             <label>Número de Ascensores:</label><br>
             <select name="numero_ascensores" required>
@@ -1080,10 +1105,7 @@ EQUIPO_EDIT_TEMPLATE = '''
                 <label>Identificación del Ascensor:</label><br>
                 <input type="text" name="identificacion" value="{{ equipo.identificacion }}" required><br><br>
 
-                <label>Empresa Mantenedora:</label><br>
-                <input type="text" name="empresa_mantenedora" value="{{ equipo.empresa_mantenedora }}"><br><br>
-
-                <button type="submit" class="button">Actualizar Equipo</button>
+                               <button type="submit" class="button">Actualizar Equipo</button>
             </form>
             <br>
             <a href="/home" class="button">Volver al inicio</a>
