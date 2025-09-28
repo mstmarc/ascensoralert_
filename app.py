@@ -287,62 +287,7 @@ LOGIN_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
-    <style>
-    body {
-        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        line-height: 1.6 !important;
-        color: #333 !important;
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        min-height: 100vh !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    header {
-        background: #f8f9fa !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        padding: 15px 0 !important;
-    }
-    .header-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-        padding: 0 20px !important;
-    }
-    main {
-        padding: 30px 20px !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-    }
-    .menu {
-        background: #ffffff !important;
-        border-radius: 15px !important;
-        padding: 40px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-        margin: 20px auto !important;
-        max-width: 500px !important;
-        width: calc(100% - 40px) !important;
-        border: 1px solid #e1e5e9 !important;
-    }
-    @media (max-width: 767px) {
-        .header-container {
-            flex-direction: column !important;
-            gap: 15px !important;
-            text-align: center !important;
-        }
-        .menu {
-            margin: 10px !important;
-            padding: 25px 20px !important;
-        }
-    }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
 </head>
 <body>
     <header>
@@ -382,62 +327,7 @@ HOME_TEMPLATE = """
     <meta charset='UTF-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido</title>
-    <link rel='stylesheet' href='/static/styles.css?v=3'>
-    <style>
-    body {
-        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        line-height: 1.6 !important;
-        color: #333 !important;
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        min-height: 100vh !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    header {
-        background: #f8f9fa !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        padding: 15px 0 !important;
-    }
-    .header-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-        padding: 0 20px !important;
-    }
-    main {
-        padding: 30px 20px !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-    }
-    .menu {
-        background: #ffffff !important;
-        border-radius: 15px !important;
-        padding: 40px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-        margin: 20px auto !important;
-        max-width: 800px !important;
-        width: calc(100% - 40px) !important;
-        border: 1px solid #e1e5e9 !important;
-    }
-    @media (max-width: 767px) {
-        .header-container {
-            flex-direction: column !important;
-            gap: 15px !important;
-            text-align: center !important;
-        }
-        .menu {
-            margin: 10px !important;
-            padding: 25px 20px !important;
-        }
-    }
-    </style>
+    <link rel='stylesheet' href='/static/styles.css?v=4'>
 </head>
 <body>
     <header>
@@ -470,62 +360,7 @@ FORM_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario Lead</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
-    <style>
-    body {
-        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        line-height: 1.6 !important;
-        color: #333 !important;
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        min-height: 100vh !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    header {
-        background: #f8f9fa !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        padding: 15px 0 !important;
-    }
-    .header-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-        padding: 0 20px !important;
-    }
-    main {
-        padding: 30px 20px !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-    }
-    .menu {
-        background: #ffffff !important;
-        border-radius: 15px !important;
-        padding: 40px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-        margin: 20px auto !important;
-        max-width: 800px !important;
-        width: calc(100% - 40px) !important;
-        border: 1px solid #e1e5e9 !important;
-    }
-    @media (max-width: 767px) {
-        .header-container {
-            flex-direction: column !important;
-            gap: 15px !important;
-            text-align: center !important;
-        }
-        .menu {
-            margin: 10px !important;
-            padding: 25px 20px !important;
-        }
-    }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
 </head>
 <body>
     <header>
@@ -659,62 +494,7 @@ EQUIPO_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario Equipo</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
-    <style>
-    body {
-        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        line-height: 1.6 !important;
-        color: #333 !important;
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        min-height: 100vh !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    header {
-        background: #f8f9fa !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        padding: 15px 0 !important;
-    }
-    .header-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-        padding: 0 20px !important;
-    }
-    main {
-        padding: 30px 20px !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-    }
-    .menu {
-        background: #ffffff !important;
-        border-radius: 15px !important;
-        padding: 40px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-        margin: 20px auto !important;
-        max-width: 800px !important;
-        width: calc(100% - 40px) !important;
-        border: 1px solid #e1e5e9 !important;
-    }
-    @media (max-width: 767px) {
-        .header-container {
-            flex-direction: column !important;
-            gap: 15px !important;
-            text-align: center !important;
-        }
-        .menu {
-            margin: 10px !important;
-            padding: 25px 20px !important;
-        }
-    }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
 </head>
 <body>
 <header>
@@ -799,90 +579,7 @@ EDIT_LEAD_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Lead</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-<header>
-    <div class="header-container">
-        <div class="logo-container">
-            <a href="/home">
-                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
-            </a>
-        </div>
-        <div class="title-container">
-            <h1>Editar Lead</h1>
-        </div>
-    </div>
-</header>
-<main>
-    <div class="menu">
-        <form method="POST">
-            <label>Tipo de Lead:</label><br>
-            <select name="tipo_lead" required>
-                <option value="">-- Selecciona un tipo --</option>
-EDIT_LEAD_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Lead</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
-    <style>
-    body {
-        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        line-height: 1.6 !important;
-        color: #333 !important;
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        min-height: 100vh !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    header {
-        background: #f8f9fa !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        padding: 15px 0 !important;
-    }
-    .header-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-        padding: 0 20px !important;
-    }
-    main {
-        padding: 30px 20px !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-    }
-    .menu {
-        background: #ffffff !important;
-        border-radius: 15px !important;
-        padding: 40px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-        margin: 20px auto !important;
-        max-width: 800px !important;
-        width: calc(100% - 40px) !important;
-        border: 1px solid #e1e5e9 !important;
-    }
-    @media (max-width: 767px) {
-        .header-container {
-            flex-direction: column !important;
-            gap: 15px !important;
-            text-align: center !important;
-        }
-        .menu {
-            margin: 10px !important;
-            padding: 25px 20px !important;
-        }
-    }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
 </head>
 <body>
 <header>
@@ -1017,62 +714,7 @@ DASHBOARD_TEMPLATE = """
     <meta charset='UTF-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leads Dashboard</title>
-    <link rel='stylesheet' href='/static/styles.css?v=3'>
-    <style>
-    body {
-        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        line-height: 1.6 !important;
-        color: #333 !important;
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        min-height: 100vh !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    header {
-        background: #f8f9fa !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        padding: 15px 0 !important;
-    }
-    .header-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-        padding: 0 20px !important;
-    }
-    main {
-        padding: 30px 20px !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-    }
-    .menu {
-        background: #ffffff !important;
-        border-radius: 15px !important;
-        padding: 40px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-        margin: 20px auto !important;
-        max-width: 1200px !important;
-        width: calc(100% - 40px) !important;
-        border: 1px solid #e1e5e9 !important;
-    }
-    @media (max-width: 767px) {
-        .header-container {
-            flex-direction: column !important;
-            gap: 15px !important;
-            text-align: center !important;
-        }
-        .menu {
-            margin: 10px !important;
-            padding: 25px 20px !important;
-        }
-    }
-    </style>
+    <link rel='stylesheet' href='/static/styles.css?v=4'>
 </head>
 <body>
     <header>
@@ -1088,7 +730,7 @@ DASHBOARD_TEMPLATE = """
         </div>
     </header>
     <main>
-        <div class='menu'>
+        <div class='menu dashboard'>
             <!-- Vista de tabla para desktop -->
             <div class="table-container">
                 <table>
@@ -1169,62 +811,7 @@ EQUIPO_EDIT_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Equipo</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
-    <style>
-    body {
-        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        line-height: 1.6 !important;
-        color: #333 !important;
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        min-height: 100vh !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    header {
-        background: #f8f9fa !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-        padding: 15px 0 !important;
-    }
-    .header-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-        padding: 0 20px !important;
-    }
-    main {
-        padding: 30px 20px !important;
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-    }
-    .menu {
-        background: #ffffff !important;
-        border-radius: 15px !important;
-        padding: 40px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-        margin: 20px auto !important;
-        max-width: 800px !important;
-        width: calc(100% - 40px) !important;
-        border: 1px solid #e1e5e9 !important;
-    }
-    @media (max-width: 767px) {
-        .header-container {
-            flex-direction: column !important;
-            gap: 15px !important;
-            text-align: center !important;
-        }
-        .menu {
-            margin: 10px !important;
-            padding: 25px 20px !important;
-        }
-    }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
 </head>
 <body>
     <header>
