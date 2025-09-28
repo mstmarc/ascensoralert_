@@ -134,11 +134,18 @@ def nuevo_equipo():
 
     return render_template_string(EQUIPO_TEMPLATE, cliente=cliente_data)
 
-# Dashboard CORREGIDO
+# Dashboard CON SISTEMA DE FILTROS
 @app.route("/leads_dashboard")
 def leads_dashboard():
     if "usuario" not in session:
         return redirect("/")
+
+    # Obtener parámetros de filtro
+    filtro_empresa = request.args.get('empresa', '')
+    filtro_localidad = request.args.get('localidad', '')
+    filtro_ipo_mes = request.args.get('ipo_mes', '')
+    filtro_ipo_año = request.args.get('ipo_año', '')
+    buscar_texto = request.args.get('buscar', '')
 
     response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=*", headers=HEADERS)
     if response.status_code != 200:
@@ -146,29 +153,42 @@ def leads_dashboard():
 
     leads_data = response.json()
     rows = []
+    
+    # Obtener listas para filtros
+    empresas_disponibles = set()
+    localidades_disponibles = set()
 
     for lead in leads_data:
         lead_id = lead["id"]
         equipos_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
+        
         if equipos_response.status_code == 200:
             equipos = equipos_response.json()
             total_equipos = len(equipos)
+            
+            # Añadir a listas de filtros
+            localidades_disponibles.add(lead.get("localidad", ""))
+            
             if equipos:
                 for equipo in equipos:
-                    # Formatear fechas a dd/mm/yyyy
+                    empresas_disponibles.add(equipo.get("empresa_mantenedora", ""))
+                    
+                    # Formatear fechas
                     fecha_vencimiento = equipo.get("fecha_vencimiento_contrato", "-")
-                    if fecha_vencimiento and fecha_vencimiento != "-":
+                    if fecha_vencimiento and fecha_vencimiento != "-" and fecha_vencimiento:
                         partes = fecha_vencimiento.split("-")
                         if len(partes) == 3:
                             fecha_vencimiento = f"{partes[2]}/{partes[1]}/{partes[0]}"
 
                     ipo_proxima = equipo.get("ipo_proxima", "-")
-                    if ipo_proxima and ipo_proxima != "-":
+                    ipo_fecha_original = ipo_proxima
+                    if ipo_proxima and ipo_proxima != "-" and ipo_proxima:
                         partes = ipo_proxima.split("-")
                         if len(partes) == 3:
                             ipo_proxima = f"{partes[2]}/{partes[1]}/{partes[0]}"
 
-                    rows.append({
+                    # Crear fila de datos
+                    row = {
                         "lead_id": lead_id,
                         "equipo_id": equipo["id"],
                         "direccion": lead.get("direccion", "-"),
@@ -179,11 +199,60 @@ def leads_dashboard():
                         "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
                         "empresa_mantenedora": equipo.get("empresa_mantenedora", "-"),
                         "fecha_vencimiento_contrato": fecha_vencimiento,
-                        "ipo_proxima": ipo_proxima
-                    })
+                        "ipo_proxima": ipo_proxima,
+                        "ipo_fecha_original": ipo_fecha_original
+                    }
+                    
+                    # Aplicar filtros
+                    incluir_fila = True
+                    
+                    # Filtro por empresa
+                    if filtro_empresa and filtro_empresa != equipo.get("empresa_mantenedora", ""):
+                        incluir_fila = False
+                    
+                    # Filtro por localidad
+                    if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
+                        incluir_fila = False
+                    
+                    # Filtro por IPO (mes y año)
+                    if filtro_ipo_mes or filtro_ipo_año:
+                        if ipo_fecha_original and ipo_fecha_original != "-":
+                            try:
+                                partes_fecha = ipo_fecha_original.split("-")
+                                if len(partes_fecha) == 3:
+                                    año_ipo = partes_fecha[0]
+                                    mes_ipo = partes_fecha[1]
+                                    
+                                    if filtro_ipo_año and filtro_ipo_año != año_ipo:
+                                        incluir_fila = False
+                                    if filtro_ipo_mes and filtro_ipo_mes != mes_ipo:
+                                        incluir_fila = False
+                            except:
+                                pass
+                        else:
+                            if filtro_ipo_mes or filtro_ipo_año:
+                                incluir_fila = False
+                    
+                    # Filtro por búsqueda de texto
+                    if buscar_texto:
+                        texto_busqueda = buscar_texto.lower()
+                        campos_busqueda = [
+                            str(lead.get("direccion", "")),
+                            str(lead.get("localidad", "")),
+                            str(equipo.get("identificacion", "")),
+                            str(equipo.get("empresa_mantenedora", "")),
+                            str(lead.get("nombre_cliente", ""))
+                        ]
+                        
+                        encontrado = any(texto_busqueda in campo.lower() for campo in campos_busqueda)
+                        if not encontrado:
+                            incluir_fila = False
+                    
+                    if incluir_fila:
+                        rows.append(row)
             else:
-                # Si no hay equipos, mostrar una fila sin equipo
-                rows.append({
+                # Lead sin equipos
+                row = {
                     "lead_id": lead_id,
                     "equipo_id": None,
                     "direccion": lead.get("direccion", "-"),
@@ -194,10 +263,43 @@ def leads_dashboard():
                     "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
                     "empresa_mantenedora": "-",
                     "fecha_vencimiento_contrato": "-",
-                    "ipo_proxima": "-"
-                })
+                    "ipo_proxima": "-",
+                    "ipo_fecha_original": None
+                }
+                
+                # Aplicar filtros para leads sin equipos
+                incluir_fila = True
+                if filtro_empresa or filtro_ipo_mes or filtro_ipo_año:
+                    incluir_fila = False
+                if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
+                    incluir_fila = False
+                if buscar_texto:
+                    texto_busqueda = buscar_texto.lower()
+                    campos_busqueda = [
+                        str(lead.get("direccion", "")),
+                        str(lead.get("localidad", "")),
+                        str(lead.get("nombre_cliente", ""))
+                    ]
+                    encontrado = any(texto_busqueda in campo.lower() for campo in campos_busqueda)
+                    if not encontrado:
+                        incluir_fila = False
+                
+                if incluir_fila:
+                    rows.append(row)
 
-    return render_template_string(DASHBOARD_TEMPLATE, rows=rows)
+    # Limpiar y ordenar listas para filtros
+    empresas_disponibles = sorted([e for e in empresas_disponibles if e and e != "-"])
+    localidades_disponibles = sorted([l for l in localidades_disponibles if l and l != "-"])
+
+    return render_template_string(DASHBOARD_TEMPLATE_WITH_FILTERS, 
+                                rows=rows, 
+                                empresas=empresas_disponibles,
+                                localidades=localidades_disponibles,
+                                filtro_empresa=filtro_empresa,
+                                filtro_localidad=filtro_localidad,
+                                filtro_ipo_mes=filtro_ipo_mes,
+                                filtro_ipo_año=filtro_ipo_año,
+                                buscar_texto=buscar_texto)
 
 # Editar Lead CORREGIDO
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
@@ -707,7 +809,7 @@ EDIT_LEAD_TEMPLATE = """
 </html>
 """
 
-DASHBOARD_TEMPLATE = """
+DASHBOARD_TEMPLATE_WITH_FILTERS = """
 <!DOCTYPE html>
 <html lang='es'>
 <head>
@@ -715,6 +817,87 @@ DASHBOARD_TEMPLATE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leads Dashboard</title>
     <link rel='stylesheet' href='/static/styles.css?v=4'>
+    <style>
+    .filters-container {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #e1e5e9;
+    }
+    .filters-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-group label {
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #555;
+        font-size: 12px;
+    }
+    .filter-input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .search-box {
+        grid-column: 1 / -1;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 16px;
+        border: 2px solid #0065a3;
+        border-radius: 8px;
+    }
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .btn-filter {
+        background: #0065a3;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .btn-clear {
+        background: #6c757d;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .results-info {
+        background: #e7f3ff;
+        padding: 10px 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-weight: 600;
+        color: #0065a3;
+    }
+    @media (max-width: 767px) {
+        .filters-row {
+            grid-template-columns: 1fr;
+        }
+        .filter-actions {
+            flex-direction: column;
+        }
+    }
+    </style>
 </head>
 <body>
     <header>
@@ -731,6 +914,85 @@ DASHBOARD_TEMPLATE = """
     </header>
     <main>
         <div class='menu dashboard'>
+            
+            <!-- Sistema de Filtros -->
+            <div class="filters-container">
+                <h3 style="margin-bottom: 15px; color: #333;">🔍 Filtros y Búsqueda</h3>
+                <form method="GET">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label>Empresa Mantenedora:</label>
+                            <select name="empresa" class="filter-input">
+                                <option value="">Todas las empresas</option>
+                                {% for empresa in empresas %}
+                                <option value="{{ empresa }}" {% if filtro_empresa == empresa %}selected{% endif %}>{{ empresa }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Localidad:</label>
+                            <select name="localidad" class="filter-input">
+                                <option value="">Todas las localidades</option>
+                                {% for localidad in localidades %}
+                                <option value="{{ localidad }}" {% if filtro_localidad == localidad %}selected{% endif %}>{{ localidad }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>IPO - Año:</label>
+                            <select name="ipo_año" class="filter-input">
+                                <option value="">Cualquier año</option>
+                                <option value="2024" {% if filtro_ipo_año == '2024' %}selected{% endif %}>2024</option>
+                                <option value="2025" {% if filtro_ipo_año == '2025' %}selected{% endif %}>2025</option>
+                                <option value="2026" {% if filtro_ipo_año == '2026' %}selected{% endif %}>2026</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>IPO - Mes:</label>
+                            <select name="ipo_mes" class="filter-input">
+                                <option value="">Cualquier mes</option>
+                                <option value="01" {% if filtro_ipo_mes == '01' %}selected{% endif %}>Enero</option>
+                                <option value="02" {% if filtro_ipo_mes == '02' %}selected{% endif %}>Febrero</option>
+                                <option value="03" {% if filtro_ipo_mes == '03' %}selected{% endif %}>Marzo</option>
+                                <option value="04" {% if filtro_ipo_mes == '04' %}selected{% endif %}>Abril</option>
+                                <option value="05" {% if filtro_ipo_mes == '05' %}selected{% endif %}>Mayo</option>
+                                <option value="06" {% if filtro_ipo_mes == '06' %}selected{% endif %}>Junio</option>
+                                <option value="07" {% if filtro_ipo_mes == '07' %}selected{% endif %}>Julio</option>
+                                <option value="08" {% if filtro_ipo_mes == '08' %}selected{% endif %}>Agosto</option>
+                                <option value="09" {% if filtro_ipo_mes == '09' %}selected{% endif %}>Septiembre</option>
+                                <option value="10" {% if filtro_ipo_mes == '10' %}selected{% endif %}>Octubre</option>
+                                <option value="11" {% if filtro_ipo_mes == '11' %}selected{% endif %}>Noviembre</option>
+                                <option value="12" {% if filtro_ipo_mes == '12' %}selected{% endif %}>Diciembre</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="search-box">
+                        <input type="text" name="buscar" placeholder="🔍 Buscar por dirección, localidad, identificación de ascensor, empresa..." value="{{ buscar_texto }}">
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter">🔍 Aplicar Filtros</button>
+                        <a href="/leads_dashboard" class="btn-clear">🗑️ Limpiar Filtros</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Información de resultados -->
+            {% if filtro_empresa or filtro_localidad or filtro_ipo_mes or filtro_ipo_año or buscar_texto %}
+            <div class="results-info">
+                📊 Mostrando {{ rows|length }} resultado(s) con los filtros aplicados
+                {% if filtro_empresa %} | Empresa: {{ filtro_empresa }}{% endif %}
+                {% if filtro_localidad %} | Localidad: {{ filtro_localidad }}{% endif %}
+                {% if filtro_ipo_año %} | IPO Año: {{ filtro_ipo_año }}{% endif %}
+                {% if filtro_ipo_mes %} | IPO Mes: {{ filtro_ipo_mes }}{% endif %}
+                {% if buscar_texto %} | Búsqueda: "{{ buscar_texto }}"{% endif %}
+            </div>
+            {% endif %}
+            
             <!-- Vista de tabla para desktop -->
             <div class="table-container">
                 <table>
@@ -794,6 +1056,13 @@ DASHBOARD_TEMPLATE = """
                 </div>
             </div>
             {% endfor %}
+
+            {% if not rows %}
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <h3>No se encontraron resultados</h3>
+                <p>Prueba ajustando los filtros o búsqueda</p>
+            </div>
+            {% endif %}
 
             <div class="text-center mt-20">
                 <a href='/home' class='button'>🏠 Volver al inicio</a>
