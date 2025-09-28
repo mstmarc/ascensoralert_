@@ -371,41 +371,41 @@ if equipos:
                     if incluir_fila:
                         rows.append(row)
                     else:
-                # Lead sin equipos
-                row = {
-                    "lead_id": lead_id,
-                    "equipo_id": None,
-                    "direccion": lead.get("direccion", "-"),
-                    "localidad": lead.get("localidad", "-"),
-                    "codigo_postal": lead.get("codigo_postal", "-"),
-                    "identificacion": "-",
-                    "total_equipos": 0,
-                    "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
-                    "empresa_mantenedora": empresa_mantenedora,
-                    "fecha_vencimiento_contrato": "-",
-                    "ipo_proxima": "-",
-                    "ipo_fecha_original": None
+                        # Lead sin equipos
+                        row = {
+                        "lead_id": lead_id,
+                        "equipo_id": None,
+                        "direccion": lead.get("direccion", "-"),
+                        "localidad": lead.get("localidad", "-"),
+                        "codigo_postal": lead.get("codigo_postal", "-"),
+                        "identificacion": "-",
+                        "total_equipos": 0,
+                        "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
+                        "empresa_mantenedora": empresa_mantenedora,
+                        "fecha_vencimiento_contrato": "-",
+                        "ipo_proxima": "-",
+                        "ipo_fecha_original": None
                 }
                 
-                # Aplicar filtros para leads sin equipos
-                incluir_fila = True
-                if filtro_empresa or filtro_ipo_mes or filtro_ipo_año:
-                    incluir_fila = False
-                if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
-                    incluir_fila = False
-                if buscar_texto:
-                    texto_busqueda = buscar_texto.lower()
-                    campos_busqueda = [
-                        str(lead.get("direccion", "")),
-                        str(lead.get("localidad", "")),
-                        str(lead.get("nombre_cliente", ""))
-                    ]
-                    encontrado = any(texto_busqueda in campo.lower() for campo in campos_busqueda)
-                    if not encontrado:
-                        incluir_fila = False
-                
-                if incluir_fila:
-                    rows.append(row)
+                        # Aplicar filtros para leads sin equipos
+                        incluir_fila = True
+                        if filtro_empresa or filtro_ipo_mes or filtro_ipo_año:
+                            incluir_fila = False
+                        if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
+                            incluir_fila = False
+                        if buscar_texto:
+                            texto_busqueda = buscar_texto.lower()
+                            campos_busqueda = [
+                                str(lead.get("direccion", "")),
+                                str(lead.get("localidad", "")),
+                                str(lead.get("nombre_cliente", ""))
+                            ]
+                            encontrado = any(texto_busqueda in campo.lower() for campo in campos_busqueda)
+                            if not encontrado:
+                                incluir_fila = False
+                        
+                        if incluir_fila:
+                            rows.append(row)
 
     # Limpiar y ordenar listas para filtros
     empresas_disponibles = sorted([e for e in empresas_disponibles if e and e != "-"])
