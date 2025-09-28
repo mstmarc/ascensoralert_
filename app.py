@@ -10,7 +10,7 @@ if not app.secret_key:
     raise RuntimeError("SECRET_KEY environment variable is not set")
 
 # Datos de Supabase ACTUALIZADOS
-SUPABASE_URL = "https://hvkifgguxsgegzaxwcmj.supabase.co"
+SUPABASE_URL = "https://hvkifqguxsgegzaxwcmj.supabase.co"
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 if not SUPABASE_KEY:
