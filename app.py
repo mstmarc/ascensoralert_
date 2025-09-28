@@ -577,6 +577,7 @@ EDIT_LEAD_TEMPLATE = """
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Lead</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
@@ -697,29 +698,23 @@ EDIT_LEAD_TEMPLATE = """
             <label>Observaciones:</label><br>
             <textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br>
 
-EDIT_LEAD_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Lead</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
+            <a href="/nuevo_equipo?cliente_id={{ lead.id }}" class="button">➕ Añadir nuevo equipo</a>
+            <button type="submit" class="button">Actualizar Lead</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>
+"""
+
 DASHBOARD_TEMPLATE = """
 <!DOCTYPE html>
 <html lang='es'>
 <head>
     <meta charset='UTF-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leads Dashboard</title>
     <link rel='stylesheet' href='/static/styles.css'>
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        tr:hover { background-color: #f5f5f5; }
-        a { text-decoration: none; color: #0065a3; }
-    </style>
 </head>
 <body>
     <header>
@@ -736,45 +731,73 @@ DASHBOARD_TEMPLATE = """
     </header>
     <main>
         <div class='menu'>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Dirección</th>
-                        <th>Localidad</th>
-                        <th>Código Postal</th>
-                        <th>Identificación</th>
-                        <th>Equipos Registrados/Previstos</th>
-                        <th>Empresa Mantenedora</th>
-                        <th>Vencimiento Contrato</th>
-                        <th>IPO Próxima</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in rows %}
-                    <tr>
-                        <td><a href='/editar_lead/{{ row.lead_id }}'>{{ row.direccion }}</a></td>
-                        <td>{{ row.localidad }}</td>
-                        <td>{{ row.codigo_postal }}</td>
-                        <td>{{ row.identificacion }}</td>
-                        <td>
-                            <a href='/nuevo_equipo?cliente_id={{ row.lead_id }}'>{{ row.total_equipos }}/{{ row.numero_ascensores_previsto }}</a>
-                        </td>
-                        <td>{{ row.empresa_mantenedora }}</td>
-                        <td>{{ row.fecha_vencimiento_contrato }}</td>
-                        <td>{{ row.ipo_proxima }}</td>
-                        <td>
-                            {% if row.equipo_id %}
-                                <a href="/editar_equipo/{{ row.equipo_id }}" class="button-small">✏️ Editar Equipo</a>
-                            {% else %}
-                                <span style="color: #999;">Sin equipos</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <a href='/home' class='button'>🏠 Volver al inicio</a>
+            <!-- Vista de tabla para desktop -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dirección</th>
+                            <th>Localidad</th>
+                            <th>Código Postal</th>
+                            <th>Identificación</th>
+                            <th>Equipos</th>
+                            <th>Mantenedora</th>
+                            <th>Venc. Contrato</th>
+                            <th>IPO Próxima</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                        <tr>
+                            <td><a href='/editar_lead/{{ row.lead_id }}'>{{ row.direccion }}</a></td>
+                            <td>{{ row.localidad }}</td>
+                            <td>{{ row.codigo_postal }}</td>
+                            <td>{{ row.identificacion }}</td>
+                            <td>
+                                <a href='/nuevo_equipo?cliente_id={{ row.lead_id }}'>{{ row.total_equipos }}/{{ row.numero_ascensores_previsto }}</a>
+                            </td>
+                            <td>{{ row.empresa_mantenedora }}</td>
+                            <td>{{ row.fecha_vencimiento_contrato }}</td>
+                            <td>{{ row.ipo_proxima }}</td>
+                            <td>
+                                {% if row.equipo_id %}
+                                    <a href="/editar_equipo/{{ row.equipo_id }}" class="button-small">✏️ Editar</a>
+                                {% else %}
+                                    <span style="color: #999;">Sin equipos</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Vista de cards para móvil -->
+            {% for row in rows %}
+            <div class="mobile-card">
+                <h3>📍 {{ row.direccion }}</h3>
+                <p><strong>Localidad:</strong> {{ row.localidad }}</p>
+                <p><strong>Código Postal:</strong> {{ row.codigo_postal }}</p>
+                <p><strong>Identificación:</strong> {{ row.identificacion }}</p>
+                <p><strong>Equipos:</strong> {{ row.total_equipos }}/{{ row.numero_ascensores_previsto }}</p>
+                <p><strong>Mantenedora:</strong> {{ row.empresa_mantenedora }}</p>
+                <p><strong>Venc. Contrato:</strong> {{ row.fecha_vencimiento_contrato }}</p>
+                <p><strong>IPO Próxima:</strong> {{ row.ipo_proxima }}</p>
+                
+                <div class="actions">
+                    <a href='/editar_lead/{{ row.lead_id }}' class="button button-small">✏️ Editar Lead</a>
+                    <a href='/nuevo_equipo?cliente_id={{ row.lead_id }}' class="button button-small">➕ Añadir Equipo</a>
+                    {% if row.equipo_id %}
+                        <a href="/editar_equipo/{{ row.equipo_id }}" class="button button-small">🔧 Editar Equipo</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="text-center mt-20">
+                <a href='/home' class='button'>🏠 Volver al inicio</a>
+            </div>
         </div>
     </main>
 </body>
@@ -786,6 +809,7 @@ EQUIPO_EDIT_TEMPLATE = """
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Equipo</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
