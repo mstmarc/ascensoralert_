@@ -327,7 +327,37 @@ HOME_TEMPLATE = """
     <meta charset='UTF-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido</title>
-    <link rel='stylesheet' href='/static/styles.css'>
+    <link rel='stylesheet' href='/static/styles.css?v=3'>
+    <style>
+    .menu {
+        background: white !important;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin: 20px auto;
+        max-width: 800px;
+        width: calc(100% - 40px);
+    }
+    .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    @media (max-width: 767px) {
+        .header-container {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        .menu {
+            margin: 10px;
+            padding: 25px 20px;
+        }
+    }
+    </style>
 </head>
 <body>
     <header>
