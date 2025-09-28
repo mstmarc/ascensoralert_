@@ -290,7 +290,7 @@ def leads_dashboard():
             if empresa_mantenedora:
                 empresas_disponibles.add(empresa_mantenedora)
 
-if equipos:
+        if equipos:
     for equipo in equipos:
                     
                     # Formatear fechas
