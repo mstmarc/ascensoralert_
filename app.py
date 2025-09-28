@@ -36,7 +36,7 @@ def login():
 
         if response.status_code == 200 and len(response.json()) == 1:
             user = response.json()[0]
-            if check_password_hash(user.get("contrasena", ""), contrasena):
+            if user.get("contrasena", "") == contrasena:
                 session["usuario"] = usuario
                 return redirect("/home")
         return render_template_string(LOGIN_TEMPLATE, error="Usuario o contraseña incorrectos")
