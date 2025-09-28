@@ -2,6 +2,7 @@ from flask import Flask, request, render_template_string, redirect, session
 import requests
 import os
 import urllib.parse
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -53,13 +54,14 @@ def home():
         return redirect("/")
     return render_template_string(HOME_TEMPLATE, usuario=session["usuario"])
 
-# Alta de Lead
+# Alta de Lead CON FECHA DE VISITA
 @app.route("/formulario_lead", methods=["GET", "POST"])
 def formulario_lead():
     if "usuario" not in session:
         return redirect("/")
     if request.method == "POST":
         data = {
+            "fecha_visita": request.form.get("fecha_visita"),  # NUEVO CAMPO
             "tipo_cliente": request.form.get("tipo_lead"),
             "direccion": request.form.get("direccion"),
             "nombre_cliente": request.form.get("nombre_lead"),
@@ -74,9 +76,9 @@ def formulario_lead():
             "observaciones": request.form.get("observaciones")
         }
 
-        required = [data["tipo_cliente"], data["direccion"], data["nombre_cliente"], data["localidad"], data["numero_ascensores"]]
+        required = [data["fecha_visita"], data["tipo_cliente"], data["direccion"], data["nombre_cliente"], data["localidad"], data["numero_ascensores"]]
         if any(not field for field in required):
-            return "Datos del lead inválidos", 400
+            return "Datos del lead inválidos - Fecha de visita es obligatoria", 400
 
         response = requests.post(f"{SUPABASE_URL}/rest/v1/clientes?select=id", json=data, headers=HEADERS)
         if response.status_code in [200, 201]:
@@ -85,7 +87,9 @@ def formulario_lead():
         else:
             return f"<h3 style='color:red;'>❌ Error al registrar lead</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
-    return render_template_string(FORM_TEMPLATE)
+    # Para GET: mostrar formulario con fecha actual por defecto
+    fecha_hoy = date.today().strftime('%Y-%m-%d')
+    return render_template_string(FORM_TEMPLATE, fecha_hoy=fecha_hoy)
 
 # Alta de Equipo
 @app.route("/nuevo_equipo", methods=["GET", "POST"])
@@ -301,7 +305,7 @@ def leads_dashboard():
                                 filtro_ipo_año=filtro_ipo_año,
                                 buscar_texto=buscar_texto)
 
-# Editar Lead CORREGIDO
+# Editar Lead CORREGIDO Y CON FECHA DE VISITA
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
 def editar_lead(lead_id):
     if "usuario" not in session:
@@ -309,6 +313,7 @@ def editar_lead(lead_id):
 
     if request.method == "POST":
         data = {
+            "fecha_visita": request.form.get("fecha_visita"),  # NUEVO CAMPO
             "tipo_cliente": request.form.get("tipo_lead"),
             "direccion": request.form.get("direccion"),
             "nombre_cliente": request.form.get("nombre_lead"),
@@ -480,6 +485,10 @@ FORM_TEMPLATE = """
     <main>
         <div class="menu">
             <form method="POST">
+                <!-- NUEVO CAMPO: Fecha de Visita como primer campo -->
+                <label>📅 Fecha de Visita:</label><br>
+                <input type="date" name="fecha_visita" value="{{ fecha_hoy }}" required><br><br>
+
                 <label>Tipo de Lead:</label><br>
                 <select name="tipo_lead" required>
                     <option value="">-- Selecciona un tipo --</option>
@@ -513,7 +522,7 @@ FORM_TEMPLATE = """
                     <option value="El Tablero">El Tablero</option>
                     <option value="Gáldar">Gáldar</option>
                     <option value="Ingenio">Ingenio</option>
-                    <option value="Jinámar">Jinámar</option>
+                    <option value="Jinémar">Jinémar</option>
                     <option value="La Aldea de San Nicolás">La Aldea de San Nicolás</option>
                     <option value="La Pardilla">La Pardilla</option>
                     <option value="Las Palmas de Gran Canaria">Las Palmas de Gran Canaria</option>
@@ -699,6 +708,10 @@ EDIT_LEAD_TEMPLATE = """
 <main>
     <div class="menu">
         <form method="POST">
+            <!-- NUEVO CAMPO: Fecha de Visita -->
+            <label>📅 Fecha de Visita:</label><br>
+            <input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br>
+
             <label>Tipo de Lead:</label><br>
             <select name="tipo_lead" required>
                 <option value="">-- Selecciona un tipo --</option>
@@ -732,7 +745,7 @@ EDIT_LEAD_TEMPLATE = """
                 <option value="El Tablero" {% if lead.localidad == 'El Tablero' %}selected{% endif %}>El Tablero</option>
                 <option value="Gáldar" {% if lead.localidad == 'Gáldar' %}selected{% endif %}>Gáldar</option>
                 <option value="Ingenio" {% if lead.localidad == 'Ingenio' %}selected{% endif %}>Ingenio</option>
-                <option value="Jinámar" {% if lead.localidad == 'Jinámar' %}selected{% endif %}>Jinámar</option>
+                <option value="Jinémar" {% if lead.localidad == 'Jinémar' %}selected{% endif %}>Jinémar</option>
                 <option value="La Aldea de San Nicolás" {% if lead.localidad == 'La Aldea de San Nicolás' %}selected{% endif %}>La Aldea de San Nicolás</option>
                 <option value="La Pardilla" {% if lead.localidad == 'La Pardilla' %}selected{% endif %}>La Pardilla</option>
                 <option value="Las Palmas de Gran Canaria" {% if lead.localidad == 'Las Palmas de Gran Canaria' %}selected{% endif %}>Las Palmas de Gran Canaria</option>
@@ -1038,7 +1051,7 @@ DASHBOARD_TEMPLATE_WITH_FILTERS = """
             <!-- Vista de cards para móvil -->
             {% for row in rows %}
             <div class="mobile-card">
-                <h3>📍 {{ row.direccion }}</h3>
+                <h3>🏢 {{ row.direccion }}</h3>
                 <p><strong>Localidad:</strong> {{ row.localidad }}</p>
                 <p><strong>Código Postal:</strong> {{ row.codigo_postal }}</p>
                 <p><strong>Identificación:</strong> {{ row.identificacion }}</p>
