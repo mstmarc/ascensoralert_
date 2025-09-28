@@ -278,7 +278,7 @@ def leads_dashboard():
         lead_id = lead["id"]
         equipos_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
         
-    if equipos_response.status_code == 200:
+        if equipos_response.status_code == 200:
             equipos = equipos_response.json()
             total_equipos = len(equipos)
             
@@ -287,7 +287,7 @@ def leads_dashboard():
             
             # Empresa mantenedora ahora viene del cliente
             empresa_mantenedora = lead.get("empresa_mantenedora", "-")
-    if empresa_mantenedora:
+        if empresa_mantenedora:
             empresas_disponibles.add(empresa_mantenedora)
 
     if equipos:
@@ -321,8 +321,7 @@ def leads_dashboard():
                     "ipo_proxima": ipo_proxima,
                     "ipo_fecha_original": ipo_fecha_original
                 }
-
-                    
+                
                     # Aplicar filtros
                     incluir_fila = True
                     
