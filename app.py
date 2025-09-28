@@ -63,7 +63,7 @@ def formulario_lead():
         return redirect("/")
     if request.method == "POST":
         data = {
-            "fecha_visita": request.form.get("fecha_visita"),  # NUEVO CAMPO
+            "fecha_visita": request.form.get("fecha_visita"),
             "tipo_cliente": request.form.get("tipo_lead"),
             "direccion": request.form.get("direccion"),
             "nombre_cliente": request.form.get("nombre_lead"),
@@ -87,7 +87,7 @@ def formulario_lead():
             cliente_id = response.json()[0]["id"]
             return redirect(f"/nuevo_equipo?cliente_id={cliente_id}")
         else:
-            return f"<h3 style='color:red;'>❌ Error al registrar lead</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+            return f"<h3 style='color:red;'>Error al registrar lead</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
     # Para GET: mostrar formulario con fecha actual por defecto
     fecha_hoy = date.today().strftime('%Y-%m-%d')
@@ -123,7 +123,7 @@ def nuevo_equipo():
         if any(not field for field in required):
             return "Datos del equipo inválidos", 400
 
-        # Limpiar campos vacíos (convertir strings vacíos a None)
+        # Limpiar campos vacíos
         for key, value in equipo_data.items():
             if value == "":
                 equipo_data[key] = None
@@ -131,12 +131,12 @@ def nuevo_equipo():
         res = requests.post(f"{SUPABASE_URL}/rest/v1/equipos", json=equipo_data, headers=HEADERS)
         if res.status_code in [200, 201]:
             return f"""
-            <h3>✅ Equipo registrado correctamente</h3>
-            <a href='/nuevo_equipo?cliente_id={cliente_id}' class='button'>➕ Añadir otro equipo</a><br><br>
-            <a href='/home' class='button'>🏠 Finalizar y volver al inicio</a>
+            <h3>Equipo registrado correctamente</h3>
+            <a href='/nuevo_equipo?cliente_id={cliente_id}' class='button'>Añadir otro equipo</a><br><br>
+            <a href='/home' class='button'>Finalizar y volver al inicio</a>
             """
         else:
-            return f"<h3 style='color:red;'>❌ Error al registrar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
+            return f"<h3 style='color:red;'>Error al registrar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
 
     return render_template_string(EQUIPO_TEMPLATE, cliente=cliente_data)
 
@@ -172,7 +172,7 @@ def reporte_mensual():
         ws = wb.active
         ws.title = "ADM. FINCAS"
         
-        # Configurar encabezados exactos del formato original
+        # Configurar encabezados
         headers = ['FECHA', 'COMUNIDAD/EMPRESA', 'DIRECCION', 'ZONA', 'OBSERVACIONES']
         
         # Aplicar encabezados con formato
@@ -198,14 +198,14 @@ def reporte_mensual():
             # FECHA
             ws.cell(row=row, column=1, value=cliente.get('fecha_visita', ''))
             
-            # COMUNIDAD/EMPRESA (usamos nombre_cliente)
+            # COMUNIDAD/EMPRESA
             comunidad_empresa = cliente.get('nombre_cliente', '')
             ws.cell(row=row, column=2, value=comunidad_empresa)
             
             # DIRECCION
             ws.cell(row=row, column=3, value=cliente.get('direccion', ''))
             
-            # ZONA (localidad)
+            # ZONA
             ws.cell(row=row, column=4, value=cliente.get('localidad', ''))
             
             # OBSERVACIONES
@@ -217,13 +217,13 @@ def reporte_mensual():
             
             row += 1
         
-        # Ajustar anchos de columna para que se vea bien
+        # Ajustar anchos de columna
         column_widths = {
-            'A': 12,  # FECHA
-            'B': 40,  # COMUNIDAD/EMPRESA
-            'C': 50,  # DIRECCION
-            'D': 20,  # ZONA
-            'E': 70   # OBSERVACIONES
+            'A': 12,
+            'B': 40,
+            'C': 50,
+            'D': 20,
+            'E': 70
         }
         
         for col_letter, width in column_widths.items():
@@ -235,7 +235,6 @@ def reporte_mensual():
         output.seek(0)
         
         # Generar respuesta de descarga
-        # Nombre del archivo igual al formato actual
         meses = ['', 'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
                 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
         filename = f"DESCARGO COMERCIAL GRAN CANARIA {meses[mes]} {año}.xlsx"
@@ -249,7 +248,6 @@ def reporte_mensual():
             }
         )
     
-    # Para GET: mostrar formulario de selección de mes/año
     return render_template_string(REPORTE_TEMPLATE)
 
 # Dashboard CON SISTEMA DE FILTROS
@@ -267,7 +265,7 @@ def leads_dashboard():
 
     response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=*", headers=HEADERS)
     if response.status_code != 200:
-        return f"<h3 style='color:red;'>❌ Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+        return f"<h3 style='color:red;'>Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
     leads_data = response.json()
     rows = []
@@ -332,7 +330,7 @@ def leads_dashboard():
                     if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
                         incluir_fila = False
                     
-                    # Filtro por IPO (mes y año)
+                    # Filtro por IPO
                     if filtro_ipo_mes or filtro_ipo_año:
                         if ipo_fecha_original and ipo_fecha_original != "-":
                             try:
@@ -419,7 +417,7 @@ def leads_dashboard():
                                 filtro_ipo_año=filtro_ipo_año,
                                 buscar_texto=buscar_texto)
 
-# Editar Lead CORREGIDO Y CON FECHA DE VISITA
+# Editar Lead
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
 def editar_lead(lead_id):
     if "usuario" not in session:
@@ -427,7 +425,7 @@ def editar_lead(lead_id):
 
     if request.method == "POST":
         data = {
-            "fecha_visita": request.form.get("fecha_visita"),  # NUEVO CAMPO
+            "fecha_visita": request.form.get("fecha_visita"),
             "tipo_cliente": request.form.get("tipo_lead"),
             "direccion": request.form.get("direccion"),
             "nombre_cliente": request.form.get("nombre_lead"),
@@ -449,7 +447,7 @@ def editar_lead(lead_id):
         if res.status_code in [200, 204]:
             return redirect("/leads_dashboard")
         else:
-            return f"<h3 style='color:red;'>❌ Error al actualizar Lead</h3><pre>{res.text}</pre><a href='/leads_dashboard'>Volver</a>"
+            return f"<h3 style='color:red;'>Error al actualizar Lead</h3><pre>{res.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
     # GET: Consultar el lead
     response = requests.get(
@@ -459,7 +457,7 @@ def editar_lead(lead_id):
     if response.status_code == 200 and response.json():
         lead = response.json()[0]
     else:
-        return f"<h3 style='color:red;'>❌ Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
+        return f"<h3 style='color:red;'>Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
     return render_template_string(EDIT_LEAD_TEMPLATE, lead=lead)
 
@@ -470,7 +468,7 @@ def editar_equipo(equipo_id):
 
     response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
     if response.status_code != 200 or not response.json():
-        return f"<h3 style='color:red;'>❌ Error al obtener equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+        return f"<h3 style='color:red;'>Error al obtener equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
     equipo = response.json()[0]
 
@@ -496,12 +494,12 @@ def editar_equipo(equipo_id):
         if res.status_code in [200, 204]:
             return redirect("/leads_dashboard")
         else:
-            return f"<h3 style='color:red;'>❌ Error al actualizar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
+            return f"<h3 style='color:red;'>Error al actualizar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
 
     return render_template_string(EQUIPO_EDIT_TEMPLATE, equipo=equipo)
 
 # PLANTILLAS HTML
-LOGIN_TEMPLATE = """
+LOGIN_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -519,7 +517,7 @@ LOGIN_TEMPLATE = """
             </a>
         </div>
         <div class="title-container">
-            <h1>Bienvenido, {{ usuario }}</h1>
+            <h1>AscensorAlert</h1>
         </div>
     </div>
 </header>
@@ -539,16 +537,16 @@ LOGIN_TEMPLATE = """
     </main>
 </body>
 </html>
-"""
+'''
 
-HOME_TEMPLATE = """
+HOME_TEMPLATE = '''
 <!DOCTYPE html>
-<html lang='es'>
+<html lang="es">
 <head>
-    <meta charset='UTF-8'>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido</title>
-    <link rel='stylesheet' href='/static/styles.css?v=4'>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
 </head>
 <body>
     <header>
@@ -564,18 +562,18 @@ HOME_TEMPLATE = """
     </div>
 </header>
     <main>
-        <div class='menu'>
-            <a href="/formulario_lead" class='button'>Añadir Lead</a>
-            <a href="/leads_dashboard" class='button'>Visualizar Datos</a>
-            <a href="/reporte_mensual" class='button'>Descargo Comercial</a>
-            <a href="/logout" class='button'>Cerrar Sesión</a>
+        <div class="menu">
+            <a href="/formulario_lead" class="button">Añadir Lead</a>
+            <a href="/leads_dashboard" class="button">Visualizar Datos</a>
+            <a href="/reporte_mensual" class="button">Descargo Comercial</a>
+            <a href="/logout" class="button">Cerrar Sesión</a>
         </div>
     </main>
 </body>
 </html>
-"""
+'''
 
-FORM_TEMPLATE = """
+FORM_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -600,12 +598,46 @@ FORM_TEMPLATE = """
     <main>
         <div class="menu">
             <form method="POST">
-                <!-- NUEVO CAMPO: Fecha de Visita como primer campo -->
                 <label>Fecha de Visita:</label><br>
                 <input type="date" name="fecha_visita" value="{{ fecha_hoy }}" required><br><br>
 
                 <label>Tipo de Lead:</label><br>
                 <select name="tipo_lead" required>
+                    <option value="">-- Selecciona un tipo --</option>
+                    <option value="Comunidad">Comunidad</option>
+                    <option value="Hotel/Apartamentos">Hotel/Apartamentos</option>
+                    <option value="Empresa">Empresa</option>
+                    <option value="Otro">Otro</option>
+                </select><br><br>
+
+                <label>Dirección:</label><br>
+                <input type="text" name="direccion" required><br><br>
+
+                <label>Nombre de la Instalación:</label><br>
+                <input type="text" name="nombre_lead" required><br><br>
+
+                <label>Código Postal:</label><br>
+                <input type="text" name="codigo_postal"><br><br>
+
+                <label>Localidad:</label><br>
+                <select name="localidad" required>
+                    <option value="">-- Selecciona una localidad --</option>
+                    <option value="Agaete">Agaete</option>
+                    <option value="Agüimes">Agüimes</option>
+                    <option value="Arguineguín">Arguineguín</option>
+                    <option value="Arinaga">Arinaga</option>
+                    <option value="Artenara">Artenara</option>
+                    <option value="Arucas">Arucas</option>
+                    <option value="Carrizal">Carrizal</option>
+                    <option value="Cruce de Arinaga">Cruce de Arinaga</option>
+                    <option value="El Burrero">El Burrero</option>
+                    <option value="El Tablero">El Tablero</option>
+                    <option value="Gáldar">Gáldar</option>
+                    <option value="Ingenio">Ingenio</option>
+                    <option value="Jinémar">Jinémar</option>
+                    <option value="La Aldea de San Nicolás">La Aldea de San Nicolás</option>
+                    <option value="La Pardilla">La Pardilla</option>
+                    <option value="Las Palmas de Gran Canaria">Las Palmas de Gran Canaria</option>
                     <option value="Maspalomas">Maspalomas</option>
                     <option value="Mogán">Mogán</option>
                     <option value="Moya">Moya</option>
@@ -672,14 +704,14 @@ FORM_TEMPLATE = """
 
                 <button type="submit" class="button">Registrar Lead</button>
             </form>
+            <a href="/home" class="button">Volver</a>
         </div>
     </main>
 </body>
 </html>
-"""
+'''
 
-# Resto de templates...
-EQUIPO_TEMPLATE = """
+EQUIPO_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -758,13 +790,14 @@ EQUIPO_TEMPLATE = """
 
                 <button type="submit" class="button">Registrar Equipo</button>
             </form>
+            <a href="/home" class="button">Volver</a>
         </div>
     </main>
 </body>
 </html>
-"""
+'''
 
-EDIT_LEAD_TEMPLATE = """
+EDIT_LEAD_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -789,7 +822,6 @@ EDIT_LEAD_TEMPLATE = """
 <main>
     <div class="menu">
         <form method="POST">
-            <!-- Campo fecha de visita -->
             <label>Fecha de Visita:</label><br>
             <input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br>
 
@@ -808,28 +840,22 @@ EDIT_LEAD_TEMPLATE = """
             <label>Nombre de la Instalación:</label><br>
             <input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br>
 
-            <!-- Resto de campos del formulario de edición -->
             <label>Código Postal:</label><br>
             <input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br>
-
-            <label>Localidad:</label><br>
-            <select name="localidad" required>
-                <option value="">-- Selecciona una localidad --</option>
-                <!-- ... todas las localidades con selected si coincide ... -->
-            </select><br><br>
 
             <label>Observaciones:</label><br>
             <textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br>
 
             <button type="submit" class="button">Actualizar Lead</button>
         </form>
+        <a href="/leads_dashboard" class="button">Volver</a>
     </div>
 </main>
 </body>
 </html>
-"""
+'''
 
-REPORTE_TEMPLATE = """
+REPORTE_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -854,7 +880,7 @@ REPORTE_TEMPLATE = """
     <main>
         <div class="menu">
             <h3>Generar Descargo Comercial Mensual</h3>
-            <p>Selecciona el mes y año para generar el descargo comercial con las visitas realizadas:</p>
+            <p>Selecciona el mes y año para generar el descargo comercial:</p>
             
             <form method="POST">
                 <label>Mes:</label><br>
@@ -890,46 +916,103 @@ REPORTE_TEMPLATE = """
     </main>
 </body>
 </html>
-"""
+'''
 
-# Templates de dashboard y edición de equipos continúan igual...
-# [El resto del código con DASHBOARD_TEMPLATE_WITH_FILTERS y EQUIPO_EDIT_TEMPLATE]
+DASHBOARD_TEMPLATE_WITH_FILTERS = '''
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Dashboard</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <h3>Dashboard de Leads</h3>
+            <table border="1">
+                <tr>
+                    <th>Dirección</th>
+                    <th>Localidad</th>
+                    <th>Equipos</th>
+                    <th>Acciones</th>
+                </tr>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ row.direccion }}</td>
+                    <td>{{ row.localidad }}</td>
+                    <td>{{ row.total_equipos }}</td>
+                    <td>
+                        <a href="/editar_lead/{{ row.lead_id }}">Editar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            <br>
+            <a href="/home" class="button">Volver</a>
+        </div>
+    </main>
+</body>
+</html>
+'''
+
+EQUIPO_EDIT_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Equipo</title>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Editar Equipo</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <form method="POST">
+                <label>Tipo de Equipo:</label><br>
+                <input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br>
+
+                <label>Identificación del Ascensor:</label><br>
+                <input type="text" name="identificacion" value="{{ equipo.identificacion }}" required><br><br>
+
+                <label>Empresa Mantenedora:</label><br>
+                <input type="text" name="empresa_mantenedora" value="{{ equipo.empresa_mantenedora }}"><br><br>
+
+                <button type="submit" class="button">Actualizar Equipo</button>
+            </form>
+            <br>
+            <a href="/home" class="button">Volver al inicio</a>
+        </div>
+    </main>
+</body>
+</html>
+'''
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)="">-- Selecciona un tipo --</option>
-                    <option value="Comunidad">Comunidad</option>
-                    <option value="Hotel/Apartamentos">Hotel/Apartamentos</option>
-                    <option value="Empresa">Empresa</option>
-                    <option value="Otro">Otro</option>
-                </select><br><br>
-
-                <label>Dirección:</label><br>
-                <input type="text" name="direccion" required><br><br>
-
-                <label>Nombre de la Instalación:</label><br>
-                <input type="text" name="nombre_lead" required><br><br>
-
-                <label>Código Postal:</label><br>
-                <input type="text" name="codigo_postal"><br><br>
-
-                <label>Localidad:</label><br>
-                <select name="localidad" required>
-                    <option value="">-- Selecciona una localidad --</option>
-                    <option value="Agaete">Agaete</option>
-                    <option value="Agüimes">Agüimes</option>
-                    <option value="Arguineguín">Arguineguín</option>
-                    <option value="Arinaga">Arinaga</option>
-                    <option value="Artenara">Artenara</option>
-                    <option value="Arucas">Arucas</option>
-                    <option value="Carrizal">Carrizal</option>
-                    <option value="Cruce de Arinaga">Cruce de Arinaga</option>
-                    <option value="El Burrero">El Burrero</option>
-                    <option value="El Tablero">El Tablero</option>
-                    <option value="Gáldar">Gáldar</option>
-                    <option value="Ingenio">Ingenio</option>
-                    <option value="Jinémar">Jinémar</option>
-                    <option value="La Aldea de San Nicolás">La Aldea de San Nicolás</option>
-                    <option value="La Pardilla">La Pardilla</option>
-                    <option value="Las Palmas de Gran Canaria">Las Palmas de Gran Canaria</option>
-                    <option value
+    app.run(host="0.0.0.0", port=port, debug=False)
