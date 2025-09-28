@@ -843,6 +843,86 @@ EDIT_LEAD_TEMPLATE = '''
             <label>Código Postal:</label><br>
             <input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br>
 
+            <label>Localidad:</label><br>
+            <select name="localidad" required>
+                <option value="">-- Selecciona una localidad --</option>
+                <option value="Agaete" {% if lead.localidad == 'Agaete' %}selected{% endif %}>Agaete</option>
+                <option value="Agüimes" {% if lead.localidad == 'Agüimes' %}selected{% endif %}>Agüimes</option>
+                <option value="Arguineguín" {% if lead.localidad == 'Arguineguín' %}selected{% endif %}>Arguineguín</option>
+                <option value="Arinaga" {% if lead.localidad == 'Arinaga' %}selected{% endif %}>Arinaga</option>
+                <option value="Artenara" {% if lead.localidad == 'Artenara' %}selected{% endif %}>Artenara</option>
+                <option value="Arucas" {% if lead.localidad == 'Arucas' %}selected{% endif %}>Arucas</option>
+                <option value="Carrizal" {% if lead.localidad == 'Carrizal' %}selected{% endif %}>Carrizal</option>
+                <option value="Cruce de Arinaga" {% if lead.localidad == 'Cruce de Arinaga' %}selected{% endif %}>Cruce de Arinaga</option>
+                <option value="El Burrero" {% if lead.localidad == 'El Burrero' %}selected{% endif %}>El Burrero</option>
+                <option value="El Tablero" {% if lead.localidad == 'El Tablero' %}selected{% endif %}>El Tablero</option>
+                <option value="Gáldar" {% if lead.localidad == 'Gáldar' %}selected{% endif %}>Gáldar</option>
+                <option value="Ingenio" {% if lead.localidad == 'Ingenio' %}selected{% endif %}>Ingenio</option>
+                <option value="Jinémar" {% if lead.localidad == 'Jinémar' %}selected{% endif %}>Jinémar</option>
+                <option value="La Aldea de San Nicolás" {% if lead.localidad == 'La Aldea de San Nicolás' %}selected{% endif %}>La Aldea de San Nicolás</option>
+                <option value="La Pardilla" {% if lead.localidad == 'La Pardilla' %}selected{% endif %}>La Pardilla</option>
+                <option value="Las Palmas de Gran Canaria" {% if lead.localidad == 'Las Palmas de Gran Canaria' %}selected{% endif %}>Las Palmas de Gran Canaria</option>
+                <option value="Maspalomas" {% if lead.localidad == 'Maspalomas' %}selected{% endif %}>Maspalomas</option>
+                <option value="Mogán" {% if lead.localidad == 'Mogán' %}selected{% endif %}>Mogán</option>
+                <option value="Moya" {% if lead.localidad == 'Moya' %}selected{% endif %}>Moya</option>
+                <option value="Playa de Mogán" {% if lead.localidad == 'Playa de Mogán' %}selected{% endif %}>Playa de Mogán</option>
+                <option value="Playa del Inglés" {% if lead.localidad == 'Playa del Inglés' %}selected{% endif %}>Playa del Inglés</option>
+                <option value="Puerto Rico" {% if lead.localidad == 'Puerto Rico' %}selected{% endif %}>Puerto Rico</option>
+                <option value="San Bartolomé de Tirajana" {% if lead.localidad == 'San Bartolomé de Tirajana' %}selected{% endif %}>San Bartolomé de Tirajana</option>
+                <option value="San Fernando" {% if lead.localidad == 'San Fernando' %}selected{% endif %}>San Fernando</option>
+                <option value="San Mateo" {% if lead.localidad == 'San Mateo' %}selected{% endif %}>San Mateo</option>
+                <option value="Santa Brígida" {% if lead.localidad == 'Santa Brígida' %}selected{% endif %}>Santa Brígida</option>
+                <option value="Santa Lucía de Tirajana" {% if lead.localidad == 'Santa Lucía de Tirajana' %}selected{% endif %}>Santa Lucía de Tirajana</option>
+                <option value="Santa María de Guía" {% if lead.localidad == 'Santa María de Guía' %}selected{% endif %}>Santa María de Guía</option>
+                <option value="Tafira" {% if lead.localidad == 'Tafira' %}selected{% endif %}>Tafira</option>
+                <option value="Tejeda" {% if lead.localidad == 'Tejeda' %}selected{% endif %}>Tejeda</option>
+                <option value="Teror" {% if lead.localidad == 'Teror' %}selected{% endif %}>Teror</option>
+                <option value="Valleseco" {% if lead.localidad == 'Valleseco' %}selected{% endif %}>Valleseco</option>
+                <option value="Valsequillo" {% if lead.localidad == 'Valsequillo' %}selected{% endif %}>Valsequillo</option>
+                <option value="Vecindario" {% if lead.localidad == 'Vecindario' %}selected{% endif %}>Vecindario</option>
+            </select><br><br>
+
+            <label>Zona:</label><br>
+            <input type="text" name="zona" value="{{ lead.zona }}"><br><br>
+
+            <label>Persona de Contacto:</label><br>
+            <input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br>
+
+            <label>Teléfono:</label><br>
+            <input type="text" name="telefono" value="{{ lead.telefono }}"><br><br>
+
+            <label>Email:</label><br>
+            <input type="email" name="email" value="{{ lead.email }}"><br><br>
+
+            <label>Administrador de Fincas:</label><br>
+            <input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br>
+
+            <label>Número de Ascensores:</label><br>
+            <select name="numero_ascensores" required>
+                <option value="">-- ¿Cuántos ascensores hay? --</option>
+                <option value="1" {% if lead.numero_ascensores == '1' %}selected{% endif %}>1 ascensor</option>
+                <option value="2" {% if lead.numero_ascensores == '2' %}selected{% endif %}>2 ascensores</option>
+                <option value="3" {% if lead.numero_ascensores == '3' %}selected{% endif %}>3 ascensores</option>
+                <option value="4" {% if lead.numero_ascensores == '4' %}selected{% endif %}>4 ascensores</option>
+                <option value="5" {% if lead.numero_ascensores == '5' %}selected{% endif %}>5 ascensores</option>
+                <option value="6" {% if lead.numero_ascensores == '6' %}selected{% endif %}>6 ascensores</option>
+                <option value="7" {% if lead.numero_ascensores == '7' %}selected{% endif %}>7 ascensores</option>
+                <option value="8" {% if lead.numero_ascensores == '8' %}selected{% endif %}>8 ascensores</option>
+                <option value="9" {% if lead.numero_ascensores == '9' %}selected{% endif %}>9 ascensores</option>
+                <option value="10" {% if lead.numero_ascensores == '10' %}selected{% endif %}>10 ascensores</option>
+                <option value="11" {% if lead.numero_ascensores == '11' %}selected{% endif %}>11 ascensores</option>
+                <option value="12" {% if lead.numero_ascensores == '12' %}selected{% endif %}>12 ascensores</option>
+                <option value="13" {% if lead.numero_ascensores == '13' %}selected{% endif %}>13 ascensores</option>
+                <option value="14" {% if lead.numero_ascensores == '14' %}selected{% endif %}>14 ascensores</option>
+                <option value="15" {% if lead.numero_ascensores == '15' %}selected{% endif %}>15 ascensores</option>
+                <option value="16" {% if lead.numero_ascensores == '16' %}selected{% endif %}>16 ascensores</option>
+                <option value="17" {% if lead.numero_ascensores == '17' %}selected{% endif %}>17 ascensores</option>
+                <option value="18" {% if lead.numero_ascensores == '18' %}selected{% endif %}>18 ascensores</option>
+                <option value="19" {% if lead.numero_ascensores == '19' %}selected{% endif %}>19 ascensores</option>
+                <option value="20" {% if lead.numero_ascensores == '20' %}selected{% endif %}>20 ascensores</option>
+                <option value="20+" {% if lead.numero_ascensores == '20+' %}selected{% endif %}>Más de 20 ascensores</option>
+            </select><br><br>
+
             <label>Observaciones:</label><br>
             <textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br>
 
