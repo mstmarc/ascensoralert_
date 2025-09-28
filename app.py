@@ -290,38 +290,38 @@ def leads_dashboard():
             if empresa_mantenedora:
                 empresas_disponibles.add(empresa_mantenedora)
 
-        if equipos:
-    for equipo in equipos:
-                    
-                    # Formatear fechas
-                    fecha_vencimiento = equipo.get("fecha_vencimiento_contrato", "-")
-                    if fecha_vencimiento and fecha_vencimiento != "-" and fecha_vencimiento:
-                        partes = fecha_vencimiento.split("-")
-                        if len(partes) == 3:
-                            fecha_vencimiento = f"{partes[2]}/{partes[1]}/{partes[0]}"
+                    if equipos:
+            for equipo in equipos:
+                # Formatear fechas
+                fecha_vencimiento = equipo.get("fecha_vencimiento_contrato", "-")
+                if fecha_vencimiento and fecha_vencimiento != "-" and fecha_vencimiento:
+                    partes = fecha_vencimiento.split("-")
+                    if len(partes) == 3:
+                        fecha_vencimiento = f"{partes[2]}/{partes[1]}/{partes[0]}"
 
-                    ipo_proxima = equipo.get("ipo_proxima", "-")
-                    ipo_fecha_original = ipo_proxima
-                    if ipo_proxima and ipo_proxima != "-" and ipo_proxima:
-                        partes = ipo_proxima.split("-")
-                        if len(partes) == 3:
-                            ipo_proxima = f"{partes[2]}/{partes[1]}/{partes[0]}"
+                ipo_proxima = equipo.get("ipo_proxima", "-")
+                ipo_fecha_original = ipo_proxima
+                if ipo_proxima and ipo_proxima != "-" and ipo_proxima:
+                    partes = ipo_proxima.split("-")
+                    if len(partes) == 3:
+                        ipo_proxima = f"{partes[2]}/{partes[1]}/{partes[0]}"
 
-                    # Crear fila de datos
-                    row = {
-                        "lead_id": lead_id,
-                        "equipo_id": equipo["id"],
-                        "direccion": lead.get("direccion", "-"),
-                        "localidad": lead.get("localidad", "-"),
-                        "codigo_postal": lead.get("codigo_postal", "-"),
-                        "identificacion": equipo.get("identificacion", "-"),
-                        "total_equipos": total_equipos,
-                        "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
-                        "empresa_mantenedora": empresa_mantenedora,
-                        "fecha_vencimiento_contrato": fecha_vencimiento,
-                        "ipo_proxima": ipo_proxima,
-                        "ipo_fecha_original": ipo_fecha_original
-                    }
+                # Crear fila de datos
+                row = {
+                    "lead_id": lead_id,
+                    "equipo_id": equipo["id"],
+                    "direccion": lead.get("direccion", "-"),
+                    "localidad": lead.get("localidad", "-"),
+                    "codigo_postal": lead.get("codigo_postal", "-"),
+                    "identificacion": equipo.get("identificacion", "-"),
+                    "total_equipos": total_equipos,
+                    "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
+                    "empresa_mantenedora": empresa_mantenedora,
+                    "fecha_vencimiento_contrato": fecha_vencimiento,
+                    "ipo_proxima": ipo_proxima,
+                    "ipo_fecha_original": ipo_fecha_original
+                }
+
                     
                     # Aplicar filtros
                     incluir_fila = True
