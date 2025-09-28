@@ -370,7 +370,7 @@ if equipos:
                     
                     if incluir_fila:
                         rows.append(row)
-            else:
+                    else:
                 # Lead sin equipos
                 row = {
                     "lead_id": lead_id,
