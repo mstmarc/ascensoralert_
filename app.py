@@ -482,6 +482,58 @@ def leads_dashboard():
         filtro_ipo_urgencia=filtro_ipo_urgencia
     )
 
+# Ver detalle completo del Lead (NUEVA RUTA)
+@app.route("/ver_lead/<int:lead_id>")
+def ver_lead(lead_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    # Obtener datos del lead
+    response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}", headers=HEADERS)
+    if response.status_code != 200 or not response.json():
+        return f"<h3 style='color:red;'>Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
+    
+    lead = response.json()[0]
+    
+    # Obtener equipos asociados
+    equipos_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
+    equipos = []
+    if equipos_response.status_code == 200:
+        equipos_raw = equipos_response.json()
+        # Formatear fechas de los equipos
+        for equipo in equipos_raw:
+            # Formatear fecha vencimiento contrato
+            fecha_venc = equipo.get("fecha_vencimiento_contrato", "-")
+            if fecha_venc and fecha_venc != "-":
+                try:
+                    partes = fecha_venc.split("-")
+                    if len(partes) == 3:
+                        fecha_venc = f"{partes[2]}/{partes[1]}/{partes[0]}"
+                except:
+                    pass
+            
+            # Formatear IPO
+            ipo = equipo.get("ipo_proxima", "-")
+            if ipo and ipo != "-":
+                try:
+                    partes = ipo.split("-")
+                    if len(partes) == 3:
+                        ipo = f"{partes[2]}/{partes[1]}/{partes[0]}"
+                except:
+                    pass
+            
+            equipos.append({
+                "id": equipo.get("id"),
+                "tipo_equipo": equipo.get("tipo_equipo", "-"),
+                "identificacion": equipo.get("identificacion", "-"),
+                "rae": equipo.get("rae", "-"),
+                "ipo_proxima": ipo,
+                "fecha_vencimiento_contrato": fecha_venc,
+                "descripcion": equipo.get("descripcion", "-")
+            })
+    
+    return render_template_string(VER_LEAD_TEMPLATE, lead=lead, equipos=equipos)
+
 # Editar Lead
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
 def editar_lead(lead_id):
@@ -913,6 +965,258 @@ EQUIPO_TEMPLATE = '''
 
 EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><button type="submit" class="button">Actualizar</button></form><a href="/leads_dashboard" class="button">Volver</a></div></main></body></html>'''
 
+VER_LEAD_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Lead</title>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
+    <style>
+        .detalle-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .seccion {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .seccion h2 {
+            color: #366092;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #366092;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .info-item label {
+            font-weight: bold;
+            color: #366092;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .info-item span {
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .equipos-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .equipos-tabla th {
+            background: #366092;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #2a4a70;
+        }
+        
+        .equipos-tabla td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .equipos-tabla tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .equipos-tabla tr:hover {
+            background: #e9ecef;
+        }
+        
+        .btn-accion-small {
+            background: #366092;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-accion-small:hover {
+            background: #2a4a70;
+        }
+        
+        .botones-accion {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .no-equipos {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Detalle de la Comunidad</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <div class="detalle-container">
+                
+                <!-- DATOS DE LA COMUNIDAD -->
+                <div class="seccion">
+                    <h2>📋 Información de la Comunidad</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Dirección:</label>
+                            <span>{{ lead.direccion or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Nombre:</label>
+                            <span>{{ lead.nombre_cliente or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Tipo:</label>
+                            <span>{{ lead.tipo_cliente or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Localidad:</label>
+                            <span>{{ lead.localidad or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Código Postal:</label>
+                            <span>{{ lead.codigo_postal or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Zona:</label>
+                            <span>{{ lead.zona or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Fecha de Visita:</label>
+                            <span>{{ lead.fecha_visita or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Nº Ascensores Previsto:</label>
+                            <span>{{ lead.numero_ascensores or '-' }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Persona de Contacto:</label>
+                            <span>{{ lead.persona_contacto or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Teléfono:</label>
+                            <span>{{ lead.telefono or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span>{{ lead.email or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Administrador de Fincas:</label>
+                            <span>{{ lead.administrador_fincas or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Empresa Mantenedora Actual:</label>
+                            <span>{{ lead.empresa_mantenedora or '-' }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if lead.observaciones %}
+                    <div class="info-item" style="grid-column: 1/-1;">
+                        <label>Observaciones:</label>
+                        <span>{{ lead.observaciones }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- EQUIPOS/ASCENSORES -->
+                <div class="seccion">
+                    <h2>🏢 Equipos/Ascensores ({{ equipos|length }})</h2>
+                    
+                    {% if equipos %}
+                    <table class="equipos-tabla">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Identificación</th>
+                                <th>RAE</th>
+                                <th>Próxima IPO</th>
+                                <th>Contrato Vence</th>
+                                <th>Observaciones</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for equipo in equipos %}
+                            <tr>
+                                <td>{{ equipo.tipo_equipo }}</td>
+                                <td>{{ equipo.identificacion }}</td>
+                                <td>{{ equipo.rae }}</td>
+                                <td>{{ equipo.ipo_proxima }}</td>
+                                <td>{{ equipo.fecha_vencimiento_contrato }}</td>
+                                <td>{{ equipo.descripcion }}</td>
+                                <td>
+                                    <a href="/editar_equipo/{{ equipo.id }}" class="btn-accion-small">Editar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="no-equipos">
+                        No hay equipos registrados para esta comunidad
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- BOTONES DE ACCIÓN -->
+                <div class="botones-accion">
+                    <a href="/editar_lead/{{ lead.id }}" class="button">Editar Comunidad</a>
+                    <a href="/nuevo_equipo?cliente_id={{ lead.id }}" class="button">Añadir Equipo</a>
+                    <a href="/leads_dashboard" class="button">Volver al Dashboard</a>
+                </div>
+                
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+'''
+
 REPORTE_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Descargo Comercial</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Descargo Comercial</h1></div></div></header><main><div class="menu"><h3>Generar Descargo Mensual</h3><form method="POST"><label>Mes:</label><br><select name="mes" required><option value="">-- Mes --</option><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select><br><br><label>Año:</label><br><select name="año" required><option value="">-- Año --</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option></select><br><br><button type="submit" class="button">Generar Excel</button></form><br><a href="/home" class="button">Volver</a></div></main></body></html>'''
 
 # TEMPLATE MEJORADO DEL DASHBOARD
@@ -1218,7 +1522,8 @@ DASHBOARD_TEMPLATE_MEJORADO = """
                                 <td style="{{ row.color_ipo }}">{{ row.ipo_proxima }}</td>
                                 <td style="{{ row.color_contrato }}">{{ row.contrato_vence }}</td>
                                 <td>
-                                    <a href="/editar_lead/{{ row.lead_id }}" class="btn-accion">Ver/Editar</a>
+                                    <a href="/ver_lead/{{ row.lead_id }}" class="btn-accion" style="background: #28a745;">Ver</a>
+                                    <a href="/editar_lead/{{ row.lead_id }}" class="btn-accion">Editar</a>
                                 </td>
                             </tr>
                             {% endfor %}
