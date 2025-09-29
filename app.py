@@ -171,7 +171,7 @@ EDIT_LEAD_TEMPLATE = '''
 
             <label>Número de Ascensores:</label><br>
             <select name="numero_ascensores" required>
-                <option value="">-- ¿Cuántos ascensores hay? --</option>
+                <option value="">-- Cuantos ascensores hay? --</option>
                 <option value="1" {% if lead.numero_ascensores == '1' %}selected{% endif %}>1 ascensor</option>
                 <option value="2" {% if lead.numero_ascensores == '2' %}selected{% endif %}>2 ascensores</option>
                 <option value="3" {% if lead.numero_ascensores == '3' %}selected{% endif %}>3 ascensores</option>
@@ -376,7 +376,8 @@ EQUIPO_EDIT_TEMPLATE = '''
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)from flask import Flask, request, render_template_string, redirect, session, Response
+    app.run(host="0.0.0.0", port=port, debug=False)# -*- coding: utf-8 -*-
+from flask import Flask, request, render_template_string, redirect, session, Response
 import requests
 import os
 import urllib.parse
@@ -1171,7 +1172,7 @@ FORM_TEMPLATE = '''
 
                 <label>Número de Ascensores:</label><br>
                 <select name="numero_ascensores" required>
-                    <option value="">-- ¿Cuántos ascensores hay? --</option>
+                    <option value="">-- Cuantos ascensores hay? --</option>
                     <option value="1">1 ascensor</option>
                     <option value="2">2 ascensores</option>
                     <option value="3">3 ascensores</option>
