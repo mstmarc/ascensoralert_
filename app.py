@@ -2,7 +2,7 @@ from flask import Flask, request, render_template_string, redirect, session, Res
 import requests
 import os
 import urllib.parse
-from datetime import date
+from datetime import date, datetime, timedelta
 import calendar
 import io
 
@@ -23,6 +23,52 @@ HEADERS = {
     "Content-Type": "application/json",
     "Prefer": "return=representation"
 }
+
+# FUNCIONES AUXILIARES PARA COLORES DEL DASHBOARD
+def calcular_color_ipo(fecha_ipo_str):
+    """Calcula el color de fondo para la celda de IPO según la urgencia"""
+    if not fecha_ipo_str or fecha_ipo_str == "-":
+        return ""
+    
+    try:
+        # Convertir fecha de dd/mm/yyyy a objeto datetime
+        fecha_ipo = datetime.strptime(fecha_ipo_str, "%d/%m/%Y")
+        hoy = datetime.now()
+        diferencia = (fecha_ipo - hoy).days
+        
+        # Amarillo: 15 días antes de la IPO
+        if -15 <= diferencia < 0:
+            return "background-color: #FFF59D;"  # Amarillo suave
+        
+        # Rojo: Desde fecha IPO hasta 30 días después (OPORTUNIDAD)
+        if diferencia >= 0 and diferencia <= 30:
+            return "background-color: #FFCDD2;"  # Rojo suave
+        
+        return ""
+    except:
+        return ""
+
+def calcular_color_contrato(fecha_contrato_str):
+    """Calcula el color de fondo para la celda de contrato según vencimiento"""
+    if not fecha_contrato_str or fecha_contrato_str == "-":
+        return ""
+    
+    try:
+        fecha_contrato = datetime.strptime(fecha_contrato_str, "%d/%m/%Y")
+        hoy = datetime.now()
+        diferencia = (fecha_contrato - hoy).days
+        
+        # Rojo: Vencido o vence en menos de 30 días
+        if diferencia <= 30:
+            return "background-color: #FFCDD2;"  # Rojo suave
+        
+        # Amarillo: Vence entre 30-90 días
+        if 30 < diferencia <= 90:
+            return "background-color: #FFF59D;"  # Amarillo suave
+        
+        return ""
+    except:
+        return ""
 
 # Login
 @app.route("/", methods=["GET", "POST"])
@@ -291,175 +337,150 @@ def reporte_mensual():
     
     return render_template_string(REPORTE_TEMPLATE)
 
-# Dashboard CON SISTEMA DE FILTROS
+# DASHBOARD MEJORADO POR COMUNIDADES CON INDICADORES VISUALES
 @app.route("/leads_dashboard")
 def leads_dashboard():
     if "usuario" not in session:
         return redirect("/")
-
-    # Obtener parámetros de filtro
-    filtro_empresa = request.args.get('empresa', '')
-    filtro_localidad = request.args.get('localidad', '')
-    filtro_ipo_mes = request.args.get('ipo_mes', '')
-    filtro_ipo_año = request.args.get('ipo_año', '')
-    buscar_texto = request.args.get('buscar', '')
-
+    
+    # Obtener filtros de la URL
+    filtro_localidad = request.args.get("localidad", "")
+    filtro_empresa = request.args.get("empresa", "")
+    buscar_texto = request.args.get("buscar", "")
+    filtro_ipo_urgencia = request.args.get("ipo_urgencia", "")
+    
+    # Obtener todos los leads (clientes/comunidades)
     response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=*", headers=HEADERS)
     if response.status_code != 200:
-        return f"<h3 style='color:red;'>Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
-
+        return f"<h3 style='color:red;'>❌ Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+    
     leads_data = response.json()
     rows = []
-    
-    # Obtener listas para filtros
-    empresas_disponibles = set()
     localidades_disponibles = set()
-
+    empresas_disponibles = set()
+    
     for lead in leads_data:
         lead_id = lead["id"]
-        equipos_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
+        
+        # Obtener equipos de esta comunidad
+        equipos_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", 
+            headers=HEADERS
+        )
         
         if equipos_response.status_code == 200:
             equipos = equipos_response.json()
-            total_equipos = len(equipos)
             
-            # Añadir a listas de filtros
-            localidades_disponibles.add(lead.get("localidad", ""))
-            
-            # Empresa mantenedora ahora viene del cliente
+            # Información de la comunidad
+            direccion = lead.get("direccion", "-")
+            localidad = lead.get("localidad", "-")
             empresa_mantenedora = lead.get("empresa_mantenedora", "-")
-            if empresa_mantenedora:
+            total_equipos = len(equipos) if equipos else lead.get("numero_ascensores", 0)
+            
+            # Agregar a conjuntos para filtros
+            if localidad and localidad != "-":
+                localidades_disponibles.add(localidad)
+            if empresa_mantenedora and empresa_mantenedora != "-":
                 empresas_disponibles.add(empresa_mantenedora)
-
+            
+            # Calcular IPO más próxima y contrato más próximo
+            ipo_proxima = None
+            contrato_vence = None
+            
             if equipos:
                 for equipo in equipos:
-                    # Formatear fechas
-                    fecha_vencimiento = equipo.get("fecha_vencimiento_contrato", "-")
-                    if fecha_vencimiento and fecha_vencimiento != "-" and fecha_vencimiento:
-                        partes = fecha_vencimiento.split("-")
-                        if len(partes) == 3:
-                            fecha_vencimiento = f"{partes[2]}/{partes[1]}/{partes[0]}"
-
-                    ipo_proxima = equipo.get("ipo_proxima", "-")
-                    ipo_fecha_original = ipo_proxima
-                    if ipo_proxima and ipo_proxima != "-" and ipo_proxima:
-                        partes = ipo_proxima.split("-")
-                        if len(partes) == 3:
-                            ipo_proxima = f"{partes[2]}/{partes[1]}/{partes[0]}"
-
-                    # Crear fila de datos
-                    row = {
-                        "lead_id": lead_id,
-                        "equipo_id": equipo["id"],
-                        "direccion": lead.get("direccion", "-"),
-                        "localidad": lead.get("localidad", "-"),
-                        "codigo_postal": lead.get("codigo_postal", "-"),
-                        "identificacion": equipo.get("identificacion", "-"),
-                        "total_equipos": total_equipos,
-                        "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
-                        "empresa_mantenedora": empresa_mantenedora,
-                        "fecha_vencimiento_contrato": fecha_vencimiento,
-                        "ipo_proxima": ipo_proxima,
-                        "ipo_fecha_original": ipo_fecha_original
-                    }
+                    # Procesar IPO
+                    ipo_equipo = equipo.get("ipo_proxima")
+                    if ipo_equipo:
+                        try:
+                            ipo_date = datetime.strptime(ipo_equipo, "%Y-%m-%d")
+                            if ipo_proxima is None or ipo_date < ipo_proxima:
+                                ipo_proxima = ipo_date
+                        except:
+                            pass
                     
-                    # Aplicar filtros
-                    incluir_fila = True
-                    
-                    # Filtro por empresa
-                    if filtro_empresa and filtro_empresa != empresa_mantenedora:
-                        incluir_fila = False
-                    
-                    # Filtro por localidad
-                    if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
-                        incluir_fila = False
-                    
-                    # Filtro por IPO
-                    if filtro_ipo_mes or filtro_ipo_año:
-                        if ipo_fecha_original and ipo_fecha_original != "-":
-                            try:
-                                partes_fecha = ipo_fecha_original.split("-")
-                                if len(partes_fecha) == 3:
-                                    año_ipo = partes_fecha[0]
-                                    mes_ipo = partes_fecha[1]
-                                    
-                                    if filtro_ipo_año and filtro_ipo_año != año_ipo:
-                                        incluir_fila = False
-                                    if filtro_ipo_mes and filtro_ipo_mes != mes_ipo:
-                                        incluir_fila = False
-                            except:
-                                pass
-                        else:
-                            if filtro_ipo_mes or filtro_ipo_año:
-                                incluir_fila = False
-                    
-                    # Filtro por búsqueda de texto
-                    if buscar_texto:
-                        texto_busqueda = buscar_texto.lower()
-                        campos_busqueda = [
-                            str(lead.get("direccion", "")),
-                            str(lead.get("localidad", "")),
-                            str(equipo.get("identificacion", "")),
-                            str(equipo.get("empresa_mantenedora", "")),
-                            str(lead.get("nombre_cliente", ""))
-                        ]
-                        
-                        encontrado = any(texto_busqueda in campo.lower() for campo in campos_busqueda)
-                        if not encontrado:
-                            incluir_fila = False
-                    
-                    if incluir_fila:
-                        rows.append(row)
-            else:
-                # Lead sin equipos
-                row = {
-                    "lead_id": lead_id,
-                    "equipo_id": None,
-                    "direccion": lead.get("direccion", "-"),
-                    "localidad": lead.get("localidad", "-"),
-                    "codigo_postal": lead.get("codigo_postal", "-"),
-                    "identificacion": "-",
-                    "total_equipos": 0,
-                    "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
-                    "empresa_mantenedora": empresa_mantenedora,
-                    "fecha_vencimiento_contrato": "-",
-                    "ipo_proxima": "-",
-                    "ipo_fecha_original": None
-                }
-                
-                # Aplicar filtros para leads sin equipos
-                incluir_fila = True
-                if filtro_empresa or filtro_ipo_mes or filtro_ipo_año:
+                    # Procesar contrato
+                    contrato_equipo = equipo.get("fecha_vencimiento_contrato")
+                    if contrato_equipo:
+                        try:
+                            contrato_date = datetime.strptime(contrato_equipo, "%Y-%m-%d")
+                            if contrato_vence is None or contrato_date < contrato_vence:
+                                contrato_vence = contrato_date
+                        except:
+                            pass
+            
+            # Formatear fechas a dd/mm/yyyy
+            ipo_proxima_str = ipo_proxima.strftime("%d/%m/%Y") if ipo_proxima else "-"
+            contrato_vence_str = contrato_vence.strftime("%d/%m/%Y") if contrato_vence else "-"
+            
+            # Calcular colores
+            color_ipo = calcular_color_ipo(ipo_proxima_str)
+            color_contrato = calcular_color_contrato(contrato_vence_str)
+            
+            # Crear fila
+            row = {
+                "lead_id": lead_id,
+                "direccion": direccion,
+                "localidad": localidad,
+                "total_equipos": total_equipos,
+                "empresa_mantenedora": empresa_mantenedora,
+                "ipo_proxima": ipo_proxima_str,
+                "ipo_fecha_original": ipo_proxima,  # Para ordenar
+                "contrato_vence": contrato_vence_str,
+                "contrato_fecha_original": contrato_vence,  # Para ordenar
+                "color_ipo": color_ipo,
+                "color_contrato": color_contrato
+            }
+            
+            # Aplicar filtros
+            incluir_fila = True
+            
+            # Filtro por localidad
+            if filtro_localidad and filtro_localidad != localidad:
+                incluir_fila = False
+            
+            # Filtro por empresa
+            if filtro_empresa and filtro_empresa != empresa_mantenedora:
+                incluir_fila = False
+            
+            # Filtro por búsqueda de texto
+            if buscar_texto:
+                texto_busqueda = buscar_texto.lower()
+                if texto_busqueda not in direccion.lower():
                     incluir_fila = False
-                if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
-                    incluir_fila = False
-                if buscar_texto:
-                    texto_busqueda = buscar_texto.lower()
-                    campos_busqueda = [
-                        str(lead.get("direccion", "")),
-                        str(lead.get("localidad", "")),
-                        str(lead.get("nombre_cliente", ""))
-                    ]
-                    encontrado = any(texto_busqueda in campo.lower() for campo in campos_busqueda)
-                    if not encontrado:
-                        incluir_fila = False
+            
+            # Filtro por urgencia IPO
+            if filtro_ipo_urgencia and ipo_proxima:
+                hoy = datetime.now()
+                diferencia_dias = (ipo_proxima - hoy).days
                 
-                if incluir_fila:
-                    rows.append(row)
-
+                if filtro_ipo_urgencia == "15_dias" and not (-15 <= diferencia_dias < 0):
+                    incluir_fila = False
+                elif filtro_ipo_urgencia == "ipo_pasada_30" and not (0 <= diferencia_dias <= 30):
+                    incluir_fila = False
+                elif filtro_ipo_urgencia == "30_90_dias" and not (30 < diferencia_dias <= 90):
+                    incluir_fila = False
+            
+            if incluir_fila:
+                rows.append(row)
+    
+    # Ordenar por IPO más próxima (urgentes primero)
+    rows.sort(key=lambda x: x["ipo_fecha_original"] if x["ipo_fecha_original"] else datetime.max)
+    
     # Limpiar y ordenar listas para filtros
-    empresas_disponibles = sorted([e for e in empresas_disponibles if e and e != "-"])
-    localidades_disponibles = sorted([l for l in localidades_disponibles if l and l != "-"])
-
-    return render_template_string(DASHBOARD_TEMPLATE_WITH_FILTERS, 
-                                rows=rows, 
-                                empresas=empresas_disponibles,
-                                localidades=localidades_disponibles,
-                                filtro_empresa=filtro_empresa,
-                                filtro_localidad=filtro_localidad,
-                                filtro_ipo_mes=filtro_ipo_mes,
-                                filtro_ipo_año=filtro_ipo_año,
-                                buscar_texto=buscar_texto)
+    localidades_disponibles = sorted([l for l in localidades_disponibles if l])
+    empresas_disponibles = sorted([e for e in empresas_disponibles if e])
+    
+    return render_template_string(
+        DASHBOARD_TEMPLATE_MEJORADO,
+        rows=rows,
+        localidades=localidades_disponibles,
+        empresas=empresas_disponibles,
+        filtro_localidad=filtro_localidad,
+        filtro_empresa=filtro_empresa,
+        buscar_texto=buscar_texto,
+        filtro_ipo_urgencia=filtro_ipo_urgencia
+    )
 
 # Editar Lead
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
@@ -894,7 +915,354 @@ EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-
 
 REPORTE_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Descargo Comercial</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Descargo Comercial</h1></div></div></header><main><div class="menu"><h3>Generar Descargo Mensual</h3><form method="POST"><label>Mes:</label><br><select name="mes" required><option value="">-- Mes --</option><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select><br><br><label>Año:</label><br><select name="año" required><option value="">-- Año --</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option></select><br><br><button type="submit" class="button">Generar Excel</button></form><br><a href="/home" class="button">Volver</a></div></main></body></html>'''
 
-DASHBOARD_TEMPLATE_WITH_FILTERS = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Dashboard</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Dashboard</h1></div></div></header><main><div class="menu"><h3>Dashboard de Leads</h3><table border="1"><tr><th>Dirección</th><th>Localidad</th><th>Equipos</th><th>Acciones</th></tr>{% for row in rows %}<tr><td>{{ row.direccion }}</td><td>{{ row.localidad }}</td><td>{{ row.total_equipos }}</td><td><a href="/editar_lead/{{ row.lead_id }}">Editar</a></td></tr>{% endfor %}</table><br><a href="/home" class="button">Volver</a></div></main></body></html>'''
+# TEMPLATE MEJORADO DEL DASHBOARD
+DASHBOARD_TEMPLATE_MEJORADO = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Leads - AscensorAlert</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+        
+        .btn-volver {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-volver:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .filtros {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filtro-grupo label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .filtro-grupo select,
+        .filtro-grupo input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        .filtro-grupo select:focus,
+        .filtro-grupo input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-filtrar {
+            background: #667eea;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            align-self: flex-end;
+        }
+        
+        .btn-filtrar:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-limpiar {
+            background: #6c757d;
+            color: white;
+            padding: 10px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .btn-limpiar:hover {
+            background: #5a6268;
+        }
+        
+        .info-resultados {
+            text-align: center;
+            color: #666;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .tabla-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .btn-accion {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            display: inline-block;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+        
+        .btn-accion:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .leyenda {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .color-amarillo { background-color: #FFF59D; }
+        .color-rojo { background-color: #FFCDD2; }
+        
+        @media (max-width: 768px) {
+            .filtros {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Dashboard de Leads por Comunidades</h1>
+            <a href="/home" class="btn-volver">← Volver al Home</a>
+        </div>
+        
+        <!-- Formulario de filtros -->
+        <form method="GET" action="/leads_dashboard">
+            <div class="filtros">
+                <div class="filtro-grupo">
+                    <label>🏘️ Localidad:</label>
+                    <select name="localidad">
+                        <option value="">Todas las localidades</option>
+                        {% for loc in localidades %}
+                        <option value="{{ loc }}" {% if filtro_localidad == loc %}selected{% endif %}>{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filtro-grupo">
+                    <label>🏢 Empresa Mantenedora:</label>
+                    <select name="empresa">
+                        <option value="">Todas las empresas</option>
+                        {% for emp in empresas %}
+                        <option value="{{ emp }}" {% if filtro_empresa == emp %}selected{% endif %}>{{ emp }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filtro-grupo">
+                    <label>🔍 Buscar dirección:</label>
+                    <input type="text" name="buscar" value="{{ buscar_texto }}" placeholder="Ej: Calle Mayor">
+                </div>
+                
+                <div class="filtro-grupo">
+                    <label>⚠️ Urgencia IPO:</label>
+                    <select name="ipo_urgencia">
+                        <option value="">Todas</option>
+                        <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 días antes (amarillo)</option>
+                        <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 días (rojo)</option>
+                        <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 días</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-grupo">
+                    <button type="submit" class="btn-filtrar">🔎 Filtrar</button>
+                </div>
+                
+                <div class="filtro-grupo">
+                    <a href="/leads_dashboard" class="btn-limpiar">🗑️ Limpiar filtros</a>
+                </div>
+            </div>
+        </form>
+        
+        <div class="info-resultados">
+            📋 Mostrando {{ rows|length }} comunidades
+        </div>
+        
+        <!-- Leyenda de colores -->
+        <div class="leyenda">
+            <div class="leyenda-item">
+                <span class="color-box color-amarillo"></span>
+                <span><strong>IPO:</strong> 15 días antes de inspección</span>
+            </div>
+            <div class="leyenda-item">
+                <span class="color-box color-rojo"></span>
+                <span><strong>IPO:</strong> IPO pasada hasta 30 días (OPORTUNIDAD)</span>
+            </div>
+            <div class="leyenda-item">
+                <span class="color-box color-amarillo"></span>
+                <span><strong>Contrato:</strong> Vence en 30-90 días</span>
+            </div>
+            <div class="leyenda-item">
+                <span class="color-box color-rojo"></span>
+                <span><strong>Contrato:</strong> Vencido o vence en menos de 30 días</span>
+            </div>
+        </div>
+        
+        <!-- Tabla de resultados -->
+        <div class="tabla-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>📍 Dirección</th>
+                        <th>🏘️ Localidad</th>
+                        <th>🏢 Nº Ascensores</th>
+                        <th>🔧 Empresa Mantenedora</th>
+                        <th>⚠️ Próxima IPO</th>
+                        <th>📄 Contrato Vence</th>
+                        <th>⚙️ Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if rows %}
+                        {% for row in rows %}
+                        <tr>
+                            <td>{{ row.direccion }}</td>
+                            <td>{{ row.localidad }}</td>
+                            <td style="text-align: center;">{{ row.total_equipos }}</td>
+                            <td>{{ row.empresa_mantenedora }}</td>
+                            <td style="{{ row.color_ipo }}">{{ row.ipo_proxima }}</td>
+                            <td style="{{ row.color_contrato }}">{{ row.contrato_vence }}</td>
+                            <td>
+                                <a href="/editar_lead/{{ row.lead_id }}" class="btn-accion">✏️ Ver/Editar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                                No se encontraron comunidades con los filtros aplicados
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+"""
 
 EQUIPO_EDIT_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Equipo</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Equipo</h1></div></div></header><main><div class="menu"><form method="POST"><label>Tipo:</label><br><input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br><label>Identificación:</label><br><input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br><label>Vencimiento Contrato:</label><br><input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br><label>RAE:</label><br><input type="text" name="rae" value="{{ equipo.rae }}"><br><br><label>Próxima IPO:</label><br><input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br><button type="submit" class="button">Actualizar</button></form><br><a href="/home" class="button">Volver</a></div></main></body></html>'''
 
