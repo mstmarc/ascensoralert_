@@ -287,41 +287,41 @@ def leads_dashboard():
             
             # Empresa mantenedora ahora viene del cliente
             empresa_mantenedora = lead.get("empresa_mantenedora", "-")
-        if empresa_mantenedora:
-            empresas_disponibles.add(empresa_mantenedora)
+            if empresa_mantenedora:
+                empresas_disponibles.add(empresa_mantenedora)
 
-    if equipos:
-            for equipo in equipos:
-                # Formatear fechas
-                fecha_vencimiento = equipo.get("fecha_vencimiento_contrato", "-")
-                if fecha_vencimiento and fecha_vencimiento != "-" and fecha_vencimiento:
-                    partes = fecha_vencimiento.split("-")
-                    if len(partes) == 3:
-                        fecha_vencimiento = f"{partes[2]}/{partes[1]}/{partes[0]}"
+            if equipos:
+                for equipo in equipos:
+                    # Formatear fechas
+                    fecha_vencimiento = equipo.get("fecha_vencimiento_contrato", "-")
+                    if fecha_vencimiento and fecha_vencimiento != "-" and fecha_vencimiento:
+                        partes = fecha_vencimiento.split("-")
+                        if len(partes) == 3:
+                            fecha_vencimiento = f"{partes[2]}/{partes[1]}/{partes[0]}"
 
-                ipo_proxima = equipo.get("ipo_proxima", "-")
-                ipo_fecha_original = ipo_proxima
-                if ipo_proxima and ipo_proxima != "-" and ipo_proxima:
-                    partes = ipo_proxima.split("-")
-                    if len(partes) == 3:
-                        ipo_proxima = f"{partes[2]}/{partes[1]}/{partes[0]}"
+                    ipo_proxima = equipo.get("ipo_proxima", "-")
+                    ipo_fecha_original = ipo_proxima
+                    if ipo_proxima and ipo_proxima != "-" and ipo_proxima:
+                        partes = ipo_proxima.split("-")
+                        if len(partes) == 3:
+                            ipo_proxima = f"{partes[2]}/{partes[1]}/{partes[0]}"
 
-                # Crear fila de datos
-                row = {
-                    "lead_id": lead_id,
-                    "equipo_id": equipo["id"],
-                    "direccion": lead.get("direccion", "-"),
-                    "localidad": lead.get("localidad", "-"),
-                    "codigo_postal": lead.get("codigo_postal", "-"),
-                    "identificacion": equipo.get("identificacion", "-"),
-                    "total_equipos": total_equipos,
-                    "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
-                    "empresa_mantenedora": empresa_mantenedora,
-                    "fecha_vencimiento_contrato": fecha_vencimiento,
-                    "ipo_proxima": ipo_proxima,
-                    "ipo_fecha_original": ipo_fecha_original
-                }
-                
+                    # Crear fila de datos
+                    row = {
+                        "lead_id": lead_id,
+                        "equipo_id": equipo["id"],
+                        "direccion": lead.get("direccion", "-"),
+                        "localidad": lead.get("localidad", "-"),
+                        "codigo_postal": lead.get("codigo_postal", "-"),
+                        "identificacion": equipo.get("identificacion", "-"),
+                        "total_equipos": total_equipos,
+                        "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
+                        "empresa_mantenedora": empresa_mantenedora,
+                        "fecha_vencimiento_contrato": fecha_vencimiento,
+                        "ipo_proxima": ipo_proxima,
+                        "ipo_fecha_original": ipo_fecha_original
+                    }
+                    
                     # Aplicar filtros
                     incluir_fila = True
                     
@@ -369,42 +369,42 @@ def leads_dashboard():
                     
                     if incluir_fila:
                         rows.append(row)
-                    else:
-                        # Lead sin equipos
-                        row = {
-                        "lead_id": lead_id,
-                        "equipo_id": None,
-                        "direccion": lead.get("direccion", "-"),
-                        "localidad": lead.get("localidad", "-"),
-                        "codigo_postal": lead.get("codigo_postal", "-"),
-                        "identificacion": "-",
-                        "total_equipos": 0,
-                        "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
-                        "empresa_mantenedora": empresa_mantenedora,
-                        "fecha_vencimiento_contrato": "-",
-                        "ipo_proxima": "-",
-                        "ipo_fecha_original": None
+            else:
+                # Lead sin equipos
+                row = {
+                    "lead_id": lead_id,
+                    "equipo_id": None,
+                    "direccion": lead.get("direccion", "-"),
+                    "localidad": lead.get("localidad", "-"),
+                    "codigo_postal": lead.get("codigo_postal", "-"),
+                    "identificacion": "-",
+                    "total_equipos": 0,
+                    "numero_ascensores_previsto": lead.get("numero_ascensores", "-"),
+                    "empresa_mantenedora": empresa_mantenedora,
+                    "fecha_vencimiento_contrato": "-",
+                    "ipo_proxima": "-",
+                    "ipo_fecha_original": None
                 }
                 
-                        # Aplicar filtros para leads sin equipos
-                        incluir_fila = True
-                        if filtro_empresa or filtro_ipo_mes or filtro_ipo_año:
-                            incluir_fila = False
-                        if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
-                            incluir_fila = False
-                        if buscar_texto:
-                            texto_busqueda = buscar_texto.lower()
-                            campos_busqueda = [
-                                str(lead.get("direccion", "")),
-                                str(lead.get("localidad", "")),
-                                str(lead.get("nombre_cliente", ""))
-                            ]
-                            encontrado = any(texto_busqueda in campo.lower() for campo in campos_busqueda)
-                            if not encontrado:
-                                incluir_fila = False
-                        
-                        if incluir_fila:
-                            rows.append(row)
+                # Aplicar filtros para leads sin equipos
+                incluir_fila = True
+                if filtro_empresa or filtro_ipo_mes or filtro_ipo_año:
+                    incluir_fila = False
+                if filtro_localidad and filtro_localidad != lead.get("localidad", ""):
+                    incluir_fila = False
+                if buscar_texto:
+                    texto_busqueda = buscar_texto.lower()
+                    campos_busqueda = [
+                        str(lead.get("direccion", "")),
+                        str(lead.get("localidad", "")),
+                        str(lead.get("nombre_cliente", ""))
+                    ]
+                    encontrado = any(texto_busqueda in campo.lower() for campo in campos_busqueda)
+                    if not encontrado:
+                        incluir_fila = False
+                
+                if incluir_fila:
+                    rows.append(row)
 
     # Limpiar y ordenar listas para filtros
     empresas_disponibles = sorted([e for e in empresas_disponibles if e and e != "-"])
@@ -637,7 +637,7 @@ FORM_TEMPLATE = '''
                     <option value="El Tablero">El Tablero</option>
                     <option value="Gáldar">Gáldar</option>
                     <option value="Ingenio">Ingenio</option>
-                    <option value="Jinémar">Jinémar</option>
+                    <option value="Jinámar">Jinámar</option>
                     <option value="La Aldea de San Nicolás">La Aldea de San Nicolás</option>
                     <option value="La Pardilla">La Pardilla</option>
                     <option value="Las Palmas de Gran Canaria">Las Palmas de Gran Canaria</option>
@@ -861,7 +861,7 @@ EDIT_LEAD_TEMPLATE = '''
                 <option value="El Tablero" {% if lead.localidad == 'El Tablero' %}selected{% endif %}>El Tablero</option>
                 <option value="Gáldar" {% if lead.localidad == 'Gáldar' %}selected{% endif %}>Gáldar</option>
                 <option value="Ingenio" {% if lead.localidad == 'Ingenio' %}selected{% endif %}>Ingenio</option>
-                <option value="Jinémar" {% if lead.localidad == 'Jinémar' %}selected{% endif %}>Jinémar</option>
+                <option value="Jinámar" {% if lead.localidad == 'Jinámar' %}selected{% endif %}>Jinámar</option>
                 <option value="La Aldea de San Nicolás" {% if lead.localidad == 'La Aldea de San Nicolás' %}selected{% endif %}>La Aldea de San Nicolás</option>
                 <option value="La Pardilla" {% if lead.localidad == 'La Pardilla' %}selected{% endif %}>La Pardilla</option>
                 <option value="Las Palmas de Gran Canaria" {% if lead.localidad == 'Las Palmas de Gran Canaria' %}selected{% endif %}>Las Palmas de Gran Canaria</option>
@@ -1104,7 +1104,7 @@ EQUIPO_EDIT_TEMPLATE = '''
                 <label>Identificación del Ascensor:</label><br>
                 <input type="text" name="identificacion" value="{{ equipo.identificacion }}" required><br><br>
 
-                               <button type="submit" class="button">Actualizar Equipo</button>
+                <button type="submit" class="button">Actualizar Equipo</button>
             </form>
             <br>
             <a href="/home" class="button">Volver al inicio</a>
