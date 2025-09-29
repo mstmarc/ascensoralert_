@@ -923,66 +923,17 @@ DASHBOARD_TEMPLATE_MEJORADO = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Leads - AscensorAlert</title>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #667eea;
-        }
-        
-        h1 {
-            color: #667eea;
-            font-size: 28px;
-        }
-        
-        .btn-volver {
-            background: #667eea;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .btn-volver:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-        }
-        
         .filtros {
             background: #f8f9fa;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin-bottom: 25px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
+            border: 1px solid #ddd;
         }
         
         .filtro-grupo {
@@ -992,7 +943,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
         
         .filtro-grupo label {
             font-weight: bold;
-            color: #333;
+            color: #366092;
             margin-bottom: 5px;
             font-size: 14px;
         }
@@ -1009,11 +960,11 @@ DASHBOARD_TEMPLATE_MEJORADO = """
         .filtro-grupo select:focus,
         .filtro-grupo input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #366092;
         }
         
         .btn-filtrar {
-            background: #667eea;
+            background: #366092;
             color: white;
             padding: 10px 25px;
             border: none;
@@ -1025,8 +976,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
         }
         
         .btn-filtrar:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
+            background: #2a4a70;
         }
         
         .btn-limpiar {
@@ -1047,63 +997,75 @@ DASHBOARD_TEMPLATE_MEJORADO = """
         
         .info-resultados {
             text-align: center;
-            color: #666;
+            color: #366092;
             margin: 15px 0;
             font-weight: bold;
+            font-size: 16px;
         }
         
         .tabla-container {
             overflow-x: auto;
+            margin-top: 20px;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            border: 1px solid #ddd;
         }
         
         th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #366092;
             color: white;
-            padding: 15px;
+            padding: 12px;
             text-align: left;
             font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            border: 1px solid #2a4a70;
         }
         
         td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
         }
         
-        tr:hover {
+        tr:nth-child(even) {
             background: #f8f9fa;
         }
         
+        tr:hover {
+            background: #e9ecef;
+        }
+        
         .btn-accion {
-            background: #667eea;
+            background: #366092;
             color: white;
-            padding: 8px 15px;
+            padding: 6px 12px;
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 4px;
             font-size: 13px;
             display: inline-block;
-            margin-right: 5px;
             transition: all 0.3s;
         }
         
         .btn-accion:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
+            background: #2a4a70;
         }
         
         .leyenda {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 8px;
-            margin-top: 20px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+        
+        .leyenda h3 {
+            color: #366092;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .leyenda-items {
             display: flex;
             justify-content: center;
             gap: 30px;
@@ -1120,7 +1082,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             width: 30px;
             height: 20px;
             border-radius: 4px;
-            border: 1px solid #ddd;
+            border: 1px solid #999;
         }
         
         .color-amarillo { background-color: #FFF59D; }
@@ -1142,124 +1104,139 @@ DASHBOARD_TEMPLATE_MEJORADO = """
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📊 Dashboard de Leads por Comunidades</h1>
-            <a href="/home" class="btn-volver">← Volver al Home</a>
-        </div>
-        
-        <!-- Formulario de filtros -->
-        <form method="GET" action="/leads_dashboard">
-            <div class="filtros">
-                <div class="filtro-grupo">
-                    <label>🏘️ Localidad:</label>
-                    <select name="localidad">
-                        <option value="">Todas las localidades</option>
-                        {% for loc in localidades %}
-                        <option value="{{ loc }}" {% if filtro_localidad == loc %}selected{% endif %}>{{ loc }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="filtro-grupo">
-                    <label>🏢 Empresa Mantenedora:</label>
-                    <select name="empresa">
-                        <option value="">Todas las empresas</option>
-                        {% for emp in empresas %}
-                        <option value="{{ emp }}" {% if filtro_empresa == emp %}selected{% endif %}>{{ emp }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="filtro-grupo">
-                    <label>🔍 Buscar dirección:</label>
-                    <input type="text" name="buscar" value="{{ buscar_texto }}" placeholder="Ej: Calle Mayor">
-                </div>
-                
-                <div class="filtro-grupo">
-                    <label>⚠️ Urgencia IPO:</label>
-                    <select name="ipo_urgencia">
-                        <option value="">Todas</option>
-                        <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 días antes (amarillo)</option>
-                        <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 días (rojo)</option>
-                        <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 días</option>
-                    </select>
-                </div>
-                
-                <div class="filtro-grupo">
-                    <button type="submit" class="btn-filtrar">🔎 Filtrar</button>
-                </div>
-                
-                <div class="filtro-grupo">
-                    <a href="/leads_dashboard" class="btn-limpiar">🗑️ Limpiar filtros</a>
-                </div>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
             </div>
-        </form>
-        
-        <div class="info-resultados">
-            📋 Mostrando {{ rows|length }} comunidades
-        </div>
-        
-        <!-- Leyenda de colores -->
-        <div class="leyenda">
-            <div class="leyenda-item">
-                <span class="color-box color-amarillo"></span>
-                <span><strong>IPO:</strong> 15 días antes de inspección</span>
-            </div>
-            <div class="leyenda-item">
-                <span class="color-box color-rojo"></span>
-                <span><strong>IPO:</strong> IPO pasada hasta 30 días (OPORTUNIDAD)</span>
-            </div>
-            <div class="leyenda-item">
-                <span class="color-box color-amarillo"></span>
-                <span><strong>Contrato:</strong> Vence en 30-90 días</span>
-            </div>
-            <div class="leyenda-item">
-                <span class="color-box color-rojo"></span>
-                <span><strong>Contrato:</strong> Vencido o vence en menos de 30 días</span>
+            <div class="title-container">
+                <h1>Dashboard de Leads por Comunidades</h1>
             </div>
         </div>
-        
-        <!-- Tabla de resultados -->
-        <div class="tabla-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>📍 Dirección</th>
-                        <th>🏘️ Localidad</th>
-                        <th>🏢 Nº Ascensores</th>
-                        <th>🔧 Empresa Mantenedora</th>
-                        <th>⚠️ Próxima IPO</th>
-                        <th>📄 Contrato Vence</th>
-                        <th>⚙️ Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if rows %}
-                        {% for row in rows %}
+    </header>
+    <main>
+        <div class="menu">
+            <!-- Formulario de filtros -->
+            <form method="GET" action="/leads_dashboard">
+                <div class="filtros">
+                    <div class="filtro-grupo">
+                        <label>Localidad:</label>
+                        <select name="localidad">
+                            <option value="">Todas las localidades</option>
+                            {% for loc in localidades %}
+                            <option value="{{ loc }}" {% if filtro_localidad == loc %}selected{% endif %}>{{ loc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-grupo">
+                        <label>Empresa Mantenedora:</label>
+                        <select name="empresa">
+                            <option value="">Todas las empresas</option>
+                            {% for emp in empresas %}
+                            <option value="{{ emp }}" {% if filtro_empresa == emp %}selected{% endif %}>{{ emp }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-grupo">
+                        <label>Buscar dirección:</label>
+                        <input type="text" name="buscar" value="{{ buscar_texto }}" placeholder="Ej: Calle Mayor">
+                    </div>
+                    
+                    <div class="filtro-grupo">
+                        <label>Urgencia IPO:</label>
+                        <select name="ipo_urgencia">
+                            <option value="">Todas</option>
+                            <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 días antes (amarillo)</option>
+                            <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 días (rojo)</option>
+                            <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 días</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-grupo">
+                        <button type="submit" class="btn-filtrar">Filtrar</button>
+                    </div>
+                    
+                    <div class="filtro-grupo">
+                        <a href="/leads_dashboard" class="btn-limpiar">Limpiar</a>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="info-resultados">
+                Mostrando {{ rows|length }} comunidades
+            </div>
+            
+            <!-- Leyenda de colores -->
+            <div class="leyenda">
+                <h3>Leyenda de Colores:</h3>
+                <div class="leyenda-items">
+                    <div class="leyenda-item">
+                        <span class="color-box color-amarillo"></span>
+                        <span><strong>IPO:</strong> 15 días antes</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-rojo"></span>
+                        <span><strong>IPO:</strong> Pasada hasta 30 días (OPORTUNIDAD)</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-amarillo"></span>
+                        <span><strong>Contrato:</strong> Vence 30-90 días</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-rojo"></span>
+                        <span><strong>Contrato:</strong> Vencido o &lt;30 días</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla de resultados -->
+            <div class="tabla-container">
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ row.direccion }}</td>
-                            <td>{{ row.localidad }}</td>
-                            <td style="text-align: center;">{{ row.total_equipos }}</td>
-                            <td>{{ row.empresa_mantenedora }}</td>
-                            <td style="{{ row.color_ipo }}">{{ row.ipo_proxima }}</td>
-                            <td style="{{ row.color_contrato }}">{{ row.contrato_vence }}</td>
-                            <td>
-                                <a href="/editar_lead/{{ row.lead_id }}" class="btn-accion">✏️ Ver/Editar</a>
-                            </td>
+                            <th>Dirección</th>
+                            <th>Localidad</th>
+                            <th>Nº Ascensores</th>
+                            <th>Empresa Mantenedora</th>
+                            <th>Próxima IPO</th>
+                            <th>Contrato Vence</th>
+                            <th>Acciones</th>
                         </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
-                                No se encontraron comunidades con los filtros aplicados
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% if rows %}
+                            {% for row in rows %}
+                            <tr>
+                                <td>{{ row.direccion }}</td>
+                                <td>{{ row.localidad }}</td>
+                                <td style="text-align: center;">{{ row.total_equipos }}</td>
+                                <td>{{ row.empresa_mantenedora }}</td>
+                                <td style="{{ row.color_ipo }}">{{ row.ipo_proxima }}</td>
+                                <td style="{{ row.color_contrato }}">{{ row.contrato_vence }}</td>
+                                <td>
+                                    <a href="/editar_lead/{{ row.lead_id }}" class="btn-accion">Ver/Editar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                                    No se encontraron comunidades con los filtros aplicados
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <br>
+            <a href="/home" class="button">Volver al Home</a>
         </div>
-    </div>
+    </main>
 </body>
 </html>
 """
