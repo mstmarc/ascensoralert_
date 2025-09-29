@@ -114,11 +114,7 @@ def visita_administrador():
         
         response = requests.post(f"{SUPABASE_URL}/rest/v1/visitas_administradores", json=data, headers=HEADERS)
         if response.status_code in [200, 201]:
-            return """
-            <h3>Visita registrada correctamente</h3>
-            <a href='/visita_administrador' class='button'>Añadir otra visita</a><br><br>
-            <a href='/home' class='button'>Volver al inicio</a>
-            """
+            return render_template_string(VISITA_ADMIN_SUCCESS_TEMPLATE)
         else:
             return f"<h3 style='color:red;'>Error al registrar visita</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
     
@@ -160,11 +156,7 @@ def nuevo_equipo():
 
         res = requests.post(f"{SUPABASE_URL}/rest/v1/equipos", json=equipo_data, headers=HEADERS)
         if res.status_code in [200, 201]:
-            return f"""
-            <h3>Equipo registrado correctamente</h3>
-            <a href='/nuevo_equipo?cliente_id={cliente_id}' class='button'>Añadir otro equipo</a><br><br>
-            <a href='/home' class='button'>Finalizar y volver al inicio</a>
-            """
+            return render_template_string(EQUIPO_SUCCESS_TEMPLATE, cliente_id=cliente_id)
         else:
             return f"<h3 style='color:red;'>Error al registrar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
 
@@ -905,6 +897,74 @@ REPORTE_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"
 DASHBOARD_TEMPLATE_WITH_FILTERS = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Dashboard</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Dashboard</h1></div></div></header><main><div class="menu"><h3>Dashboard de Leads</h3><table border="1"><tr><th>Dirección</th><th>Localidad</th><th>Equipos</th><th>Acciones</th></tr>{% for row in rows %}<tr><td>{{ row.direccion }}</td><td>{{ row.localidad }}</td><td>{{ row.total_equipos }}</td><td><a href="/editar_lead/{{ row.lead_id }}">Editar</a></td></tr>{% endfor %}</table><br><a href="/home" class="button">Volver</a></div></main></body></html>'''
 
 EQUIPO_EDIT_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Equipo</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Equipo</h1></div></div></header><main><div class="menu"><form method="POST"><label>Tipo:</label><br><input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br><label>Identificación:</label><br><input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br><label>Vencimiento Contrato:</label><br><input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br><label>RAE:</label><br><input type="text" name="rae" value="{{ equipo.rae }}"><br><br><label>Próxima IPO:</label><br><input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br><button type="submit" class="button">Actualizar</button></form><br><a href="/home" class="button">Volver</a></div></main></body></html>'''
+
+EQUIPO_SUCCESS_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipo Registrado</title>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
+</head>
+<body>
+    <header>
+    <div class="header-container">
+        <div class="logo-container">
+            <a href="/home">
+                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+            </a>
+        </div>
+        <div class="title-container">
+            <h1>Equipo Registrado</h1>
+        </div>
+    </div>
+</header>
+    <main>
+        <div class="menu">
+            <h3>Equipo registrado correctamente</h3>
+            <p>El equipo se ha añadido a la base de datos.</p>
+            <a href="/nuevo_equipo?cliente_id={{ cliente_id }}" class="button">Añadir otro equipo</a>
+            <a href="/home" class="button">Finalizar y volver al inicio</a>
+        </div>
+    </main>
+</body>
+</html>
+'''
+
+VISITA_ADMIN_SUCCESS_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visita Registrada</title>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
+</head>
+<body>
+    <header>
+    <div class="header-container">
+        <div class="logo-container">
+            <a href="/home">
+                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+            </a>
+        </div>
+        <div class="title-container">
+            <h1>Visita Registrada</h1>
+        </div>
+    </div>
+</header>
+    <main>
+        <div class="menu">
+            <h3>Visita registrada correctamente</h3>
+            <p>La visita al administrador se ha registrado en la base de datos.</p>
+            <a href="/visita_administrador" class="button">Añadir otra visita</a>
+            <a href="/home" class="button">Volver al inicio</a>
+        </div>
+    </main>
+</body>
+</html>
+'''
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
