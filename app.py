@@ -1349,10 +1349,23 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             font-size: 13px;
             display: inline-block;
             transition: all 0.3s;
+            margin: 2px;
         }
         
         .btn-accion:hover {
             background: #2a4a70;
+        }
+        
+        .btn-ver {
+            background: #28a745;
+        }
+        
+        .btn-ver:hover {
+            background: #218838;
+        }
+        
+        .acciones-cell {
+            white-space: nowrap;
         }
         
         .leyenda {
@@ -1521,8 +1534,8 @@ DASHBOARD_TEMPLATE_MEJORADO = """
                                 <td>{{ row.empresa_mantenedora }}</td>
                                 <td style="{{ row.color_ipo }}">{{ row.ipo_proxima }}</td>
                                 <td style="{{ row.color_contrato }}">{{ row.contrato_vence }}</td>
-                                <td>
-                                    <a href="/ver_lead/{{ row.lead_id }}" class="btn-accion" style="background: #28a745;">Ver</a>
+                                <td class="acciones-cell">
+                                    <a href="/ver_lead/{{ row.lead_id }}" class="btn-accion btn-ver">Ver</a>
                                     <a href="/editar_lead/{{ row.lead_id }}" class="btn-accion">Editar</a>
                                 </td>
                             </tr>
