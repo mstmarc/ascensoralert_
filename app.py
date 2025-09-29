@@ -112,14 +112,13 @@ def nuevo_equipo():
             "cliente_id": request.form.get("cliente_id"),
             "tipo_equipo": request.form.get("tipo_equipo"),
             "identificacion": request.form.get("identificacion"),
-            "ubicacion": request.form.get("ubicacion"),
-            "descripcion": request.form.get("descripcion"),
+            "descripcion": request.form.get("observaciones"),
             "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
             "rae": request.form.get("rae"),
             "ipo_proxima": request.form.get("ipo_proxima") or None
         }
 
-        required = [equipo_data["cliente_id"], equipo_data["tipo_equipo"], equipo_data["identificacion"]]
+        required = [equipo_data["cliente_id"], equipo_data["tipo_equipo"]]
         if any(not field for field in required):
             return "Datos del equipo inválidos", 400
 
@@ -479,9 +478,7 @@ def editar_equipo(equipo_id):
         data = {
             "tipo_equipo": request.form.get("tipo_equipo"),
             "identificacion": request.form.get("identificacion"),
-            "empresa_mantenedora": request.form.get("empresa_mantenedora"),
-            "ubicacion": request.form.get("ubicacion"),
-            "descripcion": request.form.get("descripcion"),
+            "descripcion": request.form.get("observaciones"),
             "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
             "rae": request.form.get("rae"),
             "ipo_proxima": request.form.get("ipo_proxima") or None
@@ -633,8 +630,11 @@ FORM_TEMPLATE = '''
                     <option value="Arucas">Arucas</option>
                     <option value="Carrizal">Carrizal</option>
                     <option value="Cruce de Arinaga">Cruce de Arinaga</option>
+                    <option value="Cruce de Melenara">Cruce de Melenara</option>
+                    <option value="Cruce de Sardina">Cruce de Sardina</option>
                     <option value="El Burrero">El Burrero</option>
                     <option value="El Tablero">El Tablero</option>
+                    <option value="Firgas">Firgas</option>
                     <option value="Gáldar">Gáldar</option>
                     <option value="Ingenio">Ingenio</option>
                     <option value="Jinámar">Jinámar</option>
@@ -642,19 +642,23 @@ FORM_TEMPLATE = '''
                     <option value="La Pardilla">La Pardilla</option>
                     <option value="Las Palmas de Gran Canaria">Las Palmas de Gran Canaria</option>
                     <option value="Maspalomas">Maspalomas</option>
+                    <option value="Melenara">Melenara</option>
                     <option value="Mogán">Mogán</option>
                     <option value="Moya">Moya</option>
                     <option value="Playa de Mogán">Playa de Mogán</option>
                     <option value="Playa del Inglés">Playa del Inglés</option>
                     <option value="Puerto Rico">Puerto Rico</option>
+                    <option value="Salinetas">Salinetas</option>
                     <option value="San Bartolomé de Tirajana">San Bartolomé de Tirajana</option>
                     <option value="San Fernando">San Fernando</option>
                     <option value="San Mateo">San Mateo</option>
                     <option value="Santa Brígida">Santa Brígida</option>
                     <option value="Santa Lucía de Tirajana">Santa Lucía de Tirajana</option>
                     <option value="Santa María de Guía">Santa María de Guía</option>
+                    <option value="Sardina del Norte">Sardina del Norte</option>
                     <option value="Tafira">Tafira</option>
                     <option value="Tejeda">Tejeda</option>
+                    <option value="Telde">Telde</option>
                     <option value="Teror">Teror</option>
                     <option value="Valleseco">Valleseco</option>
                     <option value="Valsequillo">Valsequillo</option>
@@ -774,13 +778,7 @@ EQUIPO_TEMPLATE = '''
                 </select><br><br>
 
                 <label>Identificación del Ascensor:</label><br>
-                <input type="text" name="identificacion" placeholder="Ej: Ascensor A, Principal, Garaje, etc." required><br><br>
-                
-                <label>Ubicación:</label><br>
-                <input type="text" name="ubicacion"><br><br>
-
-                <label>Descripción:</label><br>
-                <input type="text" name="descripcion"><br><br>
+                <input type="text" name="identificacion" placeholder="Ej: Ascensor A, Principal, Garaje, etc."><br><br>
 
                 <label>Fecha Vencimiento Contrato:</label><br>
                 <input type="date" name="fecha_vencimiento_contrato"><br><br>
@@ -788,8 +786,11 @@ EQUIPO_TEMPLATE = '''
                 <label>RAE (solo para ascensores):</label><br>
                 <input type="text" name="rae"><br><br>
 
-                <label>IPO Próxima: <em>(consultar placa del ascensor)</em></label><br>
+                <label>Próxima IPO: <em>(consultar placa del ascensor)</em></label><br>
                 <input type="date" name="ipo_proxima"><br><br>
+
+                <label>Observaciones:</label><br>
+                <textarea name="observaciones"></textarea><br><br>
 
                 <button type="submit" class="button">Registrar Equipo</button>
             </form>
@@ -857,8 +858,11 @@ EDIT_LEAD_TEMPLATE = '''
                 <option value="Arucas" {% if lead.localidad == 'Arucas' %}selected{% endif %}>Arucas</option>
                 <option value="Carrizal" {% if lead.localidad == 'Carrizal' %}selected{% endif %}>Carrizal</option>
                 <option value="Cruce de Arinaga" {% if lead.localidad == 'Cruce de Arinaga' %}selected{% endif %}>Cruce de Arinaga</option>
+                <option value="Cruce de Melenara" {% if lead.localidad == 'Cruce de Melenara' %}selected{% endif %}>Cruce de Melenara</option>
+                <option value="Cruce de Sardina" {% if lead.localidad == 'Cruce de Sardina' %}selected{% endif %}>Cruce de Sardina</option>
                 <option value="El Burrero" {% if lead.localidad == 'El Burrero' %}selected{% endif %}>El Burrero</option>
                 <option value="El Tablero" {% if lead.localidad == 'El Tablero' %}selected{% endif %}>El Tablero</option>
+                <option value="Firgas" {% if lead.localidad == 'Firgas' %}selected{% endif %}>Firgas</option>
                 <option value="Gáldar" {% if lead.localidad == 'Gáldar' %}selected{% endif %}>Gáldar</option>
                 <option value="Ingenio" {% if lead.localidad == 'Ingenio' %}selected{% endif %}>Ingenio</option>
                 <option value="Jinámar" {% if lead.localidad == 'Jinámar' %}selected{% endif %}>Jinámar</option>
@@ -866,19 +870,23 @@ EDIT_LEAD_TEMPLATE = '''
                 <option value="La Pardilla" {% if lead.localidad == 'La Pardilla' %}selected{% endif %}>La Pardilla</option>
                 <option value="Las Palmas de Gran Canaria" {% if lead.localidad == 'Las Palmas de Gran Canaria' %}selected{% endif %}>Las Palmas de Gran Canaria</option>
                 <option value="Maspalomas" {% if lead.localidad == 'Maspalomas' %}selected{% endif %}>Maspalomas</option>
+                <option value="Melenara" {% if lead.localidad == 'Melenara' %}selected{% endif %}>Melenara</option>
                 <option value="Mogán" {% if lead.localidad == 'Mogán' %}selected{% endif %}>Mogán</option>
                 <option value="Moya" {% if lead.localidad == 'Moya' %}selected{% endif %}>Moya</option>
                 <option value="Playa de Mogán" {% if lead.localidad == 'Playa de Mogán' %}selected{% endif %}>Playa de Mogán</option>
                 <option value="Playa del Inglés" {% if lead.localidad == 'Playa del Inglés' %}selected{% endif %}>Playa del Inglés</option>
                 <option value="Puerto Rico" {% if lead.localidad == 'Puerto Rico' %}selected{% endif %}>Puerto Rico</option>
+                <option value="Salinetas" {% if lead.localidad == 'Salinetas' %}selected{% endif %}>Salinetas</option>
                 <option value="San Bartolomé de Tirajana" {% if lead.localidad == 'San Bartolomé de Tirajana' %}selected{% endif %}>San Bartolomé de Tirajana</option>
                 <option value="San Fernando" {% if lead.localidad == 'San Fernando' %}selected{% endif %}>San Fernando</option>
                 <option value="San Mateo" {% if lead.localidad == 'San Mateo' %}selected{% endif %}>San Mateo</option>
                 <option value="Santa Brígida" {% if lead.localidad == 'Santa Brígida' %}selected{% endif %}>Santa Brígida</option>
                 <option value="Santa Lucía de Tirajana" {% if lead.localidad == 'Santa Lucía de Tirajana' %}selected{% endif %}>Santa Lucía de Tirajana</option>
                 <option value="Santa María de Guía" {% if lead.localidad == 'Santa María de Guía' %}selected{% endif %}>Santa María de Guía</option>
+                <option value="Sardina del Norte" {% if lead.localidad == 'Sardina del Norte' %}selected{% endif %}>Sardina del Norte</option>
                 <option value="Tafira" {% if lead.localidad == 'Tafira' %}selected{% endif %}>Tafira</option>
                 <option value="Tejeda" {% if lead.localidad == 'Tejeda' %}selected{% endif %}>Tejeda</option>
+                <option value="Telde" {% if lead.localidad == 'Telde' %}selected{% endif %}>Telde</option>
                 <option value="Teror" {% if lead.localidad == 'Teror' %}selected{% endif %}>Teror</option>
                 <option value="Valleseco" {% if lead.localidad == 'Valleseco' %}selected{% endif %}>Valleseco</option>
                 <option value="Valsequillo" {% if lead.localidad == 'Valsequillo' %}selected{% endif %}>Valsequillo</option>
@@ -1102,7 +1110,19 @@ EQUIPO_EDIT_TEMPLATE = '''
                 <input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br>
 
                 <label>Identificación del Ascensor:</label><br>
-                <input type="text" name="identificacion" value="{{ equipo.identificacion }}" required><br><br>
+                <input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br>
+
+                <label>Fecha Vencimiento Contrato:</label><br>
+                <input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br>
+
+                <label>RAE:</label><br>
+                <input type="text" name="rae" value="{{ equipo.rae }}"><br><br>
+
+                <label>Próxima IPO:</label><br>
+                <input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br>
+
+                <label>Observaciones:</label><br>
+                <textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br>
 
                 <button type="submit" class="button">Actualizar Equipo</button>
             </form>
