@@ -1332,6 +1332,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             border-radius: 6px;
             font-size: 14px;
             transition: border 0.3s;
+            height: 44px;
         }
         
         .filtro-grupo select:focus,
@@ -1343,13 +1344,13 @@ DASHBOARD_TEMPLATE_MEJORADO = """
         .btn-filtrar {
             background: #366092;
             color: white;
-            padding: 10px 25px;
+            padding: 0 25px;
             border: none;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            height: 42px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1362,7 +1363,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
         .btn-limpiar {
             background: #6c757d;
             color: white;
-            padding: 10px 25px;
+            padding: 0 25px;
             text-decoration: none;
             border-radius: 8px;
             font-weight: bold;
@@ -1370,7 +1371,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
-            height: 42px;
+            height: 44px;
         }
         
         .btn-limpiar:hover {
