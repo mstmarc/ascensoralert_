@@ -1315,7 +1315,8 @@ DASHBOARD_TEMPLATE_MEJORADO = """
         .botones-filtros {
             display: flex;
             gap: 10px;
-            align-items: flex-end;
+            align-self: end;
+            margin-bottom: 0;
         }
         
         .filtro-grupo label {
@@ -1323,6 +1324,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             color: #366092;
             margin-bottom: 5px;
             font-size: 14px;
+            height: 20px;
         }
         
         .filtro-grupo select,
