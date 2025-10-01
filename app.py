@@ -1349,7 +1349,10 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            align-self: flex-end;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .btn-filtrar:hover {
@@ -1363,9 +1366,11 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             text-decoration: none;
             border-radius: 8px;
             font-weight: bold;
-            display: inline-block;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s;
+            height: 42px;
         }
         
         .btn-limpiar:hover {
