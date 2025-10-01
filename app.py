@@ -1301,21 +1301,14 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             border-radius: 8px;
             margin-bottom: 25px;
             display: grid;
-            grid-template-columns: repeat(4, 1fr) auto;
+            grid-template-columns: repeat(6, 1fr);
             gap: 15px;
-            align-items: end;
             border: 1px solid #ddd;
         }
         
         .filtro-grupo {
             display: flex;
             flex-direction: column;
-        }
-        
-        .botones-filtros {
-            display: flex;
-            gap: 10px;
-            margin-top: 25px;
         }
         
         .filtro-grupo label {
@@ -1553,8 +1546,13 @@ DASHBOARD_TEMPLATE_MEJORADO = """
                         </select>
                     </div>
                     
-                    <div class="botones-filtros">
+                    <div class="filtro-grupo">
+                        <label>&nbsp;</label>
                         <button type="submit" class="btn-filtrar">Filtrar</button>
+                    </div>
+                    
+                    <div class="filtro-grupo">
+                        <label>&nbsp;</label>
                         <a href="/leads_dashboard" class="btn-limpiar">Limpiar</a>
                     </div>
                 </div>
