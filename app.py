@@ -534,6 +534,44 @@ def ver_lead(lead_id):
     
     return render_template_string(VER_LEAD_TEMPLATE, lead=lead, equipos=equipos)
 
+# Eliminar Lead (NUEVA RUTA)
+@app.route("/eliminar_lead/<int:lead_id>")
+def eliminar_lead(lead_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    # Primero eliminar equipos asociados
+    requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
+    
+    # Luego eliminar el lead
+    response = requests.delete(f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}", headers=HEADERS)
+    
+    if response.status_code in [200, 204]:
+        return redirect("/leads_dashboard")
+    else:
+        return f"<h3 style='color:red;'>Error al eliminar Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
+
+# Eliminar Equipo (NUEVA RUTA)
+@app.route("/eliminar_equipo/<int:equipo_id>")
+def eliminar_equipo(equipo_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    # Obtener el cliente_id antes de eliminar
+    equipo_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
+    if equipo_response.status_code == 200 and equipo_response.json():
+        cliente_id = equipo_response.json()[0].get("cliente_id")
+        
+        # Eliminar el equipo
+        response = requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
+        
+        if response.status_code in [200, 204]:
+            return redirect(f"/ver_lead/{cliente_id}")
+        else:
+            return f"<h3 style='color:red;'>Error al eliminar Equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+    else:
+        return f"<h3 style='color:red;'>Error al obtener Equipo</h3><a href='/home'>Volver</a>"
+
 # Editar Lead
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
 def editar_lead(lead_id):
@@ -990,7 +1028,7 @@ EQUIPO_TEMPLATE = '''
 </html>
 '''
 
-EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}</style></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/leads_dashboard" class="button">Volver</a></div></form></div></main></body></html>'''
+EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacionComunidad(){return confirm('⚠️ ATENCIÓN: Esto eliminará la comunidad y TODOS sus equipos asociados.\\n\\n¿Estás seguro de que quieres continuar?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/leads_dashboard" class="button">Volver</a><a href="/eliminar_lead/{{ lead.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacionComunidad()">Eliminar Comunidad</a></div></form></div></main></body></html>'''
 
 VER_LEAD_TEMPLATE = '''
 <!DOCTYPE html>
@@ -1083,6 +1121,7 @@ VER_LEAD_TEMPLATE = '''
             font-size: 12px;
             display: inline-block;
             transition: all 0.3s;
+            margin: 2px;
         }
         
         .btn-accion-small:hover {
@@ -1216,7 +1255,7 @@ VER_LEAD_TEMPLATE = '''
                                 <td>{{ equipo.ipo_proxima }}</td>
                                 <td>{{ equipo.fecha_vencimiento_contrato }}</td>
                                 <td>{{ equipo.descripcion }}</td>
-                                <td>
+                                <td style="white-space: nowrap;">
                                     <a href="/editar_equipo/{{ equipo.id }}" class="btn-accion-small">Editar</a>
                                 </td>
                             </tr>
@@ -1590,7 +1629,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
 </html>
 """
 
-EQUIPO_EDIT_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Equipo</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}</style></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Equipo</h1></div></div></header><main><div class="menu"><form method="POST"><label>Tipo:</label><br><input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br><label>Identificación:</label><br><input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br><label>Vencimiento Contrato:</label><br><input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br><label>RAE:</label><br><input type="text" name="rae" value="{{ equipo.rae }}"><br><br><label>Próxima IPO:</label><br><input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/home" class="button">Volver</a></div></form></div></main></body></html>'''
+EQUIPO_EDIT_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Equipo</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacion(){return confirm('¿Estás seguro de que quieres eliminar este equipo?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Equipo</h1></div></div></header><main><div class="menu"><form method="POST"><label>Tipo:</label><br><input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br><label>Identificación:</label><br><input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br><label>Vencimiento Contrato:</label><br><input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br><label>RAE:</label><br><input type="text" name="rae" value="{{ equipo.rae }}"><br><br><label>Próxima IPO:</label><br><input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/home" class="button">Volver</a><a href="/eliminar_equipo/{{ equipo.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacion()">Eliminar Equipo</a></div></form></div></main></body></html>'''
 
 EQUIPO_SUCCESS_TEMPLATE = '''
 <!DOCTYPE html>
