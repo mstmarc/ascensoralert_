@@ -697,6 +697,13 @@ VISITA_ADMIN_TEMPLATE = '''
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visita a Administrador</title>
     <link rel="stylesheet" href="/static/styles.css?v=4">
+    <style>
+        .botones-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -726,9 +733,11 @@ VISITA_ADMIN_TEMPLATE = '''
                 <label>Resultado de la Visita / Observaciones:</label><br>
                 <textarea name="observaciones" rows="8" required></textarea><br><br>
 
-                <button type="submit" class="button">Registrar Visita</button>
+                <div class="botones-form">
+                    <button type="submit" class="button">Registrar Visita</button>
+                    <a href="/home" class="button">Volver</a>
+                </div>
             </form>
-            <a href="/home" class="button">Volver</a>
         </div>
     </main>
 </body>
@@ -743,6 +752,13 @@ FORM_TEMPLATE = '''
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario Lead</title>
     <link rel="stylesheet" href="/static/styles.css?v=4">
+    <style>
+        .botones-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -892,9 +908,11 @@ FORM_TEMPLATE = '''
                 <label>Observaciones:</label><br>
                 <textarea name="observaciones"></textarea><br><br>
 
-                <button type="submit" class="button">Registrar Lead</button>
+                <div class="botones-form">
+                    <button type="submit" class="button">Registrar Lead</button>
+                    <a href="/home" class="button">Volver</a>
+                </div>
             </form>
-            <a href="/home" class="button">Volver</a>
         </div>
     </main>
 </body>
@@ -909,6 +927,13 @@ EQUIPO_TEMPLATE = '''
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario Equipo</title>
     <link rel="stylesheet" href="/static/styles.css?v=4">
+    <style>
+        .botones-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
 <header>
@@ -954,16 +979,18 @@ EQUIPO_TEMPLATE = '''
                 <label>Observaciones:</label><br>
                 <textarea name="observaciones"></textarea><br><br>
 
-                <button type="submit" class="button">Registrar Equipo</button>
+                <div class="botones-form">
+                    <button type="submit" class="button">Registrar Equipo</button>
+                    <a href="/home" class="button">Volver</a>
+                </div>
             </form>
-            <a href="/home" class="button">Volver</a>
         </div>
     </main>
 </body>
 </html>
 '''
 
-EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><button type="submit" class="button">Actualizar</button></form><a href="/leads_dashboard" class="button">Volver</a></div></main></body></html>'''
+EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}</style></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/leads_dashboard" class="button">Volver</a></div></form></div></main></body></html>'''
 
 VER_LEAD_TEMPLATE = '''
 <!DOCTYPE html>
@@ -1563,7 +1590,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
 </html>
 """
 
-EQUIPO_EDIT_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Equipo</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Equipo</h1></div></div></header><main><div class="menu"><form method="POST"><label>Tipo:</label><br><input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br><label>Identificación:</label><br><input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br><label>Vencimiento Contrato:</label><br><input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br><label>RAE:</label><br><input type="text" name="rae" value="{{ equipo.rae }}"><br><br><label>Próxima IPO:</label><br><input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br><button type="submit" class="button">Actualizar</button></form><br><a href="/home" class="button">Volver</a></div></main></body></html>'''
+EQUIPO_EDIT_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Equipo</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}</style></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Equipo</h1></div></div></header><main><div class="menu"><form method="POST"><label>Tipo:</label><br><input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br><label>Identificación:</label><br><input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br><label>Vencimiento Contrato:</label><br><input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br><label>RAE:</label><br><input type="text" name="rae" value="{{ equipo.rae }}"><br><br><label>Próxima IPO:</label><br><input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/home" class="button">Volver</a></div></form></div></main></body></html>'''
 
 EQUIPO_SUCCESS_TEMPLATE = '''
 <!DOCTYPE html>
@@ -1573,6 +1600,13 @@ EQUIPO_SUCCESS_TEMPLATE = '''
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equipo Registrado</title>
     <link rel="stylesheet" href="/static/styles.css?v=4">
+    <style>
+        .botones-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -1591,8 +1625,10 @@ EQUIPO_SUCCESS_TEMPLATE = '''
         <div class="menu">
             <h3>Equipo registrado correctamente</h3>
             <p>El equipo se ha añadido a la base de datos.</p>
-            <a href="/nuevo_equipo?cliente_id={{ cliente_id }}" class="button">Añadir otro equipo</a>
-            <a href="/home" class="button">Finalizar y volver al inicio</a>
+            <div class="botones-form">
+                <a href="/nuevo_equipo?cliente_id={{ cliente_id }}" class="button">Añadir otro equipo</a>
+                <a href="/home" class="button">Finalizar y volver al inicio</a>
+            </div>
         </div>
     </main>
 </body>
@@ -1607,6 +1643,13 @@ VISITA_ADMIN_SUCCESS_TEMPLATE = '''
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visita Registrada</title>
     <link rel="stylesheet" href="/static/styles.css?v=4">
+    <style>
+        .botones-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -1625,8 +1668,10 @@ VISITA_ADMIN_SUCCESS_TEMPLATE = '''
         <div class="menu">
             <h3>Visita registrada correctamente</h3>
             <p>La visita al administrador se ha registrado en la base de datos.</p>
-            <a href="/visita_administrador" class="button">Añadir otra visita</a>
-            <a href="/home" class="button">Volver al inicio</a>
+            <div class="botones-form">
+                <a href="/visita_administrador" class="button">Añadir otra visita</a>
+                <a href="/home" class="button">Volver al inicio</a>
+            </div>
         </div>
     </main>
 </body>
