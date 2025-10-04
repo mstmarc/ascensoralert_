@@ -31,18 +31,15 @@ def calcular_color_ipo(fecha_ipo_str):
         return ""
     
     try:
-        # Convertir fecha de dd/mm/yyyy a objeto datetime
         fecha_ipo = datetime.strptime(fecha_ipo_str, "%d/%m/%Y")
         hoy = datetime.now()
         diferencia = (fecha_ipo - hoy).days
         
-        # Amarillo: 15 días antes de la IPO
         if -15 <= diferencia < 0:
-            return "background-color: #FFF59D;"  # Amarillo suave
+            return "background-color: #FFF59D;"
         
-        # Rojo: Desde fecha IPO hasta 30 días después (OPORTUNIDAD)
         if diferencia >= 0 and diferencia <= 30:
-            return "background-color: #FFCDD2;"  # Rojo suave
+            return "background-color: #FFCDD2;"
         
         return ""
     except:
@@ -58,13 +55,11 @@ def calcular_color_contrato(fecha_contrato_str):
         hoy = datetime.now()
         diferencia = (fecha_contrato - hoy).days
         
-        # Rojo: Vencido o vence en menos de 30 días
         if diferencia <= 30:
-            return "background-color: #FFCDD2;"  # Rojo suave
+            return "background-color: #FFCDD2;"
         
-        # Amarillo: Vence entre 30-90 días
         if 30 < diferencia <= 90:
-            return "background-color: #FFF59D;"  # Amarillo suave
+            return "background-color: #FFF59D;"
         
         return ""
     except:
@@ -136,7 +131,6 @@ def formulario_lead():
         else:
             return f"<h3 style='color:red;'>Error al registrar lead</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
-    # Para GET: mostrar formulario con fecha actual por defecto
     fecha_hoy = date.today().strftime('%Y-%m-%d')
     return render_template_string(FORM_TEMPLATE, fecha_hoy=fecha_hoy)
 
@@ -195,7 +189,6 @@ def nuevo_equipo():
         if any(not field for field in required):
             return "Datos del equipo inválidos", 400
 
-        # Limpiar campos vacíos
         for key, value in equipo_data.items():
             if value == "":
                 equipo_data[key] = None
@@ -208,7 +201,7 @@ def nuevo_equipo():
 
     return render_template_string(EQUIPO_TEMPLATE, cliente=cliente_data)
 
-# DESCARGO COMERCIAL MENSUAL - MODIFICADO CON 2 HOJAS
+# DESCARGO COMERCIAL MENSUAL
 @app.route("/reporte_mensual", methods=["GET", "POST"])
 def reporte_mensual():
     if "usuario" not in session:
@@ -218,16 +211,13 @@ def reporte_mensual():
         mes = int(request.form.get("mes"))
         año = int(request.form.get("año"))
         
-        # Construir filtros de fecha para el mes seleccionado
         ultimo_dia = calendar.monthrange(año, mes)[1]
         fecha_inicio = f"{año}-{mes:02d}-01"
         fecha_fin = f"{año}-{mes:02d}-{ultimo_dia}"
         
-        # Consultar leads del mes por fecha_visita
         query_clientes = f"fecha_visita=gte.{fecha_inicio}&fecha_visita=lte.{fecha_fin}"
         response_clientes = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?{query_clientes}&select=*", headers=HEADERS)
         
-        # NUEVO: Consultar visitas a administradores del mes
         response_admin = requests.get(f"{SUPABASE_URL}/rest/v1/visitas_administradores?{query_clientes}&select=*", headers=HEADERS)
         
         if response_clientes.status_code != 200:
@@ -236,20 +226,16 @@ def reporte_mensual():
         clientes_mes = response_clientes.json()
         visitas_admin_mes = response_admin.json() if response_admin.status_code == 200 else []
         
-        # Generar Excel con el formato exacto del descargo actual
         from openpyxl import Workbook
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
         
         wb = Workbook()
         
-        # HOJA 1: VISITAS A INSTALACIONES
         ws1 = wb.active
         ws1.title = "VISITAS INSTALACIONES"
         
-        # Configurar encabezados
         headers = ['FECHA', 'COMUNIDAD/EMPRESA', 'DIRECCION', 'ZONA', 'OBSERVACIONES']
         
-        # Aplicar encabezados con formato
         thin_border = Border(
             left=Side(style='thin'),
             right=Side(style='thin'), 
@@ -265,7 +251,6 @@ def reporte_mensual():
             cell.alignment = Alignment(horizontal='center')
             cell.border = thin_border
         
-        # Añadir datos de clientes
         row = 2
         for cliente in clientes_mes:
             ws1.cell(row=row, column=1, value=cliente.get('fecha_visita', ''))
@@ -279,14 +264,12 @@ def reporte_mensual():
             
             row += 1
         
-        # Ajustar anchos de columna
         ws1.column_dimensions['A'].width = 12
         ws1.column_dimensions['B'].width = 40
         ws1.column_dimensions['C'].width = 50
         ws1.column_dimensions['D'].width = 20
         ws1.column_dimensions['E'].width = 70
         
-        # HOJA 2: VISITAS A ADMINISTRADORES (NUEVA)
         ws2 = wb.create_sheet(title="VISITAS ADMINISTRADORES")
         
         headers_admin = ['FECHA', 'ADMINISTRADOR', 'PERSONA CONTACTO', 'OBSERVACIONES']
@@ -316,12 +299,10 @@ def reporte_mensual():
         ws2.column_dimensions['C'].width = 30
         ws2.column_dimensions['D'].width = 70
         
-        # Guardar archivo en memoria
         output = io.BytesIO()
         wb.save(output)
         output.seek(0)
         
-        # Generar respuesta de descarga
         meses = ['', 'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
                 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
         filename = f"DESCARGO COMERCIAL GRAN CANARIA {meses[mes]} {año}.xlsx"
@@ -337,20 +318,48 @@ def reporte_mensual():
     
     return render_template_string(REPORTE_TEMPLATE)
 
-# DASHBOARD MEJORADO POR COMUNIDADES CON INDICADORES VISUALES
+# DASHBOARD MEJORADO CON PAGINACIÓN Y BÚSQUEDA
 @app.route("/leads_dashboard")
 def leads_dashboard():
     if "usuario" not in session:
         return redirect("/")
     
-    # Obtener filtros de la URL
+    page = int(request.args.get("page", 1))
+    per_page = 25
+    offset = (page - 1) * per_page
+    
     filtro_localidad = request.args.get("localidad", "")
     filtro_empresa = request.args.get("empresa", "")
-    buscar_texto = request.args.get("buscar", "")
+    buscar_direccion = request.args.get("buscar_direccion", "")
     filtro_ipo_urgencia = request.args.get("ipo_urgencia", "")
     
-    # Obtener todos los leads (clientes/comunidades)
-    response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=*", headers=HEADERS)
+    query_params = []
+    
+    if filtro_localidad:
+        query_params.append(f"localidad=eq.{filtro_localidad}")
+    
+    if filtro_empresa:
+        query_params.append(f"empresa_mantenedora=eq.{filtro_empresa}")
+    
+    if buscar_direccion:
+        query_params.append(f"direccion=ilike.*{buscar_direccion}*")
+    
+    query_string = "&".join(query_params) if query_params else ""
+    
+    count_url = f"{SUPABASE_URL}/rest/v1/clientes?select=*"
+    if query_string:
+        count_url += f"&{query_string}"
+    
+    count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"})
+    total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
+    total_pages = max(1, (total_registros + per_page - 1) // per_page)
+    
+    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=*&limit={per_page}&offset={offset}"
+    if query_string:
+        data_url += f"&{query_string}"
+    
+    response = requests.get(data_url, headers=HEADERS)
+    
     if response.status_code != 200:
         return f"<h3 style='color:red;'>❌ Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
     
@@ -359,10 +368,18 @@ def leads_dashboard():
     localidades_disponibles = set()
     empresas_disponibles = set()
     
+    all_leads_response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=localidad,empresa_mantenedora", headers=HEADERS)
+    if all_leads_response.status_code == 200:
+        all_leads = all_leads_response.json()
+        for lead in all_leads:
+            if lead.get("localidad"):
+                localidades_disponibles.add(lead["localidad"])
+            if lead.get("empresa_mantenedora"):
+                empresas_disponibles.add(lead["empresa_mantenedora"])
+    
     for lead in leads_data:
         lead_id = lead["id"]
         
-        # Obtener equipos de esta comunidad
         equipos_response = requests.get(
             f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", 
             headers=HEADERS
@@ -371,25 +388,16 @@ def leads_dashboard():
         if equipos_response.status_code == 200:
             equipos = equipos_response.json()
             
-            # Información de la comunidad
             direccion = lead.get("direccion", "-")
             localidad = lead.get("localidad", "-")
             empresa_mantenedora = lead.get("empresa_mantenedora", "-")
             total_equipos = len(equipos) if equipos else lead.get("numero_ascensores", 0)
             
-            # Agregar a conjuntos para filtros
-            if localidad and localidad != "-":
-                localidades_disponibles.add(localidad)
-            if empresa_mantenedora and empresa_mantenedora != "-":
-                empresas_disponibles.add(empresa_mantenedora)
-            
-            # Calcular IPO más próxima y contrato más próximo
             ipo_proxima = None
             contrato_vence = None
             
             if equipos:
                 for equipo in equipos:
-                    # Procesar IPO
                     ipo_equipo = equipo.get("ipo_proxima")
                     if ipo_equipo:
                         try:
@@ -399,7 +407,6 @@ def leads_dashboard():
                         except:
                             pass
                     
-                    # Procesar contrato
                     contrato_equipo = equipo.get("fecha_vencimiento_contrato")
                     if contrato_equipo:
                         try:
@@ -409,15 +416,12 @@ def leads_dashboard():
                         except:
                             pass
             
-            # Formatear fechas a dd/mm/yyyy
             ipo_proxima_str = ipo_proxima.strftime("%d/%m/%Y") if ipo_proxima else "-"
             contrato_vence_str = contrato_vence.strftime("%d/%m/%Y") if contrato_vence else "-"
             
-            # Calcular colores
             color_ipo = calcular_color_ipo(ipo_proxima_str)
             color_contrato = calcular_color_contrato(contrato_vence_str)
             
-            # Crear fila
             row = {
                 "lead_id": lead_id,
                 "direccion": direccion,
@@ -425,31 +429,14 @@ def leads_dashboard():
                 "total_equipos": total_equipos,
                 "empresa_mantenedora": empresa_mantenedora,
                 "ipo_proxima": ipo_proxima_str,
-                "ipo_fecha_original": ipo_proxima,  # Para ordenar
+                "ipo_fecha_original": ipo_proxima,
                 "contrato_vence": contrato_vence_str,
-                "contrato_fecha_original": contrato_vence,  # Para ordenar
+                "contrato_fecha_original": contrato_vence,
                 "color_ipo": color_ipo,
                 "color_contrato": color_contrato
             }
             
-            # Aplicar filtros
             incluir_fila = True
-            
-            # Filtro por localidad
-            if filtro_localidad and filtro_localidad != localidad:
-                incluir_fila = False
-            
-            # Filtro por empresa
-            if filtro_empresa and filtro_empresa != empresa_mantenedora:
-                incluir_fila = False
-            
-            # Filtro por búsqueda de texto
-            if buscar_texto:
-                texto_busqueda = buscar_texto.lower()
-                if texto_busqueda not in direccion.lower():
-                    incluir_fila = False
-            
-            # Filtro por urgencia IPO
             if filtro_ipo_urgencia and ipo_proxima:
                 hoy = datetime.now()
                 diferencia_dias = (ipo_proxima - hoy).days
@@ -464,45 +451,43 @@ def leads_dashboard():
             if incluir_fila:
                 rows.append(row)
     
-    # Ordenar por IPO más próxima (urgentes primero)
     rows.sort(key=lambda x: x["ipo_fecha_original"] if x["ipo_fecha_original"] else datetime.max)
     
-    # Limpiar y ordenar listas para filtros
     localidades_disponibles = sorted([l for l in localidades_disponibles if l])
     empresas_disponibles = sorted([e for e in empresas_disponibles if e])
     
     return render_template_string(
-        DASHBOARD_TEMPLATE_MEJORADO,
+        DASHBOARD_TEMPLATE_PAGINADO,
         rows=rows,
         localidades=localidades_disponibles,
         empresas=empresas_disponibles,
         filtro_localidad=filtro_localidad,
         filtro_empresa=filtro_empresa,
-        buscar_texto=buscar_texto,
-        filtro_ipo_urgencia=filtro_ipo_urgencia
+        buscar_direccion=buscar_direccion,
+        filtro_ipo_urgencia=filtro_ipo_urgencia,
+        page=page,
+        total_pages=total_pages,
+        total_registros=total_registros,
+        per_page=per_page
     )
 
-# Ver detalle completo del Lead (NUEVA RUTA)
+# Ver detalle completo del Lead
 @app.route("/ver_lead/<int:lead_id>")
 def ver_lead(lead_id):
     if "usuario" not in session:
         return redirect("/")
     
-    # Obtener datos del lead
     response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}", headers=HEADERS)
     if response.status_code != 200 or not response.json():
         return f"<h3 style='color:red;'>Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
     
     lead = response.json()[0]
     
-    # Obtener equipos asociados
     equipos_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
     equipos = []
     if equipos_response.status_code == 200:
         equipos_raw = equipos_response.json()
-        # Formatear fechas de los equipos
         for equipo in equipos_raw:
-            # Formatear fecha vencimiento contrato
             fecha_venc = equipo.get("fecha_vencimiento_contrato", "-")
             if fecha_venc and fecha_venc != "-":
                 try:
@@ -512,7 +497,6 @@ def ver_lead(lead_id):
                 except:
                     pass
             
-            # Formatear IPO
             ipo = equipo.get("ipo_proxima", "-")
             if ipo and ipo != "-":
                 try:
@@ -534,16 +518,14 @@ def ver_lead(lead_id):
     
     return render_template_string(VER_LEAD_TEMPLATE, lead=lead, equipos=equipos)
 
-# Eliminar Lead (NUEVA RUTA)
+# Eliminar Lead
 @app.route("/eliminar_lead/<int:lead_id>")
 def eliminar_lead(lead_id):
     if "usuario" not in session:
         return redirect("/")
     
-    # Primero eliminar equipos asociados
     requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
     
-    # Luego eliminar el lead
     response = requests.delete(f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}", headers=HEADERS)
     
     if response.status_code in [200, 204]:
@@ -551,18 +533,16 @@ def eliminar_lead(lead_id):
     else:
         return f"<h3 style='color:red;'>Error al eliminar Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
-# Eliminar Equipo (NUEVA RUTA)
+# Eliminar Equipo
 @app.route("/eliminar_equipo/<int:equipo_id>")
 def eliminar_equipo(equipo_id):
     if "usuario" not in session:
         return redirect("/")
     
-    # Obtener el cliente_id antes de eliminar
     equipo_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
     if equipo_response.status_code == 200 and equipo_response.json():
         cliente_id = equipo_response.json()[0].get("cliente_id")
         
-        # Eliminar el equipo
         response = requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
         
         if response.status_code in [200, 204]:
@@ -604,7 +584,6 @@ def editar_lead(lead_id):
         else:
             return f"<h3 style='color:red;'>Error al actualizar Lead</h3><pre>{res.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
-    # GET: Consultar el lead
     response = requests.get(
         f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}",
         headers=HEADERS
@@ -637,7 +616,6 @@ def editar_equipo(equipo_id):
             "ipo_proxima": request.form.get("ipo_proxima") or None
         }
 
-        # Limpiar campos vacíos
         for key, value in data.items():
             if value == "":
                 data[key] = None
@@ -1285,23 +1263,164 @@ VER_LEAD_TEMPLATE = '''
 
 REPORTE_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Descargo Comercial</title><link rel="stylesheet" href="/static/styles.css?v=4"></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Descargo Comercial</h1></div></div></header><main><div class="menu"><h3>Generar Descargo Mensual</h3><form method="POST"><label>Mes:</label><br><select name="mes" required><option value="">-- Mes --</option><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select><br><br><label>Año:</label><br><select name="año" required><option value="">-- Año --</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option></select><br><br><button type="submit" class="button">Generar Excel</button></form><br><a href="/home" class="button">Volver</a></div></main></body></html>'''
 
-# TEMPLATE MEJORADO DEL DASHBOARD
-DASHBOARD_TEMPLATE_MEJORADO = """
+EQUIPO_EDIT_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Equipo</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacion(){return confirm('¿Estás seguro de que quieres eliminar este equipo?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Equipo</h1></div></div></header><main><div class="menu"><form method="POST"><label>Tipo:</label><br><input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br><label>Identificación:</label><br><input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br><label>Vencimiento Contrato:</label><br><input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br><label>RAE:</label><br><input type="text" name="rae" value="{{ equipo.rae }}"><br><br><label>Próxima IPO:</label><br><input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/home" class="button">Volver</a><a href="/eliminar_equipo/{{ equipo.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacion()">Eliminar Equipo</a></div></form></div></main></body></html>'''
+
+EQUIPO_SUCCESS_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipo Registrado</title>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
+    <style>
+        .botones-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+    <div class="header-container">
+        <div class="logo-container">
+            <a href="/home">
+                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+            </a>
+        </div>
+        <div class="title-container">
+            <h1>Equipo Registrado</h1>
+        </div>
+    </div>
+</header>
+    <main>
+        <div class="menu">
+            <h3>Equipo registrado correctamente</h3>
+            <p>El equipo se ha añadido a la base de datos.</p>
+            <div class="botones-form">
+                <a href="/nuevo_equipo?cliente_id={{ cliente_id }}" class="button">Añadir otro equipo</a>
+                <a href="/home" class="button">Finalizar y volver al inicio</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+'''
+
+VISITA_ADMIN_SUCCESS_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visita Registrada</title>
+    <link rel="stylesheet" href="/static/styles.css?v=4">
+    <style>
+        .botones-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+    <div class="header-container">
+        <div class="logo-container">
+            <a href="/home">
+                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+            </a>
+        </div>
+        <div class="title-container">
+            <h1>Visita Registrada</h1>
+        </div>
+    </div>
+</header>
+    <main>
+        <div class="menu">
+            <h3>Visita registrada correctamente</h3>
+            <p>La visita al administrador se ha registrado en la base de datos.</p>
+            <div class="botones-form">
+                <a href="/visita_administrador" class="button">Añadir otra visita</a>
+                <a href="/home" class="button">Volver al inicio</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+'''
+
+# DASHBOARD TEMPLATE CON PAGINACIÓN
+DASHBOARD_TEMPLATE_PAGINADO = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Leads - AscensorAlert</title>
-    <link rel="stylesheet" href="/static/styles.css?v=4">
+    <link rel="stylesheet" href="/static/styles.css?v=5">
     <style>
+        .buscador-destacado {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .buscador-input-container {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .buscador-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .buscador-input:focus {
+            outline: 3px solid rgba(255,255,255,0.5);
+        }
+        
+        .btn-buscar {
+            background: white;
+            color: #667eea;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-buscar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .buscador-label {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 18px;
+        }
+        
         .filtros {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 25px;
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             border: 1px solid #ddd;
         }
@@ -1319,8 +1438,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             height: 20px;
         }
         
-        .filtro-grupo select,
-        .filtro-grupo input {
+        .filtro-grupo select {
             padding: 10px;
             border: 2px solid #ddd;
             border-radius: 6px;
@@ -1329,29 +1447,9 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             height: 44px;
         }
         
-        .filtro-grupo select:focus,
-        .filtro-grupo input:focus {
+        .filtro-grupo select:focus {
             outline: none;
             border-color: #366092;
-        }
-        
-        .btn-filtrar {
-            background: #366092;
-            color: white;
-            padding: 0 25px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .btn-filtrar:hover {
-            background: #2a4a70;
         }
         
         .btn-limpiar {
@@ -1372,12 +1470,55 @@ DASHBOARD_TEMPLATE_MEJORADO = """
             background: #5a6268;
         }
         
+        .paginacion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .paginacion-info {
+            color: #366092;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .btn-paginacion {
+            background: #366092;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-paginacion:hover:not(:disabled) {
+            background: #2a4a70;
+            transform: translateY(-2px);
+        }
+        
+        .btn-paginacion:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
         .info-resultados {
             text-align: center;
             color: #366092;
             margin: 15px 0;
             font-weight: bold;
             font-size: 16px;
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 8px;
         }
         
         .tabla-container {
@@ -1508,13 +1649,29 @@ DASHBOARD_TEMPLATE_MEJORADO = """
     </header>
     <main>
         <div class="menu">
-            <!-- Formulario de filtros -->
+            <!-- Buscador destacado por dirección -->
             <form method="GET" action="/leads_dashboard">
+                <div class="buscador-destacado">
+                    <div class="buscador-label">🔍 Buscar por Dirección</div>
+                    <div class="buscador-input-container">
+                        <input 
+                            type="text" 
+                            name="buscar_direccion" 
+                            class="buscador-input"
+                            value="{{ buscar_direccion }}" 
+                            placeholder="Ej: Calle Mayor, Avenida..."
+                            autofocus
+                        >
+                        <button type="submit" class="btn-buscar">Buscar</button>
+                    </div>
+                </div>
+                
+                <!-- Filtros adicionales -->
                 <div class="filtros">
                     <div class="filtro-grupo">
                         <label>Localidad:</label>
                         <select name="localidad">
-                            <option value="">Todas las localidades</option>
+                            <option value="">Todas</option>
                             {% for loc in localidades %}
                             <option value="{{ loc }}" {% if filtro_localidad == loc %}selected{% endif %}>{{ loc }}</option>
                             {% endfor %}
@@ -1524,7 +1681,7 @@ DASHBOARD_TEMPLATE_MEJORADO = """
                     <div class="filtro-grupo">
                         <label>Empresa Mantenedora:</label>
                         <select name="empresa">
-                            <option value="">Todas las empresas</option>
+                            <option value="">Todas</option>
                             {% for emp in empresas %}
                             <option value="{{ emp }}" {% if filtro_empresa == emp %}selected{% endif %}>{{ emp }}</option>
                             {% endfor %}
@@ -1532,34 +1689,44 @@ DASHBOARD_TEMPLATE_MEJORADO = """
                     </div>
                     
                     <div class="filtro-grupo">
-                        <label>Buscar dirección:</label>
-                        <input type="text" name="buscar" value="{{ buscar_texto }}" placeholder="Ej: Calle Mayor">
-                    </div>
-                    
-                    <div class="filtro-grupo">
                         <label>Urgencia IPO:</label>
                         <select name="ipo_urgencia">
                             <option value="">Todas</option>
-                            <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 días antes (amarillo)</option>
-                            <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 días (rojo)</option>
+                            <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 días antes</option>
+                            <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 días</option>
                             <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 días</option>
                         </select>
                     </div>
                     
                     <div class="filtro-grupo">
                         <label>&nbsp;</label>
-                        <button type="submit" class="btn-filtrar">Filtrar</button>
-                    </div>
-                    
-                    <div class="filtro-grupo">
-                        <label>&nbsp;</label>
-                        <a href="/leads_dashboard" class="btn-limpiar">Limpiar</a>
+                        <a href="/leads_dashboard" class="btn-limpiar">Limpiar Filtros</a>
                     </div>
                 </div>
+                
+                <!-- Mantener página en filtros -->
+                <input type="hidden" name="page" value="1">
             </form>
             
             <div class="info-resultados">
-                Mostrando {{ rows|length }} comunidades
+                📊 Mostrando {{ rows|length }} registros de {{ total_registros }} totales
+            </div>
+            
+            <!-- Paginación superior -->
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">← Anterior</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>← Anterior</button>
+                {% endif %}
+                
+                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+                
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente →</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Siguiente →</button>
+                {% endif %}
             </div>
             
             <!-- Leyenda de colores -->
@@ -1626,6 +1793,23 @@ DASHBOARD_TEMPLATE_MEJORADO = """
                 </table>
             </div>
             
+            <!-- Paginación inferior -->
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">← Anterior</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>← Anterior</button>
+                {% endif %}
+                
+                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+                
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente →</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Siguiente →</button>
+                {% endif %}
+            </div>
+            
             <br>
             <a href="/home" class="button">Volver al Home</a>
         </div>
@@ -1633,94 +1817,6 @@ DASHBOARD_TEMPLATE_MEJORADO = """
 </body>
 </html>
 """
-
-EQUIPO_EDIT_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Equipo</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacion(){return confirm('¿Estás seguro de que quieres eliminar este equipo?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Equipo</h1></div></div></header><main><div class="menu"><form method="POST"><label>Tipo:</label><br><input type="text" name="tipo_equipo" value="{{ equipo.tipo_equipo }}" required><br><br><label>Identificación:</label><br><input type="text" name="identificacion" value="{{ equipo.identificacion }}"><br><br><label>Vencimiento Contrato:</label><br><input type="date" name="fecha_vencimiento_contrato" value="{{ equipo.fecha_vencimiento_contrato }}"><br><br><label>RAE:</label><br><input type="text" name="rae" value="{{ equipo.rae }}"><br><br><label>Próxima IPO:</label><br><input type="date" name="ipo_proxima" value="{{ equipo.ipo_proxima }}"><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ equipo.descripcion }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/home" class="button">Volver</a><a href="/eliminar_equipo/{{ equipo.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacion()">Eliminar Equipo</a></div></form></div></main></body></html>'''
-
-EQUIPO_SUCCESS_TEMPLATE = '''
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equipo Registrado</title>
-    <link rel="stylesheet" href="/static/styles.css?v=4">
-    <style>
-        .botones-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <header>
-    <div class="header-container">
-        <div class="logo-container">
-            <a href="/home">
-                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
-            </a>
-        </div>
-        <div class="title-container">
-            <h1>Equipo Registrado</h1>
-        </div>
-    </div>
-</header>
-    <main>
-        <div class="menu">
-            <h3>Equipo registrado correctamente</h3>
-            <p>El equipo se ha añadido a la base de datos.</p>
-            <div class="botones-form">
-                <a href="/nuevo_equipo?cliente_id={{ cliente_id }}" class="button">Añadir otro equipo</a>
-                <a href="/home" class="button">Finalizar y volver al inicio</a>
-            </div>
-        </div>
-    </main>
-</body>
-</html>
-'''
-
-VISITA_ADMIN_SUCCESS_TEMPLATE = '''
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visita Registrada</title>
-    <link rel="stylesheet" href="/static/styles.css?v=4">
-    <style>
-        .botones-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <header>
-    <div class="header-container">
-        <div class="logo-container">
-            <a href="/home">
-                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
-            </a>
-        </div>
-        <div class="title-container">
-            <h1>Visita Registrada</h1>
-        </div>
-    </div>
-</header>
-    <main>
-        <div class="menu">
-            <h3>Visita registrada correctamente</h3>
-            <p>La visita al administrador se ha registrado en la base de datos.</p>
-            <div class="botones-form">
-                <a href="/visita_administrador" class="button">Añadir otra visita</a>
-                <a href="/home" class="button">Volver al inicio</a>
-            </div>
-        </div>
-    </main>
-</body>
-</html>
-'''
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
