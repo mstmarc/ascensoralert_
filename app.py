@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string, redirect, session, Response
+from flask import Flask, request, render_template_string, redirect, session, Response, url_for, flash
 import requests
 import os
 import urllib.parse
@@ -361,7 +361,7 @@ def leads_dashboard():
     response = requests.get(data_url, headers=HEADERS)
     
     if response.status_code != 200:
-        return f"<h3 style='color:red;'>❌ Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+        return f"<h3 style='color:red;'>? Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
     
     leads_data = response.json()
     rows = []
@@ -516,7 +516,16 @@ def ver_lead(lead_id):
                 "descripcion": equipo.get("descripcion", "-")
             })
     
-    return render_template_string(VER_LEAD_TEMPLATE, lead=lead, equipos=equipos)
+    # Obtener oportunidades de esta comunidad
+    oportunidades_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=eq.{lead_id}&order=fecha_creacion.desc",
+        headers=HEADERS
+    )
+    oportunidades = []
+    if oportunidades_response.status_code == 200:
+        oportunidades = oportunidades_response.json()
+    
+    return render_template_string(VER_LEAD_TEMPLATE, lead=lead, equipos=equipos, oportunidades=oportunidades)
 
 # Eliminar Lead
 @app.route("/eliminar_lead/<int:lead_id>")
@@ -629,7 +638,159 @@ def editar_equipo(equipo_id):
 
     return render_template_string(EQUIPO_EDIT_TEMPLATE, equipo=equipo)
 
+# ============================================
+# MÓDULO DE OPORTUNIDADES
+# ============================================
+
+@app.route("/oportunidades")
+def oportunidades():
+    """Dashboard de oportunidades activas"""
+    if "usuario" not in session:
+        return redirect("/")
+    
+    try:
+        # Obtener todas las oportunidades con info del cliente
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?"
+            f"select=*,clientes(nombre_cliente,direccion,localidad)"
+            f"&order=fecha_creacion.desc",
+            headers=HEADERS
+        )
+        
+        if response.status_code == 200:
+            oportunidades_list = response.json()
+            
+            # Contar por estado
+            activas = sum(1 for o in oportunidades_list if o['estado'] == 'activa')
+            ganadas = sum(1 for o in oportunidades_list if o['estado'] == 'ganada')
+            perdidas = sum(1 for o in oportunidades_list if o['estado'] == 'perdida')
+            
+            return render_template_string(OPORTUNIDADES_TEMPLATE,
+                                        oportunidades=oportunidades_list,
+                                        activas=activas,
+                                        ganadas=ganadas,
+                                        perdidas=perdidas)
+        else:
+            flash("Error al cargar oportunidades", "error")
+            return redirect(url_for("home"))
+            
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+        return redirect(url_for("home"))
+
+
+@app.route("/crear_oportunidad/<int:cliente_id>", methods=["GET", "POST"])
+def crear_oportunidad(cliente_id):
+    """Crear nueva oportunidad desde vista de comunidad"""
+    if "usuario" not in session:
+        return redirect("/")
+    
+    if request.method == "POST":
+        try:
+            data = {
+                "cliente_id": cliente_id,
+                "tipo": request.form["tipo"],
+                "descripcion": request.form.get("descripcion", ""),
+                "valor_estimado": request.form.get("valor_estimado") or None,
+                "observaciones": request.form.get("observaciones", ""),
+                "estado": "activa"
+            }
+            
+            response = requests.post(
+                f"{SUPABASE_URL}/rest/v1/oportunidades",
+                headers=HEADERS,
+                json=data
+            )
+            
+            if response.status_code == 201:
+                flash("¡Oportunidad creada exitosamente!", "success")
+                return redirect(url_for("ver_lead", lead_id=cliente_id))
+            else:
+                flash("Error al crear oportunidad", "error")
+                
+        except Exception as e:
+            flash(f"Error: {str(e)}", "error")
+    
+    # GET: Obtener datos del cliente
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{cliente_id}",
+            headers=HEADERS
+        )
+        if response.status_code == 200:
+            cliente = response.json()[0]
+            return render_template_string(CREAR_OPORTUNIDAD_TEMPLATE, cliente=cliente)
+    except:
+        flash("Error al cargar datos del cliente", "error")
+        return redirect(url_for("leads_dashboard"))
+
+
+@app.route("/editar_oportunidad/<int:oportunidad_id>", methods=["GET", "POST"])
+def editar_oportunidad(oportunidad_id):
+    """Editar oportunidad existente"""
+    if "usuario" not in session:
+        return redirect("/")
+    
+    if request.method == "POST":
+        try:
+            data = {
+                "tipo": request.form["tipo"],
+                "descripcion": request.form.get("descripcion", ""),
+                "estado": request.form["estado"],
+                "valor_estimado": request.form.get("valor_estimado") or None,
+                "observaciones": request.form.get("observaciones", "")
+            }
+            
+            # Si se marca como ganada o perdida, añadir fecha de cierre
+            if data["estado"] in ["ganada", "perdida"]:
+                data["fecha_cierre"] = datetime.now().isoformat()
+            
+            response = requests.patch(
+                f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
+                headers=HEADERS,
+                json=data
+            )
+            
+            if response.status_code == 204:
+                flash("Oportunidad actualizada", "success")
+                
+                # Obtener cliente_id para redirigir
+                response_get = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=cliente_id",
+                    headers=HEADERS
+                )
+                if response_get.status_code == 200:
+                    cliente_id = response_get.json()[0]["cliente_id"]
+                    return redirect(url_for("ver_lead", lead_id=cliente_id))
+                else:
+                    return redirect(url_for("oportunidades"))
+            else:
+                flash("Error al actualizar", "error")
+                
+        except Exception as e:
+            flash(f"Error: {str(e)}", "error")
+    
+    # GET: Cargar datos de la oportunidad
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(nombre_cliente,direccion)",
+            headers=HEADERS
+        )
+        if response.status_code == 200:
+            oportunidad = response.json()[0]
+            return render_template_string(EDITAR_OPORTUNIDAD_TEMPLATE, oportunidad=oportunidad)
+    except:
+        flash("Error al cargar oportunidad", "error")
+        return redirect(url_for("oportunidades"))
+
+
+# AQUÍ COMIENZAN LOS TEMPLATES HTML
+# (Continúa en el siguiente mensaje debido al límite de caracteres)
+
+# ============================================
 # PLANTILLAS HTML
+# ============================================
+
 LOGIN_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="es">
@@ -697,6 +858,7 @@ HOME_TEMPLATE = '''
             <a href="/formulario_lead" class="button">Añadir Visita a Instalación</a>
             <a href="/visita_administrador" class="button">Añadir Visita a Administrador</a>
             <a href="/leads_dashboard" class="button">Visualizar Datos</a>
+            <a href="/oportunidades" class="button">?? Gestión de Oportunidades</a>
             <a href="/reporte_mensual" class="button">Descargo Comercial</a>
             <a href="/logout" class="button">Cerrar Sesión</a>
         </div>
@@ -1006,7 +1168,9 @@ EQUIPO_TEMPLATE = '''
 </html>
 '''
 
-EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacionComunidad(){return confirm('⚠️ ATENCIÓN: Esto eliminará la comunidad y TODOS sus equipos asociados.\\n\\n¿Estás seguro de que quieres continuar?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/leads_dashboard" class="button">Volver</a><a href="/eliminar_lead/{{ lead.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacionComunidad()">Eliminar Comunidad</a></div></form></div></main></body></html>'''
+EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacionComunidad(){return confirm('?? ATENCIÓN: Esto eliminará la comunidad y TODOS sus equipos asociados.\\n\\n¿Estás seguro de que quieres continuar?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/leads_dashboard" class="button">Volver</a><a href="/eliminar_lead/{{ lead.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacionComunidad()">Eliminar Comunidad</a></div></form></div></main></body></html>'''
+
+# Por límite de caracteres, continúo en el siguiente mensaje con VER_LEAD_TEMPLATE y el resto...
 
 VER_LEAD_TEMPLATE = '''
 <!DOCTYPE html>
@@ -1119,6 +1283,77 @@ VER_LEAD_TEMPLATE = '''
             color: #999;
             font-style: italic;
         }
+        
+        .oportunidad-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #366092;
+        }
+        
+        .oportunidad-card.activa {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .oportunidad-card.ganada {
+            border-left-color: #007bff;
+            background: #d1ecf1;
+        }
+        
+        .oportunidad-card.perdida {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .oportunidad-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .oportunidad-tipo {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .oportunidad-estado {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .oportunidad-estado.activa {
+            background: #28a745;
+            color: white;
+        }
+        
+        .oportunidad-estado.ganada {
+            background: #007bff;
+            color: white;
+        }
+        
+        .oportunidad-estado.perdida {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .oportunidad-detalles {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .btn-crear-oportunidad {
+            background: #28a745;
+        }
+        
+        .btn-crear-oportunidad:hover {
+            background: #218838;
+        }
     </style>
 </head>
 <body>
@@ -1140,7 +1375,7 @@ VER_LEAD_TEMPLATE = '''
                 
                 <!-- DATOS DE LA COMUNIDAD -->
                 <div class="seccion">
-                    <h2>📋 Información de la Comunidad</h2>
+                    <h2>?? Información de la Comunidad</h2>
                     <div class="info-grid">
                         <div class="info-item">
                             <label>Dirección:</label>
@@ -1207,9 +1442,48 @@ VER_LEAD_TEMPLATE = '''
                     {% endif %}
                 </div>
                 
+                <!-- OPORTUNIDADES COMERCIALES -->
+                <div class="seccion">
+                    <h2>?? Oportunidades Comerciales ({{ oportunidades|length }})</h2>
+                    
+                    {% if oportunidades %}
+                        {% for op in oportunidades %}
+                        <div class="oportunidad-card {{ op.estado }}">
+                            <div class="oportunidad-header">
+                                <div class="oportunidad-tipo">{{ op.tipo }}</div>
+                                <span class="oportunidad-estado {{ op.estado }}">{{ op.estado|upper }}</span>
+                            </div>
+                            <div class="oportunidad-detalles">
+                                {% if op.descripcion %}
+                                <p><strong>Descripción:</strong> {{ op.descripcion }}</p>
+                                {% endif %}
+                                {% if op.valor_estimado %}
+                                <p><strong>Valor estimado:</strong> {{ "%.2f"|format(op.valor_estimado) }}€</p>
+                                {% endif %}
+                                <p><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
+                                {% if op.observaciones %}
+                                <p><strong>Observaciones:</strong> {{ op.observaciones }}</p>
+                                {% endif %}
+                                <div style="margin-top: 10px;">
+                                    <a href="/editar_oportunidad/{{ op.id }}" class="btn-accion-small">Editar Oportunidad</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-equipos">
+                            No hay oportunidades registradas para esta comunidad
+                        </div>
+                    {% endif %}
+                    
+                    <div style="margin-top: 15px;">
+                        <a href="/crear_oportunidad/{{ lead.id }}" class="button btn-crear-oportunidad">+ Crear Oportunidad</a>
+                    </div>
+                </div>
+                
                 <!-- EQUIPOS/ASCENSORES -->
                 <div class="seccion">
-                    <h2>🏢 Equipos/Ascensores ({{ equipos|length }})</h2>
+                    <h2>?? Equipos/Ascensores ({{ equipos|length }})</h2>
                     
                     {% if equipos %}
                     <table class="equipos-tabla">
@@ -1350,6 +1624,8 @@ VISITA_ADMIN_SUCCESS_TEMPLATE = '''
 </body>
 </html>
 '''
+
+# Continúa en el siguiente mensaje con DASHBOARD y templates de oportunidades...
 
 # DASHBOARD TEMPLATE CON PAGINACIÓN
 DASHBOARD_TEMPLATE_PAGINADO = """
@@ -1652,7 +1928,7 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             <!-- Buscador destacado por dirección -->
             <form method="GET" action="/leads_dashboard">
                 <div class="buscador-destacado">
-                    <div class="buscador-label">🔍 Buscar por Dirección</div>
+                    <div class="buscador-label">?? Buscar por Dirección</div>
                     <div class="buscador-input-container">
                         <input 
                             type="text" 
@@ -1709,23 +1985,23 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             </form>
             
             <div class="info-resultados">
-                📊 Mostrando {{ rows|length }} registros de {{ total_registros }} totales
+                ?? Mostrando {{ rows|length }} registros de {{ total_registros }} totales
             </div>
             
             <!-- Paginación superior -->
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">← Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">? Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>← Anterior</button>
+                    <button class="btn-paginacion" disabled>? Anterior</button>
                 {% endif %}
                 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
                 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente →</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente ?</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente →</button>
+                    <button class="btn-paginacion" disabled>Siguiente ?</button>
                 {% endif %}
             </div>
             
@@ -1796,17 +2072,17 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             <!-- Paginación inferior -->
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">← Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">? Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>← Anterior</button>
+                    <button class="btn-paginacion" disabled>? Anterior</button>
                 {% endif %}
                 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
                 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente →</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente ?</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente →</button>
+                    <button class="btn-paginacion" disabled>Siguiente ?</button>
                 {% endif %}
             </div>
             
@@ -1817,6 +2093,350 @@ DASHBOARD_TEMPLATE_PAGINADO = """
 </body>
 </html>
 """
+
+# ============================================
+# TEMPLATES DE OPORTUNIDADES
+# ============================================
+
+OPORTUNIDADES_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oportunidades - AscensorAlert</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; }
+        
+        .header { background: #2c3e50; color: white; padding: 20px; }
+        .header h1 { font-size: 24px; margin-bottom: 5px; }
+        .header-nav { margin-top: 15px; }
+        .header-nav a { color: white; text-decoration: none; margin-right: 20px; opacity: 0.9; }
+        .header-nav a:hover { opacity: 1; text-decoration: underline; }
+        
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        
+        .stats { display: flex; gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; flex: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-card h3 { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .stat-card .number { font-size: 32px; font-weight: bold; }
+        .stat-card.activas .number { color: #27ae60; }
+        .stat-card.ganadas .number { color: #3498db; }
+        .stat-card.perdidas .number { color: #95a5a6; }
+        
+        .oportunidades-list { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .oportunidad-item { padding: 20px; border-bottom: 1px solid #eee; }
+        .oportunidad-item:last-child { border-bottom: none; }
+        .oportunidad-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+        .oportunidad-info h3 { font-size: 16px; margin-bottom: 5px; }
+        .oportunidad-info .ubicacion { color: #666; font-size: 14px; }
+        
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .badge.activa { background: #d4edda; color: #155724; }
+        .badge.ganada { background: #d1ecf1; color: #0c5460; }
+        .badge.perdida { background: #f8d7da; color: #721c24; }
+        
+        .oportunidad-detalles { margin-top: 10px; }
+        .oportunidad-detalles p { color: #666; font-size: 14px; margin-bottom: 5px; }
+        .oportunidad-detalles strong { color: #333; }
+        
+        .actions { margin-top: 10px; }
+        .btn { display: inline-block; padding: 8px 16px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 14px; }
+        .btn:hover { background: #2980b9; }
+        
+        .empty-state { padding: 60px 20px; text-align: center; color: #666; }
+        .empty-state p { margin-top: 10px; }
+        
+        .alert { padding: 12px 20px; margin-bottom: 20px; border-radius: 4px; }
+        .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>?? Oportunidades Comerciales</h1>
+        <div class="header-nav">
+            <a href="/home">? Inicio</a>
+            <a href="/leads_dashboard">Ver Comunidades</a>
+            <a href="/logout">Cerrar Sesión</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="stats">
+            <div class="stat-card activas">
+                <h3>Activas</h3>
+                <div class="number">{{ activas }}</div>
+            </div>
+            <div class="stat-card ganadas">
+                <h3>Ganadas (Total)</h3>
+                <div class="number">{{ ganadas }}</div>
+            </div>
+            <div class="stat-card perdidas">
+                <h3>Perdidas</h3>
+                <div class="number">{{ perdidas }}</div>
+            </div>
+        </div>
+        
+        <div class="oportunidades-list">
+            {% if oportunidades %}
+                {% for op in oportunidades %}
+                <div class="oportunidad-item">
+                    <div class="oportunidad-header">
+                        <div class="oportunidad-info">
+                            <h3>{{ op.clientes.nombre_cliente or op.clientes.direccion }}</h3>
+                            <div class="ubicacion">{{ op.clientes.direccion }} - {{ op.clientes.localidad }}</div>
+                        </div>
+                        <span class="badge {{ op.estado }}">{{ op.estado|upper }}</span>
+                    </div>
+                    
+                    <div class="oportunidad-detalles">
+                        <p><strong>Tipo:</strong> {{ op.tipo }}</p>
+                        {% if op.descripcion %}
+                        <p><strong>Descripción:</strong> {{ op.descripcion }}</p>
+                        {% endif %}
+                        {% if op.valor_estimado %}
+                        <p><strong>Valor estimado:</strong> {{ "%.2f"|format(op.valor_estimado) }}€</p>
+                        {% endif %}
+                        <p><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
+                        {% if op.fecha_cierre %}
+                        <p><strong>Cerrada:</strong> {{ op.fecha_cierre[:10] }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="actions">
+                        <a href="/ver_lead/{{ op.cliente_id }}" class="btn">Ver Comunidad</a>
+                        <a href="/editar_oportunidad/{{ op.id }}" class="btn">Editar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h2>?? No hay oportunidades todavía</h2>
+                    <p>Las oportunidades aparecerán aquí cuando las crees desde la vista de comunidades</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+CREAR_OPORTUNIDAD_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Oportunidad - AscensorAlert</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; }
+        
+        .header { background: #2c3e50; color: white; padding: 20px; }
+        .header h1 { font-size: 24px; }
+        
+        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 10px; }
+        .comunidad-info { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .comunidad-info p { margin-bottom: 5px; color: #666; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group small { color: #666; font-size: 12px; display: block; margin-top: 5px; }
+        
+        .form-actions { display: flex; gap: 10px; margin-top: 30px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #27ae60; color: white; }
+        .btn-primary:hover { background: #229954; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>?? Nueva Oportunidad</h1>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Crear Oportunidad Comercial</h2>
+            
+            <div class="comunidad-info">
+                <p><strong>Comunidad:</strong> {{ cliente.nombre_cliente or cliente.direccion }}</p>
+                <p><strong>Dirección:</strong> {{ cliente.direccion }}, {{ cliente.localidad }}</p>
+            </div>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="tipo">Tipo de Oportunidad *</label>
+                    <select name="tipo" id="tipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="IPO vencida">IPO vencida</option>
+                        <option value="Cambio mantenedora">Cambio de mantenedora</option>
+                        <option value="Contrato próximo a vencer">Contrato próximo a vencer</option>
+                        <option value="Modernización">Modernización</option>
+                        <option value="Reparación">Reparación importante</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea name="descripcion" id="descripcion" placeholder="Detalles de la oportunidad..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="valor_estimado">Valor Estimado (€)</label>
+                    <input type="number" name="valor_estimado" id="valor_estimado" step="0.01" placeholder="Ej: 5000">
+                    <small>Valor estimado del contrato o servicio</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea name="observaciones" id="observaciones" placeholder="Notas adicionales, contactos, próximos pasos..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">? Crear Oportunidad</button>
+                    <a href="/ver_lead/{{ cliente.id }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+EDITAR_OPORTUNIDAD_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Oportunidad - AscensorAlert</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; }
+        
+        .header { background: #2c3e50; color: white; padding: 20px; }
+        .header h1 { font-size: 24px; }
+        
+        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 10px; }
+        .comunidad-info { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .comunidad-info p { margin-bottom: 5px; color: #666; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group small { color: #666; font-size: 12px; display: block; margin-top: 5px; }
+        
+        .estado-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .estado-option { position: relative; }
+        .estado-option input[type="radio"] { position: absolute; opacity: 0; }
+        .estado-option label { display: block; padding: 15px; border: 2px solid #ddd; border-radius: 4px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .estado-option input[type="radio"]:checked + label { border-color: #3498db; background: #ebf5fb; font-weight: bold; }
+        
+        .form-actions { display: flex; gap: 10px; margin-top: 30px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>?? Editar Oportunidad</h1>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Actualizar Oportunidad</h2>
+            
+            <div class="comunidad-info">
+                <p><strong>Comunidad:</strong> {{ oportunidad.clientes.nombre_cliente or oportunidad.clientes.direccion }}</p>
+                <p><strong>Dirección:</strong> {{ oportunidad.clientes.direccion }}</p>
+                <p><strong>Creada:</strong> {{ oportunidad.fecha_creacion[:10] }}</p>
+            </div>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="tipo">Tipo de Oportunidad *</label>
+                    <select name="tipo" id="tipo" required>
+                        <option value="IPO vencida" {% if oportunidad.tipo == "IPO vencida" %}selected{% endif %}>IPO vencida</option>
+                        <option value="Cambio mantenedora" {% if oportunidad.tipo == "Cambio mantenedora" %}selected{% endif %}>Cambio de mantenedora</option>
+                        <option value="Contrato próximo a vencer" {% if oportunidad.tipo == "Contrato próximo a vencer" %}selected{% endif %}>Contrato próximo a vencer</option>
+                        <option value="Modernización" {% if oportunidad.tipo == "Modernización" %}selected{% endif %}>Modernización</option>
+                        <option value="Reparación" {% if oportunidad.tipo == "Reparación" %}selected{% endif %}>Reparación importante</option>
+                        <option value="Otro" {% if oportunidad.tipo == "Otro" %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Estado *</label>
+                    <div class="estado-group">
+                        <div class="estado-option">
+                            <input type="radio" name="estado" id="activa" value="activa" {% if oportunidad.estado == "activa" %}checked{% endif %} required>
+                            <label for="activa">?? Activa</label>
+                        </div>
+                        <div class="estado-option">
+                            <input type="radio" name="estado" id="ganada" value="ganada" {% if oportunidad.estado == "ganada" %}checked{% endif %}>
+                            <label for="ganada">? Ganada</label>
+                        </div>
+                        <div class="estado-option">
+                            <input type="radio" name="estado" id="perdida" value="perdida" {% if oportunidad.estado == "perdida" %}checked{% endif %}>
+                            <label for="perdida">? Perdida</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea name="descripcion" id="descripcion" placeholder="Detalles de la oportunidad...">{{ oportunidad.descripcion or '' }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="valor_estimado">Valor Estimado (€)</label>
+                    <input type="number" name="valor_estimado" id="valor_estimado" step="0.01" value="{{ oportunidad.valor_estimado or '' }}" placeholder="Ej: 5000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea name="observaciones" id="observaciones" placeholder="Notas, seguimiento, próximos pasos...">{{ oportunidad.observaciones or '' }}</textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">?? Guardar Cambios</button>
+                    <a href="/ver_lead/{{ oportunidad.cliente_id }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+# ============================================
+# CIERRE DEL ARCHIVO
+# ============================================
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
