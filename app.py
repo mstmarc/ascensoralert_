@@ -858,7 +858,7 @@ HOME_TEMPLATE = '''
             <a href="/formulario_lead" class="button">Añadir Visita a Instalación</a>
             <a href="/visita_administrador" class="button">Añadir Visita a Administrador</a>
             <a href="/leads_dashboard" class="button">Visualizar Datos</a>
-            <a href="/oportunidades" class="button">?? Gestión de Oportunidades</a>
+            <a href="/oportunidades" class="button">🎯 Gestión de Oportunidades</a>
             <a href="/reporte_mensual" class="button">Descargo Comercial</a>
             <a href="/logout" class="button">Cerrar Sesión</a>
         </div>
@@ -1168,7 +1168,7 @@ EQUIPO_TEMPLATE = '''
 </html>
 '''
 
-EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacionComunidad(){return confirm('?? ATENCIÓN: Esto eliminará la comunidad y TODOS sus equipos asociados.\\n\\n¿Estás seguro de que quieres continuar?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/leads_dashboard" class="button">Volver</a><a href="/eliminar_lead/{{ lead.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacionComunidad()">Eliminar Comunidad</a></div></form></div></main></body></html>'''
+EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacionComunidad(){return confirm('⚠️ ATENCIÓN: Esto eliminará la comunidad y TODOS sus equipos asociados.\\n\\n¿Estás seguro de que quieres continuar?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/leads_dashboard" class="button">Volver</a><a href="/eliminar_lead/{{ lead.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacionComunidad()">Eliminar Comunidad</a></div></form></div></main></body></html>'''
 
 # Por límite de caracteres, continúo en el siguiente mensaje con VER_LEAD_TEMPLATE y el resto...
 
@@ -1375,7 +1375,7 @@ VER_LEAD_TEMPLATE = '''
                 
                 <!-- DATOS DE LA COMUNIDAD -->
                 <div class="seccion">
-                    <h2>?? Información de la Comunidad</h2>
+                    <h2>📋 Información de la Comunidad</h2>
                     <div class="info-grid">
                         <div class="info-item">
                             <label>Dirección:</label>
@@ -1444,7 +1444,7 @@ VER_LEAD_TEMPLATE = '''
                 
                 <!-- OPORTUNIDADES COMERCIALES -->
                 <div class="seccion">
-                    <h2>?? Oportunidades Comerciales ({{ oportunidades|length }})</h2>
+                    <h2>🎯 Oportunidades Comerciales ({{ oportunidades|length }})</h2>
                     
                     {% if oportunidades %}
                         {% for op in oportunidades %}
@@ -1483,7 +1483,7 @@ VER_LEAD_TEMPLATE = '''
                 
                 <!-- EQUIPOS/ASCENSORES -->
                 <div class="seccion">
-                    <h2>?? Equipos/Ascensores ({{ equipos|length }})</h2>
+                    <h2>🏢 Equipos/Ascensores ({{ equipos|length }})</h2>
                     
                     {% if equipos %}
                     <table class="equipos-tabla">
@@ -1928,7 +1928,7 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             <!-- Buscador destacado por dirección -->
             <form method="GET" action="/leads_dashboard">
                 <div class="buscador-destacado">
-                    <div class="buscador-label">?? Buscar por Dirección</div>
+                    <div class="buscador-label">🔍 Buscar por Dirección</div>
                     <div class="buscador-input-container">
                         <input 
                             type="text" 
@@ -1985,23 +1985,23 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             </form>
             
             <div class="info-resultados">
-                ?? Mostrando {{ rows|length }} registros de {{ total_registros }} totales
+                📊 Mostrando {{ rows|length }} registros de {{ total_registros }} totales
             </div>
             
             <!-- Paginación superior -->
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">? Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">← Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>? Anterior</button>
+                    <button class="btn-paginacion" disabled>← Anterior</button>
                 {% endif %}
                 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
                 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente ?</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente →</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente ?</button>
+                    <button class="btn-paginacion" disabled>Siguiente →</button>
                 {% endif %}
             </div>
             
@@ -2072,17 +2072,17 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             <!-- Paginación inferior -->
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">? Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">← Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>? Anterior</button>
+                    <button class="btn-paginacion" disabled>← Anterior</button>
                 {% endif %}
                 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
                 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente ?</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente →</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente ?</button>
+                    <button class="btn-paginacion" disabled>Siguiente →</button>
                 {% endif %}
             </div>
             
@@ -2155,9 +2155,9 @@ OPORTUNIDADES_TEMPLATE = """
 </head>
 <body>
     <div class="header">
-        <h1>?? Oportunidades Comerciales</h1>
+        <h1>🎯 Oportunidades Comerciales</h1>
         <div class="header-nav">
-            <a href="/home">? Inicio</a>
+            <a href="/home">← Inicio</a>
             <a href="/leads_dashboard">Ver Comunidades</a>
             <a href="/logout">Cerrar Sesión</a>
         </div>
@@ -2221,7 +2221,7 @@ OPORTUNIDADES_TEMPLATE = """
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <h2>?? No hay oportunidades todavía</h2>
+                    <h2>📭 No hay oportunidades todavía</h2>
                     <p>Las oportunidades aparecerán aquí cuando las crees desde la vista de comunidades</p>
                 </div>
             {% endif %}
@@ -2311,7 +2311,7 @@ CREAR_OPORTUNIDAD_TEMPLATE = """
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">? Crear Oportunidad</button>
+                    <button type="submit" class="btn btn-primary">✅ Crear Oportunidad</button>
                     <a href="/ver_lead/{{ cliente.id }}" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
@@ -2395,15 +2395,15 @@ EDITAR_OPORTUNIDAD_TEMPLATE = """
                     <div class="estado-group">
                         <div class="estado-option">
                             <input type="radio" name="estado" id="activa" value="activa" {% if oportunidad.estado == "activa" %}checked{% endif %} required>
-                            <label for="activa">?? Activa</label>
+                            <label for="activa">🟢 Activa</label>
                         </div>
                         <div class="estado-option">
                             <input type="radio" name="estado" id="ganada" value="ganada" {% if oportunidad.estado == "ganada" %}checked{% endif %}>
-                            <label for="ganada">? Ganada</label>
+                            <label for="ganada">✅ Ganada</label>
                         </div>
                         <div class="estado-option">
                             <input type="radio" name="estado" id="perdida" value="perdida" {% if oportunidad.estado == "perdida" %}checked{% endif %}>
-                            <label for="perdida">? Perdida</label>
+                            <label for="perdida">❌ Perdida</label>
                         </div>
                     </div>
                 </div>
@@ -2424,7 +2424,7 @@ EDITAR_OPORTUNIDAD_TEMPLATE = """
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">?? Guardar Cambios</button>
+                    <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
                     <a href="/ver_lead/{{ oportunidad.cliente_id }}" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
