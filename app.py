@@ -361,7 +361,7 @@ def leads_dashboard():
     response = requests.get(data_url, headers=HEADERS)
     
     if response.status_code != 200:
-        return f"<h3 style='color:red;'>? Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+        return f"<h3 style='color:red;'>Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
     
     leads_data = response.json()
     rows = []
@@ -649,7 +649,6 @@ def oportunidades():
         return redirect("/")
     
     try:
-        # Obtener todas las oportunidades con info del cliente
         response = requests.get(
             f"{SUPABASE_URL}/rest/v1/oportunidades?"
             f"select=*,clientes(nombre_cliente,direccion,localidad)"
@@ -660,7 +659,6 @@ def oportunidades():
         if response.status_code == 200:
             oportunidades_list = response.json()
             
-            # Contar por estado
             activas = sum(1 for o in oportunidades_list if o['estado'] == 'activa')
             ganadas = sum(1 for o in oportunidades_list if o['estado'] == 'ganada')
             perdidas = sum(1 for o in oportunidades_list if o['estado'] == 'perdida')
@@ -703,7 +701,7 @@ def crear_oportunidad(cliente_id):
             )
             
             if response.status_code == 201:
-                flash("¡Oportunidad creada exitosamente!", "success")
+                flash("Oportunidad creada exitosamente!", "success")
                 return redirect(url_for("ver_lead", lead_id=cliente_id))
             else:
                 flash("Error al crear oportunidad", "error")
@@ -711,7 +709,6 @@ def crear_oportunidad(cliente_id):
         except Exception as e:
             flash(f"Error: {str(e)}", "error")
     
-    # GET: Obtener datos del cliente
     try:
         response = requests.get(
             f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{cliente_id}",
@@ -741,7 +738,6 @@ def editar_oportunidad(oportunidad_id):
                 "observaciones": request.form.get("observaciones", "")
             }
             
-            # Si se marca como ganada o perdida, añadir fecha de cierre
             if data["estado"] in ["ganada", "perdida"]:
                 data["fecha_cierre"] = datetime.now().isoformat()
             
@@ -754,7 +750,6 @@ def editar_oportunidad(oportunidad_id):
             if response.status_code == 204:
                 flash("Oportunidad actualizada", "success")
                 
-                # Obtener cliente_id para redirigir
                 response_get = requests.get(
                     f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=cliente_id",
                     headers=HEADERS
@@ -770,7 +765,6 @@ def editar_oportunidad(oportunidad_id):
         except Exception as e:
             flash(f"Error: {str(e)}", "error")
     
-    # GET: Cargar datos de la oportunidad
     try:
         response = requests.get(
             f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(nombre_cliente,direccion)",
@@ -784,9 +778,60 @@ def editar_oportunidad(oportunidad_id):
         return redirect(url_for("oportunidades"))
 
 
-# AQUÍ COMIENZAN LOS TEMPLATES HTML
-# (Continúa en el siguiente mensaje debido al límite de caracteres)
+@app.route("/ver_oportunidad/<int:oportunidad_id>")
+def ver_oportunidad(oportunidad_id):
+    """Ver detalle de una oportunidad"""
+    if "usuario" not in session:
+        return redirect("/")
+    
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(nombre_cliente,direccion,localidad)",
+            headers=HEADERS
+        )
+        if response.status_code == 200 and response.json():
+            oportunidad = response.json()[0]
+            return render_template_string(VER_OPORTUNIDAD_TEMPLATE, oportunidad=oportunidad)
+        else:
+            flash("Oportunidad no encontrada", "error")
+            return redirect(url_for("oportunidades"))
+    except:
+        flash("Error al cargar oportunidad", "error")
+        return redirect(url_for("oportunidades"))
 
+
+@app.route("/eliminar_oportunidad/<int:oportunidad_id>")
+def eliminar_oportunidad(oportunidad_id):
+    """Eliminar una oportunidad"""
+    if "usuario" not in session:
+        return redirect("/")
+    
+    try:
+        response_get = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=cliente_id",
+            headers=HEADERS
+        )
+        
+        if response_get.status_code == 200 and response_get.json():
+            cliente_id = response_get.json()[0]["cliente_id"]
+            
+            response = requests.delete(
+                f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
+                headers=HEADERS
+            )
+            
+            if response.status_code in [200, 204]:
+                flash("Oportunidad eliminada correctamente", "success")
+                return redirect(f"/ver_lead/{cliente_id}")
+            else:
+                flash("Error al eliminar oportunidad", "error")
+                return redirect(url_for("oportunidades"))
+        else:
+            flash("Oportunidad no encontrada", "error")
+            return redirect(url_for("oportunidades"))
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+        return redirect(url_for("oportunidades"))
 # ============================================
 # PLANTILLAS HTML
 # ============================================
@@ -858,7 +903,7 @@ HOME_TEMPLATE = '''
             <a href="/formulario_lead" class="button">Añadir Visita a Instalación</a>
             <a href="/visita_administrador" class="button">Añadir Visita a Administrador</a>
             <a href="/leads_dashboard" class="button">Visualizar Datos</a>
-            <a href="/oportunidades" class="button">🎯 Gestión de Oportunidades</a>
+            <a href="/oportunidades" class="button">Gestion de Oportunidades</a>
             <a href="/reporte_mensual" class="button">Descargo Comercial</a>
             <a href="/logout" class="button">Cerrar Sesión</a>
         </div>
@@ -1170,8 +1215,6 @@ EQUIPO_TEMPLATE = '''
 
 EDIT_LEAD_TEMPLATE = '''<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Editar Lead</title><link rel="stylesheet" href="/static/styles.css?v=4"><style>.botones-form{display:flex;gap:10px;margin-top:20px;}.btn-eliminar-form{background:#dc3545;}.btn-eliminar-form:hover{background:#c82333;}</style><script>function confirmarEliminacionComunidad(){return confirm('⚠️ ATENCIÓN: Esto eliminará la comunidad y TODOS sus equipos asociados.\\n\\n¿Estás seguro de que quieres continuar?\\n\\nEsta acción no se puede deshacer.');}</script></head><body><header><div class="header-container"><div class="logo-container"><a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a></div><div class="title-container"><h1>Editar Lead</h1></div></div></header><main><div class="menu"><form method="POST"><label>Fecha:</label><br><input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br><label>Tipo:</label><br><select name="tipo_lead" required><option value="">-- Tipo --</option><option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option><option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option><option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option><option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option></select><br><br><label>Dirección:</label><br><input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br><label>Nombre:</label><br><input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br><label>CP:</label><br><input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br><label>Localidad:</label><br><input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br><label>Zona:</label><br><input type="text" name="zona" value="{{ lead.zona }}"><br><br><label>Contacto:</label><br><input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br><label>Teléfono:</label><br><input type="text" name="telefono" value="{{ lead.telefono }}"><br><br><label>Email:</label><br><input type="email" name="email" value="{{ lead.email }}"><br><br><label>Admin Fincas:</label><br><input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br><label>Num Ascensores:</label><br><input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br><label>Observaciones:</label><br><textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br><div class="botones-form"><button type="submit" class="button">Actualizar</button><a href="/leads_dashboard" class="button">Volver</a><a href="/eliminar_lead/{{ lead.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacionComunidad()">Eliminar Comunidad</a></div></form></div></main></body></html>'''
 
-# Por límite de caracteres, continúo en el siguiente mensaje con VER_LEAD_TEMPLATE y el resto...
-
 VER_LEAD_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="es">
@@ -1375,10 +1418,10 @@ VER_LEAD_TEMPLATE = '''
                 
                 <!-- DATOS DE LA COMUNIDAD -->
                 <div class="seccion">
-                    <h2>📋 Información de la Comunidad</h2>
+                    <h2>Informacion de la Comunidad</h2>
                     <div class="info-grid">
                         <div class="info-item">
-                            <label>Dirección:</label>
+                            <label>Direccion:</label>
                             <span>{{ lead.direccion or '-' }}</span>
                         </div>
                         <div class="info-item">
@@ -1394,7 +1437,7 @@ VER_LEAD_TEMPLATE = '''
                             <span>{{ lead.localidad or '-' }}</span>
                         </div>
                         <div class="info-item">
-                            <label>Código Postal:</label>
+                            <label>Codigo Postal:</label>
                             <span>{{ lead.codigo_postal or '-' }}</span>
                         </div>
                         <div class="info-item">
@@ -1406,7 +1449,7 @@ VER_LEAD_TEMPLATE = '''
                             <span>{{ lead.fecha_visita or '-' }}</span>
                         </div>
                         <div class="info-item">
-                            <label>Nº Ascensores Previsto:</label>
+                            <label>Num Ascensores Previsto:</label>
                             <span>{{ lead.numero_ascensores or '-' }}</span>
                         </div>
                     </div>
@@ -1417,7 +1460,7 @@ VER_LEAD_TEMPLATE = '''
                             <span>{{ lead.persona_contacto or '-' }}</span>
                         </div>
                         <div class="info-item">
-                            <label>Teléfono:</label>
+                            <label>Telefono:</label>
                             <span>{{ lead.telefono or '-' }}</span>
                         </div>
                         <div class="info-item">
@@ -1444,7 +1487,7 @@ VER_LEAD_TEMPLATE = '''
                 
                 <!-- OPORTUNIDADES COMERCIALES -->
                 <div class="seccion">
-                    <h2>🎯 Oportunidades Comerciales ({{ oportunidades|length }})</h2>
+                    <h2>Oportunidades Comerciales ({{ oportunidades|length }})</h2>
                     
                     {% if oportunidades %}
                         {% for op in oportunidades %}
@@ -1455,17 +1498,18 @@ VER_LEAD_TEMPLATE = '''
                             </div>
                             <div class="oportunidad-detalles">
                                 {% if op.descripcion %}
-                                <p><strong>Descripción:</strong> {{ op.descripcion }}</p>
+                                <p><strong>Descripcion:</strong> {{ op.descripcion }}</p>
                                 {% endif %}
                                 {% if op.valor_estimado %}
-                                <p><strong>Valor estimado:</strong> {{ "%.2f"|format(op.valor_estimado) }}€</p>
+                                <p><strong>Valor estimado:</strong> {{ "%.2f"|format(op.valor_estimado) }} EUR</p>
                                 {% endif %}
                                 <p><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
                                 {% if op.observaciones %}
                                 <p><strong>Observaciones:</strong> {{ op.observaciones }}</p>
                                 {% endif %}
                                 <div style="margin-top: 10px;">
-                                    <a href="/editar_oportunidad/{{ op.id }}" class="btn-accion-small">Editar Oportunidad</a>
+                                    <a href="/ver_oportunidad/{{ op.id }}" class="btn-accion-small">Ver Detalle</a>
+                                    <a href="/editar_oportunidad/{{ op.id }}" class="btn-accion-small">Editar</a>
                                 </div>
                             </div>
                         </div>
@@ -1483,16 +1527,16 @@ VER_LEAD_TEMPLATE = '''
                 
                 <!-- EQUIPOS/ASCENSORES -->
                 <div class="seccion">
-                    <h2>🏢 Equipos/Ascensores ({{ equipos|length }})</h2>
+                    <h2>Equipos/Ascensores ({{ equipos|length }})</h2>
                     
                     {% if equipos %}
                     <table class="equipos-tabla">
                         <thead>
                             <tr>
                                 <th>Tipo</th>
-                                <th>Identificación</th>
+                                <th>Identificacion</th>
                                 <th>RAE</th>
-                                <th>Próxima IPO</th>
+                                <th>Proxima IPO</th>
                                 <th>Contrato Vence</th>
                                 <th>Observaciones</th>
                                 <th>Acciones</th>
@@ -1625,9 +1669,6 @@ VISITA_ADMIN_SUCCESS_TEMPLATE = '''
 </html>
 '''
 
-# Continúa en el siguiente mensaje con DASHBOARD y templates de oportunidades...
-
-# DASHBOARD TEMPLATE CON PAGINACIÓN
 DASHBOARD_TEMPLATE_PAGINADO = """
 <!DOCTYPE html>
 <html lang="es">
@@ -1928,7 +1969,7 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             <!-- Buscador destacado por dirección -->
             <form method="GET" action="/leads_dashboard">
                 <div class="buscador-destacado">
-                    <div class="buscador-label">🔍 Buscar por Dirección</div>
+                    <div class="buscador-label">Buscar por Direccion</div>
                     <div class="buscador-input-container">
                         <input 
                             type="text" 
@@ -1968,9 +2009,9 @@ DASHBOARD_TEMPLATE_PAGINADO = """
                         <label>Urgencia IPO:</label>
                         <select name="ipo_urgencia">
                             <option value="">Todas</option>
-                            <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 días antes</option>
-                            <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 días</option>
-                            <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 días</option>
+                            <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 dias antes</option>
+                            <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 dias</option>
+                            <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 dias</option>
                         </select>
                     </div>
                     
@@ -1985,23 +2026,23 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             </form>
             
             <div class="info-resultados">
-                📊 Mostrando {{ rows|length }} registros de {{ total_registros }} totales
+                Mostrando {{ rows|length }} registros de {{ total_registros }} totales
             </div>
             
             <!-- Paginación superior -->
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">← Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>← Anterior</button>
+                    <button class="btn-paginacion" disabled>Anterior</button>
                 {% endif %}
                 
-                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
                 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente →</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente →</button>
+                    <button class="btn-paginacion" disabled>Siguiente</button>
                 {% endif %}
             </div>
             
@@ -2011,19 +2052,19 @@ DASHBOARD_TEMPLATE_PAGINADO = """
                 <div class="leyenda-items">
                     <div class="leyenda-item">
                         <span class="color-box color-amarillo"></span>
-                        <span><strong>IPO:</strong> 15 días antes</span>
+                        <span><strong>IPO:</strong> 15 dias antes</span>
                     </div>
                     <div class="leyenda-item">
                         <span class="color-box color-rojo"></span>
-                        <span><strong>IPO:</strong> Pasada hasta 30 días (OPORTUNIDAD)</span>
+                        <span><strong>IPO:</strong> Pasada hasta 30 dias (OPORTUNIDAD)</span>
                     </div>
                     <div class="leyenda-item">
                         <span class="color-box color-amarillo"></span>
-                        <span><strong>Contrato:</strong> Vence 30-90 días</span>
+                        <span><strong>Contrato:</strong> Vence 30-90 dias</span>
                     </div>
                     <div class="leyenda-item">
                         <span class="color-box color-rojo"></span>
-                        <span><strong>Contrato:</strong> Vencido o &lt;30 días</span>
+                        <span><strong>Contrato:</strong> Vencido o menos 30 dias</span>
                     </div>
                 </div>
             </div>
@@ -2033,11 +2074,11 @@ DASHBOARD_TEMPLATE_PAGINADO = """
                 <table>
                     <thead>
                         <tr>
-                            <th>Dirección</th>
+                            <th>Direccion</th>
                             <th>Localidad</th>
-                            <th>Nº Ascensores</th>
+                            <th>Num Ascensores</th>
                             <th>Empresa Mantenedora</th>
-                            <th>Próxima IPO</th>
+                            <th>Proxima IPO</th>
                             <th>Contrato Vence</th>
                             <th>Acciones</th>
                         </tr>
@@ -2072,17 +2113,17 @@ DASHBOARD_TEMPLATE_PAGINADO = """
             <!-- Paginación inferior -->
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">← Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>← Anterior</button>
+                    <button class="btn-paginacion" disabled>Anterior</button>
                 {% endif %}
                 
-                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
                 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente →</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente →</button>
+                    <button class="btn-paginacion" disabled>Siguiente</button>
                 {% endif %}
             </div>
             
@@ -2094,9 +2135,7 @@ DASHBOARD_TEMPLATE_PAGINADO = """
 </html>
 """
 
-# ============================================
 # TEMPLATES DE OPORTUNIDADES
-# ============================================
 
 OPORTUNIDADES_TEMPLATE = """
 <!DOCTYPE html>
@@ -2155,11 +2194,11 @@ OPORTUNIDADES_TEMPLATE = """
 </head>
 <body>
     <div class="header">
-        <h1>🎯 Oportunidades Comerciales</h1>
+        <h1>Oportunidades Comerciales</h1>
         <div class="header-nav">
-            <a href="/home">← Inicio</a>
+            <a href="/home">Inicio</a>
             <a href="/leads_dashboard">Ver Comunidades</a>
-            <a href="/logout">Cerrar Sesión</a>
+            <a href="/logout">Cerrar Sesion</a>
         </div>
     </div>
     
@@ -2202,10 +2241,10 @@ OPORTUNIDADES_TEMPLATE = """
                     <div class="oportunidad-detalles">
                         <p><strong>Tipo:</strong> {{ op.tipo }}</p>
                         {% if op.descripcion %}
-                        <p><strong>Descripción:</strong> {{ op.descripcion }}</p>
+                        <p><strong>Descripcion:</strong> {{ op.descripcion }}</p>
                         {% endif %}
                         {% if op.valor_estimado %}
-                        <p><strong>Valor estimado:</strong> {{ "%.2f"|format(op.valor_estimado) }}€</p>
+                        <p><strong>Valor estimado:</strong> {{ "%.2f"|format(op.valor_estimado) }} EUR</p>
                         {% endif %}
                         <p><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
                         {% if op.fecha_cierre %}
@@ -2214,6 +2253,7 @@ OPORTUNIDADES_TEMPLATE = """
                     </div>
                     
                     <div class="actions">
+                        <a href="/ver_oportunidad/{{ op.id }}" class="btn">Ver Detalle</a>
                         <a href="/ver_lead/{{ op.cliente_id }}" class="btn">Ver Comunidad</a>
                         <a href="/editar_oportunidad/{{ op.id }}" class="btn">Editar</a>
                     </div>
@@ -2221,8 +2261,8 @@ OPORTUNIDADES_TEMPLATE = """
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <h2>📭 No hay oportunidades todavía</h2>
-                    <p>Las oportunidades aparecerán aquí cuando las crees desde la vista de comunidades</p>
+                    <h2>No hay oportunidades todavia</h2>
+                    <p>Las oportunidades apareceran aqui cuando las crees desde la vista de comunidades</p>
                 </div>
             {% endif %}
         </div>
@@ -2268,7 +2308,7 @@ CREAR_OPORTUNIDAD_TEMPLATE = """
 </head>
 <body>
     <div class="header">
-        <h1>?? Nueva Oportunidad</h1>
+        <h1>Nueva Oportunidad</h1>
     </div>
     
     <div class="container">
@@ -2277,7 +2317,7 @@ CREAR_OPORTUNIDAD_TEMPLATE = """
             
             <div class="comunidad-info">
                 <p><strong>Comunidad:</strong> {{ cliente.nombre_cliente or cliente.direccion }}</p>
-                <p><strong>Dirección:</strong> {{ cliente.direccion }}, {{ cliente.localidad }}</p>
+                <p><strong>Direccion:</strong> {{ cliente.direccion }}, {{ cliente.localidad }}</p>
             </div>
             
             <form method="POST">
@@ -2285,33 +2325,31 @@ CREAR_OPORTUNIDAD_TEMPLATE = """
                     <label for="tipo">Tipo de Oportunidad *</label>
                     <select name="tipo" id="tipo" required>
                         <option value="">Seleccionar...</option>
-                        <option value="IPO vencida">IPO vencida</option>
-                        <option value="Cambio mantenedora">Cambio de mantenedora</option>
-                        <option value="Contrato próximo a vencer">Contrato próximo a vencer</option>
-                        <option value="Modernización">Modernización</option>
-                        <option value="Reparación">Reparación importante</option>
-                        <option value="Otro">Otro</option>
+                        <option value="Descontento con empresa mantenedora">Descontento con empresa mantenedora</option>
+                        <option value="Fecha de finalizacion de contrato proxima">Fecha de finalizacion de contrato proxima</option>
+                        <option value="Presupuesto elevado de subsanacion IPO">Presupuesto elevado de subsanacion IPO</option>
+                        <option value="Modernizacion / Sustitucion prevista">Modernizacion / Sustitucion prevista</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label for="descripcion">Descripción</label>
+                    <label for="descripcion">Descripcion</label>
                     <textarea name="descripcion" id="descripcion" placeholder="Detalles de la oportunidad..."></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="valor_estimado">Valor Estimado (€)</label>
+                    <label for="valor_estimado">Valor Estimado (EUR)</label>
                     <input type="number" name="valor_estimado" id="valor_estimado" step="0.01" placeholder="Ej: 5000">
                     <small>Valor estimado del contrato o servicio</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="observaciones">Observaciones</label>
-                    <textarea name="observaciones" id="observaciones" placeholder="Notas adicionales, contactos, próximos pasos..."></textarea>
+                    <textarea name="observaciones" id="observaciones" placeholder="Notas adicionales, contactos, proximos pasos..."></textarea>
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">✅ Crear Oportunidad</button>
+                    <button type="submit" class="btn btn-primary">Crear Oportunidad</button>
                     <a href="/ver_lead/{{ cliente.id }}" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
@@ -2354,17 +2392,19 @@ EDITAR_OPORTUNIDAD_TEMPLATE = """
         .estado-option label { display: block; padding: 15px; border: 2px solid #ddd; border-radius: 4px; text-align: center; cursor: pointer; transition: all 0.2s; }
         .estado-option input[type="radio"]:checked + label { border-color: #3498db; background: #ebf5fb; font-weight: bold; }
         
-        .form-actions { display: flex; gap: 10px; margin-top: 30px; }
+        .form-actions { display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap; }
         .btn { padding: 12px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; }
         .btn-primary { background: #3498db; color: white; }
         .btn-primary:hover { background: #2980b9; }
         .btn-secondary { background: #95a5a6; color: white; }
         .btn-secondary:hover { background: #7f8c8d; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>?? Editar Oportunidad</h1>
+        <h1>Editar Oportunidad</h1>
     </div>
     
     <div class="container">
@@ -2373,7 +2413,7 @@ EDITAR_OPORTUNIDAD_TEMPLATE = """
             
             <div class="comunidad-info">
                 <p><strong>Comunidad:</strong> {{ oportunidad.clientes.nombre_cliente or oportunidad.clientes.direccion }}</p>
-                <p><strong>Dirección:</strong> {{ oportunidad.clientes.direccion }}</p>
+                <p><strong>Direccion:</strong> {{ oportunidad.clientes.direccion }}</p>
                 <p><strong>Creada:</strong> {{ oportunidad.fecha_creacion[:10] }}</p>
             </div>
             
@@ -2381,12 +2421,10 @@ EDITAR_OPORTUNIDAD_TEMPLATE = """
                 <div class="form-group">
                     <label for="tipo">Tipo de Oportunidad *</label>
                     <select name="tipo" id="tipo" required>
-                        <option value="IPO vencida" {% if oportunidad.tipo == "IPO vencida" %}selected{% endif %}>IPO vencida</option>
-                        <option value="Cambio mantenedora" {% if oportunidad.tipo == "Cambio mantenedora" %}selected{% endif %}>Cambio de mantenedora</option>
-                        <option value="Contrato próximo a vencer" {% if oportunidad.tipo == "Contrato próximo a vencer" %}selected{% endif %}>Contrato próximo a vencer</option>
-                        <option value="Modernización" {% if oportunidad.tipo == "Modernización" %}selected{% endif %}>Modernización</option>
-                        <option value="Reparación" {% if oportunidad.tipo == "Reparación" %}selected{% endif %}>Reparación importante</option>
-                        <option value="Otro" {% if oportunidad.tipo == "Otro" %}selected{% endif %}>Otro</option>
+                        <option value="Descontento con empresa mantenedora" {% if oportunidad.tipo == "Descontento con empresa mantenedora" %}selected{% endif %}>Descontento con empresa mantenedora</option>
+                        <option value="Fecha de finalizacion de contrato proxima" {% if oportunidad.tipo == "Fecha de finalizacion de contrato proxima" %}selected{% endif %}>Fecha de finalizacion de contrato proxima</option>
+                        <option value="Presupuesto elevado de subsanacion IPO" {% if oportunidad.tipo == "Presupuesto elevado de subsanacion IPO" %}selected{% endif %}>Presupuesto elevado de subsanacion IPO</option>
+                        <option value="Modernizacion / Sustitucion prevista" {% if oportunidad.tipo == "Modernizacion / Sustitucion prevista" %}selected{% endif %}>Modernizacion / Sustitucion prevista</option>
                     </select>
                 </div>
                 
@@ -2395,39 +2433,158 @@ EDITAR_OPORTUNIDAD_TEMPLATE = """
                     <div class="estado-group">
                         <div class="estado-option">
                             <input type="radio" name="estado" id="activa" value="activa" {% if oportunidad.estado == "activa" %}checked{% endif %} required>
-                            <label for="activa">🟢 Activa</label>
+                            <label for="activa">Activa</label>
                         </div>
                         <div class="estado-option">
                             <input type="radio" name="estado" id="ganada" value="ganada" {% if oportunidad.estado == "ganada" %}checked{% endif %}>
-                            <label for="ganada">✅ Ganada</label>
+                            <label for="ganada">Ganada</label>
                         </div>
                         <div class="estado-option">
                             <input type="radio" name="estado" id="perdida" value="perdida" {% if oportunidad.estado == "perdida" %}checked{% endif %}>
-                            <label for="perdida">❌ Perdida</label>
+                            <label for="perdida">Perdida</label>
                         </div>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="descripcion">Descripción</label>
+                    <label for="descripcion">Descripcion</label>
                     <textarea name="descripcion" id="descripcion" placeholder="Detalles de la oportunidad...">{{ oportunidad.descripcion or '' }}</textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="valor_estimado">Valor Estimado (€)</label>
+                    <label for="valor_estimado">Valor Estimado (EUR)</label>
                     <input type="number" name="valor_estimado" id="valor_estimado" step="0.01" value="{{ oportunidad.valor_estimado or '' }}" placeholder="Ej: 5000">
                 </div>
                 
                 <div class="form-group">
                     <label for="observaciones">Observaciones</label>
-                    <textarea name="observaciones" id="observaciones" placeholder="Notas, seguimiento, próximos pasos...">{{ oportunidad.observaciones or '' }}</textarea>
+                    <textarea name="observaciones" id="observaciones" placeholder="Notas, seguimiento, proximos pasos...">{{ oportunidad.observaciones or '' }}</textarea>
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                     <a href="/ver_lead/{{ oportunidad.cliente_id }}" class="btn btn-secondary">Cancelar</a>
+                    <a href="/eliminar_oportunidad/{{ oportunidad.id }}" class="btn btn-danger" onclick="return confirm('¿Estas seguro de eliminar esta oportunidad?\n\nEsta accion no se puede deshacer.')">Eliminar Oportunidad</a>
                 </div>
             </form>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+VER_OPORTUNIDAD_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Oportunidad - AscensorAlert</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; }
+        
+        .header { background: #2c3e50; color: white; padding: 20px; }
+        .header h1 { font-size: 24px; }
+        
+        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card h2 { margin-bottom: 15px; color: #2c3e50; }
+        
+        .comunidad-info { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .comunidad-info p { margin-bottom: 5px; color: #666; }
+        
+        .info-row { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-weight: bold; color: #555; }
+        .info-value { color: #333; }
+        
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 500; }
+        .badge.activa { background: #d4edda; color: #155724; }
+        .badge.ganada { background: #d1ecf1; color: #0c5460; }
+        .badge.perdida { background: #f8d7da; color: #721c24; }
+        
+        .form-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+        
+        @media (max-width: 600px) {
+            .info-row { grid-template-columns: 1fr; gap: 5px; }
+            .info-label { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Detalle de Oportunidad</h1>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Informacion de la Comunidad</h2>
+            <div class="comunidad-info">
+                <p><strong>Nombre:</strong> {{ oportunidad.clientes.nombre_cliente or oportunidad.clientes.direccion }}</p>
+                <p><strong>Direccion:</strong> {{ oportunidad.clientes.direccion }}, {{ oportunidad.clientes.localidad }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Detalles de la Oportunidad</h2>
+            
+            <div class="info-row">
+                <div class="info-label">Estado:</div>
+                <div class="info-value">
+                    <span class="badge {{ oportunidad.estado }}">{{ oportunidad.estado|upper }}</span>
+                </div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">Tipo:</div>
+                <div class="info-value">{{ oportunidad.tipo }}</div>
+            </div>
+            
+            {% if oportunidad.descripcion %}
+            <div class="info-row">
+                <div class="info-label">Descripcion:</div>
+                <div class="info-value">{{ oportunidad.descripcion }}</div>
+            </div>
+            {% endif %}
+            
+            {% if oportunidad.valor_estimado %}
+            <div class="info-row">
+                <div class="info-label">Valor Estimado:</div>
+                <div class="info-value">{{ "%.2f"|format(oportunidad.valor_estimado) }} EUR</div>
+            </div>
+            {% endif %}
+            
+            <div class="info-row">
+                <div class="info-label">Fecha Creacion:</div>
+                <div class="info-value">{{ oportunidad.fecha_creacion[:10] }}</div>
+            </div>
+            
+            {% if oportunidad.fecha_cierre %}
+            <div class="info-row">
+                <div class="info-label">Fecha Cierre:</div>
+                <div class="info-value">{{ oportunidad.fecha_cierre[:10] }}</div>
+            </div>
+            {% endif %}
+            
+            {% if oportunidad.observaciones %}
+            <div class="info-row">
+                <div class="info-label">Observaciones:</div>
+                <div class="info-value">{{ oportunidad.observaciones }}</div>
+            </div>
+            {% endif %}
+            
+            <div class="form-actions">
+                <a href="/editar_oportunidad/{{ oportunidad.id }}" class="btn btn-primary">Editar</a>
+                <a href="/ver_lead/{{ oportunidad.cliente_id }}" class="btn btn-secondary">Ver Comunidad</a>
+                <a href="/oportunidades" class="btn btn-secondary">Volver a Oportunidades</a>
+            </div>
         </div>
     </div>
 </body>
