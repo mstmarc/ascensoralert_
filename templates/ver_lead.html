@@ -15,6 +15,9 @@
         .detalle-container { max-width: 1200px; margin: 0 auto; }
         .seccion { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ddd; }
         .seccion h2 { color: #366092; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #366092; }
+        .seccion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #366092; }
+        .seccion-header h2 { margin: 0; padding: 0; border: none; }
+        
         .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .info-item { padding: 10px; background: #f8f9fa; border-radius: 4px; }
         .info-item label { font-weight: bold; color: #366092; display: block; margin-bottom: 5px; font-size: 14px; }
@@ -28,8 +31,11 @@
         
         .btn-accion-small { background: #366092; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 12px; display: inline-block; transition: all 0.3s; margin: 2px; }
         .btn-accion-small:hover { background: #2a4a70; }
+        .btn-añadir-equipo { background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; transition: all 0.3s; }
+        .btn-añadir-equipo:hover { background: #218838; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         .botones-accion { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-        .no-equipos { text-align: center; padding: 30px; color: #999; font-style: italic; }
+        .no-equipos { text-align: center; padding: 30px; color: #999; font-style: italic; background: #f8f9fa; border-radius: 6px; border: 2px dashed #ddd; }
+        .no-equipos-con-boton { display: flex; flex-direction: column; align-items: center; gap: 15px; }
         
         .oportunidad-card { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #366092; }
         .oportunidad-card.activa { border-left-color: #28a745; background: #d4edda; }
@@ -51,7 +57,7 @@
         .visita-observaciones { color: #555; font-size: 14px; }
         .visita-oportunidad { color: #666; font-size: 12px; font-style: italic; margin-top: 5px; }
         
-        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } }
+        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } .seccion-header { flex-direction: column; align-items: flex-start; gap: 10px; } }
     </style>
 </head>
 <body>
@@ -81,6 +87,7 @@
         <div class="menu">
             <div class="detalle-container">
                 
+                <!-- INFORMACIÓN DE LA COMUNIDAD -->
                 <div class="seccion">
                     <h2>Informacion de la Comunidad</h2>
                     <div class="info-grid">
@@ -109,7 +116,9 @@
                     </div>
                     {% endif %}
                 </div>
-              <div class="seccion">
+
+                <!-- OPORTUNIDADES COMERCIALES -->
+                <div class="seccion">
                     <h2>Oportunidades Comerciales ({{ oportunidades|length }})</h2>
                     
                     {% if oportunidades %}
@@ -141,6 +150,7 @@
                     </div>
                 </div>
                 
+                <!-- HISTORIAL DE VISITAS -->
                 <div class="seccion">
                     <h2>Historial de Visitas ({{ (visitas_seguimiento|length) + 1 }})</h2>
                     
@@ -166,8 +176,14 @@
                     </div>
                 </div>
                 
+                <!-- EQUIPOS/ASCENSORES -->
                 <div class="seccion">
-                    <h2>Equipos/Ascensores ({{ equipos|length }})</h2>
+                    <div class="seccion-header">
+                        <h2>Equipos/Ascensores ({{ equipos|length }})</h2>
+                        <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn-añadir-equipo">
+                            🔧 Añadir Nuevo Equipo
+                        </a>
+                    </div>
                     
                     {% if equipos %}
                     <table class="equipos-tabla">
@@ -199,13 +215,18 @@
                         </tbody>
                     </table>
                     {% else %}
-                    <div class="no-equipos">No hay equipos registrados para esta comunidad</div>
+                    <div class="no-equipos no-equipos-con-boton">
+                        <p style="margin: 0;">🔧 Esta instalación aún no tiene equipos registrados</p>
+                        <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn-añadir-equipo">
+                            Añadir Primer Equipo
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
                 
+                <!-- BOTONES DE ACCIÓN -->
                 <div class="botones-accion">
                     <a href="/editar_lead/{{ lead.id }}" class="button">Editar Comunidad</a>
-                    <a href="/nuevo_equipo?cliente_id={{ lead.id }}" class="button">Añadir Equipo</a>
                     <a href="/leads_dashboard" class="button">Volver al Dashboard</a>
                 </div>
                 
@@ -226,6 +247,6 @@
             }
         });
     </script>
-<script src="/static/sidebar.js"></script>
+    <script src="/static/sidebar.js"></script>
 </body>
 </html>
