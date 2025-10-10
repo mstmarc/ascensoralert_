@@ -39,10 +39,15 @@ def add_sidebar_to_templates():
             skipped_count += 1
             continue
         
-        # Buscar </body> y añadir el script antes
-        if '</body>' in content:
-            # Reemplazar la primera ocurrencia de </body>
-            new_content = content.replace('</body>', sidebar_line + '</body>', 1)
+        # Buscar <script src="/static/sidebar.js"></script>
+</body> y añadir el script antes
+        if '<script src="/static/sidebar.js"></script>
+</body>' in content:
+            # Reemplazar la primera ocurrencia de <script src="/static/sidebar.js"></script>
+</body>
+            new_content = content.replace('<script src="/static/sidebar.js"></script>
+</body>', sidebar_line + '<script src="/static/sidebar.js"></script>
+</body>', 1)
             
             # Guardar el archivo modificado
             with open(html_file, 'w', encoding='utf-8') as f:
@@ -51,7 +56,8 @@ def add_sidebar_to_templates():
             print(f"✅ {filename} - Script añadido correctamente")
             modified_count += 1
         else:
-            print(f"⚠️  {filename} - No se encontró </body>, revisar manualmente")
+            print(f"⚠️  {filename} - No se encontró <script src="/static/sidebar.js"></script>
+</body>, revisar manualmente")
     
     print(f"\n{'='*50}")
     print(f"✅ Archivos modificados: {modified_count}")
