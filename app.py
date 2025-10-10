@@ -131,7 +131,8 @@ def formulario_lead():
         response = requests.post(f"{SUPABASE_URL}/rest/v1/clientes?select=id", json=data, headers=HEADERS)
         if response.status_code in [200, 201]:
             cliente_id = response.json()[0]["id"]
-            return redirect(f"/nuevo_equipo?cliente_id={cliente_id}")
+            # <<<< MODIFICADO: Cambiar a lead_id
+            return redirect(f"/nuevo_equipo?lead_id={cliente_id}")
         else:
             return f"<h3 style='color:red;'>Error al registrar lead</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
@@ -255,22 +256,33 @@ def eliminar_visita_admin(visita_id):
     
     return redirect("/visitas_administradores_dashboard")
 
-# Alta de Equipo
+# <<<< MODIFICADO COMPLETAMENTE - Alta de Equipo (ahora requiere lead_id)
 @app.route("/nuevo_equipo", methods=["GET", "POST"])
 def nuevo_equipo():
     if "usuario" not in session:
         return redirect("/")
-    cliente_id = request.args.get("cliente_id")
-
-    cliente_data = None
-    if cliente_id:
-        r = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{cliente_id}", headers=HEADERS)
-        if r.status_code == 200 and r.json():
-            cliente_data = r.json()[0]
-
+    
+    # VALIDAR que viene con lead_id
+    lead_id = request.args.get("lead_id")
+    
+    if not lead_id:
+        # Si no hay lead_id, redirigir al dashboard de leads
+        flash("Debes añadir equipos desde un lead específico", "error")
+        return redirect("/leads_dashboard")
+    
+    # Verificar que el lead existe
+    lead_url = f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}"
+    lead_response = requests.get(lead_url, headers=HEADERS)
+    
+    if lead_response.status_code != 200 or not lead_response.json():
+        flash("Lead no encontrado", "error")
+        return redirect("/leads_dashboard")
+    
+    lead_data = lead_response.json()[0]
+    
     if request.method == "POST":
         equipo_data = {
-            "cliente_id": request.form.get("cliente_id"),
+            "cliente_id": int(lead_id),  # Vincula con el lead
             "tipo_equipo": request.form.get("tipo_equipo"),
             "identificacion": request.form.get("identificacion"),
             "descripcion": request.form.get("observaciones"),
@@ -279,9 +291,11 @@ def nuevo_equipo():
             "ipo_proxima": request.form.get("ipo_proxima") or None
         }
 
-        required = [equipo_data["cliente_id"], equipo_data["tipo_equipo"]]
+        required = [equipo_data["tipo_equipo"]]
         if any(not field for field in required):
-            return "Datos del equipo inválidos", 400
+            return render_template("nuevo_equipo.html", 
+                                 lead=lead_data, 
+                                 error="Tipo de equipo es obligatorio")
 
         for key, value in equipo_data.items():
             if value == "":
@@ -289,11 +303,15 @@ def nuevo_equipo():
 
         res = requests.post(f"{SUPABASE_URL}/rest/v1/equipos", json=equipo_data, headers=HEADERS)
         if res.status_code in [200, 201]:
-            return render_template("equipo_success.html", cliente_id=cliente_id)
+            # Redirigir a ver el lead en lugar de mostrar success
+            flash("Equipo añadido correctamente", "success")
+            return redirect(f"/ver_lead/{lead_id}")
         else:
-            return f"<h3 style='color:red;'>Error al registrar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
+            return render_template("nuevo_equipo.html", 
+                                 lead=lead_data, 
+                                 error="Error al crear el equipo")
 
-    return render_template("nuevo_equipo.html", cliente=cliente_data)
+    return render_template("nuevo_equipo.html", lead=lead_data)
 
 # Crear visita de seguimiento
 @app.route("/crear_visita_seguimiento/<int:cliente_id>", methods=["GET", "POST"])
