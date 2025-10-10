@@ -1,1 +1,170 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oportunidades - AscensorAlert</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
+        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
+        .menu-lateral.active { right: 0; }
+        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
+        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        .stats { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; flex: 1; min-width: 150px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-card h3 { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .stat-card .number { font-size: 32px; font-weight: bold; }
+        .stat-card.activas .number { color: #27ae60; }
+        .stat-card.ganadas .number { color: #3498db; }
+        .stat-card.perdidas .number { color: #95a5a6; }
+        
+        .oportunidades-list { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .oportunidad-item { padding: 20px; border-bottom: 1px solid #eee; }
+        .oportunidad-item:last-child { border-bottom: none; }
+        .oportunidad-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+        .oportunidad-info h3 { font-size: 16px; margin-bottom: 5px; }
+        .oportunidad-info .ubicacion { color: #666; font-size: 14px; }
+        
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .badge.activa { background: #d4edda; color: #155724; }
+        .badge.ganada { background: #d1ecf1; color: #0c5460; }
+        .badge.perdida { background: #f8d7da; color: #721c24; }
+        
+        .oportunidad-detalles { margin-top: 10px; }
+        .oportunidad-detalles p { color: #666; font-size: 14px; margin-bottom: 5px; }
+        .oportunidad-detalles strong { color: #333; }
+        
+        .actions { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { display: inline-block; padding: 8px 16px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 14px; transition: background 0.3s; }
+        .btn:hover { background: #2980b9; }
+        
+        .empty-state { padding: 60px 20px; text-align: center; color: #666; }
+        .empty-state p { margin-top: 10px; }
+        
+        .alert { padding: 12px 20px; margin-bottom: 20px; border-radius: 4px; }
+        .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+            .stats { flex-direction: column; }
+            .stat-card { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Oportunidades Comerciales</h1>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="menu">
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="stats">
+                    <div class="stat-card activas">
+                        <h3>Activas</h3>
+                        <div class="number">{{ activas }}</div>
+                    </div>
+                    <div class="stat-card ganadas">
+                        <h3>Ganadas (Total)</h3>
+                        <div class="number">{{ ganadas }}</div>
+                    </div>
+                    <div class="stat-card perdidas">
+                        <h3>Perdidas</h3>
+                        <div class="number">{{ perdidas }}</div>
+                    </div>
+                </div>
+                
+                <div class="oportunidades-list">
+                    {% if oportunidades %}
+                        {% for op in oportunidades %}
+                        <div class="oportunidad-item">
+                            <div class="oportunidad-header">
+                                <div class="oportunidad-info">
+                                    <h3>{{ op.clientes.nombre_cliente or op.clientes.direccion }}</h3>
+                                    <div class="ubicacion">{{ op.clientes.direccion }} - {{ op.clientes.localidad }}</div>
+                                </div>
+                                <span class="badge {{ op.estado }}">{{ op.estado|upper }}</span>
+                            </div>
+                            
+                            <div class="oportunidad-detalles">
+                                <p><strong>Tipo:</strong> {{ op.tipo }}</p>
+                                {% if op.descripcion %}
+                                <p><strong>Descripcion:</strong> {{ op.descripcion }}</p>
+                                {% endif %}
+                                {% if op.valor_estimado %}
+                                <p><strong>Valor estimado:</strong> {{ "%.2f"|format(op.valor_estimado) }} EUR</p>
+                                {% endif %}
+                                <p><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
+                                {% if op.fecha_cierre %}
+                                <p><strong>Cerrada:</strong> {{ op.fecha_cierre[:10] }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="actions">
+                                <a href="/ver_oportunidad/{{ op.id }}" class="btn">Ver Detalle</a>
+                                <a href="/ver_lead/{{ op.cliente_id }}" class="btn">Ver Comunidad</a>
+                                <a href="/editar_oportunidad/{{ op.id }}" class="btn">Editar</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <h2>No hay oportunidades todavia</h2>
+                            <p>Las oportunidades apareceran aqui cuando las crees desde la vista de comunidades</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <br>
+                <a href="/home" class="button">Volver al Home</a>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
