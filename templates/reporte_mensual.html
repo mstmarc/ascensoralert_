@@ -1,1 +1,86 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Descargo Comercial</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle{display:none;position:fixed;top:20px;right:20px;z-index:1000;background:#366092;color:white;border:none;padding:10px 15px;border-radius:5px;cursor:pointer;font-size:20px;}
+        .menu-lateral{display:none;position:fixed;top:0;right:-300px;width:250px;height:100%;background:#2c3e50;z-index:999;transition:right 0.3s ease;padding-top:60px;box-shadow:-2px 0 5px rgba(0,0,0,0.3);}
+        .menu-lateral.active{right:0;}
+        .menu-lateral a{display:block;color:white;padding:15px 20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);transition:background 0.3s;}
+        .menu-lateral a:hover{background:rgba(255,255,255,0.1);}
+        @media (max-width:768px){.menu-toggle{display:block;}.menu-lateral{display:block;}}
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a>
+            </div>
+            <div class="title-container">
+                <h1>Descargo Comercial</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <h3>Generar Descargo Mensual</h3>
+            <form method="POST">
+                <label>Mes:</label><br>
+                <select name="mes" required>
+                    <option value="">-- Mes --</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select><br><br>
+                
+                <label>Año:</label><br>
+                <select name="año" required>
+                    <option value="">-- Año --</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                </select><br><br>
+                
+                <button type="submit" class="button">Generar Excel</button>
+            </form>
+            <br>
+            <a href="/home" class="button">Volver</a>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu(){
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        document.addEventListener('click',function(event){
+            const menu=document.getElementById('menuLateral');
+            const toggle=document.querySelector('.menu-toggle');
+            if(!menu.contains(event.target)&&!toggle.contains(event.target)){
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
