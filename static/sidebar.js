@@ -193,10 +193,6 @@
                     <span class="sidebar-integrated-icon">💰</span>
                     Oportunidades
                 </a>
-                <a href="/crear_oportunidad" class="sidebar-integrated-link">
-                    <span class="sidebar-integrated-icon">➕</span>
-                    Nueva Oportunidad
-                </a>
 
                 <div class="sidebar-integrated-divider"></div>
 
