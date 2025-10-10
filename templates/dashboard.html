@@ -1,1 +1,574 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Leads - AscensorAlert</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #366092;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .menu-lateral {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 999;
+            transition: right 0.3s ease;
+            padding-top: 60px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .menu-lateral.active {
+            right: 0;
+        }
+        
+        .menu-lateral a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s;
+        }
+        
+        .menu-lateral a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .buscador-destacado {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .buscador-input-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .buscador-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .buscador-input:focus {
+            outline: 3px solid rgba(255,255,255,0.5);
+        }
+        
+        .btn-buscar {
+            background: white;
+            color: #667eea;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-buscar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .buscador-label {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        .filtros {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filtro-grupo label {
+            font-weight: bold;
+            color: #366092;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .filtro-grupo select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        .filtro-grupo select:focus {
+            outline: none;
+            border-color: #366092;
+        }
+        
+        .btn-limpiar {
+            background: #6c757d;
+            color: white;
+            padding: 10px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-limpiar:hover {
+            background: #5a6268;
+        }
+        
+        .paginacion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 25px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .paginacion-info {
+            color: #366092;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .btn-paginacion {
+            background: #366092;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-paginacion:hover:not(:disabled) {
+            background: #2a4a70;
+            transform: translateY(-2px);
+        }
+        
+        .btn-paginacion:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .info-resultados {
+            text-align: center;
+            color: #366092;
+            margin: 15px 0;
+            font-weight: bold;
+            font-size: 16px;
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .tabla-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+            min-width: 800px;
+        }
+        
+        th {
+            background: #366092;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #2a4a70;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr:hover {
+            background: #e9ecef;
+        }
+        
+        .btn-accion {
+            background: #366092;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 13px;
+            display: inline-block;
+            transition: all 0.3s;
+            margin: 2px;
+        }
+        
+        .btn-accion:hover {
+            background: #2a4a70;
+        }
+        
+        .btn-ver {
+            background: #28a745;
+        }
+        
+        .btn-ver:hover {
+            background: #218838;
+        }
+        
+        .acciones-cell {
+            white-space: nowrap;
+        }
+        
+        .leyenda {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+        
+        .leyenda h3 {
+            color: #366092;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .leyenda-items {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #999;
+            flex-shrink: 0;
+        }
+        
+        .color-amarillo { background-color: #FFF59D; }
+        .color-rojo { background-color: #FFCDD2; }
+        
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+            
+            .buscador-destacado {
+                padding: 15px;
+            }
+            
+            .buscador-label {
+                font-size: 16px;
+            }
+            
+            .buscador-input-container {
+                flex-direction: column;
+            }
+            
+            .buscador-input {
+                min-width: 100%;
+            }
+            
+            .btn-buscar {
+                width: 100%;
+            }
+            
+            .filtros {
+                padding: 10px;
+            }
+            
+            .filtros-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 12px;
+                min-width: 600px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+            
+            .btn-accion {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .leyenda-items {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .paginacion-info {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Dashboard de Leads por Comunidades</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <form method="GET" action="/leads_dashboard">
+                <div class="buscador-destacado">
+                    <div class="buscador-label">Buscar por Direccion</div>
+                    <div class="buscador-input-container">
+                        <input 
+                            type="text" 
+                            name="buscar_direccion" 
+                            class="buscador-input"
+                            value="{{ buscar_direccion }}" 
+                            placeholder="Ej: Calle Mayor, Avenida..."
+                            autofocus
+                        >
+                        <button type="submit" class="btn-buscar">Buscar</button>
+                    </div>
+                </div>
+                
+                <div class="filtros">
+                    <div class="filtros-grid">
+                        <div class="filtro-grupo">
+                            <label>Localidad:</label>
+                            <select name="localidad">
+                                <option value="">Todas</option>
+                                {% for loc in localidades %}
+                                <option value="{{ loc }}" {% if filtro_localidad == loc %}selected{% endif %}>{{ loc }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label>Empresa Mantenedora:</label>
+                            <select name="empresa">
+                                <option value="">Todas</option>
+                                {% for emp in empresas %}
+                                <option value="{{ emp }}" {% if filtro_empresa == emp %}selected{% endif %}>{{ emp }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label>Urgencia IPO:</label>
+                            <select name="ipo_urgencia">
+                                <option value="">Todas</option>
+                                <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 dias antes</option>
+                                <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 dias</option>
+                                <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 dias</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <a href="/leads_dashboard" class="btn-limpiar">Limpiar Filtros</a>
+                </div>
+                
+                <input type="hidden" name="page" value="1">
+            </form>
+            
+            <div class="info-resultados">
+                Mostrando {{ rows|length }} registros de {{ total_registros }} totales
+            </div>
+            
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Anterior</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Anterior</button>
+                {% endif %}
+                
+                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
+                
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Siguiente</button>
+                {% endif %}
+            </div>
+            
+            <div class="leyenda">
+                <h3>Leyenda de Colores:</h3>
+                <div class="leyenda-items">
+                    <div class="leyenda-item">
+                        <span class="color-box color-amarillo"></span>
+                        <span><strong>IPO:</strong> 15 dias antes</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-rojo"></span>
+                        <span><strong>IPO:</strong> Pasada hasta 30 dias</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-amarillo"></span>
+                        <span><strong>Contrato:</strong> Vence 30-90 dias</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-rojo"></span>
+                        <span><strong>Contrato:</strong> Vencido o menos 30 dias</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tabla-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Direccion</th>
+                            <th>Localidad</th>
+                            <th>Num Asc</th>
+                            <th>Empresa Mant</th>
+                            <th>Proxima IPO</th>
+                            <th>Contrato Vence</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if rows %}
+                            {% for row in rows %}
+                            <tr>
+                                <td>{{ row.direccion }}</td>
+                                <td>{{ row.localidad }}</td>
+                                <td style="text-align: center;">{{ row.total_equipos }}</td>
+                                <td>{{ row.empresa_mantenedora }}</td>
+                                <td style="{{ row.color_ipo }}">{{ row.ipo_proxima }}</td>
+                                <td style="{{ row.color_contrato }}">{{ row.contrato_vence }}</td>
+                                <td class="acciones-cell">
+                                    <a href="/ver_lead/{{ row.lead_id }}" class="btn-accion btn-ver">Ver</a>
+                                    <a href="/editar_lead/{{ row.lead_id }}" class="btn-accion">Editar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                                    No se encontraron comunidades con los filtros aplicados
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Anterior</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Anterior</button>
+                {% endif %}
+                
+                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
+                
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Siguiente</button>
+                {% endif %}
+            </div>
+            
+            <br>
+            <a href="/home" class="button">Volver al Home</a>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
