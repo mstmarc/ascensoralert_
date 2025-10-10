@@ -1,1 +1,326 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitas Administradores - AscensorAlert</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #366092;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .menu-lateral {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 999;
+            transition: right 0.3s ease;
+            padding-top: 60px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .menu-lateral.active {
+            right: 0;
+        }
+        
+        .menu-lateral a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s;
+        }
+        
+        .menu-lateral a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .paginacion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .paginacion-info {
+            color: #366092;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .btn-paginacion {
+            background: #366092;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-paginacion:hover:not(:disabled) {
+            background: #2a4a70;
+            transform: translateY(-2px);
+        }
+        
+        .btn-paginacion:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .info-resultados {
+            text-align: center;
+            color: #366092;
+            margin: 15px 0;
+            font-weight: bold;
+            font-size: 16px;
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        
+        th {
+            background: #366092;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #2a4a70;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr:hover {
+            background: #e9ecef;
+        }
+        
+        .btn-accion {
+            background: #366092;
+            color: white;
+            padding: 6px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 13px;
+            display: inline-block;
+            transition: all 0.3s;
+            margin: 2px;
+        }
+        
+        .btn-accion:hover {
+            background: #2a4a70;
+        }
+        
+        .btn-ver {
+            background: #28a745;
+        }
+        
+        .btn-ver:hover {
+            background: #218838;
+        }
+        
+        .observaciones-resumen {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+            
+            .observaciones-resumen {
+                max-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Visitas a Administradores</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="info-resultados">
+                Mostrando {{ visitas|length }} registros de {{ total_registros }} totales
+            </div>
+            
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}" class="btn-paginacion">Anterior</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Anterior</button>
+                {% endif %}
+                
+                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
+                
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}" class="btn-paginacion">Siguiente</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Siguiente</button>
+                {% endif %}
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Administrador</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if visitas %}
+                        {% for visita in visitas %}
+                        <tr>
+                            <td>{{ visita.fecha_visita }}</td>
+                            <td>{{ visita.administrador_fincas }}</td>
+                            <td>
+                                <div class="observaciones-resumen">
+                                    {{ visita.observaciones or '-' }}
+                                </div>
+                            </td>
+                            <td style="white-space: nowrap;">
+                                <a href="/ver_visita_admin/{{ visita.id }}" class="btn-accion btn-ver">Ver</a>
+                                <a href="/editar_visita_admin/{{ visita.id }}" class="btn-accion">Editar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 40px; color: #999;">
+                                No se encontraron visitas registradas
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}" class="btn-paginacion">Anterior</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Anterior</button>
+                {% endif %}
+                
+                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
+                
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}" class="btn-paginacion">Siguiente</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Siguiente</button>
+                {% endif %}
+            </div>
+            
+            <br>
+            <a href="/home" class="button">Volver al Home</a>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
