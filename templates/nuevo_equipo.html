@@ -1,1 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Equipo</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .botones-form { display: flex; gap: 10px; margin-top: 20px; }
+        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
+        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
+        .menu-lateral.active { right: 0; }
+        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
+        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+<header>
+    <div class="header-container">
+        <div class="logo-container">
+            <a href="/home">
+                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+            </a>
+        </div>
+        <div class="title-container">
+            <h1>Introducir datos</h1>
+        </div>
+    </div>
+</header>
+    <main>
+        <div class="menu">
+            <form method="POST">
+                <input type="hidden" name="cliente_id" value="{{ cliente['id'] }}">
 
+                <label>Tipo de Equipo:</label><br>
+                <select name="tipo_equipo" required>
+                    <option value="">-- Selecciona un tipo --</option>
+                    <option value="Ascensor">Ascensor</option>
+                    <option value="Elevador">Elevador</option>
+                    <option value="Montaplatos">Montaplatos</option>
+                    <option value="Montacargas">Montacargas</option>
+                    <option value="Plataforma Salvaescaleras">Plataforma Salvaescaleras</option>
+                    <option value="Otro">Otro</option>
+                </select><br><br>
+
+                <label>Identificación del Ascensor:</label><br>
+                <input type="text" name="identificacion" placeholder="Ej: Ascensor A, Principal, Garaje, etc."><br><br>
+
+                <label>Fecha Vencimiento Contrato:</label><br>
+                <input type="date" name="fecha_vencimiento_contrato"><br><br>
+
+                <label>RAE (solo para ascensores):</label><br>
+                <input type="text" name="rae"><br><br>
+
+                <label>Próxima IPO: <em>(consultar placa del ascensor)</em></label><br>
+                <input type="date" name="ipo_proxima"><br><br>
+
+                <label>Observaciones:</label><br>
+                <textarea name="observaciones"></textarea><br><br>
+
+                <div class="botones-form">
+                    <button type="submit" class="button">Registrar Equipo</button>
+                    <a href="/home" class="button">Volver</a>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
