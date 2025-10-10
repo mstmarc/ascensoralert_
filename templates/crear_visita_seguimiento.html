@@ -1,1 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Visita de Seguimiento</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #366092;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .menu-lateral {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 999;
+            transition: right 0.3s ease;
+            padding-top: 60px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .menu-lateral.active { right: 0; }
+        
+        .menu-lateral a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s;
+        }
+        
+        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+        
+        .comunidad-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .comunidad-info p {
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .botones-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Registrar Visita de Seguimiento</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <div class="comunidad-info">
+                <p><strong>Comunidad:</strong> {{ cliente.nombre_cliente or cliente.direccion }}</p>
+                <p><strong>Direccion:</strong> {{ cliente.direccion }}</p>
+                <p><strong>Localidad:</strong> {{ cliente.localidad }}</p>
+            </div>
+            
+            <form method="POST">
+                <label>Fecha de Visita:</label><br>
+                <input type="date" name="fecha_visita" value="{{ fecha_hoy }}" required><br><br>
 
+                {% if oportunidades %}
+                <label>Oportunidad Relacionada (opcional):</label><br>
+                <select name="oportunidad_id">
+                    <option value="">-- Sin vincular a oportunidad --</option>
+                    {% for op in oportunidades %}
+                    <option value="{{ op.id }}" {% if oportunidad_id_preseleccionada and oportunidad_id_preseleccionada|string == op.id|string %}selected{% endif %}>
+                        {{ op.tipo }} - {{ op.estado }}
+                    </option>
+                    {% endfor %}
+                </select><br><br>
+                {% endif %}
+
+                <label>Observaciones / Resultado de la Visita:</label><br>
+                <textarea name="observaciones" rows="8" required placeholder="Describe que se hablo, acuerdos alcanzados, proximos pasos..."></textarea><br><br>
+
+                <div class="botones-form">
+                    <button type="submit" class="button">Registrar Visita</button>
+                    <a href="/ver_lead/{{ cliente.id }}" class="button">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
