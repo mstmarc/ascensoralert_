@@ -1,1 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Lead</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .botones-form { display: flex; gap: 10px; margin-top: 20px; }
+        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
+        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
+        .menu-lateral.active { right: 0; }
+        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
+        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+    <div class="header-container">
+        <div class="logo-container">
+            <a href="/home">
+                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+            </a>
+        </div>
+        <div class="title-container">
+            <h1>Introducir datos</h1>
+        </div>
+    </div>
+</header>
+    <main>
+        <div class="menu">
+            <form method="POST">
+                <label>Fecha de Visita:</label><br>
+                <input type="date" name="fecha_visita" value="{{ fecha_hoy }}" required><br><br>
 
+                <label>Tipo de Lead:</label><br>
+                <select name="tipo_lead" required>
+                    <option value="">-- Selecciona un tipo --</option>
+                    <option value="Comunidad">Comunidad</option>
+                    <option value="Hotel/Apartamentos">Hotel/Apartamentos</option>
+                    <option value="Empresa">Empresa</option>
+                    <option value="Otro">Otro</option>
+                </select><br><br>
+
+                <label>Dirección:</label><br>
+                <input type="text" name="direccion" required><br><br>
+
+                <label>Nombre de la Instalación:</label><br>
+                <input type="text" name="nombre_lead" required><br><br>
+
+                <label>Código Postal:</label><br>
+                <input type="text" name="codigo_postal"><br><br>
+
+                <label>Localidad:</label><br>
+                <select name="localidad" required>
+                    <option value="">-- Selecciona una localidad --</option>
+                    <option value="Agaete">Agaete</option>
+                    <option value="Agüimes">Agüimes</option>
+                    <option value="Arguineguín">Arguineguín</option>
+                    <option value="Arinaga">Arinaga</option>
+                    <option value="Artenara">Artenara</option>
+                    <option value="Arucas">Arucas</option>
+                    <option value="Carrizal">Carrizal</option>
+                    <option value="Cruce de Arinaga">Cruce de Arinaga</option>
+                    <option value="Cruce de Melenara">Cruce de Melenara</option>
+                    <option value="Cruce de Sardina">Cruce de Sardina</option>
+                    <option value="El Burrero">El Burrero</option>
+                    <option value="El Tablero">El Tablero</option>
+                    <option value="Firgas">Firgas</option>
+                    <option value="Gáldar">Gáldar</option>
+                    <option value="Ingenio">Ingenio</option>
+                    <option value="Jinámar">Jinámar</option>
+                    <option value="La Aldea de San Nicolás">La Aldea de San Nicolás</option>
+                    <option value="La Pardilla">La Pardilla</option>
+                    <option value="Las Palmas de Gran Canaria">Las Palmas de Gran Canaria</option>
+                    <option value="Maspalomas">Maspalomas</option>
+                    <option value="Melenara">Melenara</option>
+                    <option value="Mogán">Mogán</option>
+                    <option value="Moya">Moya</option>
+                    <option value="Playa de Mogán">Playa de Mogán</option>
+                    <option value="Playa del Inglés">Playa del Inglés</option>
+                    <option value="Puerto Rico">Puerto Rico</option>
+                    <option value="Salinetas">Salinetas</option>
+                    <option value="San Bartolomé de Tirajana">San Bartolomé de Tirajana</option>
+                    <option value="San Fernando">San Fernando</option>
+                    <option value="San Mateo">San Mateo</option>
+                    <option value="Santa Brígida">Santa Brígida</option>
+                    <option value="Santa Lucía de Tirajana">Santa Lucía de Tirajana</option>
+                    <option value="Santa María de Guía">Santa María de Guía</option>
+                    <option value="Sardina del Norte">Sardina del Norte</option>
+                    <option value="Tafira">Tafira</option>
+                    <option value="Tejeda">Tejeda</option>
+                    <option value="Telde">Telde</option>
+                    <option value="Teror">Teror</option>
+                    <option value="Valleseco">Valleseco</option>
+                    <option value="Valsequillo">Valsequillo</option>
+                    <option value="Vecindario">Vecindario</option>
+                </select><br><br>
+
+                <label>Zona:</label><br>
+                <input type="text" name="zona"><br><br>
+
+                <label>Persona de Contacto:</label><br>
+                <input type="text" name="persona_contacto"><br><br>
+
+                <label>Teléfono:</label><br>
+                <input type="text" name="telefono"><br><br>
+
+                <label>Email:</label><br>
+                <input type="email" name="email"><br><br>
+
+                <label>Administrador de Fincas:</label><br>
+                <input type="text" name="administrador_fincas" placeholder="Nombre de la empresa administradora"><br><br>
+
+                <label>Empresa Mantenedora Actual:</label><br>
+                <select name="empresa_mantenedora">
+                    <option value="">-- Selecciona una empresa --</option>
+                    <option value="FAIN Ascensores">FAIN Ascensores</option>
+                    <option value="KONE">KONE</option>
+                    <option value="Otis">Otis</option>
+                    <option value="Schindler">Schindler</option>
+                    <option value="TKE">TKE</option>
+                    <option value="Orona">Orona</option>
+                    <option value="APlus Ascensores">APlus Ascensores</option>
+                    <option value="Ascensores Canarias">Ascensores Canarias</option>
+                    <option value="Ascensores Domingo">Ascensores Domingo</option>
+                    <option value="Ascensores Vulcano Canarias">Ascensores Vulcano Canarias</option>
+                    <option value="Elevadores Canarios">Elevadores Canarios</option>
+                    <option value="Fedes Ascensores">Fedes Ascensores</option>
+                    <option value="Gratecsa">Gratecsa</option>
+                    <option value="Lift Technology">Lift Technology</option>
+                    <option value="Omega Elevadores">Omega Elevadores</option>
+                    <option value="Q Ascensores">Q Ascensores</option>
+                </select><br><br>
+
+                <label>Número de Ascensores:</label><br>
+                <select name="numero_ascensores" required>
+                    <option value="">-- Cuantos ascensores hay? --</option>
+                    <option value="1">1 ascensor</option>
+                    <option value="2">2 ascensores</option>
+                    <option value="3">3 ascensores</option>
+                    <option value="4">4 ascensores</option>
+                    <option value="5">5 ascensores</option>
+                    <option value="6">6 ascensores</option>
+                    <option value="7">7 ascensores</option>
+                    <option value="8">8 ascensores</option>
+                    <option value="9">9 ascensores</option>
+                    <option value="10">10 ascensores</option>
+                    <option value="11">11 ascensores</option>
+                    <option value="12">12 ascensores</option>
+                    <option value="13">13 ascensores</option>
+                    <option value="14">14 ascensores</option>
+                    <option value="15">15 ascensores</option>
+                    <option value="16">16 ascensores</option>
+                    <option value="17">17 ascensores</option>
+                    <option value="18">18 ascensores</option>
+                    <option value="19">19 ascensores</option>
+                    <option value="20">20 ascensores</option>
+                    <option value="20+">Más de 20 ascensores</option>
+                </select><br><br>
+
+                <label>Observaciones:</label><br>
+                <textarea name="observaciones"></textarea><br><br>
+
+                <div class="botones-form">
+                    <button type="submit" class="button">Registrar Lead</button>
+                    <a href="/home" class="button">Volver</a>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
