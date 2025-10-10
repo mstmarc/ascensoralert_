@@ -1,1 +1,174 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Visita Administrador</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #366092;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .menu-lateral {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 999;
+            transition: right 0.3s ease;
+            padding-top: 60px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .menu-lateral.active {
+            right: 0;
+        }
+        
+        .menu-lateral a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s;
+        }
+        
+        .menu-lateral a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .detalle-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .info-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #366092;
+        }
+        
+        .info-value {
+            color: #333;
+        }
+        
+        .botones-accion {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+            
+            .info-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Detalle Visita Administrador</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <div class="detalle-card">
+                <h2>Informacion de la Visita</h2>
+                
+                <div class="info-row">
+                    <div class="info-label">Fecha:</div>
+                    <div class="info-value">{{ visita.fecha_visita }}</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Administrador:</div>
+                    <div class="info-value">{{ visita.administrador_fincas }}</div>
+                </div>
+                
+                {% if visita.persona_contacto %}
+                <div class="info-row">
+                    <div class="info-label">Persona de Contacto:</div>
+                    <div class="info-value">{{ visita.persona_contacto }}</div>
+                </div>
+                {% endif %}
+                
+                <div class="info-row">
+                    <div class="info-label">Observaciones:</div>
+                    <div class="info-value">{{ visita.observaciones or '-' }}</div>
+                </div>
+                
+                <div class="botones-accion">
+                    <a href="/editar_visita_admin/{{ visita.id }}" class="button">Editar</a>
+                    <a href="/visitas_administradores_dashboard" class="button">Volver</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
