@@ -177,21 +177,13 @@
                 <div class="sidebar-integrated-divider"></div>
 
                 <!-- Leads -->
-                <a href="/formulario" class="sidebar-integrated-link">
+                <a href="/formulario_lead" class="sidebar-integrated-link">
                     <span class="sidebar-integrated-icon">📋</span>
                     Visita a Instalación
                 </a>
                 <a href="/leads_dashboard" class="sidebar-integrated-link">
                     <span class="sidebar-integrated-icon">📊</span>
                     Leads
-                </a>
-
-                <div class="sidebar-integrated-divider"></div>
-
-                <!-- Equipos -->
-                <a href="/nuevo_equipo" class="sidebar-integrated-link">
-                    <span class="sidebar-integrated-icon">🔧</span>
-                    Nuevo Equipo
                 </a>
 
                 <div class="sidebar-integrated-divider"></div>
