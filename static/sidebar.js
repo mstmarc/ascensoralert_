@@ -1,287 +1,354 @@
-// sidebar.js - Menú Hamburguesa para navegación
+// sidebar.js - Menú lateral fijo integrado
 (function() {
-    // CSS del menú
-    const menuCSS = `
-        /* Botón hamburguesa */
-        .hamburger-btn {
+    // CSS del menú lateral fijo
+    const sidebarCSS = `
+        /* Layout principal con sidebar */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sidebar fijo */
+        .sidebar-fixed {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            z-index: 900;
+            overflow-y: auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Logo en sidebar */
+        .sidebar-logo {
+            padding: 25px 20px;
+            text-align: center;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-logo img {
+            max-width: 180px;
+            height: auto;
+        }
+
+        /* Navegación */
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        /* Links del menú */
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #495057;
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-link:hover {
+            background: #e9ecef;
+            color: #1e3c72;
+            border-left-color: #1e3c72;
+        }
+
+        .sidebar-link.active {
+            background: #e7f1ff;
+            color: #1e3c72;
+            border-left-color: #1e3c72;
+            font-weight: 500;
+        }
+
+        .sidebar-icon {
+            width: 24px;
+            font-size: 18px;
+            margin-right: 12px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        /* Títulos de sección */
+        .sidebar-section-title {
+            padding: 20px 20px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Separador */
+        .sidebar-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 15px 15px;
+        }
+
+        /* Footer del sidebar */
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .sidebar-user {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-user-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
             background: #1e3c72;
             color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.3s;
+            margin-right: 10px;
+            font-size: 14px;
         }
 
-        .hamburger-btn:hover {
-            background: #2a5298;
-            transform: scale(1.05);
+        /* Ajustar contenido principal */
+        header, main {
+            margin-left: 260px;
         }
 
-        /* Menú desplegable */
-        .hamburger-menu {
+        /* Responsive - ocultar en móvil */
+        @media (max-width: 768px) {
+            .sidebar-fixed {
+                transform: translateX(-260px);
+                transition: transform 0.3s;
+            }
+
+            .sidebar-fixed.mobile-open {
+                transform: translateX(0);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            }
+
+            header, main {
+                margin-left: 0;
+            }
+
+            /* Botón toggle para móvil */
+            .sidebar-mobile-toggle {
+                display: flex !important;
+            }
+
+            /* Overlay para móvil */
+            .sidebar-overlay-mobile {
+                display: block;
+            }
+        }
+
+        /* Botón toggle móvil */
+        .sidebar-mobile-toggle {
             position: fixed;
-            top: 0;
-            left: -350px;
-            width: 320px;
-            height: 100vh;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            box-shadow: 2px 0 15px rgba(0,0,0,0.3);
-            z-index: 999;
-            transition: left 0.3s ease;
-            overflow-y: auto;
+            top: 20px;
+            left: 20px;
+            z-index: 901;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
-        .hamburger-menu.open {
-            left: 0;
+        .sidebar-mobile-toggle:hover {
+            background: #2a5298;
         }
 
-        /* Overlay oscuro */
-        .menu-overlay {
+        /* Overlay móvil */
+        .sidebar-overlay-mobile {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.5);
-            z-index: 998;
+            z-index: 899;
             display: none;
         }
 
-        .menu-overlay.show {
+        .sidebar-overlay-mobile.show {
             display: block;
         }
 
-        /* Header del menú */
-        .menu-header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.1);
-            position: relative;
+        /* Scrollbar personalizado */
+        .sidebar-fixed::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .menu-header img {
-            max-width: 180px;
-            margin-bottom: 10px;
+        .sidebar-fixed::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
 
-        .menu-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 5px;
-            transition: background 0.2s;
+        .sidebar-fixed::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
         }
 
-        .menu-close:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        /* Enlaces del menú */
-        .menu-content {
-            padding: 20px 0 100px 0;
-        }
-
-        .menu-link {
-            display: block;
-            padding: 15px 25px;
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            transition: all 0.2s;
-            border-left: 4px solid transparent;
-        }
-
-        .menu-link:hover {
-            background: rgba(255,255,255,0.1);
-            border-left-color: #4CAF50;
-            padding-left: 30px;
-        }
-
-        .menu-link .emoji {
-            display: inline-block;
-            width: 30px;
-            font-size: 18px;
-        }
-
-        /* Secciones */
-        .menu-section {
-            margin: 10px 0;
-        }
-
-        .menu-section-title {
-            padding: 15px 25px 10px;
-            color: rgba(255,255,255,0.6);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-
-        .menu-divider {
-            height: 1px;
-            background: rgba(255,255,255,0.1);
-            margin: 15px 20px;
-        }
-
-        /* Usuario info */
-        .menu-footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: 20px;
-            background: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .menu-user {
-            color: white;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hamburger-menu {
-                width: 280px;
-                left: -280px;
-            }
+        .sidebar-fixed::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
     `;
 
-    // HTML del menú
-    const menuHTML = `
-        <!-- Botón Hamburguesa -->
-        <button class="hamburger-btn" onclick="abrirMenu()">☰</button>
+    // HTML del sidebar
+    const sidebarHTML = `
+        <!-- Toggle móvil -->
+        <button class="sidebar-mobile-toggle" onclick="toggleSidebarMobile()">☰</button>
+        
+        <!-- Overlay móvil -->
+        <div class="sidebar-overlay-mobile" id="sidebarOverlay" onclick="closeSidebarMobile()"></div>
 
-        <!-- Overlay -->
-        <div class="menu-overlay" id="menuOverlay" onclick="cerrarMenu()"></div>
-
-        <!-- Menú -->
-        <nav class="hamburger-menu" id="hamburguerMenu">
-            <div class="menu-header">
-                <button class="menu-close" onclick="cerrarMenu()">✕</button>
-                <img src="/static/logo-fedes-ascensores.png" alt="Fedes Ascensores">
+        <!-- Sidebar fijo -->
+        <aside class="sidebar-fixed" id="sidebarFixed">
+            <!-- Logo -->
+            <div class="sidebar-logo">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Fedes Ascensores">
+                </a>
             </div>
 
-            <div class="menu-content">
+            <!-- Navegación -->
+            <nav class="sidebar-nav">
                 <!-- Inicio -->
-                <a href="/home" class="menu-link">
-                    <span class="emoji">🏠</span> Inicio
+                <a href="/home" class="sidebar-link">
+                    <span class="sidebar-icon">🏠</span>
+                    Inicio
                 </a>
 
-                <div class="menu-divider"></div>
+                <div class="sidebar-divider"></div>
 
-                <!-- Leads -->
-                <div class="menu-section">
-                    <div class="menu-section-title">Leads & Visitas</div>
-                    <a href="/formulario" class="menu-link">
-                        <span class="emoji">📋</span> Nueva Visita
-                    </a>
-                    <a href="/leads_dashboard" class="menu-link">
-                        <span class="emoji">📊</span> Dashboard Leads
-                    </a>
-                </div>
+                <!-- Leads & Visitas -->
+                <div class="sidebar-section-title">Leads & Visitas</div>
+                <a href="/formulario" class="sidebar-link">
+                    <span class="sidebar-icon">📋</span>
+                    Nueva Visita
+                </a>
+                <a href="/leads_dashboard" class="sidebar-link">
+                    <span class="sidebar-icon">📊</span>
+                    Dashboard Leads
+                </a>
 
-                <div class="menu-divider"></div>
+                <div class="sidebar-divider"></div>
 
                 <!-- Equipos -->
-                <div class="menu-section">
-                    <div class="menu-section-title">Equipos</div>
-                    <a href="/nuevo_equipo" class="menu-link">
-                        <span class="emoji">🔧</span> Nuevo Equipo
-                    </a>
-                </div>
+                <div class="sidebar-section-title">Equipos</div>
+                <a href="/nuevo_equipo" class="sidebar-link">
+                    <span class="sidebar-icon">🔧</span>
+                    Nuevo Equipo
+                </a>
 
-                <div class="menu-divider"></div>
+                <div class="sidebar-divider"></div>
 
                 <!-- Oportunidades -->
-                <div class="menu-section">
-                    <div class="menu-section-title">Oportunidades</div>
-                    <a href="/oportunidades" class="menu-link">
-                        <span class="emoji">💰</span> Ver Oportunidades
-                    </a>
-                    <a href="/crear_oportunidad" class="menu-link">
-                        <span class="emoji">➕</span> Nueva Oportunidad
-                    </a>
-                </div>
+                <div class="sidebar-section-title">Oportunidades</div>
+                <a href="/oportunidades" class="sidebar-link">
+                    <span class="sidebar-icon">💰</span>
+                    Ver Oportunidades
+                </a>
+                <a href="/crear_oportunidad" class="sidebar-link">
+                    <span class="sidebar-icon">➕</span>
+                    Nueva Oportunidad
+                </a>
 
-                <div class="menu-divider"></div>
+                <div class="sidebar-divider"></div>
 
-                <!-- Visitas Admin -->
-                <div class="menu-section">
-                    <div class="menu-section-title">Visitas Administrador</div>
-                    <a href="/visita_administrador" class="menu-link">
-                        <span class="emoji">👤</span> Nueva Visita Admin
-                    </a>
-                    <a href="/visitas_admin_dashboard" class="menu-link">
-                        <span class="emoji">📈</span> Dashboard Visitas Admin
-                    </a>
-                </div>
+                <!-- Visitas Administrador -->
+                <div class="sidebar-section-title">Visitas Administrador</div>
+                <a href="/visita_administrador" class="sidebar-link">
+                    <span class="sidebar-icon">👤</span>
+                    Nueva Visita
+                </a>
+                <a href="/visitas_admin_dashboard" class="sidebar-link">
+                    <span class="sidebar-icon">📈</span>
+                    Dashboard
+                </a>
 
-                <div class="menu-divider"></div>
+                <div class="sidebar-divider"></div>
 
                 <!-- Reportes -->
-                <a href="/reporte_mensual" class="menu-link">
-                    <span class="emoji">📊</span> Reporte Mensual
+                <a href="/reporte_mensual" class="sidebar-link">
+                    <span class="sidebar-icon">📊</span>
+                    Reporte Mensual
                 </a>
-            </div>
 
-            <div class="menu-footer">
-                <div class="menu-user">👤 Usuario</div>
-                <a href="/logout" class="menu-link" style="padding: 10px 0;">
-                    <span class="emoji">🚪</span> Cerrar Sesión
+                <!-- Espacio para el footer -->
+                <div style="height: 80px;"></div>
+            </nav>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-user-icon">👤</div>
+                    <span>Usuario</span>
+                </div>
+                <a href="/logout" class="sidebar-link" style="padding: 8px 0; font-size: 14px;">
+                    <span class="sidebar-icon">🚪</span>
+                    Cerrar Sesión
                 </a>
             </div>
-        </nav>
+        </aside>
     `;
 
     // Insertar CSS
     const style = document.createElement('style');
-    style.textContent = menuCSS;
+    style.textContent = sidebarCSS;
     document.head.appendChild(style);
 
     // Insertar HTML
-    document.body.insertAdjacentHTML('afterbegin', menuHTML);
+    document.body.insertAdjacentHTML('afterbegin', sidebarHTML);
 
-    // Funciones globales
-    window.abrirMenu = function() {
-        document.getElementById('hamburguerMenu').classList.add('open');
-        document.getElementById('menuOverlay').classList.add('show');
-        document.body.style.overflow = 'hidden';
-    };
-
-    window.cerrarMenu = function() {
-        document.getElementById('hamburguerMenu').classList.remove('open');
-        document.getElementById('menuOverlay').classList.remove('show');
-        document.body.style.overflow = 'auto';
-    };
-
-    // Cerrar con tecla ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            cerrarMenu();
+    // Marcar link activo según la URL actual
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.sidebar-link');
+    links.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
         }
+    });
+
+    // Funciones para móvil
+    window.toggleSidebarMobile = function() {
+        const sidebar = document.getElementById('sidebarFixed');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('show');
+    };
+
+    window.closeSidebarMobile = function() {
+        const sidebar = document.getElementById('sidebarFixed');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('show');
+    };
+
+    // Cerrar al hacer clic en un link en móvil
+    links.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                closeSidebarMobile();
+            }
+        });
     });
 })();
