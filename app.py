@@ -481,4 +481,524 @@ def reporte_mensual():
     
     return render_template("reporte_mensual.html")
 
-# CONTINÚA EN SIGUIENTE MENSAJE CON MÁS RUTAS...
+# DASHBOARD MEJORADO CON PAGINACIÓN Y BÚSQUEDA
+@app.route("/leads_dashboard")
+def leads_dashboard():
+    if "usuario" not in session:
+        return redirect("/")
+    
+    page = int(request.args.get("page", 1))
+    per_page = 25
+    offset = (page - 1) * per_page
+    
+    filtro_localidad = request.args.get("localidad", "")
+    filtro_empresa = request.args.get("empresa", "")
+    buscar_direccion = request.args.get("buscar_direccion", "")
+    filtro_ipo_urgencia = request.args.get("ipo_urgencia", "")
+    
+    query_params = []
+    
+    if filtro_localidad:
+        query_params.append(f"localidad=eq.{filtro_localidad}")
+    
+    if filtro_empresa:
+        query_params.append(f"empresa_mantenedora=eq.{filtro_empresa}")
+    
+    if buscar_direccion:
+        query_params.append(f"direccion=ilike.*{buscar_direccion}*")
+    
+    query_string = "&".join(query_params) if query_params else ""
+    
+    count_url = f"{SUPABASE_URL}/rest/v1/clientes?select=*"
+    if query_string:
+        count_url += f"&{query_string}"
+    
+    count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"})
+    total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
+    total_pages = max(1, (total_registros + per_page - 1) // per_page)
+    
+    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=*&limit={per_page}&offset={offset}"
+    if query_string:
+        data_url += f"&{query_string}"
+    
+    response = requests.get(data_url, headers=HEADERS)
+    
+    if response.status_code != 200:
+        return f"<h3 style='color:red;'>Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+    
+    leads_data = response.json()
+    rows = []
+    localidades_disponibles = set()
+    empresas_disponibles = set()
+    
+    all_leads_response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=localidad,empresa_mantenedora", headers=HEADERS)
+    if all_leads_response.status_code == 200:
+        all_leads = all_leads_response.json()
+        for lead in all_leads:
+            if lead.get("localidad"):
+                localidades_disponibles.add(lead["localidad"])
+            if lead.get("empresa_mantenedora"):
+                empresas_disponibles.add(lead["empresa_mantenedora"])
+    
+    for lead in leads_data:
+        lead_id = lead["id"]
+        
+        equipos_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", 
+            headers=HEADERS
+        )
+        
+        if equipos_response.status_code == 200:
+            equipos = equipos_response.json()
+            
+            direccion = lead.get("direccion", "-")
+            localidad = lead.get("localidad", "-")
+            empresa_mantenedora = lead.get("empresa_mantenedora", "-")
+            total_equipos = len(equipos) if equipos else lead.get("numero_ascensores", 0)
+            
+            ipo_proxima = None
+            contrato_vence = None
+            
+            if equipos:
+                for equipo in equipos:
+                    ipo_equipo = equipo.get("ipo_proxima")
+                    if ipo_equipo:
+                        try:
+                            ipo_date = datetime.strptime(ipo_equipo, "%Y-%m-%d")
+                            if ipo_proxima is None or ipo_date < ipo_proxima:
+                                ipo_proxima = ipo_date
+                        except:
+                            pass
+                    
+                    contrato_equipo = equipo.get("fecha_vencimiento_contrato")
+                    if contrato_equipo:
+                        try:
+                            contrato_date = datetime.strptime(contrato_equipo, "%Y-%m-%d")
+                            if contrato_vence is None or contrato_date < contrato_vence:
+                                contrato_vence = contrato_date
+                        except:
+                            pass
+            
+            ipo_proxima_str = ipo_proxima.strftime("%d/%m/%Y") if ipo_proxima else "-"
+            contrato_vence_str = contrato_vence.strftime("%d/%m/%Y") if contrato_vence else "-"
+            
+            color_ipo = calcular_color_ipo(ipo_proxima_str)
+            color_contrato = calcular_color_contrato(contrato_vence_str)
+            
+            row = {
+                "lead_id": lead_id,
+                "direccion": direccion,
+                "localidad": localidad,
+                "total_equipos": total_equipos,
+                "empresa_mantenedora": empresa_mantenedora,
+                "ipo_proxima": ipo_proxima_str,
+                "ipo_fecha_original": ipo_proxima,
+                "contrato_vence": contrato_vence_str,
+                "contrato_fecha_original": contrato_vence,
+                "color_ipo": color_ipo,
+                "color_contrato": color_contrato
+            }
+            
+            incluir_fila = True
+            if filtro_ipo_urgencia and ipo_proxima:
+                hoy = datetime.now()
+                diferencia_dias = (ipo_proxima - hoy).days
+                
+                if filtro_ipo_urgencia == "15_dias" and not (-15 <= diferencia_dias < 0):
+                    incluir_fila = False
+                elif filtro_ipo_urgencia == "ipo_pasada_30" and not (0 <= diferencia_dias <= 30):
+                    incluir_fila = False
+                elif filtro_ipo_urgencia == "30_90_dias" and not (30 < diferencia_dias <= 90):
+                    incluir_fila = False
+            
+            if incluir_fila:
+                rows.append(row)
+    
+    rows.sort(key=lambda x: x["ipo_fecha_original"] if x["ipo_fecha_original"] else datetime.max)
+    
+    localidades_disponibles = sorted([l for l in localidades_disponibles if l])
+    empresas_disponibles = sorted([e for e in empresas_disponibles if e])
+    
+    return render_template("dashboard.html",
+        rows=rows,
+        localidades=localidades_disponibles,
+        empresas=empresas_disponibles,
+        filtro_localidad=filtro_localidad,
+        filtro_empresa=filtro_empresa,
+        buscar_direccion=buscar_direccion,
+        filtro_ipo_urgencia=filtro_ipo_urgencia,
+        page=page,
+        total_pages=total_pages,
+        total_registros=total_registros,
+        per_page=per_page
+    )
+
+# Ver detalle completo del Lead
+@app.route("/ver_lead/<int:lead_id>")
+def ver_lead(lead_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}", headers=HEADERS)
+    if response.status_code != 200 or not response.json():
+        return f"<h3 style='color:red;'>Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
+    
+    lead = response.json()[0]
+    
+    equipos_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
+    equipos = []
+    if equipos_response.status_code == 200:
+        equipos_raw = equipos_response.json()
+        for equipo in equipos_raw:
+            fecha_venc = equipo.get("fecha_vencimiento_contrato", "-")
+            if fecha_venc and fecha_venc != "-":
+                try:
+                    partes = fecha_venc.split("-")
+                    if len(partes) == 3:
+                        fecha_venc = f"{partes[2]}/{partes[1]}/{partes[0]}"
+                except:
+                    pass
+            
+            ipo = equipo.get("ipo_proxima", "-")
+            if ipo and ipo != "-":
+                try:
+                    partes = ipo.split("-")
+                    if len(partes) == 3:
+                        ipo = f"{partes[2]}/{partes[1]}/{partes[0]}"
+                except:
+                    pass
+            
+            equipos.append({
+                "id": equipo.get("id"),
+                "tipo_equipo": equipo.get("tipo_equipo", "-"),
+                "identificacion": equipo.get("identificacion", "-"),
+                "rae": equipo.get("rae", "-"),
+                "ipo_proxima": ipo,
+                "fecha_vencimiento_contrato": fecha_venc,
+                "descripcion": equipo.get("descripcion", "-")
+            })
+    
+    oportunidades_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=eq.{lead_id}&order=fecha_creacion.desc",
+        headers=HEADERS
+    )
+    oportunidades = []
+    if oportunidades_response.status_code == 200:
+        oportunidades = oportunidades_response.json()
+    
+    visitas_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/visitas_seguimiento?cliente_id=eq.{lead_id}&select=*,oportunidades(tipo)&order=fecha_visita.desc",
+        headers=HEADERS
+    )
+    visitas_seguimiento = []
+    if visitas_response.status_code == 200:
+        visitas_seguimiento = visitas_response.json()
+    
+    return render_template("ver_lead.html", 
+        lead=lead, 
+        equipos=equipos, 
+        oportunidades=oportunidades,
+        visitas_seguimiento=visitas_seguimiento
+    )
+
+# Eliminar Lead
+@app.route("/eliminar_lead/<int:lead_id>")
+def eliminar_lead(lead_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
+    requests.delete(f"{SUPABASE_URL}/rest/v1/visitas_seguimiento?cliente_id=eq.{lead_id}", headers=HEADERS)
+    
+    response = requests.delete(f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}", headers=HEADERS)
+    
+    if response.status_code in [200, 204]:
+        return redirect("/leads_dashboard")
+    else:
+        return f"<h3 style='color:red;'>Error al eliminar Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
+
+# Eliminar Equipo
+@app.route("/eliminar_equipo/<int:equipo_id>")
+def eliminar_equipo(equipo_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    equipo_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
+    if equipo_response.status_code == 200 and equipo_response.json():
+        cliente_id = equipo_response.json()[0].get("cliente_id")
+        
+        response = requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
+        
+        if response.status_code in [200, 204]:
+            return redirect(f"/ver_lead/{cliente_id}")
+        else:
+            return f"<h3 style='color:red;'>Error al eliminar Equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+    else:
+        return f"<h3 style='color:red;'>Error al obtener Equipo</h3><a href='/home'>Volver</a>"
+
+# Editar Lead
+@app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
+def editar_lead(lead_id):
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        data = {
+            "fecha_visita": request.form.get("fecha_visita"),
+            "tipo_cliente": request.form.get("tipo_lead"),
+            "direccion": request.form.get("direccion"),
+            "nombre_cliente": request.form.get("nombre_lead"),
+            "codigo_postal": request.form.get("codigo_postal"),
+            "localidad": request.form.get("localidad"),
+            "zona": request.form.get("zona"),
+            "persona_contacto": request.form.get("persona_contacto"),
+            "telefono": request.form.get("telefono"),
+            "email": request.form.get("email"),
+            "administrador_fincas": request.form.get("administrador_fincas"),
+            "empresa_mantenedora": request.form.get("empresa_mantenedora"),
+            "numero_ascensores": request.form.get("numero_ascensores"),
+            "observaciones": request.form.get("observaciones")
+        }
+        res = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}",
+            json=data,
+            headers=HEADERS
+        )
+        if res.status_code in [200, 204]:
+            return redirect("/leads_dashboard")
+        else:
+            return f"<h3 style='color:red;'>Error al actualizar Lead</h3><pre>{res.text}</pre><a href='/leads_dashboard'>Volver</a>"
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}",
+        headers=HEADERS
+    )
+    if response.status_code == 200 and response.json():
+        lead = response.json()[0]
+    else:
+        return f"<h3 style='color:red;'>Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
+
+    return render_template("editar_lead.html", lead=lead)
+
+@app.route("/editar_equipo/<int:equipo_id>", methods=["GET", "POST"])
+def editar_equipo(equipo_id):
+    if "usuario" not in session:
+        return redirect("/")
+
+    response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
+    if response.status_code != 200 or not response.json():
+        return f"<h3 style='color:red;'>Error al obtener equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+
+    equipo = response.json()[0]
+
+    if request.method == "POST":
+        data = {
+            "tipo_equipo": request.form.get("tipo_equipo"),
+            "identificacion": request.form.get("identificacion"),
+            "descripcion": request.form.get("observaciones"),
+            "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
+            "rae": request.form.get("rae"),
+            "ipo_proxima": request.form.get("ipo_proxima") or None
+        }
+
+        for key, value in data.items():
+            if value == "":
+                data[key] = None
+
+        update_url = f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}"
+        res = requests.patch(update_url, json=data, headers=HEADERS)
+        if res.status_code in [200, 204]:
+            return redirect("/leads_dashboard")
+        else:
+            return f"<h3 style='color:red;'>Error al actualizar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
+
+    return render_template("editar_equipo.html", equipo=equipo)
+
+# ============================================
+# MÓDULO DE OPORTUNIDADES
+# ============================================
+
+@app.route("/oportunidades")
+def oportunidades():
+    if "usuario" not in session:
+        return redirect("/")
+    
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?"
+            f"select=*,clientes(nombre_cliente,direccion,localidad)"
+            f"&order=fecha_creacion.desc",
+            headers=HEADERS
+        )
+        
+        if response.status_code == 200:
+            oportunidades_list = response.json()
+            
+            activas = sum(1 for o in oportunidades_list if o['estado'] == 'activa')
+            ganadas = sum(1 for o in oportunidades_list if o['estado'] == 'ganada')
+            perdidas = sum(1 for o in oportunidades_list if o['estado'] == 'perdida')
+            
+            return render_template("oportunidades.html",
+                                        oportunidades=oportunidades_list,
+                                        activas=activas,
+                                        ganadas=ganadas,
+                                        perdidas=perdidas)
+        else:
+            flash("Error al cargar oportunidades", "error")
+            return redirect(url_for("home"))
+            
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+        return redirect(url_for("home"))
+
+
+@app.route("/crear_oportunidad/<int:cliente_id>", methods=["GET", "POST"])
+def crear_oportunidad(cliente_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    if request.method == "POST":
+        try:
+            data = {
+                "cliente_id": cliente_id,
+                "tipo": request.form["tipo"],
+                "descripcion": request.form.get("descripcion", ""),
+                "valor_estimado": request.form.get("valor_estimado") or None,
+                "observaciones": request.form.get("observaciones", ""),
+                "estado": "activa"
+            }
+            
+            response = requests.post(
+                f"{SUPABASE_URL}/rest/v1/oportunidades",
+                headers=HEADERS,
+                json=data
+            )
+            
+            if response.status_code == 201:
+                flash("Oportunidad creada exitosamente!", "success")
+                return redirect(url_for("ver_lead", lead_id=cliente_id))
+            else:
+                flash("Error al crear oportunidad", "error")
+                
+        except Exception as e:
+            flash(f"Error: {str(e)}", "error")
+    
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{cliente_id}",
+            headers=HEADERS
+        )
+        if response.status_code == 200:
+            cliente = response.json()[0]
+            return render_template("crear_oportunidad.html", cliente=cliente)
+    except:
+        flash("Error al cargar datos del cliente", "error")
+        return redirect(url_for("leads_dashboard"))
+
+
+@app.route("/editar_oportunidad/<int:oportunidad_id>", methods=["GET", "POST"])
+def editar_oportunidad(oportunidad_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    if request.method == "POST":
+        try:
+            data = {
+                "tipo": request.form["tipo"],
+                "descripcion": request.form.get("descripcion", ""),
+                "estado": request.form["estado"],
+                "valor_estimado": request.form.get("valor_estimado") or None,
+                "observaciones": request.form.get("observaciones", "")
+            }
+            
+            if data["estado"] in ["ganada", "perdida"]:
+                data["fecha_cierre"] = datetime.now().isoformat()
+            
+            response = requests.patch(
+                f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
+                headers=HEADERS,
+                json=data
+            )
+            
+            if response.status_code == 204:
+                flash("Oportunidad actualizada correctamente", "success")
+                return redirect(url_for("oportunidades"))
+            else:
+                flash("Error al actualizar", "error")
+                
+        except Exception as e:
+            flash(f"Error: {str(e)}", "error")
+    
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(nombre_cliente,direccion)",
+            headers=HEADERS
+        )
+        if response.status_code == 200:
+            oportunidad = response.json()[0]
+            return render_template("editar_oportunidad.html", oportunidad=oportunidad)
+    except:
+        flash("Error al cargar oportunidad", "error")
+        return redirect(url_for("oportunidades"))
+
+
+@app.route("/ver_oportunidad/<int:oportunidad_id>")
+def ver_oportunidad(oportunidad_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(nombre_cliente,direccion,localidad)",
+            headers=HEADERS
+        )
+        if response.status_code == 200 and response.json():
+            oportunidad = response.json()[0]
+            return render_template("ver_oportunidad.html", oportunidad=oportunidad)
+        else:
+            flash("Oportunidad no encontrada", "error")
+            return redirect(url_for("oportunidades"))
+    except:
+        flash("Error al cargar oportunidad", "error")
+        return redirect(url_for("oportunidades"))
+
+
+@app.route("/eliminar_oportunidad/<int:oportunidad_id>")
+def eliminar_oportunidad(oportunidad_id):
+    if "usuario" not in session:
+        return redirect("/")
+    
+    try:
+        response_get = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=cliente_id",
+            headers=HEADERS
+        )
+        
+        if response_get.status_code == 200 and response_get.json():
+            cliente_id = response_get.json()[0]["cliente_id"]
+            
+            response = requests.delete(
+                f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
+                headers=HEADERS
+            )
+            
+            if response.status_code in [200, 204]:
+                flash("Oportunidad eliminada correctamente", "success")
+                return redirect(f"/ver_lead/{cliente_id}")
+            else:
+                flash("Error al eliminar oportunidad", "error")
+                return redirect(url_for("oportunidades"))
+        else:
+            flash("Oportunidad no encontrada", "error")
+            return redirect(url_for("oportunidades"))
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+        return redirect(url_for("oportunidades"))
+
+# ============================================
+# CIERRE
+# ============================================
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
