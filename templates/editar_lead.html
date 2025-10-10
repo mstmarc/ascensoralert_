@@ -1,1 +1,135 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Lead</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .botones-form{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+        .btn-eliminar-form{background:#dc3545;}
+        .btn-eliminar-form:hover{background:#c82333;}
+        .menu-toggle{display:none;position:fixed;top:20px;right:20px;z-index:1000;background:#366092;color:white;border:none;padding:10px 15px;border-radius:5px;cursor:pointer;font-size:20px;}
+        .menu-lateral{display:none;position:fixed;top:0;right:-300px;width:250px;height:100%;background:#2c3e50;z-index:999;transition:right 0.3s ease;padding-top:60px;box-shadow:-2px 0 5px rgba(0,0,0,0.3);}
+        .menu-lateral.active{right:0;}
+        .menu-lateral a{display:block;color:white;padding:15px 20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);transition:background 0.3s;}
+        .menu-lateral a:hover{background:rgba(255,255,255,0.1);}
+        @media (max-width:768px){.menu-toggle{display:block;}.menu-lateral{display:block;}}
+    </style>
+    <script>
+        function confirmarEliminacionComunidad(){
+            return confirm('⚠️ ATENCIÓN: Esto eliminará la comunidad y TODOS sus equipos asociados.\n\n¿Estás seguro de que quieres continuar?\n\nEsta acción no se puede deshacer.');
+        }
+    </script>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a>
+            </div>
+            <div class="title-container">
+                <h1>Editar Lead</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <form method="POST">
+                <label>Fecha:</label><br>
+                <input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br>
+                
+                <label>Tipo:</label><br>
+                <select name="tipo_lead" required>
+                    <option value="">-- Tipo --</option>
+                    <option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option>
+                    <option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option>
+                    <option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option>
+                    <option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option>
+                </select><br><br>
+                
+                <label>Dirección:</label><br>
+                <input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br>
+                
+                <label>Nombre:</label><br>
+                <input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br>
+                
+                <label>CP:</label><br>
+                <input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br>
+                
+                <label>Localidad:</label><br>
+                <input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br>
+                
+                <label>Zona:</label><br>
+                <input type="text" name="zona" value="{{ lead.zona }}"><br><br>
+                
+                <label>Contacto:</label><br>
+                <input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br>
+                
+                <label>Teléfono:</label><br>
+                <input type="text" name="telefono" value="{{ lead.telefono }}"><br><br>
+                
+                <label>Email:</label><br>
+                <input type="email" name="email" value="{{ lead.email }}"><br><br>
+                
+                <label>Admin Fincas:</label><br>
+                <input type="text" name="administrador_fincas" value="{{ lead.administrador_fincas }}"><br><br>
+                
+                <label>Empresa Mantenedora:</label><br>
+                <select name="empresa_mantenedora">
+                    <option value="">-- Selecciona --</option>
+                    <option value="FAIN Ascensores" {% if lead.empresa_mantenedora == 'FAIN Ascensores' %}selected{% endif %}>FAIN Ascensores</option>
+                    <option value="KONE" {% if lead.empresa_mantenedora == 'KONE' %}selected{% endif %}>KONE</option>
+                    <option value="Otis" {% if lead.empresa_mantenedora == 'Otis' %}selected{% endif %}>Otis</option>
+                    <option value="Schindler" {% if lead.empresa_mantenedora == 'Schindler' %}selected{% endif %}>Schindler</option>
+                    <option value="TKE" {% if lead.empresa_mantenedora == 'TKE' %}selected{% endif %}>TKE</option>
+                    <option value="Orona" {% if lead.empresa_mantenedora == 'Orona' %}selected{% endif %}>Orona</option>
+                    <option value="APlus Ascensores" {% if lead.empresa_mantenedora == 'APlus Ascensores' %}selected{% endif %}>APlus Ascensores</option>
+                    <option value="Ascensores Canarias" {% if lead.empresa_mantenedora == 'Ascensores Canarias' %}selected{% endif %}>Ascensores Canarias</option>
+                    <option value="Ascensores Domingo" {% if lead.empresa_mantenedora == 'Ascensores Domingo' %}selected{% endif %}>Ascensores Domingo</option>
+                    <option value="Ascensores Vulcano Canarias" {% if lead.empresa_mantenedora == 'Ascensores Vulcano Canarias' %}selected{% endif %}>Ascensores Vulcano Canarias</option>
+                    <option value="Elevadores Canarios" {% if lead.empresa_mantenedora == 'Elevadores Canarios' %}selected{% endif %}>Elevadores Canarios</option>
+                    <option value="Fedes Ascensores" {% if lead.empresa_mantenedora == 'Fedes Ascensores' %}selected{% endif %}>Fedes Ascensores</option>
+                    <option value="Gratecsa" {% if lead.empresa_mantenedora == 'Gratecsa' %}selected{% endif %}>Gratecsa</option>
+                    <option value="Lift Technology" {% if lead.empresa_mantenedora == 'Lift Technology' %}selected{% endif %}>Lift Technology</option>
+                    <option value="Omega Elevadores" {% if lead.empresa_mantenedora == 'Omega Elevadores' %}selected{% endif %}>Omega Elevadores</option>
+                    <option value="Q Ascensores" {% if lead.empresa_mantenedora == 'Q Ascensores' %}selected{% endif %}>Q Ascensores</option>
+                </select><br><br>
+                
+                <label>Num Ascensores:</label><br>
+                <input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br>
+                
+                <label>Observaciones:</label><br>
+                <textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br>
+                
+                <div class="botones-form">
+                    <button type="submit" class="button">Actualizar</button>
+                    <a href="/leads_dashboard" class="button">Volver</a>
+                    <a href="/eliminar_lead/{{ lead.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacionComunidad()">Eliminar Comunidad</a>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu(){
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        document.addEventListener('click',function(event){
+            const menu=document.getElementById('menuLateral');
+            const toggle=document.querySelector('.menu-toggle');
+            if(!menu.contains(event.target)&&!toggle.contains(event.target)){
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
