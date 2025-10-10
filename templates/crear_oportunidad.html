@@ -1,1 +1,128 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Oportunidad - AscensorAlert</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
+        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
+        .menu-lateral.active { right: 0; }
+        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
+        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 10px; color: #366092; }
+        .comunidad-info { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .comunidad-info p { margin-bottom: 5px; color: #666; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group small { color: #666; font-size: 12px; display: block; margin-top: 5px; }
+        
+        .form-actions { display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #27ae60; color: white; }
+        .btn-primary:hover { background: #229954; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+        
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Nueva Oportunidad</h1>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="menu">
+            <div class="container">
+                <div class="card">
+                    <h2>Crear Oportunidad Comercial</h2>
+                    
+                    <div class="comunidad-info">
+                        <p><strong>Comunidad:</strong> {{ cliente.nombre_cliente or cliente.direccion }}</p>
+                        <p><strong>Direccion:</strong> {{ cliente.direccion }}, {{ cliente.localidad }}</p>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="tipo">Tipo de Oportunidad *</label>
+                            <select name="tipo" id="tipo" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Descontento con empresa mantenedora">Descontento con empresa mantenedora</option>
+                                <option value="Fecha de finalizacion de contrato proxima">Fecha de finalizacion de contrato proxima</option>
+                                <option value="Presupuesto elevado de subsanacion IPO">Presupuesto elevado de subsanacion IPO</option>
+                                <option value="Modernizacion / Sustitucion prevista">Modernizacion / Sustitucion prevista</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="descripcion">Descripcion</label>
+                            <textarea name="descripcion" id="descripcion" placeholder="Detalles de la oportunidad..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valor_estimado">Valor Estimado (EUR)</label>
+                            <input type="number" name="valor_estimado" id="valor_estimado" step="0.01" placeholder="Ej: 5000">
+                            <small>Valor estimado del contrato o servicio</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="observaciones">Observaciones</label>
+                            <textarea name="observaciones" id="observaciones" placeholder="Notas adicionales, contactos, proximos pasos..."></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Crear Oportunidad</button>
+                            <a href="/ver_lead/{{ cliente.id }}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
