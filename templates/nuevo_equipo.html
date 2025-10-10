@@ -3,92 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario Equipo</title>
-    <link rel="stylesheet" href="/static/styles.css?v=5">
-    <style>
-        .botones-form { display: flex; gap: 10px; margin-top: 20px; }
-        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
-        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
-        .menu-lateral.active { right: 0; }
-        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
-        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
-        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } }
-    </style>
+    <title>Nuevo Equipo - Fedes Ascensores</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <nav class="menu-lateral" id="menuLateral">
-        <a href="/home">Inicio</a>
-        <a href="/leads_dashboard">Ver Comunidades</a>
-        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
-        <a href="/oportunidades">Oportunidades</a>
-        <a href="/reporte_mensual">Descargo Comercial</a>
-        <a href="/logout">Cerrar Sesión</a>
-    </nav>
-<header>
-    <div class="header-container">
-        <div class="logo-container">
-            <a href="/home">
-                <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
-            </a>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Nuevo Equipo</h1>
+            </div>
         </div>
-        <div class="title-container">
-            <h1>Introducir datos</h1>
-        </div>
-    </div>
-</header>
+    </header>
+
     <main>
         <div class="menu">
-            <form method="POST">
-                <input type="hidden" name="cliente_id" value="{{ cliente['id'] }}">
+            <!-- Información del Lead -->
+            <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
+                <h3 style="margin: 0 0 10px 0; color: #0066cc;">📍 Añadiendo equipo a:</h3>
+                <p style="margin: 5px 0;"><strong>Dirección:</strong> {{ lead.direccion }}</p>
+                <p style="margin: 5px 0;"><strong>Localidad:</strong> {{ lead.localidad }}</p>
+                <p style="margin: 5px 0;"><strong>Nombre:</strong> {{ lead.nombre_instalacion }}</p>
+            </div>
 
-                <label>Tipo de Equipo:</label><br>
-                <select name="tipo_equipo" required>
-                    <option value="">-- Selecciona un tipo --</option>
-                    <option value="Ascensor">Ascensor</option>
-                    <option value="Elevador">Elevador</option>
-                    <option value="Montaplatos">Montaplatos</option>
-                    <option value="Montacargas">Montacargas</option>
-                    <option value="Plataforma Salvaescaleras">Plataforma Salvaescaleras</option>
-                    <option value="Otro">Otro</option>
+            {% if error %}
+            <div style="background: #ffe6e6; color: #cc0000; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #cc0000;">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                <h3>Datos del Equipo</h3>
+
+                <label>Identificador del Ascensor:</label><br>
+                <input type="text" name="identificador" placeholder="Ej: A, B, C, 1, 2... (Opcional)"><br><br>
+
+                <label>Marca: *</label><br>
+                <input type="text" name="marca" required placeholder="Marca del ascensor"><br><br>
+
+                <label>Modelo: *</label><br>
+                <input type="text" name="modelo" required placeholder="Modelo del ascensor"><br><br>
+
+                <label>Número de Serie:</label><br>
+                <input type="text" name="numero_serie" placeholder="Número de serie"><br><br>
+
+                <label>Año de Fabricación:</label><br>
+                <input type="number" name="ano_fabricacion" min="1900" max="2099" placeholder="Ej: 2015"><br><br>
+
+                <label>Empresa Mantenedora:</label><br>
+                <input type="text" name="empresa_mantenedora" placeholder="Empresa actual de mantenimiento"><br><br>
+
+                <label>Tipo de Contrato:</label><br>
+                <select name="tipo_contrato">
+                    <option value="">-- Selecciona --</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Reparación">Reparación</option>
+                    <option value="Modernización">Modernización</option>
+                    <option value="Integral">Integral</option>
                 </select><br><br>
 
-                <label>Identificación del Ascensor:</label><br>
-                <input type="text" name="identificacion" placeholder="Ej: Ascensor A, Principal, Garaje, etc."><br><br>
+                <label>Fecha de Vencimiento del Contrato:</label><br>
+                <input type="date" name="fecha_vencimiento"><br><br>
 
-                <label>Fecha Vencimiento Contrato:</label><br>
-                <input type="date" name="fecha_vencimiento_contrato"><br><br>
-
-                <label>RAE (solo para ascensores):</label><br>
-                <input type="text" name="rae"><br><br>
-
-                <label>Próxima IPO: <em>(consultar placa del ascensor)</em></label><br>
+                <label>Próxima IPO:</label><br>
                 <input type="date" name="ipo_proxima"><br><br>
 
                 <label>Observaciones:</label><br>
-                <textarea name="observaciones"></textarea><br><br>
+                <textarea name="observaciones" rows="4" placeholder="Observaciones adicionales sobre el equipo"></textarea><br><br>
 
-                <div class="botones-form">
-                    <button type="submit" class="button">Registrar Equipo</button>
-                    <a href="/home" class="button">Volver</a>
-                </div>
+                <button type="submit" class="button">✅ Crear Equipo</button>
+                <a href="/ver_lead/{{ lead.id }}" class="button" style="background: #6c757d;">Cancelar</a>
             </form>
         </div>
     </main>
-    
-    <script>
-        function toggleMenu() {
-            document.getElementById('menuLateral').classList.toggle('active');
-        }
-        
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('menuLateral');
-            const toggle = document.querySelector('.menu-toggle');
-            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
-                menu.classList.remove('active');
-            }
-        });
-    </script>
-<script src="/static/sidebar.js"></script>
+
+    <script src="/static/sidebar.js"></script>
 </body>
 </html>
