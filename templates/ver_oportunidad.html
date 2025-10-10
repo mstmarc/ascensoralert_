@@ -1,1 +1,156 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Oportunidad - AscensorAlert</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
+        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
+        .menu-lateral.active { right: 0; }
+        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
+        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card h2 { margin-bottom: 15px; color: #366092; }
+        
+        .comunidad-info { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .comunidad-info p { margin-bottom: 5px; color: #666; }
+        
+        .info-row { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-weight: bold; color: #555; }
+        .info-value { color: #333; }
+        
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 500; }
+        .badge.activa { background: #d4edda; color: #155724; }
+        .badge.ganada { background: #d1ecf1; color: #0c5460; }
+        .badge.perdida { background: #f8d7da; color: #721c24; }
+        
+        .form-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+        
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+            .card { padding: 20px; }
+            .info-row { grid-template-columns: 1fr; gap: 5px; }
+            .info-label { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Detalle de Oportunidad</h1>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="menu">
+            <div class="container">
+                <div class="card">
+                    <h2>Informacion de la Comunidad</h2>
+                    <div class="comunidad-info">
+                        <p><strong>Nombre:</strong> {{ oportunidad.clientes.nombre_cliente or oportunidad.clientes.direccion }}</p>
+                        <p><strong>Direccion:</strong> {{ oportunidad.clientes.direccion }}, {{ oportunidad.clientes.localidad }}</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Detalles de la Oportunidad</h2>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Estado:</div>
+                        <div class="info-value">
+                            <span class="badge {{ oportunidad.estado }}">{{ oportunidad.estado|upper }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Tipo:</div>
+                        <div class="info-value">{{ oportunidad.tipo }}</div>
+                    </div>
+                    
+                    {% if oportunidad.descripcion %}
+                    <div class="info-row">
+                        <div class="info-label">Descripcion:</div>
+                        <div class="info-value">{{ oportunidad.descripcion }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if oportunidad.valor_estimado %}
+                    <div class="info-row">
+                        <div class="info-label">Valor Estimado:</div>
+                        <div class="info-value">{{ "%.2f"|format(oportunidad.valor_estimado) }} EUR</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="info-row">
+                        <div class="info-label">Fecha Creacion:</div>
+                        <div class="info-value">{{ oportunidad.fecha_creacion[:10] }}</div>
+                    </div>
+                    
+                    {% if oportunidad.fecha_cierre %}
+                    <div class="info-row">
+                        <div class="info-label">Fecha Cierre:</div>
+                        <div class="info-value">{{ oportunidad.fecha_cierre[:10] }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if oportunidad.observaciones %}
+                    <div class="info-row">
+                        <div class="info-label">Observaciones:</div>
+                        <div class="info-value">{{ oportunidad.observaciones }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-actions">
+                        <a href="/crear_visita_seguimiento/{{ oportunidad.cliente_id }}?oportunidad_id={{ oportunidad.id }}" class="btn btn-primary">Registrar Visita</a>
+                        <a href="/editar_oportunidad/{{ oportunidad.id }}" class="btn btn-primary">Editar</a>
+                        <a href="/ver_lead/{{ oportunidad.cliente_id }}" class="btn btn-secondary">Ver Comunidad</a>
+                        <a href="/oportunidades" class="btn btn-secondary">Volver a Oportunidades</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
