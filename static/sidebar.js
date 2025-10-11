@@ -17,9 +17,9 @@
         .sidebar-integrated {
             position: fixed;
             left: 0;
-            top: 120px; /* Ajusta según altura de tu header */
+            top: 60px; /* Ajustado al header compacto */
             width: 240px;
-            height: calc(100vh - 120px);
+            height: calc(100vh - 60px);
             background: white;
             border-right: 1px solid #ddd;
             z-index: 800;
@@ -46,14 +46,14 @@
 
         .sidebar-integrated-link:hover {
             background: #f5f5f5;
-            border-left-color: #0066cc;
-            color: #0066cc;
+            border-left-color: #366092;
+            color: #366092;
         }
 
         .sidebar-integrated-link.active {
             background: #e6f2ff;
-            color: #0066cc;
-            border-left-color: #0066cc;
+            color: #366092;
+            border-left-color: #366092;
             font-weight: 500;
         }
 
@@ -83,6 +83,8 @@
                 transform: translateX(-240px);
                 transition: transform 0.3s;
                 box-shadow: none;
+                top: 55px; /* Header móvil es 55px */
+                height: calc(100vh - 55px);
             }
 
             .sidebar-integrated.mobile-open {
@@ -106,7 +108,7 @@
         /* Botón toggle móvil */
         .sidebar-mobile-btn {
             position: fixed;
-            top: 140px;
+            top: 65px; /* Justo debajo del header compacto */
             left: 15px;
             z-index: 801;
             background: white;
