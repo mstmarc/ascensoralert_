@@ -21,15 +21,21 @@ body {
     padding: 0;
 }
 
-/* HEADER - Logo izquierda, título centrado */
+/* ==========================================
+   HEADER DEFINITIVO - Logo izq + Título centro
+   Siguiendo estándares UX/UI de la industria
+   ========================================== */
+
+/* Header fijo compacto */
 header {
     background: white;
     border-bottom: 2px solid #366092;
-    padding: 15px 0;
+    padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    height: 60px;
 }
 
 .header-container {
@@ -37,28 +43,32 @@ header {
     align-items: center;
     justify-content: center;
     position: relative;
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 0 20px;
+    height: 100%;
 }
 
+/* Logo fijo a la izquierda */
 .logo-container {
     position: absolute;
     left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .logo {
-    height: 50px;
+    height: 40px;
     width: auto;
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease;
 }
 
 .logo:hover {
-    transform: translateY(-50%) scale(1.05);
+    transform: scale(1.05);
 }
 
+/* Título centrado */
 .title-container {
     text-align: center;
     flex: 1;
@@ -66,12 +76,44 @@ header {
 
 .title-container h1 {
     color: #366092;
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 600;
     margin: 0;
+    line-height: 1.2;
 }
 
-/* Contenido principal */
+/* ==========================================
+   PÁGINA DE LOGIN - Layout centrado
+   ========================================== */
+
+body.login-page header {
+    height: auto;
+    padding: 30px 0;
+}
+
+body.login-page .header-container {
+    flex-direction: column;
+    gap: 15px;
+    justify-content: center;
+}
+
+body.login-page .logo-container {
+    position: static;
+    margin: 0 auto;
+}
+
+body.login-page .logo {
+    height: 60px;
+}
+
+body.login-page .title-container h1 {
+    font-size: 28px;
+}
+
+/* ==========================================
+   CONTENIDO PRINCIPAL
+   ========================================== */
+
 main {
     padding: 30px 20px;
     max-width: 1200px;
@@ -87,10 +129,6 @@ main {
     max-width: 800px;
     width: calc(100% - 40px);
     border: 1px solid #e1e5e9;
-}
-
-/* Centrar botones en el menú principal */
-.menu {
     text-align: center;
 }
 
@@ -100,7 +138,6 @@ main {
     min-width: 200px;
 }
 
-/* Solo para la página principal */
 .menu a.button {
     vertical-align: top;
 }
@@ -110,7 +147,15 @@ main {
     text-align: left;
 }
 
-/* Formularios responsive */
+/* Dashboard específico */
+.menu.dashboard {
+    max-width: 1200px;
+}
+
+/* ==========================================
+   FORMULARIOS
+   ========================================== */
+
 form {
     width: 100%;
 }
@@ -165,7 +210,10 @@ select {
     padding-right: 40px;
 }
 
-/* Botones responsive */
+/* ==========================================
+   BOTONES
+   ========================================== */
+
 .button,
 button[type="submit"] {
     display: inline-block;
@@ -204,7 +252,10 @@ button[type="submit"]:active {
     margin: 5px;
 }
 
-/* Tablas responsive */
+/* ==========================================
+   TABLAS
+   ========================================== */
+
 .table-container {
     width: 100%;
     overflow-x: auto;
@@ -252,7 +303,10 @@ td a:hover {
     text-decoration: underline;
 }
 
-/* Cards para móvil */
+/* ==========================================
+   CARDS PARA MÓVIL
+   ========================================== */
+
 .mobile-card {
     display: none;
     background: white;
@@ -290,7 +344,10 @@ td a:hover {
     margin: 0;
 }
 
-/* Utilidades */
+/* ==========================================
+   UTILIDADES
+   ========================================== */
+
 .text-center { 
     text-align: center; 
 }
@@ -299,29 +356,49 @@ td a:hover {
     margin-top: 20px; 
 }
 
-/* Dashboard específico */
-.menu.dashboard {
-    max-width: 1200px;
-}
+/* ==========================================
+   RESPONSIVE - MÓVILES (< 768px)
+   ========================================== */
 
-/* Media queries para responsive */
 @media (max-width: 767px) {
+    /* Header móvil */
+    header {
+        height: 55px;
+    }
+    
     .header-container {
         padding: 0 15px;
     }
     
     .logo-container {
-        left: 10px;
+        left: 15px;
     }
     
     .logo {
-        height: 40px;
+        height: 32px;
     }
     
     .title-container h1 {
-        font-size: 18px;
+        font-size: 16px;
+        padding-left: 60px; /* Dejar espacio para el logo */
     }
     
+    /* Login móvil */
+    body.login-page header {
+        height: auto;
+        padding: 20px 0;
+    }
+    
+    body.login-page .logo {
+        height: 50px;
+    }
+    
+    body.login-page .title-container h1 {
+        font-size: 22px;
+        padding-left: 0;
+    }
+    
+    /* Contenido */
     main {
         padding: 20px 15px;
     }
@@ -340,7 +417,7 @@ td a:hover {
         max-width: none;
     }
     
-    /* Ocultar tabla en móvil y mostrar cards */
+    /* Tablas → Cards en móvil */
     .table-container {
         display: none !important;
     }
@@ -377,6 +454,10 @@ td a:hover {
     }
 }
 
+/* ==========================================
+   RESPONSIVE - TABLETS (768px - 1023px)
+   ========================================== */
+
 @media (min-width: 768px) and (max-width: 1023px) {
     .header-container {
         padding: 0 25px;
@@ -384,6 +465,14 @@ td a:hover {
     
     .logo-container {
         left: 25px;
+    }
+    
+    .logo {
+        height: 38px;
+    }
+    
+    .title-container h1 {
+        font-size: 20px;
     }
     
     main {
@@ -394,11 +483,11 @@ td a:hover {
         padding: 35px;
         max-width: 900px;
     }
-    
-    .title-container h1 {
-        font-size: 24px;
-    }
 }
+
+/* ==========================================
+   RESPONSIVE - DESKTOP (> 1024px)
+   ========================================== */
 
 @media (min-width: 1024px) {
     .header-container {
@@ -410,11 +499,11 @@ td a:hover {
     }
     
     .logo {
-        height: 55px;
+        height: 45px;
     }
     
     .title-container h1 {
-        font-size: 30px;
+        font-size: 24px;
     }
     
     main {
@@ -427,7 +516,24 @@ td a:hover {
     }
 }
 
-/* Optimizaciones para dispositivos táctiles */
+/* ==========================================
+   RESPONSIVE - PANTALLAS GRANDES (> 1400px)
+   ========================================== */
+
+@media (min-width: 1400px) {
+    .logo {
+        height: 48px;
+    }
+    
+    .title-container h1 {
+        font-size: 26px;
+    }
+}
+
+/* ==========================================
+   OPTIMIZACIONES TÁCTILES
+   ========================================== */
+
 @media (hover: none) and (pointer: coarse) {
     .button,
     button[type="submit"] {
@@ -443,7 +549,10 @@ td a:hover {
     }
 }
 
-/* Ajustes cuando hay menú lateral (no en login) */
+/* ==========================================
+   AJUSTES CON MENÚ LATERAL
+   ========================================== */
+
 @media (min-width: 769px) {
     body:not(.login-page) main {
         margin-left: 240px;
