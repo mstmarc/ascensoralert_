@@ -1,5 +1,10 @@
 // sidebar.js - Menú lateral integrado debajo del header
 (function() {
+    // NO cargar el menú en la página de login
+    if (window.location.pathname === '/' || window.location.pathname === '/login') {
+        return; // Salir sin crear el menú
+    }
+
     // CSS del menú lateral integrado
     const sidebarCSS = `
         /* Ajustar header para ancho completo */
