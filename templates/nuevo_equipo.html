@@ -22,13 +22,15 @@
 
     <main>
         <div class="menu">
+            {% if lead %}
             <!-- Información del Lead -->
             <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
                 <h3 style="margin: 0 0 10px 0; color: #0066cc;">📍 Añadiendo equipo a:</h3>
                 <p style="margin: 5px 0;"><strong>Dirección:</strong> {{ lead.direccion }}</p>
                 <p style="margin: 5px 0;"><strong>Localidad:</strong> {{ lead.localidad }}</p>
-                <p style="margin: 5px 0;"><strong>Nombre:</strong> {{ lead.nombre_instalacion }}</p>
+                <p style="margin: 5px 0;"><strong>Nombre:</strong> {{ lead.nombre_cliente }}</p>
             </div>
+            {% endif %}
 
             {% if error %}
             <div style="background: #ffe6e6; color: #cc0000; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #cc0000;">
@@ -39,44 +41,36 @@
             <form method="POST">
                 <h3>Datos del Equipo</h3>
 
-                <label>Identificador del Ascensor:</label><br>
-                <input type="text" name="identificador" placeholder="Ej: A, B, C, 1, 2... (Opcional)"><br><br>
-
-                <label>Marca: *</label><br>
-                <input type="text" name="marca" required placeholder="Marca del ascensor"><br><br>
-
-                <label>Modelo: *</label><br>
-                <input type="text" name="modelo" required placeholder="Modelo del ascensor"><br><br>
-
-                <label>Número de Serie:</label><br>
-                <input type="text" name="numero_serie" placeholder="Número de serie"><br><br>
-
-                <label>Año de Fabricación:</label><br>
-                <input type="number" name="ano_fabricacion" min="1900" max="2099" placeholder="Ej: 2015"><br><br>
-
-                <label>Empresa Mantenedora:</label><br>
-                <input type="text" name="empresa_mantenedora" placeholder="Empresa actual de mantenimiento"><br><br>
-
-                <label>Tipo de Contrato:</label><br>
-                <select name="tipo_contrato">
+                <label>Tipo: *</label><br>
+                <select name="tipo_equipo" required>
                     <option value="">-- Selecciona --</option>
-                    <option value="Mantenimiento">Mantenimiento</option>
-                    <option value="Reparación">Reparación</option>
-                    <option value="Modernización">Modernización</option>
-                    <option value="Integral">Integral</option>
+                    <option value="Ascensor">Ascensor</option>
+                    <option value="Montacargas">Montacargas</option>
+                    <option value="Elevador">Elevador</option>
+                    <option value="Salvaescaleras">Salvaescaleras</option>
                 </select><br><br>
 
-                <label>Fecha de Vencimiento del Contrato:</label><br>
-                <input type="date" name="fecha_vencimiento"><br><br>
+                <label>Identificación:</label><br>
+                <input type="text" name="identificacion" placeholder="Identificación del equipo (opcional)"><br><br>
+
+                <label>Vencimiento Contrato:</label><br>
+                <input type="date" name="fecha_vencimiento_contrato"><br><br>
+
+                <label>RAE:</label><br>
+                <input type="text" name="rae" placeholder="Número RAE"><br><br>
 
                 <label>Próxima IPO:</label><br>
                 <input type="date" name="ipo_proxima"><br><br>
 
                 <label>Observaciones:</label><br>
-                <textarea name="observaciones" rows="4" placeholder="Observaciones adicionales sobre el equipo"></textarea><br><br>
+                <textarea name="observaciones" rows="4" placeholder="Observaciones adicionales"></textarea><br><br>
 
                 <button type="submit" class="button">✅ Crear Equipo</button>
+                {% if lead %}
                 <a href="/ver_lead/{{ lead.id }}" class="button" style="background: #6c757d;">Cancelar</a>
+                {% else %}
+                <a href="/leads_dashboard" class="button" style="background: #6c757d;">Cancelar</a>
+                {% endif %}
             </form>
         </div>
     </main>
