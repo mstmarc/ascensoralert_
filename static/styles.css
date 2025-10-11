@@ -21,45 +21,53 @@ body {
     padding: 0;
 }
 
-/* Header responsive */
+/* HEADER - Logo izquierda, título centrado */
 header {
-    background: #f8f9fa;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: white;
+    border-bottom: 2px solid #366092;
+    padding: 15px 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .header-container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    max-width: 1200px;
+    justify-content: center;
+    position: relative;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
 .logo-container {
-    flex-shrink: 0;
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .logo {
-    height: 60px;
+    height: 50px;
     width: auto;
     transition: transform 0.3s ease;
 }
 
 .logo:hover {
-    transform: scale(1.05);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.title-container {
+    text-align: center;
+    flex: 1;
 }
 
 .title-container h1 {
-    color: #0065a3;
-    font-size: clamp(1.2rem, 4vw, 2rem);
+    color: #366092;
+    font-size: 28px;
     font-weight: 600;
-    text-align: center;
     margin: 0;
 }
 
@@ -81,6 +89,27 @@ main {
     border: 1px solid #e1e5e9;
 }
 
+/* Centrar botones en el menú principal */
+.menu {
+    text-align: center;
+}
+
+.menu .button {
+    display: inline-block;
+    margin: 10px 15px;
+    min-width: 200px;
+}
+
+/* Solo para la página principal */
+.menu a.button {
+    vertical-align: top;
+}
+
+/* Para formularios mantener alineación izquierda */
+.menu form {
+    text-align: left;
+}
+
 /* Formularios responsive */
 form {
     width: 100%;
@@ -98,6 +127,7 @@ input[type="text"],
 input[type="email"], 
 input[type="password"],
 input[type="date"],
+input[type="number"],
 select,
 textarea {
     width: 100%;
@@ -117,8 +147,8 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: #0065a3;
-    box-shadow: 0 0 0 3px rgba(0, 101, 163, 0.1);
+    border-color: #366092;
+    box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1);
 }
 
 textarea {
@@ -139,7 +169,7 @@ select {
 .button,
 button[type="submit"] {
     display: inline-block;
-    background: linear-gradient(135deg, #0065a3 0%, #004d7a 100%);
+    background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
     color: white;
     padding: 12px 24px;
     border: none;
@@ -150,7 +180,7 @@ button[type="submit"] {
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 101, 163, 0.3);
+    box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
     margin: 10px 5px 10px 0;
     min-width: 120px;
 }
@@ -158,8 +188,8 @@ button[type="submit"] {
 .button:hover,
 button[type="submit"]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 101, 163, 0.4);
-    background: linear-gradient(135deg, #004d7a 0%, #0065a3 100%);
+    box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+    background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
 }
 
 .button:active,
@@ -213,7 +243,7 @@ tr:hover {
 }
 
 td a {
-    color: #0065a3;
+    color: #366092;
     text-decoration: none;
     font-weight: 500;
 }
@@ -230,11 +260,11 @@ td a:hover {
     padding: 20px;
     margin-bottom: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border-left: 4px solid #0065a3;
+    border-left: 4px solid #366092;
 }
 
 .mobile-card h3 {
-    color: #0065a3;
+    color: #366092;
     margin-bottom: 15px;
     font-size: 16px;
 }
@@ -269,21 +299,27 @@ td a:hover {
     margin-top: 20px; 
 }
 
+/* Dashboard específico */
+.menu.dashboard {
+    max-width: 1200px;
+}
+
 /* Media queries para responsive */
 @media (max-width: 767px) {
     .header-container {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
         padding: 0 15px;
     }
     
+    .logo-container {
+        left: 10px;
+    }
+    
     .logo {
-        height: 50px;
+        height: 40px;
     }
     
     .title-container h1 {
-        font-size: 1.3rem;
+        font-size: 18px;
     }
     
     main {
@@ -295,6 +331,13 @@ td a:hover {
         margin: 10px;
         max-width: none;
         width: calc(100% - 20px);
+    }
+    
+    .menu .button {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+        max-width: none;
     }
     
     /* Ocultar tabla en móvil y mostrar cards */
@@ -326,6 +369,7 @@ td a:hover {
     input[type="email"],
     input[type="password"],
     input[type="date"],
+    input[type="number"],
     select,
     textarea {
         font-size: 16px; /* Evita zoom en iOS */
@@ -338,6 +382,10 @@ td a:hover {
         padding: 0 25px;
     }
     
+    .logo-container {
+        left: 25px;
+    }
+    
     main {
         padding: 25px;
     }
@@ -346,6 +394,10 @@ td a:hover {
         padding: 35px;
         max-width: 900px;
     }
+    
+    .title-container h1 {
+        font-size: 24px;
+    }
 }
 
 @media (min-width: 1024px) {
@@ -353,8 +405,16 @@ td a:hover {
         padding: 0 30px;
     }
     
+    .logo-container {
+        left: 30px;
+    }
+    
     .logo {
-        height: 65px;
+        height: 55px;
+    }
+    
+    .title-container h1 {
+        font-size: 30px;
     }
     
     main {
@@ -365,11 +425,6 @@ td a:hover {
         padding: 50px;
         max-width: 1000px;
     }
-}
-
-/* Dashboard específico */
-.menu.dashboard {
-    max-width: 1200px;
 }
 
 /* Optimizaciones para dispositivos táctiles */
@@ -387,33 +442,10 @@ td a:hover {
         padding: 12px 16px;
     }
 }
-/* Centrar botones en el menú principal */
-.menu {
-    text-align: center;
-}
 
-.menu .button {
-    display: inline-block;
-    margin: 10px 15px;
-    min-width: 200px;
-}
-
-/* Solo para la página principal */
-.menu a.button {
-    vertical-align: top;
-}
-
-/* Para formularios mantener alineación izquierda */
-.menu form {
-    text-align: left;
-}
-
-/* Media query para móvil */
-@media (max-width: 767px) {
-    .menu .button {
-        display: block;
-        width: 100%;
-        margin: 10px 0;
-        max-width: none;
+/* Ajustes cuando hay menú lateral (no en login) */
+@media (min-width: 769px) {
+    body:not(.login-page) main {
+        margin-left: 240px;
     }
 }
