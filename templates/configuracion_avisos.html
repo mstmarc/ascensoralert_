@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Avisos - AscensorAlert</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: white;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .config-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .config-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            border: 2px solid #366092;
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.1);
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border: 2px solid #366092;
+            color: #366092;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #366092;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #366092;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2a4d73;
+            box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1);
+        }
+        
+        .form-hint {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #366092;
+        }
+        
+        .checkbox-input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .info-box {
+            background: white;
+            border: 2px solid #366092;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn-primary {
+            flex: 1;
+            background: #366092;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: #2a4d73;
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            background: white;
+            color: #366092;
+            padding: 12px;
+            border: 2px solid #366092;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s;
+            display: block;
+        }
+        
+        .btn-secondary:hover {
+            background: #366092;
+            color: white;
+        }
+        
+        .warning-box {
+            background: white;
+            border: 2px solid #366092;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .warning-box h3 {
+            margin-top: 0;
+            color: #366092;
+            font-size: 18px;
+        }
+        
+        .warning-box ul {
+            color: #333;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>⚙️ Configuración de Avisos por Email</h1>
+            </div>
+        </div>
+    </header>
+    
+    <main class="config-container">
+        
+        {% if mensaje %}
+        <div class="success-message">
+            ✅ {{ mensaje }}
+        </div>
+        {% endif %}
+        
+        <div class="config-card">
+            
+            <form method="POST">
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        📧 Email de destino:
+                    </label>
+                    <input type="email" name="email_destino" value="{{ config.email_destino }}" required class="form-input">
+                    <small class="form-hint">
+                        Los avisos se enviarán a este correo
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        🔍 Días de anticipación para IPOs:
+                    </label>
+                    <input type="number" name="dias_anticipacion_ipo" value="{{ config.dias_anticipacion_ipo }}" 
+                           min="1" max="365" required class="form-input">
+                    <small class="form-hint">
+                        Te avisaremos X días antes de la fecha de IPO
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        📋 Días de anticipación para vencimiento de contratos:
+                    </label>
+                    <input type="number" name="dias_anticipacion_contrato" value="{{ config.dias_anticipacion_contrato }}" 
+                           min="1" max="365" required class="form-input">
+                    <small class="form-hint">
+                        Te avisaremos X días antes del vencimiento del contrato
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="notificaciones_activas" value="true" 
+                               {% if config.notificaciones_activas %}checked{% endif %}
+                               class="checkbox-input">
+                        <span>
+                            🔔 Activar notificaciones automáticas
+                        </span>
+                    </label>
+                    <small class="form-hint" style="margin-left: 30px;">
+                        Si está desactivado, no se enviarán emails automáticos
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        ⏰ Frecuencia de chequeo:
+                    </label>
+                    <select name="frecuencia_chequeo" required class="form-input">
+                        <option value="diario" {% if config.frecuencia_chequeo == 'diario' %}selected{% endif %}>Diario</option>
+                        <option value="semanal" {% if config.frecuencia_chequeo == 'semanal' %}selected{% endif %}>Semanal (lunes)</option>
+                        <option value="quincenal" {% if config.frecuencia_chequeo == 'quincenal' %}selected{% endif %}>Quincenal</option>
+                    </select>
+                    <small class="form-hint">
+                        ¿Con qué frecuencia quieres que se revisen las fechas?
+                    </small>
+                </div>
+                
+                {% if config.ultima_ejecucion %}
+                <div class="info-box">
+                    <strong style="color: #366092;">📅 Última revisión:</strong> {{ config.ultima_ejecucion }}
+                </div>
+                {% endif %}
+                
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">
+                        💾 Guardar Configuración
+                    </button>
+                    <a href="/home" class="btn-secondary">
+                        ← Volver al Inicio
+                    </a>
+                </div>
+                
+            </form>
+            
+        </div>
+        
+        <div class="warning-box">
+            <h3>ℹ️ Información importante:</h3>
+            <ul>
+                <li>Los avisos se envían automáticamente según la configuración</li>
+                <li>Recibirás un email con todas las IPOs y contratos próximos a vencer</li>
+                <li>Puedes cambiar esta configuración cuando quieras</li>
+                <li>Si desactivas las notificaciones, puedes activarlas de nuevo más tarde</li>
+            </ul>
+        </div>
+        
+    </main>
+</body>
+</html>
