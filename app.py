@@ -221,13 +221,20 @@ def home():
     # ========== ÚLTIMAS OPORTUNIDADES ==========
     
     response_oport = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?select=*&order=fecha_creacion.desc&limit=5",
+        f"{SUPABASE_URL}/rest/v1/oportunidades?select=*,clientes(nombre_cliente,direccion)&order=fecha_creacion.desc&limit=5",
         headers=HEADERS
     )
     
     ultimas_oportunidades = []
     if response_oport.ok:
         for op in response_oport.json():
+            # Obtener nombre del cliente de la relación
+            cliente_info = op.get('clientes', {})
+            if isinstance(cliente_info, list) and len(cliente_info) > 0:
+                cliente_info = cliente_info[0]
+            
+            nombre_cliente = cliente_info.get('nombre_cliente', 'Sin nombre') if cliente_info else 'Sin nombre'
+            
             # Formatear importe
             importe = op.get('valor_estimado', 0)
             if importe:
@@ -240,7 +247,7 @@ def home():
             
             ultimas_oportunidades.append({
                 'id': op['id'],
-                'nombre_cliente': op.get('tipo', 'Sin nombre'),
+                'nombre_cliente': nombre_cliente,
                 'tipo_oportunidad': op.get('tipo', '-'),
                 'estado': op.get('estado', '-'),
                 'importe_estimado': importe_formateado
