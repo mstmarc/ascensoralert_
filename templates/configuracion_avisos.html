@@ -38,6 +38,16 @@
             font-weight: 600;
         }
         
+        .error-message {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
         .form-group {
             margin-bottom: 25px;
         }
@@ -178,11 +188,15 @@
     
     <main class="config-container">
         
-        {% if mensaje %}
-        <div class="success-message">
-            ✅ {{ mensaje }}
-        </div>
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{% if category == 'success' %}success-message{% else %}error-message{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         
         <div class="config-card">
             
@@ -192,7 +206,12 @@
                     <label class="form-label">
                         📧 Email de destino:
                     </label>
-                    <input type="text" name="email_destino" value="{{ config.email_destino }}" required class="form-input" placeholder="ejemplo@fedes.com, otro@fedes.com">
+                    <input type="text" 
+                           name="email_destinatario" 
+                           value="{{ config.email_destinatario }}" 
+                           required 
+                           class="form-input" 
+                           placeholder="ejemplo@fedes.com, otro@fedes.com">
                     <small class="form-hint">
                         Puedes poner varios emails separados por comas
                     </small>
@@ -200,30 +219,57 @@
                 
                 <div class="form-group">
                     <label class="form-label">
-                        🔍 Días de anticipación para IPOs:
+                        🔍 Días de aviso ANTES de IPOs:
                     </label>
-                    <input type="number" name="dias_anticipacion_ipo" value="{{ config.dias_anticipacion_ipo }}" 
-                           min="1" max="365" required class="form-input">
+                    <input type="number" 
+                           name="dias_aviso_antes_ipos" 
+                           value="{{ config.dias_aviso_antes_ipos }}" 
+                           min="1" 
+                           max="90" 
+                           required 
+                           class="form-input">
                     <small class="form-hint">
-                        Te avisaremos X días antes de la fecha de IPO
+                        Te avisaremos cuando falten estos días para una IPO
                     </small>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">
-                        📋 Días de anticipación para vencimiento de contratos:
+                        ⏱️ Días de seguimiento DESPUÉS de IPOs:
                     </label>
-                    <input type="number" name="dias_anticipacion_contrato" value="{{ config.dias_anticipacion_contrato }}" 
-                           min="1" max="365" required class="form-input">
+                    <input type="number" 
+                           name="dias_aviso_despues_ipos" 
+                           value="{{ config.dias_aviso_despues_ipos }}" 
+                           min="1" 
+                           max="90" 
+                           required 
+                           class="form-input">
                     <small class="form-hint">
-                        Te avisaremos X días antes del vencimiento del contrato
+                        Seguiremos avisando X días después de la fecha IPO (plazo subsanación)
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        📋 Días de aviso ANTES del vencimiento de contratos:
+                    </label>
+                    <input type="number" 
+                           name="dias_aviso_antes_contrato" 
+                           value="{{ config.dias_aviso_antes_contrato }}" 
+                           min="1" 
+                           max="180" 
+                           required 
+                           class="form-input">
+                    <small class="form-hint">
+                        Te avisaremos cuando falten estos días para que venza un contrato
                     </small>
                 </div>
                 
                 <div class="form-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" name="notificaciones_activas" value="true" 
-                               {% if config.notificaciones_activas %}checked{% endif %}
+                        <input type="checkbox" 
+                               name="sistema_activo" 
+                               {% if config.sistema_activo %}checked{% endif %}
                                class="checkbox-input">
                         <span>
                             🔔 Activar notificaciones automáticas
@@ -270,10 +316,11 @@
         <div class="warning-box">
             <h3>ℹ️ Información importante:</h3>
             <ul>
-                <li>Los avisos se envían automáticamente según la configuración</li>
+                <li><strong>IPOs:</strong> Avisos ANTES de la fecha y DESPUÉS (plazo subsanación)</li>
+                <li><strong>Contratos:</strong> Avisos ANTES del vencimiento</li>
+                <li>Los avisos se envían automáticamente según tu configuración</li>
                 <li>Recibirás un email con todas las IPOs y contratos próximos a vencer</li>
                 <li>Puedes cambiar esta configuración cuando quieras</li>
-                <li>Si desactivas las notificaciones, puedes activarlas de nuevo más tarde</li>
             </ul>
         </div>
         
