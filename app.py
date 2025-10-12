@@ -78,7 +78,9 @@ def enviar_avisos_email(config):
     if not RESEND_API_KEY:
         return "Error: No se ha configurado RESEND_API_KEY"
     
-    email_destino = config['email_destino']
+    # Procesar múltiples emails
+    emails_raw = config['email_destino']
+    emails_destino = [email.strip() for email in emails_raw.split(',')] if ',' in emails_raw else [emails_raw.strip()]
     dias_ipo = config['dias_anticipacion_ipo']
     dias_contrato = config['dias_anticipacion_contrato']
     
@@ -231,13 +233,13 @@ def enviar_avisos_email(config):
     try:
         params = {
             "from": EMAIL_FROM,
-            "to": [email_destino],
+            "to": emails_destino,
             "subject": f"🔔 Avisos AscensorAlert - {len(alertas_ipo)} IPOs y {len(alertas_contrato)} Contratos",
             "html": html_content
         }
         
         email = resend.Emails.send(params)
-        return f"Email enviado correctamente: {len(alertas_ipo)} IPOs, {len(alertas_contrato)} contratos"
+        return f"Email enviado correctamente a {len(emails_destino)} destinatario(s): {len(alertas_ipo)} IPOs, {len(alertas_contrato)} contratos"
     except Exception as e:
         return f"Error al enviar email: {str(e)}"
 
