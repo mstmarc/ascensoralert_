@@ -83,12 +83,11 @@ def enviar_avisos_email(config):
     # Procesar múltiples emails
     emails_raw = config['email_destinatario']
     emails_destino = [email.strip() for email in emails_raw.split(',')] if ',' in emails_raw else [emails_raw.strip()]
-    dias_ipo = config['dias_aviso_antes_ipos']
+    primer_aviso_ipo = config['primer_aviso_despues_ipo']
+    segundo_aviso_ipo = config['segundo_aviso_despues_ipo']
     dias_contrato = config['dias_aviso_antes_contrato']
     
-    fecha_limite_ipo = (datetime.now() + timedelta(days=dias_ipo)).date().isoformat()
-    fecha_limite_contrato = (datetime.now() + timedelta(days=dias_contrato)).date().isoformat()
-    fecha_hoy = datetime.now().date().isoformat()
+    fecha_hoy = datetime.now().date()
     
     # Obtener equipos con IPO próxima
     equipos_response = requests.get(
@@ -96,39 +95,48 @@ def enviar_avisos_email(config):
         headers=HEADERS
     )
     
-    alertas_ipo = []
+    alertas_ipo_primer_aviso = []
+    alertas_ipo_segundo_aviso = []
     alertas_contrato = []
     
     if equipos_response.status_code == 200:
         equipos = equipos_response.json()
         
         for equipo in equipos:
-            # Revisar IPOs
+            # Revisar IPOs - SOLO DESPUÉS de la fecha
             if equipo.get('ipo_proxima'):
                 try:
                     fecha_ipo = datetime.strptime(equipo['ipo_proxima'], '%Y-%m-%d').date()
-                    dias_restantes = (fecha_ipo - datetime.now().date()).days
+                    dias_desde_ipo = (fecha_hoy - fecha_ipo).days
                     
-                    if 0 <= dias_restantes <= dias_ipo:
-                        cliente = equipo.get('clientes', {})
-                        if isinstance(cliente, list) and cliente:
-                            cliente = cliente[0]
+                    cliente = equipo.get('clientes', {})
+                    if isinstance(cliente, list) and cliente:
+                        cliente = cliente[0]
+                    
+                    equipo_data = {
+                        'cliente': cliente.get('nombre_cliente', 'Sin nombre') if cliente else 'Sin nombre',
+                        'direccion': cliente.get('direccion', 'Sin dirección') if cliente else 'Sin dirección',
+                        'identificacion': equipo.get('identificacion', 'N/A'),
+                        'fecha': fecha_ipo.strftime('%d/%m/%Y'),
+                        'dias_desde_ipo': dias_desde_ipo
+                    }
+                    
+                    # Primer aviso (ej: día 15)
+                    if dias_desde_ipo == primer_aviso_ipo:
+                        alertas_ipo_primer_aviso.append(equipo_data)
+                    
+                    # Segundo aviso (ej: día 30)
+                    if dias_desde_ipo == segundo_aviso_ipo:
+                        alertas_ipo_segundo_aviso.append(equipo_data)
                         
-                        alertas_ipo.append({
-                            'cliente': cliente.get('nombre_cliente', 'Sin nombre') if cliente else 'Sin nombre',
-                            'direccion': cliente.get('direccion', 'Sin dirección') if cliente else 'Sin dirección',
-                            'identificacion': equipo.get('identificacion', 'N/A'),
-                            'fecha': fecha_ipo.strftime('%d/%m/%Y'),
-                            'dias_restantes': dias_restantes
-                        })
                 except:
                     pass
             
-            # Revisar contratos
+            # Revisar contratos - X días ANTES del vencimiento
             if equipo.get('fecha_vencimiento_contrato'):
                 try:
                     fecha_contrato = datetime.strptime(equipo['fecha_vencimiento_contrato'], '%Y-%m-%d').date()
-                    dias_restantes = (fecha_contrato - datetime.now().date()).days
+                    dias_restantes = (fecha_contrato - fecha_hoy).days
                     
                     if 0 <= dias_restantes <= dias_contrato:
                         cliente = equipo.get('clientes', {})
@@ -146,7 +154,7 @@ def enviar_avisos_email(config):
                     pass
     
     # Si no hay alertas, no enviar email
-    if not alertas_ipo and not alertas_contrato:
+    if not alertas_ipo_primer_aviso and not alertas_ipo_segundo_aviso and not alertas_contrato:
         return "No hay avisos pendientes"
     
     # Construir contenido del email
@@ -171,27 +179,52 @@ def enviar_avisos_email(config):
             <p><strong>Fecha:</strong> {datetime.now().strftime('%d/%m/%Y')}</p>
     """
     
-    if alertas_ipo:
-        html_content += """
-            <h2>🔍 IPOs Próximas</h2>
+    if alertas_ipo_primer_aviso:
+        html_content += f"""
+            <h2>🔍 IPOs - Primer Aviso ({primer_aviso_ipo} días después)</h2>
+            <p style="color: #666;">Es momento de visitar para verificar la subsanación de defectos</p>
             <table>
                 <tr>
                     <th>Cliente</th>
                     <th>Dirección</th>
                     <th>Equipo</th>
                     <th>Fecha IPO</th>
-                    <th>Días Restantes</th>
+                    <th>Días Transcurridos</th>
                 </tr>
         """
-        for alerta in alertas_ipo:
-            clase = 'urgente' if alerta['dias_restantes'] <= 7 else 'proximo'
+        for alerta in alertas_ipo_primer_aviso:
             html_content += f"""
                 <tr>
                     <td>{alerta['cliente']}</td>
                     <td>{alerta['direccion']}</td>
                     <td>{alerta['identificacion']}</td>
                     <td>{alerta['fecha']}</td>
-                    <td class="{clase}">{alerta['dias_restantes']} días</td>
+                    <td class="proximo">{alerta['dias_desde_ipo']} días</td>
+                </tr>
+            """
+        html_content += "</table>"
+    
+    if alertas_ipo_segundo_aviso:
+        html_content += f"""
+            <h2>⚠️ IPOs - Segundo Aviso ({segundo_aviso_ipo} días después)</h2>
+            <p style="color: #dc3545; font-weight: bold;">¡URGENTE! Últimos días para verificar subsanación</p>
+            <table>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Dirección</th>
+                    <th>Equipo</th>
+                    <th>Fecha IPO</th>
+                    <th>Días Transcurridos</th>
+                </tr>
+        """
+        for alerta in alertas_ipo_segundo_aviso:
+            html_content += f"""
+                <tr>
+                    <td>{alerta['cliente']}</td>
+                    <td>{alerta['direccion']}</td>
+                    <td>{alerta['identificacion']}</td>
+                    <td>{alerta['fecha']}</td>
+                    <td class="urgente">{alerta['dias_desde_ipo']} días</td>
                 </tr>
             """
         html_content += "</table>"
@@ -231,21 +264,21 @@ def enviar_avisos_email(config):
     </html>
     """
     
+    total_ipos = len(alertas_ipo_primer_aviso) + len(alertas_ipo_segundo_aviso)
+    
     # Enviar email con Resend
     try:
         params = {
             "from": EMAIL_FROM,
             "to": emails_destino,
-            "subject": f"🔔 Avisos AscensorAlert - {len(alertas_ipo)} IPOs y {len(alertas_contrato)} Contratos",
+            "subject": f"🔔 Avisos AscensorAlert - {total_ipos} IPOs y {len(alertas_contrato)} Contratos",
             "html": html_content
         }
         
         email = resend.Emails.send(params)
-        return f"Email enviado correctamente a {len(emails_destino)} destinatario(s): {len(alertas_ipo)} IPOs, {len(alertas_contrato)} contratos"
+        return f"Email enviado correctamente a {len(emails_destino)} destinatario(s): {total_ipos} IPOs, {len(alertas_contrato)} contratos"
     except Exception as e:
-        return f"Error al enviar email: {str(e)}"
-
-# ============================================
+        return f"Error al enviar email: {str(e)}"# ============================================
 # RUTAS
 # ============================================
 
@@ -1398,9 +1431,9 @@ def configuracion_avisos():
     
     if request.method == 'POST':
         email = request.form.get('email_destinatario')
-        dias_antes_ipos = request.form.get('dias_aviso_antes_ipos')
-        dias_despues_ipos = request.form.get('dias_aviso_despues_ipos')
-        dias_antes_contrato = request.form.get('dias_aviso_antes_contrato')
+        primer_aviso = request.form.get('primer_aviso_despues_ipo')
+        segundo_aviso = request.form.get('segundo_aviso_despues_ipo')
+        dias_contratos = request.form.get('dias_aviso_antes_contrato')
         sistema_activo = request.form.get('sistema_activo') == 'on'
         frecuencia = request.form.get('frecuencia_chequeo')
         
@@ -1412,9 +1445,9 @@ def configuracion_avisos():
         
         data = {
             "email_destinatario": email,
-            "dias_aviso_antes_ipos": dias_antes_ipos,
-            "dias_aviso_despues_ipos": dias_despues_ipos,
-            "dias_aviso_antes_contrato": dias_antes_contrato,
+            "primer_aviso_despues_ipo": primer_aviso,
+            "segundo_aviso_despues_ipo": segundo_aviso,
+            "dias_aviso_antes_contrato": dias_contratos,
             "sistema_activo": sistema_activo,
             "frecuencia_chequeo": frecuencia
         }
@@ -1462,8 +1495,8 @@ def configuracion_avisos():
         # Valores por defecto
         config_data = {
             'email_destinatario': session.get('email', ''),
-            'dias_aviso_antes_ipos': 7,
-            'dias_aviso_despues_ipos': 30,
+            'primer_aviso_despues_ipo': 15,
+            'segundo_aviso_despues_ipo': 30,
             'dias_aviso_antes_contrato': 30,
             'sistema_activo': True,
             'frecuencia_chequeo': 'diario',
