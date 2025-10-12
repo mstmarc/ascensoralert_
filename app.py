@@ -5,6 +5,7 @@ import urllib.parse
 from datetime import date, datetime, timedelta
 import calendar
 import io
+import resend
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -23,6 +24,12 @@ HEADERS = {
     "Content-Type": "application/json",
     "Prefer": "return=representation"
 }
+
+# Configuración de Resend para emails
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+EMAIL_FROM = os.environ.get("EMAIL_FROM", "onboarding@resend.dev")
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
 
 # FUNCIONES AUXILIARES
 def calcular_color_ipo(fecha_ipo_str):
@@ -65,6 +72,175 @@ def calcular_color_contrato(fecha_contrato_str):
     except:
         return ""
 
+def enviar_avisos_email(config):
+    """Función que revisa fechas y envía emails"""
+    
+    if not RESEND_API_KEY:
+        return "Error: No se ha configurado RESEND_API_KEY"
+    
+    email_destino = config['email_destino']
+    dias_ipo = config['dias_anticipacion_ipo']
+    dias_contrato = config['dias_anticipacion_contrato']
+    
+    fecha_limite_ipo = (datetime.now() + timedelta(days=dias_ipo)).date().isoformat()
+    fecha_limite_contrato = (datetime.now() + timedelta(days=dias_contrato)).date().isoformat()
+    fecha_hoy = datetime.now().date().isoformat()
+    
+    # Obtener equipos con IPO próxima
+    equipos_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?select=*,clientes(nombre_cliente,direccion)&ipo_proxima=not.is.null",
+        headers=HEADERS
+    )
+    
+    alertas_ipo = []
+    alertas_contrato = []
+    
+    if equipos_response.status_code == 200:
+        equipos = equipos_response.json()
+        
+        for equipo in equipos:
+            # Revisar IPOs
+            if equipo.get('ipo_proxima'):
+                try:
+                    fecha_ipo = datetime.strptime(equipo['ipo_proxima'], '%Y-%m-%d').date()
+                    dias_restantes = (fecha_ipo - datetime.now().date()).days
+                    
+                    if 0 <= dias_restantes <= dias_ipo:
+                        cliente = equipo.get('clientes', {})
+                        if isinstance(cliente, list) and cliente:
+                            cliente = cliente[0]
+                        
+                        alertas_ipo.append({
+                            'cliente': cliente.get('nombre_cliente', 'Sin nombre') if cliente else 'Sin nombre',
+                            'direccion': cliente.get('direccion', 'Sin dirección') if cliente else 'Sin dirección',
+                            'identificacion': equipo.get('identificacion', 'N/A'),
+                            'fecha': fecha_ipo.strftime('%d/%m/%Y'),
+                            'dias_restantes': dias_restantes
+                        })
+                except:
+                    pass
+            
+            # Revisar contratos
+            if equipo.get('fecha_vencimiento_contrato'):
+                try:
+                    fecha_contrato = datetime.strptime(equipo['fecha_vencimiento_contrato'], '%Y-%m-%d').date()
+                    dias_restantes = (fecha_contrato - datetime.now().date()).days
+                    
+                    if 0 <= dias_restantes <= dias_contrato:
+                        cliente = equipo.get('clientes', {})
+                        if isinstance(cliente, list) and cliente:
+                            cliente = cliente[0]
+                        
+                        alertas_contrato.append({
+                            'cliente': cliente.get('nombre_cliente', 'Sin nombre') if cliente else 'Sin nombre',
+                            'direccion': cliente.get('direccion', 'Sin dirección') if cliente else 'Sin dirección',
+                            'identificacion': equipo.get('identificacion', 'N/A'),
+                            'fecha': fecha_contrato.strftime('%d/%m/%Y'),
+                            'dias_restantes': dias_restantes
+                        })
+                except:
+                    pass
+    
+    # Si no hay alertas, no enviar email
+    if not alertas_ipo and not alertas_contrato:
+        return "No hay avisos pendientes"
+    
+    # Construir contenido del email
+    html_content = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: 'Montserrat', Arial, sans-serif; background: white; margin: 0; padding: 20px; }}
+            .container {{ max-width: 800px; margin: 0 auto; background: white; }}
+            h1 {{ color: #366092; border-bottom: 3px solid #366092; padding-bottom: 10px; }}
+            h2 {{ color: #366092; margin-top: 30px; }}
+            table {{ width: 100%; border-collapse: collapse; margin-top: 15px; }}
+            th {{ background: #366092; color: white; padding: 12px; text-align: left; }}
+            td {{ padding: 10px; border-bottom: 1px solid #ddd; }}
+            .urgente {{ color: #dc3545; font-weight: bold; }}
+            .proximo {{ color: #ffc107; font-weight: bold; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🔔 Avisos AscensorAlert - Fedes Ascensores</h1>
+            <p><strong>Fecha:</strong> {datetime.now().strftime('%d/%m/%Y')}</p>
+    """
+    
+    if alertas_ipo:
+        html_content += """
+            <h2>🔍 IPOs Próximas</h2>
+            <table>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Dirección</th>
+                    <th>Equipo</th>
+                    <th>Fecha IPO</th>
+                    <th>Días Restantes</th>
+                </tr>
+        """
+        for alerta in alertas_ipo:
+            clase = 'urgente' if alerta['dias_restantes'] <= 7 else 'proximo'
+            html_content += f"""
+                <tr>
+                    <td>{alerta['cliente']}</td>
+                    <td>{alerta['direccion']}</td>
+                    <td>{alerta['identificacion']}</td>
+                    <td>{alerta['fecha']}</td>
+                    <td class="{clase}">{alerta['dias_restantes']} días</td>
+                </tr>
+            """
+        html_content += "</table>"
+    
+    if alertas_contrato:
+        html_content += """
+            <h2>📋 Contratos por Vencer</h2>
+            <table>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Dirección</th>
+                    <th>Equipo</th>
+                    <th>Vencimiento</th>
+                    <th>Días Restantes</th>
+                </tr>
+        """
+        for alerta in alertas_contrato:
+            clase = 'urgente' if alerta['dias_restantes'] <= 15 else 'proximo'
+            html_content += f"""
+                <tr>
+                    <td>{alerta['cliente']}</td>
+                    <td>{alerta['direccion']}</td>
+                    <td>{alerta['identificacion']}</td>
+                    <td>{alerta['fecha']}</td>
+                    <td class="{clase}">{alerta['dias_restantes']} días</td>
+                </tr>
+            """
+        html_content += "</table>"
+    
+    html_content += """
+            <p style="margin-top: 30px; color: #666; font-size: 14px;">
+                Este es un email automático generado por AscensorAlert.<br>
+                Para gestionar tus alertas, accede a la configuración en la aplicación.
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Enviar email con Resend
+    try:
+        params = {
+            "from": EMAIL_FROM,
+            "to": [email_destino],
+            "subject": f"🔔 Avisos AscensorAlert - {len(alertas_ipo)} IPOs y {len(alertas_contrato)} Contratos",
+            "html": html_content
+        }
+        
+        email = resend.Emails.send(params)
+        return f"Email enviado correctamente: {len(alertas_ipo)} IPOs, {len(alertas_contrato)} contratos"
+    except Exception as e:
+        return f"Error al enviar email: {str(e)}"
+
 # ============================================
 # RUTAS
 # ============================================
@@ -85,6 +261,8 @@ def login():
             user = response.json()[0]
             if user.get("contrasena", "") == contrasena:
                 session["usuario"] = usuario
+                session["usuario_id"] = user.get("id")
+                session["email"] = user.get("email", "")
                 return redirect("/home")
         return render_template("login.html", error="Usuario o contraseña incorrectos")
     return render_template("login.html", error=None)
@@ -1202,6 +1380,127 @@ def eliminar_oportunidad(oportunidad_id):
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
         return redirect(url_for("oportunidades"))
+
+# ============================================
+# MÓDULO DE NOTIFICACIONES POR EMAIL
+# ============================================
+
+@app.route('/configuracion_avisos', methods=['GET', 'POST'])
+def configuracion_avisos():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+    
+    usuario_id = session.get("usuario_id")
+    
+    if request.method == 'POST':
+        # Obtener datos del formulario
+        email_destino = request.form.get('email_destino')
+        dias_anticipacion_ipo = int(request.form.get('dias_anticipacion_ipo', 30))
+        dias_anticipacion_contrato = int(request.form.get('dias_anticipacion_contrato', 60))
+        notificaciones_activas = request.form.get('notificaciones_activas') == 'true'
+        frecuencia_chequeo = request.form.get('frecuencia_chequeo', 'diario')
+        
+        # Verificar si ya existe configuración
+        config_existente = requests.get(
+            f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{usuario_id}",
+            headers=HEADERS
+        )
+        
+        if config_existente.status_code == 200 and config_existente.json():
+            # Actualizar configuración existente
+            data = {
+                "email_destino": email_destino,
+                "dias_anticipacion_ipo": dias_anticipacion_ipo,
+                "dias_anticipacion_contrato": dias_anticipacion_contrato,
+                "notificaciones_activas": notificaciones_activas,
+                "frecuencia_chequeo": frecuencia_chequeo
+            }
+            requests.patch(
+                f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{usuario_id}",
+                json=data,
+                headers=HEADERS
+            )
+        else:
+            # Crear nueva configuración
+            data = {
+                "usuario_id": usuario_id,
+                "email_destino": email_destino,
+                "dias_anticipacion_ipo": dias_anticipacion_ipo,
+                "dias_anticipacion_contrato": dias_anticipacion_contrato,
+                "notificaciones_activas": notificaciones_activas,
+                "frecuencia_chequeo": frecuencia_chequeo
+            }
+            requests.post(
+                f"{SUPABASE_URL}/rest/v1/configuracion_avisos",
+                json=data,
+                headers=HEADERS
+            )
+        
+        return render_template('configuracion_avisos.html', 
+                             config={
+                                 'email_destino': email_destino,
+                                 'dias_anticipacion_ipo': dias_anticipacion_ipo,
+                                 'dias_anticipacion_contrato': dias_anticipacion_contrato,
+                                 'notificaciones_activas': notificaciones_activas,
+                                 'frecuencia_chequeo': frecuencia_chequeo,
+                                 'ultima_ejecucion': None
+                             },
+                             mensaje='Configuración guardada correctamente')
+    
+    # GET - Obtener configuración actual
+    config = requests.get(
+        f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{usuario_id}",
+        headers=HEADERS
+    )
+    
+    if config.status_code == 200 and config.json():
+        config_data = config.json()[0]
+    else:
+        # Configuración por defecto
+        config_data = {
+            'email_destino': session.get('email', 'admin@fedesascensores.com'),
+            'dias_anticipacion_ipo': 30,
+            'dias_anticipacion_contrato': 60,
+            'notificaciones_activas': True,
+            'frecuencia_chequeo': 'diario',
+            'ultima_ejecucion': None
+        }
+    
+    return render_template('configuracion_avisos.html', config=config_data, mensaje=None)
+
+
+@app.route('/enviar_avisos_manual')
+def enviar_avisos_manual():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+    
+    usuario_id = session.get("usuario_id")
+    
+    # Obtener configuración del usuario
+    config = requests.get(
+        f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{usuario_id}",
+        headers=HEADERS
+    )
+    
+    if config.status_code != 200 or not config.json():
+        return "No hay configuración de avisos", 400
+    
+    config_data = config.json()[0]
+    
+    if not config_data.get('notificaciones_activas'):
+        return "Las notificaciones están desactivadas", 400
+    
+    # Enviar avisos
+    resultado = enviar_avisos_email(config_data)
+    
+    # Actualizar última ejecución
+    requests.patch(
+        f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{usuario_id}",
+        json={"ultima_ejecucion": datetime.now().isoformat()},
+        headers=HEADERS
+    )
+    
+    return f"<h3>{resultado}</h3><br><a href='/home'>Volver al inicio</a>"
 
 # ============================================
 # CIERRE
