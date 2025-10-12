@@ -81,10 +81,10 @@ def enviar_avisos_email(config):
         return "Error: No se ha configurado RESEND_API_KEY"
     
     # Procesar múltiples emails
-    emails_raw = config['email_destino']
+    emails_raw = config['email_destinatario']
     emails_destino = [email.strip() for email in emails_raw.split(',')] if ',' in emails_raw else [emails_raw.strip()]
-    dias_ipo = config['dias_anticipacion_ipo']
-    dias_contrato = config['dias_anticipacion_contrato']
+    dias_ipo = config['dias_aviso_antes_ipos']
+    dias_contrato = config['dias_aviso_antes_contrato']
     
     fecha_limite_ipo = (datetime.now() + timedelta(days=dias_ipo)).date().isoformat()
     fecha_limite_contrato = (datetime.now() + timedelta(days=dias_contrato)).date().isoformat()
@@ -1491,7 +1491,7 @@ def enviar_avisos_manual():
     
     config_data = config.json()[0]
     
-    if not config_data.get('notificaciones_activas'):
+    if not config_data.get('sistema_activo'):
         return "Las notificaciones están desactivadas", 400
     
     # Enviar avisos
