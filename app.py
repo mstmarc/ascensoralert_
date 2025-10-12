@@ -1391,86 +1391,86 @@ def eliminar_oportunidad(oportunidad_id):
 
 @app.route('/configuracion_avisos', methods=['GET', 'POST'])
 def configuracion_avisos():
-    if "usuario" not in session:
-        return redirect(url_for("login"))
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
     
-    usuario_id = session.get("usuario_id")
+    user_id = session['usuario_id']
     
     if request.method == 'POST':
-        # Obtener datos del formulario
-        email_destino = request.form.get('email_destino')
-        dias_anticipacion_ipo = int(request.form.get('dias_anticipacion_ipo', 30))
-        dias_anticipacion_contrato = int(request.form.get('dias_anticipacion_contrato', 60))
-        notificaciones_activas = request.form.get('notificaciones_activas') == 'true'
-        frecuencia_chequeo = request.form.get('frecuencia_chequeo', 'diario')
+        email = request.form.get('email_destinatario')
+        dias_antes_ipos = request.form.get('dias_aviso_antes_ipos')
+        dias_despues_ipos = request.form.get('dias_aviso_despues_ipos')
+        dias_antes_contrato = request.form.get('dias_aviso_antes_contrato')
+        sistema_activo = request.form.get('sistema_activo') == 'on'
+        frecuencia = request.form.get('frecuencia_chequeo')
         
         # Verificar si ya existe configuración
-        config_existente = requests.get(
-            f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{usuario_id}",
+        config_check = requests.get(
+            f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{user_id}",
             headers=HEADERS
         )
         
-        if config_existente.status_code == 200 and config_existente.json():
-            # Actualizar configuración existente
-            data = {
-                "email_destino": email_destino,
-                "dias_anticipacion_ipo": dias_anticipacion_ipo,
-                "dias_anticipacion_contrato": dias_anticipacion_contrato,
-                "notificaciones_activas": notificaciones_activas,
-                "frecuencia_chequeo": frecuencia_chequeo
-            }
-            requests.patch(
-                f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{usuario_id}",
+        data = {
+            "email_destinatario": email,
+            "dias_aviso_antes_ipos": dias_antes_ipos,
+            "dias_aviso_despues_ipos": dias_despues_ipos,
+            "dias_aviso_antes_contrato": dias_antes_contrato,
+            "sistema_activo": sistema_activo,
+            "frecuencia_chequeo": frecuencia
+        }
+        
+        if config_check.status_code == 200 and config_check.json():
+            # Actualizar
+            response = requests.patch(
+                f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{user_id}",
                 json=data,
                 headers=HEADERS
             )
         else:
-            # Crear nueva configuración
-            data = {
-                "usuario_id": usuario_id,
-                "email_destino": email_destino,
-                "dias_anticipacion_ipo": dias_anticipacion_ipo,
-                "dias_anticipacion_contrato": dias_anticipacion_contrato,
-                "notificaciones_activas": notificaciones_activas,
-                "frecuencia_chequeo": frecuencia_chequeo
-            }
-            requests.post(
+            # Insertar
+            data["usuario_id"] = user_id
+            response = requests.post(
                 f"{SUPABASE_URL}/rest/v1/configuracion_avisos",
                 json=data,
                 headers=HEADERS
             )
         
-        return render_template('configuracion_avisos.html', 
-                             config={
-                                 'email_destino': email_destino,
-                                 'dias_anticipacion_ipo': dias_anticipacion_ipo,
-                                 'dias_anticipacion_contrato': dias_anticipacion_contrato,
-                                 'notificaciones_activas': notificaciones_activas,
-                                 'frecuencia_chequeo': frecuencia_chequeo,
-                                 'ultima_ejecucion': None
-                             },
-                             mensaje='Configuración guardada correctamente')
+        if response.status_code in [200, 201, 204]:
+            flash('✅ Configuración guardada correctamente', 'success')
+        else:
+            flash(f'❌ Error al guardar configuración: {response.text}', 'error')
+        
+        return redirect(url_for('configuracion_avisos'))
     
-    # GET - Obtener configuración actual
-    config = requests.get(
-        f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{usuario_id}",
+    # GET - Mostrar formulario
+    config_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/configuracion_avisos?usuario_id=eq.{user_id}",
         headers=HEADERS
     )
     
-    if config.status_code == 200 and config.json():
-        config_data = config.json()[0]
+    if config_response.status_code == 200 and config_response.json():
+        config_data = config_response.json()[0]
+        
+        # Formatear fecha si existe
+        if config_data.get('ultima_ejecucion'):
+            try:
+                fecha_obj = datetime.fromisoformat(config_data['ultima_ejecucion'].replace('Z', '+00:00'))
+                config_data['ultima_ejecucion'] = fecha_obj.strftime('%d/%m/%Y %H:%M')
+            except:
+                pass
     else:
-        # Configuración por defecto
+        # Valores por defecto
         config_data = {
-            'email_destino': session.get('email', 'admin@fedesascensores.com'),
-            'dias_anticipacion_ipo': 30,
-            'dias_anticipacion_contrato': 60,
-            'notificaciones_activas': True,
+            'email_destinatario': session.get('email', ''),
+            'dias_aviso_antes_ipos': 7,
+            'dias_aviso_despues_ipos': 30,
+            'dias_aviso_antes_contrato': 30,
+            'sistema_activo': True,
             'frecuencia_chequeo': 'diario',
             'ultima_ejecucion': None
         }
     
-    return render_template('configuracion_avisos.html', config=config_data, mensaje=None)
+    return render_template('configuracion_avisos.html', config=config_data)
 
 
 @app.route('/enviar_avisos_manual')
