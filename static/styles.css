@@ -23,19 +23,19 @@ body {
 
 /* ==========================================
    HEADER DEFINITIVO - Logo izq + Título centro
-   Siguiendo estándares UX/UI de la industria
+   CON MÁS ESPACIO Y AIRE ✨
    ========================================== */
 
-/* Header fijo compacto */
+/* Header fijo con más altura */
 header {
     background: white;
     border-bottom: 2px solid #366092;
-    padding: 0;
+    padding: 15px 0; /* 🔼 Padding vertical añadido */
     position: sticky;
     top: 0;
     z-index: 100;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    height: 60px;
+    height: 90px; /* 🔼 Aumentado de 60px a 90px */
 }
 
 .header-container {
@@ -49,7 +49,7 @@ header {
     height: 100%;
 }
 
-/* Logo fijo a la izquierda */
+/* Logo fijo a la izquierda - MÁS GRANDE */
 .logo-container {
     position: absolute;
     left: 20px;
@@ -59,7 +59,7 @@ header {
 }
 
 .logo {
-    height: 40px;
+    height: 55px; /* 🔼 Aumentado de 40px a 55px */
     width: auto;
     transition: transform 0.2s ease;
 }
@@ -103,7 +103,7 @@ body.login-page .logo-container {
 }
 
 body.login-page .logo {
-    height: 60px;
+    height: 70px; /* 🔼 También más grande en login */
 }
 
 body.login-page .title-container h1 {
@@ -363,7 +363,8 @@ td a:hover {
 @media (max-width: 767px) {
     /* Header móvil */
     header {
-        height: 55px;
+        height: 70px; /* 🔼 También más alto en móvil */
+        padding: 10px 0;
     }
     
     .header-container {
@@ -375,12 +376,12 @@ td a:hover {
     }
     
     .logo {
-        height: 32px;
+        height: 40px; /* 🔼 Más grande en móvil */
     }
     
     .title-container h1 {
         font-size: 16px;
-        padding-left: 60px; /* Dejar espacio para el logo */
+        padding-left: 65px; /* Ajustado para logo más grande */
     }
     
     /* Login móvil */
@@ -390,7 +391,7 @@ td a:hover {
     }
     
     body.login-page .logo {
-        height: 50px;
+        height: 60px; /* 🔼 Más grande en login móvil */
     }
     
     body.login-page .title-container h1 {
@@ -468,7 +469,7 @@ td a:hover {
     }
     
     .logo {
-        height: 38px;
+        height: 50px;
     }
     
     .title-container h1 {
@@ -499,7 +500,7 @@ td a:hover {
     }
     
     .logo {
-        height: 45px;
+        height: 58px; /* 🔼 Aún más grande en desktop */
     }
     
     .title-container h1 {
@@ -522,7 +523,7 @@ td a:hover {
 
 @media (min-width: 1400px) {
     .logo {
-        height: 48px;
+        height: 62px; /* 🔼 Máximo tamaño */
     }
     
     .title-container h1 {
