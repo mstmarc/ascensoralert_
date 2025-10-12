@@ -208,9 +208,12 @@
 
                 <div class="sidebar-integrated-divider"></div>
 
-                <!-- Reportes -->
+                <!-- Reportes y Configuración -->
                 <a href="/reporte_mensual" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Reporte Mensual
+                </a>
+                <a href="/configuracion_avisos" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    ⚙️ Configuración de Avisos
                 </a>
 
                 <div class="sidebar-integrated-divider"></div>
