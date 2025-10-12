@@ -94,12 +94,198 @@ def logout():
     session.clear()
     return redirect("/")
 
-# Home
+# Home - ACTUALIZADO: Dashboard en desktop, menú simple en móvil
 @app.route("/home")
 def home():
+    """Homepage - Dashboard en desktop, menú simple en móvil"""
     if "usuario" not in session:
         return redirect("/")
-    return render_template("home.html", usuario=session["usuario"])
+    
+    # Detectar si es móvil
+    user_agent = request.headers.get('User-Agent', '').lower()
+    is_mobile = any(x in user_agent for x in ['mobile', 'android', 'iphone', 'ipod', 'blackberry', 'windows phone'])
+    
+    # Si es móvil, mostrar homepage antigua (menú simple)
+    if is_mobile:
+        usuario = session.get('usuario', 'Usuario')
+        return render_template('home_mobile.html', usuario=usuario)
+    
+    # Desktop: Dashboard completo
+    
+    # ========== MÉTRICAS ==========
+    
+    # Total de comunidades (leads únicos)
+    response_leads = requests.get(
+        f"{SUPABASE_URL}/rest/v1/clientes?select=id",
+        headers=HEADERS
+    )
+    total_comunidades = len(response_leads.json()) if response_leads.ok else 0
+    
+    # Total de equipos
+    response_equipos = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?select=id",
+        headers=HEADERS
+    )
+    total_equipos = len(response_equipos.json()) if response_equipos.ok else 0
+    
+    # Total de oportunidades
+    response_oportunidades = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?select=id",
+        headers=HEADERS
+    )
+    total_oportunidades = len(response_oportunidades.json()) if response_oportunidades.ok else 0
+    
+    # IPOs hoy
+    hoy = date.today().isoformat()
+    response_ipos_hoy = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?select=id&ipo_proxima=eq.{hoy}",
+        headers=HEADERS
+    )
+    ipos_hoy = len(response_ipos_hoy.json()) if response_ipos_hoy.ok else 0
+    
+    metricas = {
+        'total_comunidades': total_comunidades,
+        'total_equipos': total_equipos,
+        'total_oportunidades': total_oportunidades,
+        'ipos_hoy': ipos_hoy
+    }
+    
+    # ========== ALERTAS ==========
+    
+    # Contratos que vencen en 30 días
+    fecha_limite = (date.today() + timedelta(days=30)).isoformat()
+    response_contratos = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?select=id&fecha_vencimiento_contrato=lte.{fecha_limite}&fecha_vencimiento_contrato=gte.{hoy}",
+        headers=HEADERS
+    )
+    contratos_criticos = len(response_contratos.json()) if response_contratos.ok else 0
+    
+    # IPOs esta semana
+    fin_semana = (date.today() + timedelta(days=7)).isoformat()
+    response_ipos_semana = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?select=id&ipo_proxima=gte.{hoy}&ipo_proxima=lte.{fin_semana}",
+        headers=HEADERS
+    )
+    ipos_semana = len(response_ipos_semana.json()) if response_ipos_semana.ok else 0
+    
+    # Oportunidades pendientes (estado "activa")
+    response_op_pendientes = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?select=id&estado=eq.activa",
+        headers=HEADERS
+    )
+    oportunidades_pendientes = len(response_op_pendientes.json()) if response_op_pendientes.ok else 0
+    
+    alertas = {
+        'contratos_criticos': contratos_criticos,
+        'ipos_semana': ipos_semana,
+        'oportunidades_pendientes': oportunidades_pendientes
+    }
+    
+    # ========== ÚLTIMAS INSTALACIONES ==========
+    
+    response_ultimas = requests.get(
+        f"{SUPABASE_URL}/rest/v1/clientes?select=*&order=fecha_visita.desc&limit=5",
+        headers=HEADERS
+    )
+    
+    ultimas_instalaciones = []
+    if response_ultimas.ok:
+        leads_data = response_ultimas.json()
+        for lead in leads_data:
+            # Contar equipos de este lead
+            response_count = requests.get(
+                f"{SUPABASE_URL}/rest/v1/equipos?select=id&cliente_id=eq.{lead['id']}",
+                headers=HEADERS
+            )
+            num_equipos = len(response_count.json()) if response_count.ok else 0
+            
+            # Formatear fecha
+            fecha_str = lead.get('fecha_visita', '')
+            if fecha_str:
+                try:
+                    fecha_obj = datetime.strptime(fecha_str.split('T')[0], '%Y-%m-%d')
+                    fecha_formateada = fecha_obj.strftime('%d/%m/%Y')
+                except:
+                    fecha_formateada = fecha_str.split('T')[0]
+            else:
+                fecha_formateada = '-'
+            
+            ultimas_instalaciones.append({
+                'id': lead['id'],
+                'direccion': lead.get('direccion', 'Sin dirección'),
+                'localidad': lead.get('localidad', '-'),
+                'num_equipos': num_equipos,
+                'fecha_registro': fecha_formateada
+            })
+    
+    # ========== ÚLTIMAS OPORTUNIDADES ==========
+    
+    response_oport = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?select=*&order=fecha_creacion.desc&limit=5",
+        headers=HEADERS
+    )
+    
+    ultimas_oportunidades = []
+    if response_oport.ok:
+        for op in response_oport.json():
+            # Formatear importe
+            importe = op.get('valor_estimado', 0)
+            if importe:
+                try:
+                    importe_formateado = f"{float(importe):,.0f}".replace(',', '.')
+                except:
+                    importe_formateado = str(importe)
+            else:
+                importe_formateado = '-'
+            
+            ultimas_oportunidades.append({
+                'id': op['id'],
+                'nombre_cliente': op.get('tipo', 'Sin nombre'),
+                'tipo_oportunidad': op.get('tipo', '-'),
+                'estado': op.get('estado', '-'),
+                'importe_estimado': importe_formateado
+            })
+    
+    # ========== PRÓXIMAS IPOs ESTA SEMANA ==========
+    
+    response_ipos = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?select=*,clientes(direccion,localidad)&ipo_proxima=gte.{hoy}&ipo_proxima=lte.{fin_semana}&order=ipo_proxima.asc",
+        headers=HEADERS
+    )
+    
+    proximas_ipos = []
+    if response_ipos.ok:
+        for equipo in response_ipos.json():
+            fecha_ipo_str = equipo.get('ipo_proxima', '')
+            if fecha_ipo_str:
+                try:
+                    fecha_ipo = datetime.strptime(fecha_ipo_str, '%Y-%m-%d').date()
+                    dias_restantes = (fecha_ipo - date.today()).days
+                    
+                    # Obtener dirección del lead
+                    lead_info = equipo.get('clientes', {})
+                    if isinstance(lead_info, list) and len(lead_info) > 0:
+                        lead_info = lead_info[0]
+                    
+                    proximas_ipos.append({
+                        'lead_id': equipo.get('cliente_id'),
+                        'direccion': lead_info.get('direccion', 'Sin dirección') if lead_info else 'Sin dirección',
+                        'localidad': lead_info.get('localidad', '-') if lead_info else '-',
+                        'fecha_ipo': fecha_ipo.strftime('%d/%m/%Y'),
+                        'dias_restantes': dias_restantes
+                    })
+                except Exception as e:
+                    print(f"Error procesando IPO: {e}")
+                    continue
+    
+    return render_template(
+        'home.html',
+        metricas=metricas,
+        alertas=alertas,
+        ultimas_instalaciones=ultimas_instalaciones,
+        ultimas_oportunidades=ultimas_oportunidades,
+        proximas_ipos=proximas_ipos
+    )
 
 # Alta de Lead CON FECHA DE VISITA
 @app.route("/formulario_lead", methods=["GET", "POST"])
@@ -131,7 +317,6 @@ def formulario_lead():
         response = requests.post(f"{SUPABASE_URL}/rest/v1/clientes?select=id", json=data, headers=HEADERS)
         if response.status_code in [200, 201]:
             cliente_id = response.json()[0]["id"]
-            # <<<< MODIFICADO: Cambiar a lead_id
             return redirect(f"/nuevo_equipo?lead_id={cliente_id}")
         else:
             return f"<h3 style='color:red;'>Error al registrar lead</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
@@ -256,7 +441,7 @@ def eliminar_visita_admin(visita_id):
     
     return redirect("/visitas_administradores_dashboard")
 
-# <<<< MODIFICADO COMPLETAMENTE - Alta de Equipo (ahora requiere lead_id)
+# Alta de Equipo (ahora requiere lead_id)
 @app.route("/nuevo_equipo", methods=["GET", "POST"])
 def nuevo_equipo():
     if "usuario" not in session:
@@ -266,7 +451,6 @@ def nuevo_equipo():
     lead_id = request.args.get("lead_id")
     
     if not lead_id:
-        # Si no hay lead_id, redirigir al dashboard de leads
         flash("Debes añadir equipos desde un lead específico", "error")
         return redirect("/leads_dashboard")
     
@@ -282,7 +466,7 @@ def nuevo_equipo():
     
     if request.method == "POST":
         equipo_data = {
-            "cliente_id": int(lead_id),  # Vincula con el lead
+            "cliente_id": int(lead_id),
             "tipo_equipo": request.form.get("tipo_equipo"),
             "identificacion": request.form.get("identificacion"),
             "descripcion": request.form.get("observaciones"),
@@ -303,7 +487,6 @@ def nuevo_equipo():
 
         res = requests.post(f"{SUPABASE_URL}/rest/v1/equipos", json=equipo_data, headers=HEADERS)
         if res.status_code in [200, 201]:
-            # Redirigir a ver el lead en lugar de mostrar success
             flash("Equipo añadido correctamente", "success")
             return redirect(f"/ver_lead/{lead_id}")
         else:
