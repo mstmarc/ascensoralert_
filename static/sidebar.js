@@ -17,9 +17,9 @@
         .sidebar-integrated {
             position: fixed;
             left: 0;
-            top: 60px; /* Ajustado al header compacto */
+            top: 90px; /* 🔼 Ajustado al header espacioso de 90px */
             width: 240px;
-            height: calc(100vh - 60px);
+            height: calc(100vh - 90px);
             background: white;
             border-right: 1px solid #ddd;
             z-index: 800;
@@ -83,8 +83,8 @@
                 transform: translateX(-240px);
                 transition: transform 0.3s;
                 box-shadow: none;
-                top: 55px; /* Header móvil es 55px */
-                height: calc(100vh - 55px);
+                top: 70px; /* 🔼 Header móvil es 70px */
+                height: calc(100vh - 70px);
             }
 
             .sidebar-integrated.mobile-open {
@@ -108,7 +108,7 @@
         /* Botón toggle móvil */
         .sidebar-mobile-btn {
             position: fixed;
-            top: 65px; /* Justo debajo del header compacto */
+            top: 80px; /* 🔼 Justo debajo del header móvil de 70px */
             left: 15px;
             z-index: 801;
             background: white;
