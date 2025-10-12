@@ -6,6 +6,8 @@ from datetime import date, datetime, timedelta
 import calendar
 import io
 import resend
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
