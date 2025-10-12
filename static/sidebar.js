@@ -197,13 +197,13 @@
 
                 <!-- BLOQUE 2: VER/LISTAR -->
                 <a href="/leads_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Ver Comunidades
+                    Ver Instalaciones
                 </a>
                 <a href="/oportunidades" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Ver Oportunidades
                 </a>
                 <a href="/visitas_administradores_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Ver Visitas Administradores
+                    Ver Visitas a Administradores
                 </a>
 
                 <div class="sidebar-integrated-divider"></div>
@@ -213,7 +213,7 @@
                     Reporte Mensual
                 </a>
                 <a href="/configuracion_avisos" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    ⚙️ Configuración de Avisos
+                    Configuración de Avisos
                 </a>
 
                 <div class="sidebar-integrated-divider"></div>
