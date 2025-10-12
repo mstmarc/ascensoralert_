@@ -170,6 +170,15 @@
             color: #333;
             line-height: 1.8;
         }
+
+        .section-title {
+            color: #366092;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 30px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #366092;
+        }
     </style>
 </head>
 <body>
@@ -211,47 +220,51 @@
                            value="{{ config.email_destinatario }}" 
                            required 
                            class="form-input" 
-                           placeholder="ejemplo@fedes.com, otro@fedes.com">
+                           placeholder="julio@fedes.com, otro@fedes.com">
                     <small class="form-hint">
                         Puedes poner varios emails separados por comas
                     </small>
                 </div>
+
+                <h3 class="section-title">🔍 Avisos para IPOs (Subsanación de Defectos)</h3>
                 
                 <div class="form-group">
                     <label class="form-label">
-                        🔍 Días de aviso ANTES de IPOs:
+                        ⏱️ Primer aviso (días DESPUÉS de la IPO):
                     </label>
                     <input type="number" 
-                           name="dias_aviso_antes_ipos" 
-                           value="{{ config.dias_aviso_antes_ipos }}" 
+                           name="primer_aviso_despues_ipo" 
+                           value="{{ config.primer_aviso_despues_ipo }}" 
                            min="1" 
                            max="90" 
                            required 
                            class="form-input">
                     <small class="form-hint">
-                        Te avisaremos cuando falten estos días para una IPO
+                        Ej: 15 días después de la IPO, avisamos para visitar y verificar subsanación
                     </small>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">
-                        ⏱️ Días de seguimiento DESPUÉS de IPOs:
+                        ⏰ Segundo aviso (días DESPUÉS de la IPO):
                     </label>
                     <input type="number" 
-                           name="dias_aviso_despues_ipos" 
-                           value="{{ config.dias_aviso_despues_ipos }}" 
+                           name="segundo_aviso_despues_ipo" 
+                           value="{{ config.segundo_aviso_despues_ipo }}" 
                            min="1" 
                            max="90" 
                            required 
                            class="form-input">
                     <small class="form-hint">
-                        Seguiremos avisando X días después de la fecha IPO (plazo subsanación)
+                        Ej: 30 días después de la IPO, segundo recordatorio urgente
                     </small>
                 </div>
+
+                <h3 class="section-title">📋 Avisos para Contratos de Mantenimiento</h3>
                 
                 <div class="form-group">
                     <label class="form-label">
-                        📋 Días de aviso ANTES del vencimiento de contratos:
+                        📅 Días de aviso ANTES del vencimiento:
                     </label>
                     <input type="number" 
                            name="dias_aviso_antes_contrato" 
@@ -264,6 +277,8 @@
                         Te avisaremos cuando falten estos días para que venza un contrato
                     </small>
                 </div>
+
+                <h3 class="section-title">⚙️ Configuración del Sistema</h3>
                 
                 <div class="form-group">
                     <label class="checkbox-label">
@@ -314,12 +329,12 @@
         </div>
         
         <div class="warning-box">
-            <h3>ℹ️ Información importante:</h3>
+            <h3>ℹ️ Cómo funcionan los avisos:</h3>
             <ul>
-                <li><strong>IPOs:</strong> Avisos ANTES de la fecha y DESPUÉS (plazo subsanación)</li>
-                <li><strong>Contratos:</strong> Avisos ANTES del vencimiento</li>
+                <li><strong>IPOs:</strong> Avisos SOLO DESPUÉS de la fecha para verificar subsanación de defectos</li>
+                <li><strong>Contratos:</strong> Avisos ANTES del vencimiento para renovar a tiempo</li>
                 <li>Los avisos se envían automáticamente según tu configuración</li>
-                <li>Recibirás un email con todas las IPOs y contratos próximos a vencer</li>
+                <li>Recibirás un único email con todas las alertas del día</li>
                 <li>Puedes cambiar esta configuración cuando quieras</li>
             </ul>
         </div>
