@@ -182,6 +182,7 @@
     </style>
 </head>
 <body>
+    <!-- HEADER -->
     <header>
         <div class="header-container">
             <div class="logo-container">
@@ -194,7 +195,10 @@
             </div>
         </div>
     </header>
+
+    <!-- EL MENÚ SE INYECTA AUTOMÁTICAMENTE VÍA sidebar.js -->
     
+    <!-- CONTENIDO PRINCIPAL -->
     <main class="config-container">
         
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -340,5 +344,8 @@
         </div>
         
     </main>
+
+    <!-- SCRIPT QUE INYECTA EL SIDEBAR AUTOMÁTICAMENTE -->
+    <script src="/static/sidebar.js"></script>
 </body>
 </html>
