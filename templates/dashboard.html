@@ -53,11 +53,11 @@
         }
         
         .buscador-destacado {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #366092;
             padding: 12px 15px;
             border-radius: 8px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
         }
         
         .buscador-input-container {
@@ -80,8 +80,8 @@
         }
         
         .btn-buscar {
-            background: white;
-            color: #667eea;
+            background: #2a4a70;
+            color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 6px;
@@ -95,6 +95,7 @@
         .btn-buscar:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            background: #1f3852;
         }
         
         .buscador-label {
@@ -123,7 +124,13 @@
             display: flex;
             flex-direction: column;
             flex: 1;
-            min-width: 150px;
+            min-width: 140px;
+        }
+        
+        .filtro-grupo:nth-child(4),
+        .filtro-grupo:nth-child(5) {
+            flex: 0 0 120px;
+            min-width: 120px;
         }
         
         .filtro-grupo label {
@@ -139,6 +146,8 @@
             border-radius: 6px;
             font-size: 13px;
             transition: border 0.3s;
+            height: 36px;
+            box-sizing: border-box;
         }
         
         .filtro-grupo select:focus {
@@ -459,13 +468,19 @@
                             </select>
                         </div>
                         
-                        <button type="submit" style="background: #366092; color: white; padding: 8px 18px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; align-self: flex-end;">
-                            🔍 Buscar
-                        </button>
+                        <div class="filtro-grupo">
+                            <label style="visibility: hidden;">.</label>
+                            <button type="submit" style="background: #366092; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; width: 100%;">
+                                🔍 Buscar
+                            </button>
+                        </div>
                         
-                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; display: flex; align-items: center; justify-content: center;">
-                            🗑️ Limpiar
-                        </a>
+                        <div class="filtro-grupo">
+                            <label style="visibility: hidden;">.</label>
+                            <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                🗑️ Limpiar
+                            </a>
+                        </div>
                     </div>
                 </div>
                 
