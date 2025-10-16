@@ -73,6 +73,8 @@
             border-radius: 6px;
             font-size: 14px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            height: 40px;
+            box-sizing: border-box;
         }
         
         .buscador-input:focus {
@@ -80,22 +82,24 @@
         }
         
         .btn-buscar {
-            background: #2a4a70;
-            color: white;
-            padding: 10px 20px;
-            border: none;
+            background: white;
+            color: #366092;
+            padding: 0 20px;
+            border: 2px solid white;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             font-size: 14px;
+            height: 40px;
+            box-sizing: border-box;
         }
         
         .btn-buscar:hover {
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            background: #1f3852;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            background: #f8f9fa;
         }
         
         .buscador-label {
@@ -459,7 +463,7 @@
                             </select>
                         </div>
                         
-                        <button type="submit" style="background: white; color: #2a4a70; padding: 0; border: 2px solid #2a4a70; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box; margin-top: 23px;">
+                        <button type="submit" style="background: #2a4a70; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box; margin-top: 23px;">
                             🔍 Buscar
                         </button>
                         
