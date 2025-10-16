@@ -127,12 +127,6 @@
             min-width: 140px;
         }
         
-        .filtro-grupo:nth-child(4),
-        .filtro-grupo:nth-child(5) {
-            flex: 0 0 120px;
-            min-width: 120px;
-        }
-        
         .filtro-grupo label {
             font-weight: 600;
             color: #366092;
@@ -468,19 +462,13 @@
                             </select>
                         </div>
                         
-                        <div class="filtro-grupo">
-                            <label style="opacity: 0; pointer-events: none;">Espacio</label>
-                            <button type="submit" style="background: #366092; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; width: 100%;">
-                                🔍 Buscar
-                            </button>
-                        </div>
+                        <button type="submit" style="background: #366092; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; width: 120px; flex-shrink: 0;">
+                            🔍 Buscar
+                        </button>
                         
-                        <div class="filtro-grupo">
-                            <label style="opacity: 0; pointer-events: none;">Espacio</label>
-                            <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; display: flex; align-items: center; justify-content: center;">
-                                🗑️ Limpiar
-                            </a>
-                        </div>
+                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; width: 120px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            🗑️ Limpiar
+                        </a>
                     </div>
                 </div>
                 
