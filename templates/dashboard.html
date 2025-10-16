@@ -114,17 +114,15 @@
         }
         
         .filtros-grid {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 120px 120px;
             gap: 10px;
-            align-items: flex-end;
-            flex-wrap: wrap;
+            align-items: end;
         }
         
         .filtro-grupo {
             display: flex;
             flex-direction: column;
-            flex: 1;
-            min-width: 140px;
         }
         
         .filtro-grupo label {
@@ -462,11 +460,11 @@
                             </select>
                         </div>
                         
-                        <button type="submit" style="background: #366092; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; width: 120px; flex-shrink: 0; margin-top: 21px;">
+                        <button type="submit" style="background: #366092; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px;">
                             🔍 Buscar
                         </button>
                         
-                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; width: 120px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 21px;">
+                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; display: flex; align-items: center; justify-content: center;">
                             🗑️ Limpiar
                         </a>
                     </div>
