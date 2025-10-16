@@ -117,25 +117,11 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 120px 120px;
             gap: 10px;
-            align-items: end;
         }
         
         .filtro-grupo {
             display: flex;
             flex-direction: column;
-        }
-        
-        .filtro-boton {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .filtro-boton label {
-            font-weight: 600;
-            color: #366092;
-            margin-bottom: 4px;
-            font-size: 13px;
-            visibility: hidden;
         }
         
         .filtro-grupo label {
@@ -473,19 +459,13 @@
                             </select>
                         </div>
                         
-                        <div class="filtro-boton">
-                            <label>.</label>
-                            <button type="submit" style="background: #2a4a70; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box;">
-                                🔍 Buscar
-                            </button>
-                        </div>
+                        <button type="submit" style="background: #2a4a70; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box; margin-top: 21px;">
+                            🔍 Buscar
+                        </button>
                         
-                        <div class="filtro-boton">
-                            <label>.</label>
-                            <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
-                                🗑️ Limpiar
-                            </a>
-                        </div>
+                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; margin-top: 21px;">
+                            🗑️ Limpiar
+                        </a>
                     </div>
                 </div>
                 
