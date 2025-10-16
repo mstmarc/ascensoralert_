@@ -54,88 +54,90 @@
         
         .buscador-destacado {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
         }
         
         .buscador-input-container {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
         
         .buscador-input {
             flex: 1;
-            min-width: 200px;
-            padding: 12px 15px;
+            padding: 10px 12px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            font-size: 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
         
         .buscador-input:focus {
-            outline: 3px solid rgba(255,255,255,0.5);
+            outline: 2px solid rgba(255,255,255,0.5);
         }
         
         .btn-buscar {
             background: white;
             color: #667eea;
-            padding: 12px 25px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            font-size: 14px;
         }
         
         .btn-buscar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         
         .buscador-label {
             color: white;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-align: center;
-            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
         
         .filtros {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border: 1px solid #ddd;
         }
         
         .filtros-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
         }
         
         .filtro-grupo {
             display: flex;
             flex-direction: column;
+            flex: 1;
+            min-width: 150px;
         }
         
         .filtro-grupo label {
-            font-weight: bold;
+            font-weight: 600;
             color: #366092;
-            margin-bottom: 5px;
-            font-size: 14px;
+            margin-bottom: 4px;
+            font-size: 13px;
         }
         
         .filtro-grupo select {
-            padding: 10px;
+            padding: 8px;
             border: 2px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 13px;
             transition: border 0.3s;
         }
         
@@ -165,30 +167,31 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
-            margin: 25px 0;
-            padding: 15px;
+            gap: 12px;
+            margin: 15px 0;
+            padding: 10px;
             background: #f8f9fa;
-            border-radius: 8px;
+            border-radius: 6px;
             flex-wrap: wrap;
         }
         
         .paginacion-info {
             color: #366092;
-            font-weight: bold;
-            font-size: 16px;
+            font-weight: 600;
+            font-size: 14px;
         }
         
         .btn-paginacion {
             background: #366092;
             color: white;
-            padding: 10px 20px;
+            padding: 8px 16px;
             text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 5px;
+            font-weight: 600;
             transition: all 0.3s;
             border: none;
             cursor: pointer;
+            font-size: 13px;
         }
         
         .btn-paginacion:hover:not(:disabled) {
@@ -205,17 +208,17 @@
         .info-resultados {
             text-align: center;
             color: #366092;
-            margin: 15px 0;
-            font-weight: bold;
-            font-size: 16px;
+            margin: 10px 0;
+            font-weight: 600;
+            font-size: 14px;
             background: #e7f3ff;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
         }
         
         .tabla-container {
             overflow-x: auto;
-            margin-top: 20px;
+            margin-top: 10px;
             -webkit-overflow-scrolling: touch;
         }
         
@@ -229,17 +232,19 @@
         th {
             background: #366092;
             color: white;
-            padding: 12px;
+            padding: 10px 8px;
             text-align: left;
-            font-weight: bold;
+            font-weight: 600;
             border: 1px solid #2a4a70;
             position: sticky;
             top: 0;
+            font-size: 13px;
         }
         
         td {
-            padding: 10px 12px;
+            padding: 8px;
             border: 1px solid #ddd;
+            font-size: 13px;
         }
         
         tr:nth-child(even) {
@@ -253,10 +258,10 @@
         .btn-accion {
             background: #366092;
             color: white;
-            padding: 8px 12px;
+            padding: 6px 10px;
             text-decoration: none;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: 12px;
             display: inline-block;
             transition: all 0.3s;
             margin: 2px;
@@ -280,36 +285,37 @@
         
         .leyenda {
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 15px 0;
             border: 1px solid #ddd;
         }
         
         .leyenda h3 {
             color: #366092;
-            margin-bottom: 10px;
-            font-size: 16px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
         }
         
         .leyenda-items {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
         }
         
         .leyenda-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 14px;
+            gap: 6px;
+            font-size: 12px;
         }
         
         .color-box {
-            width: 30px;
-            height: 20px;
-            border-radius: 4px;
+            width: 20px;
+            height: 15px;
+            border-radius: 3px;
             border: 1px solid #999;
             flex-shrink: 0;
         }
@@ -452,14 +458,13 @@
                                 <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 dias</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; justify-content: space-between;">
-                        <button type="submit" style="background: #366092; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s; width: calc(50% - 5px); font-size: 15px; box-sizing: border-box;">
+                        
+                        <button type="submit" style="background: #366092; color: white; padding: 8px 18px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; align-self: flex-end;">
                             🔍 Buscar
                         </button>
-                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; display: block; text-align: center; transition: all 0.3s; width: calc(50% - 5px); font-size: 15px; box-sizing: border-box;">
-                            🗑️ Limpiar Filtros
+                        
+                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 8px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; display: flex; align-items: center; justify-content: center;">
+                            🗑️ Limpiar
                         </a>
                     </div>
                 </div>
@@ -485,28 +490,6 @@
                 {% else %}
                     <button class="btn-paginacion" disabled>Siguiente</button>
                 {% endif %}
-            </div>
-            
-            <div class="leyenda">
-                <h3>Leyenda de Colores:</h3>
-                <div class="leyenda-items">
-                    <div class="leyenda-item">
-                        <span class="color-box color-amarillo"></span>
-                        <span><strong>IPO:</strong> 15 dias antes</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="color-box color-rojo"></span>
-                        <span><strong>IPO:</strong> Pasada hasta 30 dias</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="color-box color-amarillo"></span>
-                        <span><strong>Contrato:</strong> Vence 30-90 dias</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="color-box color-rojo"></span>
-                        <span><strong>Contrato:</strong> Vencido o menos 30 dias</span>
-                    </div>
-                </div>
             </div>
             
             <div class="tabla-container">
@@ -547,6 +530,28 @@
                         {% endif %}
                     </tbody>
                 </table>
+            </div>
+            
+            <div class="leyenda">
+                <h3>Leyenda de Colores:</h3>
+                <div class="leyenda-items">
+                    <div class="leyenda-item">
+                        <span class="color-box color-amarillo"></span>
+                        <span><strong>IPO:</strong> 15 dias antes</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-rojo"></span>
+                        <span><strong>IPO:</strong> Pasada hasta 30 dias</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-amarillo"></span>
+                        <span><strong>Contrato:</strong> Vence 30-90 dias</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <span class="color-box color-rojo"></span>
+                        <span><strong>Contrato:</strong> Vencido o menos 30 dias</span>
+                    </div>
+                </div>
             </div>
             
             <div class="paginacion">
