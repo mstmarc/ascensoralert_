@@ -349,6 +349,12 @@
                 grid-template-columns: 1fr;
             }
             
+            /* Botones de filtro en móvil */
+            .filtros button[type="submit"],
+            .filtros a {
+                width: 100% !important;
+            }
+            
             table {
                 font-size: 12px;
                 min-width: 600px;
@@ -448,11 +454,11 @@
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-                        <button type="submit" style="background: #366092; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s; flex: 1; min-width: 200px; font-size: 15px;">
+                    <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; justify-content: space-between;">
+                        <button type="submit" style="background: #366092; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s; width: calc(50% - 5px); font-size: 15px; box-sizing: border-box;">
                             🔍 Buscar
                         </button>
-                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; text-align: center; transition: all 0.3s; flex: 1; min-width: 200px; font-size: 15px;">
+                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; display: block; text-align: center; transition: all 0.3s; width: calc(50% - 5px); font-size: 15px; box-sizing: border-box;">
                             🗑️ Limpiar Filtros
                         </a>
                     </div>
