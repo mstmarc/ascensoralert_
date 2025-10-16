@@ -125,6 +125,19 @@
             flex-direction: column;
         }
         
+        .filtro-boton {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filtro-boton label {
+            font-weight: 600;
+            color: #366092;
+            margin-bottom: 4px;
+            font-size: 13px;
+            visibility: hidden;
+        }
+        
         .filtro-grupo label {
             font-weight: 600;
             color: #366092;
@@ -460,16 +473,16 @@
                             </select>
                         </div>
                         
-                        <div style="display: flex; flex-direction: column;">
-                            <label style="font-weight: 600; color: #366092; margin-bottom: 4px; font-size: 13px;">&nbsp;</label>
-                            <button type="submit" style="background: #366092; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px;">
+                        <div class="filtro-boton">
+                            <label>.</label>
+                            <button type="submit" style="background: #2a4a70; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box;">
                                 🔍 Buscar
                             </button>
                         </div>
                         
-                        <div style="display: flex; flex-direction: column;">
-                            <label style="font-weight: 600; color: #366092; margin-bottom: 4px; font-size: 13px;">&nbsp;</label>
-                            <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; display: flex; align-items: center; justify-content: center;">
+                        <div class="filtro-boton">
+                            <label>.</label>
+                            <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
                                 🗑️ Limpiar
                             </a>
                         </div>
