@@ -1188,7 +1188,7 @@ def editar_lead(lead_id):
             headers=HEADERS
         )
         if res.status_code in [200, 204]:
-            return redirect("/leads_dashboard")
+            return redirect(f"/ver_lead/{lead_id}")
         else:
             return f"<h3 style='color:red;'>Error al actualizar Lead</h3><pre>{res.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
