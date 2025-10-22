@@ -1231,7 +1231,9 @@ def editar_equipo(equipo_id):
         update_url = f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}"
         res = requests.patch(update_url, json=data, headers=HEADERS)
         if res.status_code in [200, 204]:
-            return redirect("/leads_dashboard")
+            # Obtener el cliente_id del equipo para volver a su vista
+            cliente_id = equipo.get("cliente_id")
+            return redirect(f"/ver_lead/{cliente_id}")
         else:
             return f"<h3 style='color:red;'>Error al actualizar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
 
