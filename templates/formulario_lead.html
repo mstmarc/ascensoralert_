@@ -42,10 +42,10 @@
         <div class="menu">
             <form method="POST">
                 <label>Fecha de Visita:</label><br>
-                <input type="date" name="fecha_visita" value="{{ fecha_hoy }}" required><br><br>
+                <input type="date" name="fecha_visita" value="{{ fecha_hoy }}"><br><br>
 
                 <label>Tipo de Lead:</label><br>
-                <select name="tipo_lead" required>
+                <select name="tipo_lead">
                     <option value="">-- Selecciona un tipo --</option>
                     <option value="Comunidad">Comunidad</option>
                     <option value="Hotel/Apartamentos">Hotel/Apartamentos</option>
@@ -53,16 +53,16 @@
                     <option value="Otro">Otro</option>
                 </select><br><br>
 
-                <label>Dirección:</label><br>
+                <label>Dirección: *</label><br>
                 <input type="text" name="direccion" required><br><br>
 
                 <label>Nombre de la Instalación:</label><br>
-                <input type="text" name="nombre_lead" required><br><br>
+                <input type="text" name="nombre_lead"><br><br>
 
                 <label>Código Postal:</label><br>
                 <input type="text" name="codigo_postal"><br><br>
 
-                <label>Localidad:</label><br>
+                <label>Localidad: *</label><br>
                 <select name="localidad" required>
                     <option value="">-- Selecciona una localidad --</option>
                     <option value="Agaete">Agaete</option>
@@ -145,7 +145,7 @@
                 </select><br><br>
 
                 <label>Número de Ascensores:</label><br>
-                <select name="numero_ascensores" required>
+                <select name="numero_ascensores">
                     <option value="">-- Cuantos ascensores hay? --</option>
                     <option value="1">1 ascensor</option>
                     <option value="2">2 ascensores</option>
