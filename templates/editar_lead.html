@@ -45,10 +45,10 @@
         <div class="menu">
             <form method="POST">
                 <label>Fecha:</label><br>
-                <input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}" required><br><br>
+                <input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}"><br><br>
                 
                 <label>Tipo:</label><br>
-                <select name="tipo_lead" required>
+                <select name="tipo_lead">
                     <option value="">-- Tipo --</option>
                     <option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option>
                     <option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option>
@@ -56,16 +56,16 @@
                     <option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option>
                 </select><br><br>
                 
-                <label>Dirección:</label><br>
+                <label>Dirección: *</label><br>
                 <input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br>
                 
                 <label>Nombre:</label><br>
-                <input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}" required><br><br>
+                <input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}"><br><br>
                 
                 <label>CP:</label><br>
                 <input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br>
                 
-                <label>Localidad:</label><br>
+                <label>Localidad: *</label><br>
                 <input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br>
                 
                 <label>Zona:</label><br>
@@ -105,7 +105,7 @@
                 </select><br><br>
                 
                 <label>Num Ascensores:</label><br>
-                <input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}" required><br><br>
+                <input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}"><br><br>
                 
                 <label>Observaciones:</label><br>
                 <textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br>
