@@ -34,6 +34,13 @@ if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
 
 # FUNCIONES AUXILIARES
+
+def limpiar_none(data):
+    """Convierte valores None a strings vacíos para evitar mostrar 'none' en formularios"""
+    if isinstance(data, dict):
+        return {k: (v if v is not None else '') for k, v in data.items()}
+    return data
+
 def calcular_color_ipo(fecha_ipo_str):
     """Calcula el color de fondo para la celda de IPO según la urgencia"""
     if not fecha_ipo_str or fecha_ipo_str == "-":
@@ -516,25 +523,26 @@ def formulario_lead():
         return redirect("/")
     if request.method == "POST":
         data = {
-            "fecha_visita": request.form.get("fecha_visita"),
-            "tipo_cliente": request.form.get("tipo_lead"),
+            "fecha_visita": request.form.get("fecha_visita") or None,
+            "tipo_cliente": request.form.get("tipo_lead") or None,
             "direccion": request.form.get("direccion"),
-            "nombre_cliente": request.form.get("nombre_lead"),
-            "codigo_postal": request.form.get("codigo_postal"),
+            "nombre_cliente": request.form.get("nombre_lead") or None,
+            "codigo_postal": request.form.get("codigo_postal") or None,
             "localidad": request.form.get("localidad"),
-            "zona": request.form.get("zona"),
-            "persona_contacto": request.form.get("persona_contacto"),
-            "telefono": request.form.get("telefono"),
-            "email": request.form.get("email"),
-            "administrador_fincas": request.form.get("administrador_fincas"),
-            "empresa_mantenedora": request.form.get("empresa_mantenedora"),
-            "numero_ascensores": request.form.get("numero_ascensores"),
-            "observaciones": request.form.get("observaciones")
+            "zona": request.form.get("zona") or None,
+            "persona_contacto": request.form.get("persona_contacto") or None,
+            "telefono": request.form.get("telefono") or None,
+            "email": request.form.get("email") or None,
+            "administrador_fincas": request.form.get("administrador_fincas") or None,
+            "empresa_mantenedora": request.form.get("empresa_mantenedora") or None,
+            "numero_ascensores": request.form.get("numero_ascensores") or None,
+            "observaciones": request.form.get("observaciones") or None
         }
 
-        required = [data["fecha_visita"], data["tipo_cliente"], data["direccion"], data["nombre_cliente"], data["localidad"], data["numero_ascensores"]]
+        # Solo dirección y localidad son obligatorios
+        required = [data["direccion"], data["localidad"]]
         if any(not field for field in required):
-            return "Datos del lead inválidos - Fecha de visita es obligatoria", 400
+            return "Datos del lead inválidos - Dirección y Localidad son obligatorios", 400
 
         response = requests.post(f"{SUPABASE_URL}/rest/v1/clientes?select=id", json=data, headers=HEADERS)
         if response.status_code in [200, 201]:
@@ -685,27 +693,25 @@ def nuevo_equipo():
         return redirect("/leads_dashboard")
     
     lead_data = lead_response.json()[0]
+    # Limpiar valores None para evitar mostrar "none"
+    lead_data = limpiar_none(lead_data)
     
     if request.method == "POST":
         equipo_data = {
             "cliente_id": int(lead_id),
             "tipo_equipo": request.form.get("tipo_equipo"),
-            "identificacion": request.form.get("identificacion"),
-            "descripcion": request.form.get("observaciones"),
+            "identificacion": request.form.get("identificacion") or None,
+            "descripcion": request.form.get("observaciones") or None,
             "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
-            "rae": request.form.get("rae"),
+            "rae": request.form.get("rae") or None,
             "ipo_proxima": request.form.get("ipo_proxima") or None
         }
 
-        required = [equipo_data["tipo_equipo"]]
-        if any(not field for field in required):
+        # Solo tipo_equipo es obligatorio
+        if not equipo_data["tipo_equipo"]:
             return render_template("nuevo_equipo.html", 
                                  lead=lead_data, 
                                  error="Tipo de equipo es obligatorio")
-
-        for key, value in equipo_data.items():
-            if value == "":
-                equipo_data[key] = None
 
         res = requests.post(f"{SUPABASE_URL}/rest/v1/equipos", json=equipo_data, headers=HEADERS)
         if res.status_code in [200, 201]:
@@ -1159,7 +1165,7 @@ def eliminar_equipo(equipo_id):
     else:
         return f"<h3 style='color:red;'>Error al obtener Equipo</h3><a href='/home'>Volver</a>"
 
-# Editar Lead
+# Editar Lead - CON LIMPIEZA DE NONE
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
 def editar_lead(lead_id):
     if "usuario" not in session:
@@ -1167,21 +1173,27 @@ def editar_lead(lead_id):
 
     if request.method == "POST":
         data = {
-            "fecha_visita": request.form.get("fecha_visita"),
-            "tipo_cliente": request.form.get("tipo_lead"),
+            "fecha_visita": request.form.get("fecha_visita") or None,
+            "tipo_cliente": request.form.get("tipo_lead") or None,
             "direccion": request.form.get("direccion"),
-            "nombre_cliente": request.form.get("nombre_lead"),
-            "codigo_postal": request.form.get("codigo_postal"),
+            "nombre_cliente": request.form.get("nombre_lead") or None,
+            "codigo_postal": request.form.get("codigo_postal") or None,
             "localidad": request.form.get("localidad"),
-            "zona": request.form.get("zona"),
-            "persona_contacto": request.form.get("persona_contacto"),
-            "telefono": request.form.get("telefono"),
-            "email": request.form.get("email"),
-            "administrador_fincas": request.form.get("administrador_fincas"),
-            "empresa_mantenedora": request.form.get("empresa_mantenedora"),
-            "numero_ascensores": request.form.get("numero_ascensores"),
-            "observaciones": request.form.get("observaciones")
+            "zona": request.form.get("zona") or None,
+            "persona_contacto": request.form.get("persona_contacto") or None,
+            "telefono": request.form.get("telefono") or None,
+            "email": request.form.get("email") or None,
+            "administrador_fincas": request.form.get("administrador_fincas") or None,
+            "empresa_mantenedora": request.form.get("empresa_mantenedora") or None,
+            "numero_ascensores": request.form.get("numero_ascensores") or None,
+            "observaciones": request.form.get("observaciones") or None
         }
+        
+        # Solo dirección y localidad son obligatorios
+        if not data["direccion"] or not data["localidad"]:
+            flash("Dirección y Localidad son obligatorios", "error")
+            return redirect(request.referrer)
+        
         res = requests.patch(
             f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}",
             json=data,
@@ -1198,11 +1210,14 @@ def editar_lead(lead_id):
     )
     if response.status_code == 200 and response.json():
         lead = response.json()[0]
+        # LIMPIAR VALORES NONE PARA NO MOSTRAR "none" EN EL FORMULARIO
+        lead = limpiar_none(lead)
     else:
         return f"<h3 style='color:red;'>Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
     return render_template("editar_lead.html", lead=lead)
 
+# Editar Equipo - CON LIMPIEZA DE NONE
 @app.route("/editar_equipo/<int:equipo_id>", methods=["GET", "POST"])
 def editar_equipo(equipo_id):
     if "usuario" not in session:
@@ -1217,16 +1232,17 @@ def editar_equipo(equipo_id):
     if request.method == "POST":
         data = {
             "tipo_equipo": request.form.get("tipo_equipo"),
-            "identificacion": request.form.get("identificacion"),
-            "descripcion": request.form.get("observaciones"),
+            "identificacion": request.form.get("identificacion") or None,
+            "descripcion": request.form.get("observaciones") or None,
             "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
-            "rae": request.form.get("rae"),
+            "rae": request.form.get("rae") or None,
             "ipo_proxima": request.form.get("ipo_proxima") or None
         }
 
-        for key, value in data.items():
-            if value == "":
-                data[key] = None
+        # Solo tipo_equipo es obligatorio
+        if not data["tipo_equipo"]:
+            flash("Tipo de equipo es obligatorio", "error")
+            return redirect(request.referrer)
 
         update_url = f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}"
         res = requests.patch(update_url, json=data, headers=HEADERS)
@@ -1237,6 +1253,8 @@ def editar_equipo(equipo_id):
         else:
             return f"<h3 style='color:red;'>Error al actualizar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
 
+    # LIMPIAR VALORES NONE PARA NO MOSTRAR "none" EN EL FORMULARIO
+    equipo = limpiar_none(equipo)
     return render_template("editar_equipo.html", equipo=equipo)
 
 # ============================================
