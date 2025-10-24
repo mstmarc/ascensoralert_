@@ -285,7 +285,9 @@ def enviar_avisos_email(config):
         email = resend.Emails.send(params)
         return f"Email enviado correctamente a {len(emails_destino)} destinatario(s): {total_ipos} IPOs, {len(alertas_contrato)} contratos"
     except Exception as e:
-        return f"Error al enviar email: {str(e)}"# ============================================
+        return f"Error al enviar email: {str(e)}"
+
+# ============================================
 # RUTAS
 # ============================================
 
@@ -1258,7 +1260,7 @@ def editar_equipo(equipo_id):
     return render_template("editar_equipo.html", equipo=equipo)
 
 # ============================================
-# MÓDULO DE OPORTUNIDADES
+# MÓDULO DE OPORTUNIDADES - ACTUALIZADO
 # ============================================
 
 @app.route("/oportunidades")
@@ -1339,6 +1341,7 @@ def crear_oportunidad(cliente_id):
         return redirect(url_for("leads_dashboard"))
 
 
+# ACTUALIZADO: editar_oportunidad con nuevos campos
 @app.route("/editar_oportunidad/<int:oportunidad_id>", methods=["GET", "POST"])
 def editar_oportunidad(oportunidad_id):
     if "usuario" not in session:
@@ -1351,7 +1354,8 @@ def editar_oportunidad(oportunidad_id):
                 "descripcion": request.form.get("descripcion", ""),
                 "estado": request.form["estado"],
                 "valor_estimado": request.form.get("valor_estimado") or None,
-                "observaciones": request.form.get("observaciones", "")
+                "notas": request.form.get("notas", ""),
+                "estado_presupuesto": request.form.get("estado_presupuesto", "No")
             }
             
             if data["estado"] in ["ganada", "perdida"]:
@@ -1363,9 +1367,9 @@ def editar_oportunidad(oportunidad_id):
                 json=data
             )
             
-            if response.status_code == 204:
+            if response.status_code in [200, 204]:
                 flash("Oportunidad actualizada correctamente", "success")
-                return redirect(url_for("oportunidades"))
+                return redirect(url_for("ver_oportunidad", oportunidad_id=oportunidad_id))
             else:
                 flash("Error al actualizar", "error")
                 
@@ -1385,24 +1389,42 @@ def editar_oportunidad(oportunidad_id):
         return redirect(url_for("oportunidades"))
 
 
+# ACTUALIZADO: ver_oportunidad con visitas y acciones
 @app.route("/ver_oportunidad/<int:oportunidad_id>")
 def ver_oportunidad(oportunidad_id):
     if "usuario" not in session:
         return redirect("/")
     
     try:
+        # Obtener oportunidad con datos del cliente
         response = requests.get(
             f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(nombre_cliente,direccion,localidad)",
             headers=HEADERS
         )
+        
         if response.status_code == 200 and response.json():
             oportunidad = response.json()[0]
-            return render_template("ver_oportunidad.html", oportunidad=oportunidad)
+            
+            # Asegurar que acciones sea una lista
+            if not oportunidad.get('acciones') or not isinstance(oportunidad.get('acciones'), list):
+                oportunidad['acciones'] = []
+            
+            # Obtener visitas asociadas
+            visitas_response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/visitas?oportunidad_id=eq.{oportunidad_id}&order=fecha_visita.desc",
+                headers=HEADERS
+            )
+            
+            visitas = visitas_response.json() if visitas_response.status_code == 200 else []
+            
+            return render_template("ver_oportunidad.html", 
+                                 oportunidad=oportunidad,
+                                 visitas=visitas)
         else:
             flash("Oportunidad no encontrada", "error")
             return redirect(url_for("oportunidades"))
-    except:
-        flash("Error al cargar oportunidad", "error")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
         return redirect(url_for("oportunidades"))
 
 
@@ -1437,6 +1459,181 @@ def eliminar_oportunidad(oportunidad_id):
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
         return redirect(url_for("oportunidades"))
+
+
+# ============================================
+# NUEVAS RUTAS PARA ACCIONES
+# ============================================
+
+@app.route('/oportunidad/<int:oportunidad_id>/accion/add', methods=['POST'])
+def add_accion(oportunidad_id):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    texto_accion = request.form.get('texto_accion', '').strip()
+    
+    if not texto_accion:
+        flash('Debes escribir una acción', 'error')
+        return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
+    
+    # Obtener acciones actuales
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=acciones",
+        headers=HEADERS
+    )
+    
+    if response.status_code == 200 and response.json():
+        acciones = response.json()[0].get('acciones', [])
+        if not isinstance(acciones, list):
+            acciones = []
+        
+        # Añadir nueva acción
+        acciones.append({
+            'texto': texto_accion,
+            'completada': False
+        })
+        
+        # Actualizar en BD
+        requests.patch(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
+            headers=HEADERS,
+            json={'acciones': acciones}
+        )
+        
+        flash('Acción añadida correctamente', 'success')
+    
+    return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
+
+
+@app.route('/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>', methods=['POST'])
+def toggle_accion(oportunidad_id, index):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    # Obtener acciones actuales
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=acciones",
+        headers=HEADERS
+    )
+    
+    if response.status_code == 200 and response.json():
+        acciones = response.json()[0].get('acciones', [])
+        
+        if 0 <= index < len(acciones):
+            # Toggle el estado
+            acciones[index]['completada'] = not acciones[index]['completada']
+            
+            # Actualizar en BD
+            requests.patch(
+                f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
+                headers=HEADERS,
+                json={'acciones': acciones}
+            )
+    
+    return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
+
+
+@app.route('/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>', methods=['POST'])
+def delete_accion(oportunidad_id, index):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    # Obtener acciones actuales
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=acciones",
+        headers=HEADERS
+    )
+    
+    if response.status_code == 200 and response.json():
+        acciones = response.json()[0].get('acciones', [])
+        
+        if 0 <= index < len(acciones):
+            # Eliminar acción
+            acciones.pop(index)
+            
+            # Actualizar en BD
+            requests.patch(
+                f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
+                headers=HEADERS,
+                json={'acciones': acciones}
+            )
+            
+            flash('Acción eliminada', 'success')
+    
+    return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
+
+
+# ============================================
+# NUEVAS RUTAS PARA VISITAS
+# ============================================
+
+@app.route('/oportunidad/<int:oportunidad_id>/visita/nueva', methods=['GET', 'POST'])
+def nueva_visita(oportunidad_id):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    # Obtener datos de la oportunidad
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(*)",
+        headers=HEADERS
+    )
+    
+    if response.status_code != 200 or not response.json():
+        flash('Oportunidad no encontrada', 'error')
+        return redirect(url_for('oportunidades'))
+    
+    oportunidad = response.json()[0]
+    
+    if request.method == 'POST':
+        fecha_visita = request.form.get('fecha_visita')
+        tipo_visita = request.form.get('tipo_visita')
+        observaciones = request.form.get('observaciones', '')
+        realizada_por = request.form.get('realizada_por', session.get('usuario', ''))
+        
+        if not fecha_visita:
+            flash('La fecha de visita es obligatoria', 'error')
+            return render_template('nueva_visita.html', oportunidad=oportunidad)
+        
+        # Insertar visita
+        visita_response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/visitas",
+            headers=HEADERS,
+            json={
+                'oportunidad_id': oportunidad_id,
+                'cliente_id': oportunidad['cliente_id'],
+                'fecha_visita': fecha_visita,
+                'tipo_visita': tipo_visita,
+                'observaciones': observaciones,
+                'realizada_por': realizada_por
+            }
+        )
+        
+        if visita_response.status_code in [200, 201]:
+            flash('Visita registrada correctamente', 'success')
+            return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
+        else:
+            flash('Error al registrar visita', 'error')
+    
+    return render_template('nueva_visita.html', oportunidad=oportunidad)
+
+
+@app.route('/visita/<int:visita_id>')
+def ver_visita(visita_id):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+    
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/visitas?id=eq.{visita_id}&select=*,clientes(*),oportunidades(*)",
+        headers=HEADERS
+    )
+    
+    if response.status_code != 200 or not response.json():
+        flash('Visita no encontrada', 'error')
+        return redirect(url_for('oportunidades'))
+    
+    visita = response.json()[0]
+    return render_template('ver_visita.html', visita=visita)
+
 
 # ============================================
 # MÓDULO DE NOTIFICACIONES POR EMAIL
