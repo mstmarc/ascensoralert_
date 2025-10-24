@@ -510,8 +510,10 @@
                             <div class="visita-info">
                                 <div class="visita-fecha">{{ visita.fecha_visita }}</div>
                                 <div class="visita-tipo">
-                                    {{ visita.tipo_visita or 'Visita' }}
-                                    {% if visita.realizada_por %} - Por: {{ visita.realizada_por }}{% endif %}
+                                    {{ visita.tipo_visita }}
+                                    {% if visita.tipo == 'administrador' and visita.persona_contacto %}
+                                        - Contacto: {{ visita.persona_contacto }}
+                                    {% endif %}
                                 </div>
                                 {% if visita.observaciones %}
                                 <div class="visita-observaciones">{{ visita.observaciones }}</div>
@@ -524,7 +526,12 @@
                     <p class="empty-state">No hay visitas registradas para esta oportunidad</p>
                 {% endif %}
                 
-                <a href="{{ url_for('nueva_visita', oportunidad_id=oportunidad.id) }}" class="btn-registrar-visita">+ Registrar Nueva Visita</a>
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                    <a href="{{ url_for('crear_visita_seguimiento', cliente_id=oportunidad.cliente_id, oportunidad_id=oportunidad.id) }}" 
+                       class="btn-registrar-visita">+ Registrar Visita a Instalación</a>
+                    <a href="{{ url_for('visita_administrador', oportunidad_id=oportunidad.id) }}" 
+                       class="btn-registrar-visita" style="background: #5a6268;">+ Registrar Visita a Administrador</a>
+                </div>
             </div>
         </div>
         
