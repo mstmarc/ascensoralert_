@@ -373,8 +373,8 @@
     <div class="header">
         <h1>🎯 Detalle de Oportunidad</h1>
         <div class="header-nav">
-            <a href="{{ url_for('index') }}">← Inicio</a>
-            <a href="{{ url_for('oportunidades_dashboard') }}">Oportunidades</a>
+            <a href="{{ url_for('home') }}">← Inicio</a>
+            <a href="{{ url_for('oportunidades') }}">Oportunidades</a>
             <a href="{{ url_for('leads_dashboard') }}">Comunidades</a>
             <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
         </div>
@@ -538,8 +538,8 @@
         <!-- BOTONES DE ACCIÓN -->
         <div class="action-buttons">
             <a href="{{ url_for('editar_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-primary">Editar Oportunidad</a>
-            <a href="{{ url_for('ver_comunidad', cliente_id=oportunidad.cliente_id) }}" class="btn btn-primary">Ver Comunidad</a>
-            <a href="{{ url_for('oportunidades_dashboard') }}" class="btn btn-secondary">Volver a Oportunidades</a>
+            <a href="{{ url_for('ver_lead', lead_id=oportunidad.cliente_id) }}" class="btn btn-primary">Ver Comunidad</a>
+            <a href="{{ url_for('oportunidades') }}" class="btn btn-secondary">Volver a Oportunidades</a>
         </div>
         
         <!-- FOOTER CON FECHA CREACIÓN -->
