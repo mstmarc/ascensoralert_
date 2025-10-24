@@ -562,12 +562,26 @@ def visita_administrador():
     if "usuario" not in session:
         return redirect("/")
     
+    # Puede venir con oportunidad_id desde la vista de oportunidad
+    oportunidad_id = request.args.get("oportunidad_id")
+    oportunidad_data = None
+    
+    if oportunidad_id:
+        # Obtener datos de la oportunidad
+        oportunidad_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(*)",
+            headers=HEADERS
+        )
+        if oportunidad_response.status_code == 200 and oportunidad_response.json():
+            oportunidad_data = oportunidad_response.json()[0]
+    
     if request.method == "POST":
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
             "administrador_fincas": request.form.get("administrador_fincas"),
             "persona_contacto": request.form.get("persona_contacto"),
-            "observaciones": request.form.get("observaciones")
+            "observaciones": request.form.get("observaciones"),
+            "oportunidad_id": int(request.form.get("oportunidad_id")) if request.form.get("oportunidad_id") else None
         }
         
         required = [data["fecha_visita"], data["administrador_fincas"]]
@@ -576,12 +590,19 @@ def visita_administrador():
         
         response = requests.post(f"{SUPABASE_URL}/rest/v1/visitas_administradores", json=data, headers=HEADERS)
         if response.status_code in [200, 201]:
-            return render_template("visita_admin_success.html")
+            # Si viene de una oportunidad, volver a la oportunidad
+            if data["oportunidad_id"]:
+                flash("Visita a administrador registrada correctamente", "success")
+                return redirect(url_for('ver_oportunidad', oportunidad_id=data["oportunidad_id"]))
+            else:
+                return render_template("visita_admin_success.html")
         else:
             return f"<h3 style='color:red;'>Error al registrar visita</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
     
     fecha_hoy = date.today().strftime('%Y-%m-%d')
-    return render_template("visita_administrador.html", fecha_hoy=fecha_hoy)
+    return render_template("visita_administrador.html", 
+                         fecha_hoy=fecha_hoy,
+                         oportunidad=oportunidad_data)
 
 # Dashboard de visitas a administradores
 @app.route("/visitas_administradores_dashboard")
@@ -737,7 +758,7 @@ def crear_visita_seguimiento(cliente_id):
     if request.method == "POST":
         data = {
             "cliente_id": cliente_id,
-            "oportunidad_id": request.form.get("oportunidad_id") or None,
+            "oportunidad_id": int(request.form.get("oportunidad_id")) if request.form.get("oportunidad_id") else None,
             "fecha_visita": request.form.get("fecha_visita"),
             "observaciones": request.form.get("observaciones")
         }
@@ -750,7 +771,11 @@ def crear_visita_seguimiento(cliente_id):
         
         if response.status_code in [200, 201]:
             flash("Visita de seguimiento registrada correctamente", "success")
-            return redirect(f"/ver_lead/{cliente_id}")
+            # Si viene de una oportunidad, volver a la oportunidad
+            if data["oportunidad_id"]:
+                return redirect(url_for('ver_oportunidad', oportunidad_id=data["oportunidad_id"]))
+            else:
+                return redirect(f"/ver_lead/{cliente_id}")
         else:
             flash("Error al registrar visita", "error")
     
@@ -1409,17 +1434,49 @@ def ver_oportunidad(oportunidad_id):
             if not oportunidad.get('acciones') or not isinstance(oportunidad.get('acciones'), list):
                 oportunidad['acciones'] = []
             
-            # Obtener visitas asociadas
-            visitas_response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/visitas?oportunidad_id=eq.{oportunidad_id}&order=fecha_visita.desc",
+            # Obtener visitas de seguimiento asociadas a esta oportunidad
+            visitas_seguimiento_response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/visitas_seguimiento?oportunidad_id=eq.{oportunidad_id}&select=*,clientes(nombre_cliente,direccion)&order=fecha_visita.desc",
                 headers=HEADERS
             )
             
-            visitas = visitas_response.json() if visitas_response.status_code == 200 else []
+            visitas_seguimiento = []
+            if visitas_seguimiento_response.status_code == 200:
+                for v in visitas_seguimiento_response.json():
+                    visitas_seguimiento.append({
+                        'id': v.get('id'),
+                        'fecha_visita': v.get('fecha_visita'),
+                        'tipo_visita': 'Visita a Instalación',
+                        'tipo': 'instalacion',
+                        'observaciones': v.get('observaciones', ''),
+                        'cliente_nombre': v.get('clientes', {}).get('nombre_cliente', 'Sin nombre') if v.get('clientes') else 'Sin nombre'
+                    })
+            
+            # Obtener visitas a administradores asociadas a esta oportunidad
+            visitas_admin_response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/visitas_administradores?oportunidad_id=eq.{oportunidad_id}&order=fecha_visita.desc",
+                headers=HEADERS
+            )
+            
+            visitas_admin = []
+            if visitas_admin_response.status_code == 200:
+                for v in visitas_admin_response.json():
+                    visitas_admin.append({
+                        'id': v.get('id'),
+                        'fecha_visita': v.get('fecha_visita'),
+                        'tipo_visita': f"Visita a Administrador: {v.get('administrador_fincas', 'N/A')}",
+                        'tipo': 'administrador',
+                        'observaciones': v.get('observaciones', ''),
+                        'persona_contacto': v.get('persona_contacto', '')
+                    })
+            
+            # Combinar y ordenar todas las visitas por fecha
+            todas_visitas = visitas_seguimiento + visitas_admin
+            todas_visitas.sort(key=lambda x: x['fecha_visita'], reverse=True)
             
             return render_template("ver_oportunidad.html", 
                                  oportunidad=oportunidad,
-                                 visitas=visitas)
+                                 visitas=todas_visitas)
         else:
             flash("Oportunidad no encontrada", "error")
             return redirect(url_for("oportunidades"))
@@ -1561,78 +1618,6 @@ def delete_accion(oportunidad_id, index):
             flash('Acción eliminada', 'success')
     
     return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
-
-
-# ============================================
-# NUEVAS RUTAS PARA VISITAS
-# ============================================
-
-@app.route('/oportunidad/<int:oportunidad_id>/visita/nueva', methods=['GET', 'POST'])
-def nueva_visita(oportunidad_id):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    
-    # Obtener datos de la oportunidad
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=*,clientes(*)",
-        headers=HEADERS
-    )
-    
-    if response.status_code != 200 or not response.json():
-        flash('Oportunidad no encontrada', 'error')
-        return redirect(url_for('oportunidades'))
-    
-    oportunidad = response.json()[0]
-    
-    if request.method == 'POST':
-        fecha_visita = request.form.get('fecha_visita')
-        tipo_visita = request.form.get('tipo_visita')
-        observaciones = request.form.get('observaciones', '')
-        realizada_por = request.form.get('realizada_por', session.get('usuario', ''))
-        
-        if not fecha_visita:
-            flash('La fecha de visita es obligatoria', 'error')
-            return render_template('nueva_visita.html', oportunidad=oportunidad)
-        
-        # Insertar visita
-        visita_response = requests.post(
-            f"{SUPABASE_URL}/rest/v1/visitas",
-            headers=HEADERS,
-            json={
-                'oportunidad_id': oportunidad_id,
-                'cliente_id': oportunidad['cliente_id'],
-                'fecha_visita': fecha_visita,
-                'tipo_visita': tipo_visita,
-                'observaciones': observaciones,
-                'realizada_por': realizada_por
-            }
-        )
-        
-        if visita_response.status_code in [200, 201]:
-            flash('Visita registrada correctamente', 'success')
-            return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
-        else:
-            flash('Error al registrar visita', 'error')
-    
-    return render_template('nueva_visita.html', oportunidad=oportunidad)
-
-
-@app.route('/visita/<int:visita_id>')
-def ver_visita(visita_id):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/visitas?id=eq.{visita_id}&select=*,clientes(*),oportunidades(*)",
-        headers=HEADERS
-    )
-    
-    if response.status_code != 200 or not response.json():
-        flash('Visita no encontrada', 'error')
-        return redirect(url_for('oportunidades'))
-    
-    visita = response.json()[0]
-    return render_template('ver_visita.html', visita=visita)
 
 
 # ============================================
