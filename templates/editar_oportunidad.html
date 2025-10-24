@@ -4,176 +4,203 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Oportunidad - Ascensor Alert</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=5">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        
-        .header {
-            background: linear-gradient(135deg, #2c5f9e 0%, #1e4a7a 100%);
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #366092;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .menu-lateral {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 999;
+            transition: right 0.3s ease;
+            padding-top: 60px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+
+        .menu-lateral.active {
+            right: 0;
+        }
+
+        .menu-lateral a {
+            display: block;
             color: white;
             padding: 15px 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .header h1 { font-size: 24px; margin-bottom: 10px; }
-        
-        .header-nav {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .header-nav a {
-            color: white;
             text-decoration: none;
-            font-size: 14px;
-            padding: 5px 10px;
-            border-radius: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             transition: background 0.3s;
         }
-        
-        .header-nav a:hover { background: rgba(255,255,255,0.2); }
-        
+
+        .menu-lateral a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
         .container {
             max-width: 700px;
             margin: 20px auto;
             padding: 0 15px;
         }
-        
+
         .info-comunidad {
             background: white;
             padding: 15px 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #366092;
         }
-        
+
         .info-comunidad h2 {
             font-size: 18px;
-            color: #2c5f9e;
+            color: #366092;
             margin-bottom: 5px;
         }
-        
+
         .info-comunidad p {
             color: #666;
             font-size: 14px;
         }
-        
+
         .form-card {
             background: white;
             border-radius: 8px;
             padding: 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
         }
-        
+
         .form-card h3 {
             font-size: 20px;
-            color: #333;
+            color: #366092;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #2c5f9e;
+            border-bottom: 2px solid #366092;
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
-            font-weight: bold;
-            color: #333;
+            font-weight: 600;
+            color: #555;
             margin-bottom: 8px;
             font-size: 14px;
         }
-        
+
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: Arial, sans-serif;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
         }
-        
+
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #2c5f9e;
+            border-color: #366092;
+            box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1);
         }
-        
+
         .form-group textarea {
             min-height: 100px;
             resize: vertical;
         }
-        
+
         .required {
             color: red;
         }
-        
+
         .form-actions {
             display: flex;
             gap: 10px;
             margin-top: 25px;
         }
-        
+
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
             text-align: center;
+            transition: all 0.3s ease;
         }
-        
+
         .btn-primary {
-            background: #2c5f9e;
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
         }
-        
+
         .btn-primary:hover {
-            background: #1e4a7a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
         }
-        
+
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
-        
+
         .btn-secondary:hover {
             background: #5a6268;
         }
-        
+
         .alert {
             padding: 12px 20px;
             margin-bottom: 20px;
-            border-radius: 4px;
+            border-radius: 8px;
         }
-        
+
         .alert.success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        
+
         .alert.error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        
+
         .help-text {
             font-size: 12px;
             color: #666;
             margin-top: 5px;
         }
-        
+
         @media (max-width: 768px) {
-            .header h1 { font-size: 20px; }
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
             .form-card { padding: 20px 15px; }
             .form-actions { flex-direction: column; }
             .btn { width: 100%; }
@@ -181,89 +208,120 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>✏️ Editar Oportunidad</h1>
-        <div class="header-nav">
-            <a href="{{ url_for('index') }}">← Inicio</a>
-            <a href="{{ url_for('oportunidades_dashboard') }}">Oportunidades</a>
-            <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="FEDES Logo" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>✏️ Editar Oportunidad</h1>
+            </div>
         </div>
-    </div>
-    
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <div class="info-comunidad">
-            <h2>{{ oportunidad.clientes.nombre_cliente or 'Sin nombre' }}</h2>
-            <p>{{ oportunidad.clientes.direccion }} - {{ oportunidad.clientes.localidad }}</p>
+    </header>
+
+    <main>
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="info-comunidad">
+                <h2>{{ oportunidad.clientes.nombre_cliente or 'Sin nombre' }}</h2>
+                <p>{{ oportunidad.clientes.direccion }} - {{ oportunidad.clientes.localidad }}</p>
+            </div>
+
+            <div class="form-card">
+                <h3>Editar Datos de la Oportunidad</h3>
+
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="tipo">Tipo de Oportunidad <span class="required">*</span></label>
+                        <select id="tipo" name="tipo" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="Cambio de mantenedora" {% if oportunidad.tipo == 'Cambio de mantenedora' %}selected{% endif %}>Cambio de mantenedora</option>
+                            <option value="Descontento con empresa mantenedora" {% if oportunidad.tipo == 'Descontento con empresa mantenedora' %}selected{% endif %}>Descontento con empresa mantenedora</option>
+                            <option value="Modernización" {% if oportunidad.tipo == 'Modernización' %}selected{% endif %}>Modernización</option>
+                            <option value="Reparación" {% if oportunidad.tipo == 'Reparación' %}selected{% endif %}>Reparación</option>
+                            <option value="Nuevo ascensor" {% if oportunidad.tipo == 'Nuevo ascensor' %}selected{% endif %}>Nuevo ascensor</option>
+                            <option value="IPO vencida" {% if oportunidad.tipo == 'IPO vencida' %}selected{% endif %}>IPO vencida</option>
+                            <option value="Otro" {% if oportunidad.tipo == 'Otro' %}selected{% endif %}>Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" placeholder="Describe brevemente la oportunidad...">{{ oportunidad.descripcion or '' }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="valor_estimado">Valor Estimado (€)</label>
+                        <input type="number" id="valor_estimado" name="valor_estimado" step="0.01" value="{{ oportunidad.valor_estimado or '' }}" placeholder="0.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="estado">Estado <span class="required">*</span></label>
+                        <select id="estado" name="estado" required>
+                            <option value="activa" {% if oportunidad.estado == 'activa' %}selected{% endif %}>Activa</option>
+                            <option value="ganada" {% if oportunidad.estado == 'ganada' %}selected{% endif %}>Ganada</option>
+                            <option value="perdida" {% if oportunidad.estado == 'perdida' %}selected{% endif %}>Perdida</option>
+                        </select>
+                        <p class="help-text">Cambiar a "Ganada" o "Perdida" cerrará la oportunidad</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="estado_presupuesto">Estado del Presupuesto</label>
+                        <select id="estado_presupuesto" name="estado_presupuesto">
+                            <option value="No" {% if oportunidad.estado_presupuesto == 'No' %}selected{% endif %}>No</option>
+                            <option value="Pendiente" {% if oportunidad.estado_presupuesto == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="Enviado" {% if oportunidad.estado_presupuesto == 'Enviado' %}selected{% endif %}>Enviado</option>
+                            <option value="Aceptado" {% if oportunidad.estado_presupuesto == 'Aceptado' %}selected{% endif %}>Aceptado</option>
+                            <option value="Rechazado" {% if oportunidad.estado_presupuesto == 'Rechazado' %}selected{% endif %}>Rechazado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notas">Notas</label>
+                        <textarea id="notas" name="notas" placeholder="Observaciones, detalles, comentarios internos...">{{ oportunidad.notas or '' }}</textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        <a href="{{ url_for('ver_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
         </div>
-        
-        <div class="form-card">
-            <h3>Editar Datos de la Oportunidad</h3>
-            
-            <form method="POST">
-                <div class="form-group">
-                    <label for="tipo">Tipo de Oportunidad <span class="required">*</span></label>
-                    <select id="tipo" name="tipo" required>
-                        <option value="">Seleccionar...</option>
-                        <option value="Cambio de mantenedora" {% if oportunidad.tipo == 'Cambio de mantenedora' %}selected{% endif %}>Cambio de mantenedora</option>
-                        <option value="Descontento con empresa mantenedora" {% if oportunidad.tipo == 'Descontento con empresa mantenedora' %}selected{% endif %}>Descontento con empresa mantenedora</option>
-                        <option value="Modernización" {% if oportunidad.tipo == 'Modernización' %}selected{% endif %}>Modernización</option>
-                        <option value="Reparación" {% if oportunidad.tipo == 'Reparación' %}selected{% endif %}>Reparación</option>
-                        <option value="Nuevo ascensor" {% if oportunidad.tipo == 'Nuevo ascensor' %}selected{% endif %}>Nuevo ascensor</option>
-                        <option value="IPO vencida" {% if oportunidad.tipo == 'IPO vencida' %}selected{% endif %}>IPO vencida</option>
-                        <option value="Otro" {% if oportunidad.tipo == 'Otro' %}selected{% endif %}>Otro</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="descripcion">Descripción</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Describe brevemente la oportunidad...">{{ oportunidad.descripcion or '' }}</textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="valor_estimado">Valor Estimado (€)</label>
-                    <input type="number" id="valor_estimado" name="valor_estimado" step="0.01" value="{{ oportunidad.valor_estimado or '' }}" placeholder="0.00">
-                </div>
-                
-                <div class="form-group">
-                    <label for="estado">Estado <span class="required">*</span></label>
-                    <select id="estado" name="estado" required>
-                        <option value="activa" {% if oportunidad.estado == 'activa' %}selected{% endif %}>Activa</option>
-                        <option value="ganada" {% if oportunidad.estado == 'ganada' %}selected{% endif %}>Ganada</option>
-                        <option value="perdida" {% if oportunidad.estado == 'perdida' %}selected{% endif %}>Perdida</option>
-                    </select>
-                    <p class="help-text">Cambiar a "Ganada" o "Perdida" cerrará la oportunidad</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="estado_presupuesto">Estado del Presupuesto</label>
-                    <select id="estado_presupuesto" name="estado_presupuesto">
-                        <option value="No" {% if oportunidad.estado_presupuesto == 'No' %}selected{% endif %}>No</option>
-                        <option value="Pendiente" {% if oportunidad.estado_presupuesto == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                        <option value="Enviado" {% if oportunidad.estado_presupuesto == 'Enviado' %}selected{% endif %}>Enviado</option>
-                        <option value="Aceptado" {% if oportunidad.estado_presupuesto == 'Aceptado' %}selected{% endif %}>Aceptado</option>
-                        <option value="Rechazado" {% if oportunidad.estado_presupuesto == 'Rechazado' %}selected{% endif %}>Rechazado</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="notas">Notas</label>
-                    <textarea id="notas" name="notas" placeholder="Observaciones, detalles, comentarios internos...">{{ oportunidad.notas or '' }}</textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                    <a href="{{ url_for('ver_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-secondary">Cancelar</a>
-                </div>
-            </form>
-        </div>
-    </div>
+    </main>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
 </html>

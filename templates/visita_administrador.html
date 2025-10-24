@@ -4,151 +4,177 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visita a Administrador - Ascensor Alert</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=5">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        
-        .header {
-            background: linear-gradient(135deg, #2c5f9e 0%, #1e4a7a 100%);
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #366092;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .menu-lateral {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 999;
+            transition: right 0.3s ease;
+            padding-top: 60px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+
+        .menu-lateral.active {
+            right: 0;
+        }
+
+        .menu-lateral a {
+            display: block;
             color: white;
             padding: 15px 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .header h1 { font-size: 24px; margin-bottom: 10px; }
-        
-        .header-nav {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .header-nav a {
-            color: white;
             text-decoration: none;
-            font-size: 14px;
-            padding: 5px 10px;
-            border-radius: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             transition: background 0.3s;
         }
-        
-        .header-nav a:hover { background: rgba(255,255,255,0.2); }
-        
+
+        .menu-lateral a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
         .container {
             max-width: 700px;
             margin: 20px auto;
             padding: 0 15px;
         }
-        
+
         .info-oportunidad {
             background: white;
             padding: 15px 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #2c5f9e;
+            border-left: 4px solid #366092;
         }
-        
+
         .info-oportunidad h3 {
             font-size: 16px;
-            color: #2c5f9e;
+            color: #366092;
             margin-bottom: 5px;
         }
-        
+
         .info-oportunidad p {
             color: #666;
             font-size: 14px;
         }
-        
+
         .form-card {
             background: white;
             border-radius: 8px;
             padding: 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
         }
-        
+
         .form-card h2 {
             font-size: 20px;
-            color: #333;
+            color: #366092;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #2c5f9e;
+            border-bottom: 2px solid #366092;
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
-            font-weight: bold;
-            color: #333;
+            font-weight: 600;
+            color: #555;
             margin-bottom: 8px;
             font-size: 14px;
         }
-        
+
         .form-group input,
         .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: Arial, sans-serif;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
         }
-        
+
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #2c5f9e;
+            border-color: #366092;
+            box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1);
         }
-        
+
         .form-group textarea {
             min-height: 100px;
             resize: vertical;
         }
-        
+
         .required {
             color: red;
         }
-        
+
         .form-actions {
             display: flex;
             gap: 10px;
             margin-top: 25px;
         }
-        
+
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
             text-align: center;
+            transition: all 0.3s ease;
         }
-        
+
         .btn-primary {
-            background: #2c5f9e;
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
         }
-        
+
         .btn-primary:hover {
-            background: #1e4a7a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
         }
-        
+
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
-        
+
         .btn-secondary:hover {
             background: #5a6268;
         }
-        
+
         @media (max-width: 768px) {
-            .header h1 { font-size: 20px; }
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
             .form-card { padding: 20px 15px; }
             .form-actions { flex-direction: column; }
             .btn { width: 100%; }
@@ -156,68 +182,96 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🏢 Registrar Visita a Administrador</h1>
-        <div class="header-nav">
-            <a href="/home">← Inicio</a>
-            <a href="/visitas_administradores_dashboard">Visitas Admin</a>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="FEDES Logo" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>🏢 Registrar Visita a Administrador</h1>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
             {% if oportunidad %}
-            <a href="{{ url_for('ver_oportunidad', oportunidad_id=oportunidad.id) }}">Volver a Oportunidad</a>
+            <div class="info-oportunidad">
+                <h3>📌 Vinculada a Oportunidad:</h3>
+                <p><strong>{{ oportunidad.tipo }}</strong></p>
+                <p>{{ oportunidad.clientes.nombre_cliente or 'Sin nombre' }} - {{ oportunidad.clientes.direccion }}</p>
+            </div>
             {% endif %}
-            <a href="/logout">Cerrar Sesión</a>
-        </div>
-    </div>
-    
-    <div class="container">
-        {% if oportunidad %}
-        <div class="info-oportunidad">
-            <h3>📌 Vinculada a Oportunidad:</h3>
-            <p><strong>{{ oportunidad.tipo }}</strong></p>
-            <p>{{ oportunidad.clientes.nombre_cliente or 'Sin nombre' }} - {{ oportunidad.clientes.direccion }}</p>
-        </div>
-        {% endif %}
-        
-        <div class="form-card">
-            <h2>Datos de la Visita</h2>
-            
-            <form method="POST">
-                {% if oportunidad %}
-                <input type="hidden" name="oportunidad_id" value="{{ oportunidad.id }}">
-                {% endif %}
-                
-                <div class="form-group">
-                    <label for="fecha_visita">Fecha de Visita <span class="required">*</span></label>
-                    <input type="date" id="fecha_visita" name="fecha_visita" value="{{ fecha_hoy }}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="administrador_fincas">Administrador de Fincas <span class="required">*</span></label>
-                    <input type="text" id="administrador_fincas" name="administrador_fincas" 
-                           placeholder="Nombre del administrador o empresa" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="persona_contacto">Persona de Contacto</label>
-                    <input type="text" id="persona_contacto" name="persona_contacto" 
-                           placeholder="Nombre de la persona con quien hablaste">
-                </div>
-                
-                <div class="form-group">
-                    <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" name="observaciones" 
-                              placeholder="Describe lo tratado en la visita, acuerdos alcanzados, próximos pasos..."></textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Guardar Visita</button>
+
+            <div class="form-card">
+                <h2>Datos de la Visita</h2>
+
+                <form method="POST">
                     {% if oportunidad %}
-                    <a href="{{ url_for('ver_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-secondary">Cancelar</a>
-                    {% else %}
-                    <a href="/home" class="btn btn-secondary">Cancelar</a>
+                    <input type="hidden" name="oportunidad_id" value="{{ oportunidad.id }}">
                     {% endif %}
-                </div>
-            </form>
+
+                    <div class="form-group">
+                        <label for="fecha_visita">Fecha de Visita <span class="required">*</span></label>
+                        <input type="date" id="fecha_visita" name="fecha_visita" value="{{ fecha_hoy }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="administrador_fincas">Administrador de Fincas <span class="required">*</span></label>
+                        <input type="text" id="administrador_fincas" name="administrador_fincas"
+                               placeholder="Nombre del administrador o empresa" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="persona_contacto">Persona de Contacto</label>
+                        <input type="text" id="persona_contacto" name="persona_contacto"
+                               placeholder="Nombre de la persona con quien hablaste">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observaciones">Observaciones</label>
+                        <textarea id="observaciones" name="observaciones"
+                                  placeholder="Describe lo tratado en la visita, acuerdos alcanzados, próximos pasos..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar Visita</button>
+                        {% if oportunidad %}
+                        <a href="{{ url_for('ver_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-secondary">Cancelar</a>
+                        {% else %}
+                        <a href="/home" class="btn btn-secondary">Cancelar</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    </main>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
 </html>
