@@ -3,155 +3,544 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ver Oportunidad - AscensorAlert</title>
-    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <title>Detalles de Oportunidad - Ascensor Alert</title>
     <style>
-        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
-        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
-        .menu-lateral.active { right: 0; }
-        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
-        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
         
-        .container { max-width: 800px; margin: 0 auto; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .card h2 { margin-bottom: 15px; color: #366092; }
+        .header {
+            background: linear-gradient(135deg, #2c5f9e 0%, #1e4a7a 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
         
-        .comunidad-info { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        .comunidad-info p { margin-bottom: 5px; color: #666; }
+        .header h1 { font-size: 24px; margin-bottom: 10px; }
         
-        .info-row { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .info-row:last-child { border-bottom: none; }
-        .info-label { font-weight: bold; color: #555; }
-        .info-value { color: #333; }
+        .header-nav {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
         
-        .badge { display: inline-block; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 500; }
+        .header-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .header-nav a:hover { background: rgba(255,255,255,0.2); }
+        
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        .info-comunidad {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .info-comunidad h2 {
+            font-size: 18px;
+            color: #2c5f9e;
+            margin-bottom: 5px;
+        }
+        
+        .info-comunidad p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .oportunidad-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-bottom: 2px solid #2c5f9e;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        .field-group {
+            margin-bottom: 15px;
+        }
+        
+        .field-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .field-value {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
         .badge.activa { background: #d4edda; color: #155724; }
         .badge.ganada { background: #d1ecf1; color: #0c5460; }
         .badge.perdida { background: #f8d7da; color: #721c24; }
         
-        .form-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-        .btn { padding: 12px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; }
-        .btn-primary { background: #3498db; color: white; }
-        .btn-primary:hover { background: #2980b9; }
-        .btn-secondary { background: #95a5a6; color: white; }
-        .btn-secondary:hover { background: #7f8c8d; }
+        /* DROPDOWN PRESUPUESTO */
+        .presupuesto-dropdown {
+            display: inline-block;
+            position: relative;
+        }
+        
+        .presupuesto-dropdown select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .presupuesto-dropdown select:focus {
+            outline: none;
+            border-color: #2c5f9e;
+        }
+        
+        /* ACCIONES */
+        .acciones-list {
+            list-style: none;
+            margin-bottom: 15px;
+        }
+        
+        .accion-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            gap: 10px;
+        }
+        
+        .accion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .accion-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .accion-texto {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .accion-texto.completada {
+            text-decoration: line-through;
+            color: #999;
+        }
+        
+        .accion-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .accion-delete:hover {
+            background: #c82333;
+        }
+        
+        .add-accion-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .add-accion-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .add-accion-form button {
+            background: #2c5f9e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .add-accion-form button:hover {
+            background: #1e4a7a;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-style: italic;
+        }
+        
+        /* NOTAS */
+        .notas-area {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+        }
+        
+        .notas-area:focus {
+            outline: none;
+            border-color: #2c5f9e;
+        }
+        
+        .save-notas-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .save-notas-btn:hover {
+            background: #218838;
+        }
+        
+        /* VISITAS */
+        .visitas-list {
+            list-style: none;
+        }
+        
+        .visita-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .visita-item:last-child {
+            border-bottom: none;
+        }
+        
+        .visita-info {
+            flex: 1;
+        }
+        
+        .visita-fecha {
+            font-weight: bold;
+            color: #2c5f9e;
+            margin-bottom: 3px;
+        }
+        
+        .visita-tipo {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .visita-observaciones {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .btn-registrar-visita {
+            display: inline-block;
+            background: #2c5f9e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .btn-registrar-visita:hover {
+            background: #1e4a7a;
+        }
+        
+        /* FOOTER */
+        .oportunidad-footer {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* BOTONES PRINCIPALES */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: #2c5f9e;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1e4a7a;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
         
         @media (max-width: 768px) {
-            .menu-toggle { display: block; }
-            .menu-lateral { display: block; }
-            .card { padding: 20px; }
-            .info-row { grid-template-columns: 1fr; gap: 5px; }
-            .info-label { font-size: 13px; }
+            .header h1 { font-size: 20px; }
+            .section-content { padding: 15px; }
+            .add-accion-form { flex-direction: column; }
+            .action-buttons { flex-direction: column; }
+            .btn { width: 100%; text-align: center; }
         }
     </style>
 </head>
 <body>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <nav class="menu-lateral" id="menuLateral">
-        <a href="/home">Inicio</a>
-        <a href="/leads_dashboard">Ver Comunidades</a>
-        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
-        <a href="/oportunidades">Oportunidades</a>
-        <a href="/reporte_mensual">Descargo Comercial</a>
-        <a href="/logout">Cerrar Sesión</a>
-    </nav>
-    
-    <header>
-        <div class="header-container">
-            <div class="logo-container">
-                <a href="/home">
-                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
-                </a>
-            </div>
-            <div class="title-container">
-                <h1>Detalle de Oportunidad</h1>
-            </div>
+    <div class="header">
+        <h1>🎯 Detalle de Oportunidad</h1>
+        <div class="header-nav">
+            <a href="{{ url_for('index') }}">← Inicio</a>
+            <a href="{{ url_for('oportunidades_dashboard') }}">Oportunidades</a>
+            <a href="{{ url_for('leads_dashboard') }}">Comunidades</a>
+            <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
         </div>
-    </header>
+    </div>
     
-    <main>
-        <div class="menu">
-            <div class="container">
-                <div class="card">
-                    <h2>Informacion de la Comunidad</h2>
-                    <div class="comunidad-info">
-                        <p><strong>Nombre:</strong> {{ oportunidad.clientes.nombre_cliente or oportunidad.clientes.direccion }}</p>
-                        <p><strong>Direccion:</strong> {{ oportunidad.clientes.direccion }}, {{ oportunidad.clientes.localidad }}</p>
-                    </div>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- INFORMACIÓN DE LA COMUNIDAD -->
+        <div class="info-comunidad">
+            <h2>{{ oportunidad.clientes.nombre_cliente or 'Sin nombre' }}</h2>
+            <p>{{ oportunidad.clientes.direccion }} - {{ oportunidad.clientes.localidad }}</p>
+        </div>
+        
+        <!-- DETALLES DE LA OPORTUNIDAD -->
+        <div class="oportunidad-card">
+            <div class="section-title">Detalles de la Oportunidad</div>
+            <div class="section-content">
+                <div class="field-group">
+                    <span class="field-label">Estado:</span>
+                    <span class="badge {{ oportunidad.estado }}">{{ oportunidad.estado|upper }}</span>
                 </div>
                 
-                <div class="card">
-                    <h2>Detalles de la Oportunidad</h2>
-                    
-                    <div class="info-row">
-                        <div class="info-label">Estado:</div>
-                        <div class="info-value">
-                            <span class="badge {{ oportunidad.estado }}">{{ oportunidad.estado|upper }}</span>
+                <div class="field-group">
+                    <span class="field-label">Tipo:</span>
+                    <span class="field-value">{{ oportunidad.tipo }}</span>
+                </div>
+                
+                {% if oportunidad.descripcion %}
+                <div class="field-group">
+                    <span class="field-label">Descripción:</span>
+                    <span class="field-value">{{ oportunidad.descripcion }}</span>
+                </div>
+                {% endif %}
+                
+                {% if oportunidad.valor_estimado %}
+                <div class="field-group">
+                    <span class="field-label">Valor Estimado:</span>
+                    <span class="field-value">{{ "%.2f"|format(oportunidad.valor_estimado) }}€</span>
+                </div>
+                {% endif %}
+                
+                <div class="field-group">
+                    <span class="field-label">Presupuesto:</span>
+                    <form method="POST" action="{{ url_for('editar_oportunidad', oportunidad_id=oportunidad.id) }}" style="display: inline;">
+                        <input type="hidden" name="tipo" value="{{ oportunidad.tipo }}">
+                        <input type="hidden" name="descripcion" value="{{ oportunidad.descripcion or '' }}">
+                        <input type="hidden" name="estado" value="{{ oportunidad.estado }}">
+                        <input type="hidden" name="notas" value="{{ oportunidad.notas or '' }}">
+                        {% if oportunidad.valor_estimado %}
+                        <input type="hidden" name="valor_estimado" value="{{ oportunidad.valor_estimado }}">
+                        {% endif %}
+                        <div class="presupuesto-dropdown">
+                            <select name="estado_presupuesto" onchange="this.form.submit()">
+                                <option value="No" {% if oportunidad.estado_presupuesto == 'No' %}selected{% endif %}>No</option>
+                                <option value="Pendiente" {% if oportunidad.estado_presupuesto == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                <option value="Enviado" {% if oportunidad.estado_presupuesto == 'Enviado' %}selected{% endif %}>Enviado</option>
+                                <option value="Aceptado" {% if oportunidad.estado_presupuesto == 'Aceptado' %}selected{% endif %}>Aceptado</option>
+                                <option value="Rechazado" {% if oportunidad.estado_presupuesto == 'Rechazado' %}selected{% endif %}>Rechazado</option>
+                            </select>
                         </div>
-                    </div>
-                    
-                    <div class="info-row">
-                        <div class="info-label">Tipo:</div>
-                        <div class="info-value">{{ oportunidad.tipo }}</div>
-                    </div>
-                    
-                    {% if oportunidad.descripcion %}
-                    <div class="info-row">
-                        <div class="info-label">Descripcion:</div>
-                        <div class="info-value">{{ oportunidad.descripcion }}</div>
-                    </div>
-                    {% endif %}
-                    
-                    {% if oportunidad.valor_estimado %}
-                    <div class="info-row">
-                        <div class="info-label">Valor Estimado:</div>
-                        <div class="info-value">{{ "%.2f"|format(oportunidad.valor_estimado) }} EUR</div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="info-row">
-                        <div class="info-label">Fecha Creacion:</div>
-                        <div class="info-value">{{ oportunidad.fecha_creacion[:10] }}</div>
-                    </div>
-                    
-                    {% if oportunidad.fecha_cierre %}
-                    <div class="info-row">
-                        <div class="info-label">Fecha Cierre:</div>
-                        <div class="info-value">{{ oportunidad.fecha_cierre[:10] }}</div>
-                    </div>
-                    {% endif %}
-                    
-                    {% if oportunidad.observaciones %}
-                    <div class="info-row">
-                        <div class="info-label">Observaciones:</div>
-                        <div class="info-value">{{ oportunidad.observaciones }}</div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="form-actions">
-                        <a href="/crear_visita_seguimiento/{{ oportunidad.cliente_id }}?oportunidad_id={{ oportunidad.id }}" class="btn btn-primary">Registrar Visita</a>
-                        <a href="/editar_oportunidad/{{ oportunidad.id }}" class="btn btn-primary">Editar</a>
-                        <a href="/ver_lead/{{ oportunidad.cliente_id }}" class="btn btn-secondary">Ver Comunidad</a>
-                        <a href="/oportunidades" class="btn btn-secondary">Volver a Oportunidades</a>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </main>
-    
-    <script>
-        function toggleMenu() {
-            document.getElementById('menuLateral').classList.toggle('active');
-        }
         
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('menuLateral');
-            const toggle = document.querySelector('.menu-toggle');
-            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
-                menu.classList.remove('active');
-            }
-        });
-    </script>
-<script src="/static/sidebar.js"></script>
+        <!-- ACCIONES A REALIZAR -->
+        <div class="oportunidad-card">
+            <div class="section-title">✅ Acciones a Realizar</div>
+            <div class="section-content">
+                {% if oportunidad.acciones and oportunidad.acciones|length > 0 %}
+                    <ul class="acciones-list">
+                        {% for accion in oportunidad.acciones %}
+                        <li class="accion-item">
+                            <form method="POST" action="{{ url_for('toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}" style="display: inline;">
+                                <input type="checkbox" 
+                                       class="accion-checkbox" 
+                                       {% if accion.completada %}checked{% endif %}
+                                       onchange="this.form.submit()">
+                            </form>
+                            <span class="accion-texto {% if accion.completada %}completada{% endif %}">
+                                {{ accion.texto }}
+                            </span>
+                            <form method="POST" action="{{ url_for('delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}" style="display: inline;">
+                                <button type="submit" class="accion-delete" onclick="return confirm('¿Eliminar esta acción?')">×</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-state">No hay acciones registradas</p>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('add_accion', oportunidad_id=oportunidad.id) }}" class="add-accion-form">
+                    <input type="text" name="texto_accion" placeholder="Escribe una nueva acción..." required>
+                    <button type="submit">+ Añadir</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- NOTAS -->
+        <div class="oportunidad-card">
+            <div class="section-title">📝 Notas</div>
+            <div class="section-content">
+                <form method="POST" action="{{ url_for('editar_oportunidad', oportunidad_id=oportunidad.id) }}">
+                    <input type="hidden" name="tipo" value="{{ oportunidad.tipo }}">
+                    <input type="hidden" name="descripcion" value="{{ oportunidad.descripcion or '' }}">
+                    <input type="hidden" name="estado" value="{{ oportunidad.estado }}">
+                    <input type="hidden" name="estado_presupuesto" value="{{ oportunidad.estado_presupuesto or 'No' }}">
+                    {% if oportunidad.valor_estimado %}
+                    <input type="hidden" name="valor_estimado" value="{{ oportunidad.valor_estimado }}">
+                    {% endif %}
+                    <textarea name="notas" class="notas-area" placeholder="Escribe tus notas aquí...">{{ oportunidad.notas or '' }}</textarea>
+                    <button type="submit" class="save-notas-btn">Guardar Notas</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- HISTORIAL DE VISITAS -->
+        <div class="oportunidad-card">
+            <div class="section-title">📅 Historial de Visitas</div>
+            <div class="section-content">
+                {% if visitas and visitas|length > 0 %}
+                    <ul class="visitas-list">
+                        {% for visita in visitas %}
+                        <li class="visita-item">
+                            <div class="visita-info">
+                                <div class="visita-fecha">{{ visita.fecha_visita }}</div>
+                                <div class="visita-tipo">
+                                    {{ visita.tipo_visita or 'Visita' }}
+                                    {% if visita.realizada_por %} - Por: {{ visita.realizada_por }}{% endif %}
+                                </div>
+                                {% if visita.observaciones %}
+                                <div class="visita-observaciones">{{ visita.observaciones }}</div>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-state">No hay visitas registradas para esta oportunidad</p>
+                {% endif %}
+                
+                <a href="{{ url_for('nueva_visita', oportunidad_id=oportunidad.id) }}" class="btn-registrar-visita">+ Registrar Nueva Visita</a>
+            </div>
+        </div>
+        
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="action-buttons">
+            <a href="{{ url_for('editar_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-primary">Editar Oportunidad</a>
+            <a href="{{ url_for('ver_comunidad', cliente_id=oportunidad.cliente_id) }}" class="btn btn-primary">Ver Comunidad</a>
+            <a href="{{ url_for('oportunidades_dashboard') }}" class="btn btn-secondary">Volver a Oportunidades</a>
+        </div>
+        
+        <!-- FOOTER CON FECHA CREACIÓN -->
+        <div class="oportunidad-card" style="margin-top: 20px;">
+            <div class="oportunidad-footer">
+                Fecha de creación: {{ oportunidad.fecha_creacion[:10] }}
+            </div>
+        </div>
+    </div>
 </body>
 </html>
