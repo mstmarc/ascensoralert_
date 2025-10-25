@@ -379,6 +379,7 @@ td a:hover {
     font-family: 'Montserrat', sans-serif;
     box-sizing: border-box;
     height: 50px;
+    margin-bottom: 0 !important;
 }
 
 .buscador-input:focus {
@@ -399,6 +400,7 @@ button.btn-buscar {
     white-space: nowrap;
     box-sizing: border-box;
     height: 50px;
+    margin: 0 !important;
 }
 
 button.btn-buscar:hover {
