@@ -230,13 +230,23 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="administrador_id">Administrador de Fincas (de la base de datos) <span class="required">*</span></label>
-                        <select id="administrador_id" name="administrador_id">
-                            <option value="">-- Selecciona un administrador o déjalo vacío --</option>
+                        <label for="administrador_search">Administrador de Fincas (de la base de datos) <span class="required">*</span></label>
+                        <input
+                            type="text"
+                            id="administrador_search"
+                            list="administradores-list"
+                            placeholder="🔍 Buscar administrador..."
+                            autocomplete="off"
+                        >
+                        <datalist id="administradores-list">
                             {% for admin in administradores %}
-                            <option value="{{ admin.id }}">{{ admin.nombre_empresa }}</option>
+                            <option value="{{ admin.nombre_empresa }}" data-id="{{ admin.id }}">
                             {% endfor %}
-                        </select>
+                        </datalist>
+                        <input type="hidden" id="administrador_id" name="administrador_id">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            💡 Escribe para buscar o selecciona de la lista
+                        </small>
                     </div>
 
                     <div class="form-group">
@@ -285,8 +295,25 @@
                 menu.classList.remove('active');
             }
         });
+
+        // Script simple para capturar el ID del administrador seleccionado
+        const searchInput = document.getElementById('administrador_search');
+        const hiddenInput = document.getElementById('administrador_id');
+        const datalist = document.getElementById('administradores-list');
+
+        searchInput.addEventListener('input', function() {
+            const selectedOption = Array.from(datalist.options).find(
+                option => option.value === this.value
+            );
+
+            if (selectedOption) {
+                hiddenInput.value = selectedOption.dataset.id;
+                console.log('Administrador seleccionado:', this.value, 'ID:', selectedOption.dataset.id);
+            } else {
+                hiddenInput.value = '';
+            }
+        });
     </script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
-    <script src="{{ url_for('static', filename='admin-dropdown.js') }}"></script>
 </body>
 </html>
