@@ -596,18 +596,30 @@ def visita_administrador():
             oportunidad_data = oportunidad_response.json()[0]
     
     if request.method == "POST":
+        # Obtener administrador_id y convertir a int o None
+        administrador_id = request.form.get("administrador_id")
+        if administrador_id and administrador_id.strip():
+            try:
+                administrador_id = int(administrador_id)
+            except ValueError:
+                administrador_id = None
+        else:
+            administrador_id = None
+
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
-            "administrador_fincas": request.form.get("administrador_fincas"),
-            "persona_contacto": request.form.get("persona_contacto"),
-            "observaciones": request.form.get("observaciones"),
+            "administrador_fincas": request.form.get("administrador_fincas") or None,
+            "administrador_id": administrador_id,
+            "persona_contacto": request.form.get("persona_contacto") or None,
+            "observaciones": request.form.get("observaciones") or None,
             "oportunidad_id": int(request.form.get("oportunidad_id")) if request.form.get("oportunidad_id") else None
         }
-        
-        required = [data["fecha_visita"], data["administrador_fincas"]]
-        if any(not field for field in required):
-            return "Datos inválidos - Fecha y Administrador son obligatorios", 400
-        
+
+        # Solo fecha es obligatoria, al menos uno de los dos campos de administrador debe estar
+        if not data["fecha_visita"] or (not data["administrador_fincas"] and not data["administrador_id"]):
+            flash("Fecha y Administrador son obligatorios", "error")
+            return redirect(request.referrer)
+
         response = requests.post(f"{SUPABASE_URL}/rest/v1/visitas_administradores", json=data, headers=HEADERS)
         if response.status_code in [200, 201]:
             # Si viene de una oportunidad, volver a la oportunidad
@@ -617,12 +629,23 @@ def visita_administrador():
             else:
                 return render_template("visita_admin_success.html")
         else:
-            return f"<h3 style='color:red;'>Error al registrar visita</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
-    
+            flash(f"Error al registrar visita: {response.text}", "error")
+            return redirect(request.referrer)
+
+    # GET - Obtener lista de administradores
     fecha_hoy = date.today().strftime('%Y-%m-%d')
-    return render_template("visita_administrador.html", 
+    administradores_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
+        headers=HEADERS
+    )
+    administradores = []
+    if administradores_response.status_code == 200:
+        administradores = administradores_response.json()
+
+    return render_template("visita_administrador.html",
                          fecha_hoy=fecha_hoy,
-                         oportunidad=oportunidad_data)
+                         oportunidad=oportunidad_data,
+                         administradores=administradores)
 
 # Dashboard de visitas a administradores
 @app.route("/visitas_administradores_dashboard")
@@ -658,47 +681,72 @@ def visitas_administradores_dashboard():
 def ver_visita_admin(visita_id):
     if "usuario" not in session:
         return redirect("/")
-    
-    response = requests.get(f"{SUPABASE_URL}/rest/v1/visitas_administradores?id=eq.{visita_id}", headers=HEADERS)
+
+    # Obtener visita con JOIN a administradores
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/visitas_administradores?id=eq.{visita_id}&select=*,administradores(nombre_empresa)",
+        headers=HEADERS
+    )
     if response.status_code != 200 or not response.json():
         flash("Visita no encontrada", "error")
         return redirect("/visitas_administradores_dashboard")
-    
-    visita = response.json()[0]
+
+    visita = limpiar_none(response.json()[0])
     return render_template("ver_visita_admin.html", visita=visita)
 
 @app.route("/editar_visita_admin/<int:visita_id>", methods=["GET", "POST"])
 def editar_visita_admin(visita_id):
     if "usuario" not in session:
         return redirect("/")
-    
+
     if request.method == "POST":
+        # Obtener administrador_id y convertir a int o None
+        administrador_id = request.form.get("administrador_id")
+        if administrador_id and administrador_id.strip():
+            try:
+                administrador_id = int(administrador_id)
+            except ValueError:
+                administrador_id = None
+        else:
+            administrador_id = None
+
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
-            "administrador_fincas": request.form.get("administrador_fincas"),
-            "persona_contacto": request.form.get("persona_contacto"),
-            "observaciones": request.form.get("observaciones")
+            "administrador_fincas": request.form.get("administrador_fincas") or None,
+            "administrador_id": administrador_id,
+            "persona_contacto": request.form.get("persona_contacto") or None,
+            "observaciones": request.form.get("observaciones") or None
         }
-        
+
         response = requests.patch(
             f"{SUPABASE_URL}/rest/v1/visitas_administradores?id=eq.{visita_id}",
             json=data,
             headers=HEADERS
         )
-        
+
         if response.status_code in [200, 204]:
             flash("Visita actualizada correctamente", "success")
             return redirect("/visitas_administradores_dashboard")
         else:
             flash("Error al actualizar visita", "error")
-    
+
     response = requests.get(f"{SUPABASE_URL}/rest/v1/visitas_administradores?id=eq.{visita_id}", headers=HEADERS)
     if response.status_code != 200 or not response.json():
         flash("Visita no encontrada", "error")
         return redirect("/visitas_administradores_dashboard")
-    
-    visita = response.json()[0]
-    return render_template("editar_visita_admin.html", visita=visita)
+
+    visita = limpiar_none(response.json()[0])
+
+    # Obtener lista de administradores
+    administradores_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
+        headers=HEADERS
+    )
+    administradores = []
+    if administradores_response.status_code == 200:
+        administradores = administradores_response.json()
+
+    return render_template("editar_visita_admin.html", visita=visita, administradores=administradores)
 
 @app.route("/eliminar_visita_admin/<int:visita_id>")
 def eliminar_visita_admin(visita_id):

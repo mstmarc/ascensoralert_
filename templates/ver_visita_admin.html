@@ -134,10 +134,26 @@
                 </div>
                 
                 <div class="info-row">
-                    <div class="info-label">Administrador:</div>
+                    <div class="info-label">Administrador (BD):</div>
+                    <div class="info-value">
+                        {% if visita.administradores %}
+                            <strong>{{ visita.administradores.nombre_empresa }}</strong>
+                            {% if visita.administrador_id %}
+                            <a href="/ver_administrador/{{ visita.administrador_id }}" style="margin-left: 10px; color: #366092; text-decoration: underline;">Ver ficha</a>
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if visita.administrador_fincas %}
+                <div class="info-row">
+                    <div class="info-label">Administrador (texto):</div>
                     <div class="info-value">{{ visita.administrador_fincas }}</div>
                 </div>
-                
+                {% endif %}
+
                 {% if visita.persona_contacto %}
                 <div class="info-row">
                     <div class="info-label">Persona de Contacto:</div>
