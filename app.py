@@ -55,20 +55,31 @@ def get_administradores_cached():
        (now - cache_administradores['timestamp']) > timedelta(minutes=5):
 
         try:
+            print(f"🔄 Consultando administradores desde Supabase...")
             response = requests.get(
                 f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
                 headers=HEADERS,
-                timeout=5  # Timeout de 5 segundos
+                timeout=10  # Aumentado a 10 segundos
             )
 
+            print(f"📡 Respuesta de Supabase - Status: {response.status_code}")
+
             if response.status_code == 200:
-                cache_administradores['data'] = response.json()
+                data = response.json()
+                cache_administradores['data'] = data
                 cache_administradores['timestamp'] = now
-                print(f"✅ Caché de administradores actualizado: {len(cache_administradores['data'])} registros")
+                print(f"✅ Caché de administradores actualizado: {len(data)} registros")
             else:
                 print(f"⚠️ Error al actualizar caché de administradores: {response.status_code}")
+                print(f"📄 Respuesta: {response.text[:200]}")
+                # Si falla pero hay caché previo, usarlo
+                if cache_administradores['data']:
+                    print(f"ℹ️ Usando caché anterior: {len(cache_administradores['data'])} registros")
+
+        except requests.exceptions.Timeout:
+            print(f"⏱️ Timeout al consultar Supabase (>10s)")
         except Exception as e:
-            print(f"❌ Excepción al actualizar caché de administradores: {e}")
+            print(f"❌ Excepción al actualizar caché de administradores: {type(e).__name__}: {str(e)}")
             # Si falla, devolver lo que haya en caché (aunque esté desactualizado)
 
     return cache_administradores['data']
@@ -2151,74 +2162,123 @@ def test_dropdown_admin():
     if "usuario" not in session:
         return redirect("/")
 
-    # Obtener administradores (usando caché)
-    administradores = get_administradores_cached()
-    status_code = 200 if administradores else 500
+    # Test 1: Consulta directa (sin caché)
+    test_direct = {"success": False, "status": 0, "count": 0, "error": ""}
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
+            headers=HEADERS,
+            timeout=10
+        )
+        test_direct["status"] = response.status_code
+        if response.status_code == 200:
+            test_direct["success"] = True
+            test_direct["data"] = response.json()
+            test_direct["count"] = len(test_direct["data"])
+        else:
+            test_direct["error"] = response.text[:500]
+    except Exception as e:
+        test_direct["error"] = f"{type(e).__name__}: {str(e)}"
 
-    # HTML de prueba
+    # Test 2: Obtener desde caché
+    administradores_cached = get_administradores_cached()
+
+    # HTML de prueba mejorado
     html = f"""
     <!DOCTYPE html>
     <html lang="es">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Test Dropdown Administradores</title>
-
-        <!-- jQuery y Select2 -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+        <title>Test Dropdown Administradores - Diagnóstico</title>
         <style>
-            body {{ font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }}
-            .debug-info {{ background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 5px; }}
-            .form-group {{ margin: 20px 0; }}
-            label {{ display: block; margin-bottom: 5px; font-weight: bold; }}
-            select {{ width: 100%; padding: 10px; }}
-            .success {{ color: green; }}
-            .error {{ color: red; }}
+            body {{ font-family: Arial, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; background: #f5f5f5; }}
+            .debug-info {{ background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
+            .success {{ color: #28a745; font-weight: bold; }}
+            .error {{ color: #dc3545; font-weight: bold; }}
+            .warning {{ color: #ffc107; font-weight: bold; }}
+            h1 {{ color: #333; }}
+            h3 {{ color: #666; margin-top: 0; }}
+            pre {{ background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; border: 1px solid #dee2e6; }}
+            .status-badge {{ display: inline-block; padding: 5px 10px; border-radius: 5px; font-size: 14px; }}
+            .badge-success {{ background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }}
+            .badge-error {{ background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }}
+            table {{ width: 100%; border-collapse: collapse; margin-top: 10px; }}
+            td {{ padding: 8px; border-bottom: 1px solid #dee2e6; }}
+            td:first-child {{ font-weight: bold; width: 200px; }}
+            .back-link {{ display: inline-block; margin-top: 20px; padding: 10px 20px; background: #366092; color: white; text-decoration: none; border-radius: 5px; }}
+            .back-link:hover {{ background: #2a4a70; }}
         </style>
     </head>
     <body>
-        <h1>🧪 Test Dropdown Administradores</h1>
+        <h1>🧪 Test Dropdown Administradores - Diagnóstico Completo</h1>
 
         <div class="debug-info">
-            <h3>Información de Debug:</h3>
-            <p><strong>Status Code:</strong> {status_code}</p>
-            <p><strong>Total Administradores:</strong> {len(administradores)}</p>
-            <p><strong>jQuery cargado:</strong> <span id="jquery-status">Verificando...</span></p>
-            <p><strong>Select2 cargado:</strong> <span id="select2-status">Verificando...</span></p>
+            <h3>🔍 Test 1: Consulta Directa a Supabase (sin caché)</h3>
+            <table>
+                <tr>
+                    <td>Estado:</td>
+                    <td>
+                        {'<span class="status-badge badge-success">✅ Éxito</span>' if test_direct['success'] else '<span class="status-badge badge-error">❌ Error</span>'}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Status Code:</td>
+                    <td><strong>{test_direct['status']}</strong></td>
+                </tr>
+                <tr>
+                    <td>Administradores encontrados:</td>
+                    <td><strong class="{'success' if test_direct['count'] > 0 else 'error'}">{test_direct['count']}</strong></td>
+                </tr>
+                {'<tr><td>Error:</td><td><pre>' + test_direct['error'] + '</pre></td></tr>' if test_direct['error'] else ''}
+            </table>
+
+            {f"<h4>📋 Datos obtenidos:</h4><pre>{test_direct.get('data', [])}</pre>" if test_direct['success'] and test_direct['count'] > 0 else ''}
         </div>
 
         <div class="debug-info">
-            <h3>Administradores en la BD:</h3>
-            <pre>{administradores}</pre>
-        </div>
+            <h3>💾 Test 2: Sistema de Caché</h3>
+            <table>
+                <tr>
+                    <td>Administradores en caché:</td>
+                    <td><strong class="{'success' if len(administradores_cached) > 0 else 'error'}">{len(administradores_cached)}</strong></td>
+                </tr>
+                <tr>
+                    <td>Timestamp del caché:</td>
+                    <td>{cache_administradores['timestamp'] or 'Sin inicializar'}</td>
+                </tr>
+            </table>
 
-        <div class="form-group">
-            <label for="administrador_id">Dropdown de Administradores:</label>
-            <select id="administrador_id" name="administrador_id">
-                <option value="">-- Selecciona un administrador --</option>
-                {''.join([f'<option value="{admin["id"]}">{admin["nombre_empresa"]}</option>' for admin in administradores])}
-            </select>
+            {f"<h4>📋 Datos en caché:</h4><pre>{administradores_cached}</pre>" if len(administradores_cached) > 0 else ''}
         </div>
 
         <div class="debug-info">
-            <h3>Logs de Consola:</h3>
-            <p>Abre la consola del navegador (F12) para ver los logs de inicialización</p>
+            <h3>🔧 Configuración de Supabase</h3>
+            <table>
+                <tr>
+                    <td>URL:</td>
+                    <td><code>{SUPABASE_URL}</code></td>
+                </tr>
+                <tr>
+                    <td>API Key configurada:</td>
+                    <td>{'✅ Sí' if SUPABASE_KEY else '❌ No'}</td>
+                </tr>
+            </table>
         </div>
 
-        <p><a href="/home">← Volver al inicio</a></p>
+        <div class="debug-info">
+            <h3>💡 Diagnóstico</h3>
+            {'<p class="success">✅ Todo funciona correctamente. Hay ' + str(test_direct['count']) + ' administradores en la base de datos.</p>' if test_direct['success'] and test_direct['count'] > 0 else ''}
+            {'<p class="warning">⚠️ La conexión a Supabase funciona pero <strong>NO HAY ADMINISTRADORES</strong> en la base de datos. Necesitas crear administradores primero en <a href="/nuevo_administrador">/nuevo_administrador</a></p>' if test_direct['success'] and test_direct['count'] == 0 else ''}
+            {'<p class="error">❌ Error al conectar con Supabase. Verifica:<br>1. Que la URL de Supabase sea correcta<br>2. Que el API Key esté configurado<br>3. Que la tabla "administradores" exista<br>4. Que tengas permisos de lectura</p>' if not test_direct['success'] else ''}
+        </div>
 
-        <script src="/static/admin-dropdown.js"></script>
+        <a href="/home" class="back-link">← Volver al inicio</a>
 
         <script>
-            // Verificar dependencias
-            document.getElementById('jquery-status').textContent = typeof jQuery !== 'undefined' ? '✅ Sí' : '❌ No';
-            document.getElementById('select2-status').textContent = typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined' ? '✅ Sí' : '❌ No';
-
-            // Log adicional
-            console.log('🔍 Total de opciones en el select:', jQuery('#administrador_id option').length);
+            console.log('📊 Diagnóstico completo:');
+            console.log('Test directo:', {test_direct});
+            console.log('Caché:', {administradores_cached});
         </script>
     </body>
     </html>
