@@ -34,7 +34,137 @@
         .botones-accion { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .no-clientes { text-align: center; padding: 30px; color: #999; font-style: italic; background: #f8f9fa; border-radius: 6px; border: 2px dashed #ddd; }
 
-        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } }
+        /* Métricas del administrador */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .metric-card.activas { border-color: #28a745; background: #d4edda; }
+        .metric-card.ganadas { border-color: #007bff; background: #d1ecf1; }
+        .metric-card.perdidas { border-color: #dc3545; background: #f8d7da; }
+        .metric-card.total { border-color: #366092; background: #e7f3ff; }
+
+        .metric-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #366092;
+            margin: 5px 0;
+        }
+
+        .metric-card.activas .metric-number { color: #28a745; }
+        .metric-card.ganadas .metric-number { color: #007bff; }
+        .metric-card.perdidas .metric-number { color: #dc3545; }
+
+        .metric-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .metric-sublabel {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Oportunidades */
+        .oportunidad-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #366092;
+            transition: all 0.3s;
+        }
+
+        .oportunidad-item:hover {
+            background: #e9ecef;
+            transform: translateX(3px);
+        }
+
+        .oportunidad-item.activa { border-left-color: #28a745; }
+        .oportunidad-item.ganada { border-left-color: #007bff; }
+        .oportunidad-item.perdida { border-left-color: #dc3545; }
+
+        .oportunidad-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .oportunidad-tipo {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .oportunidad-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge.activa { background: #28a745; color: white; }
+        .badge.ganada { background: #007bff; color: white; }
+        .badge.perdida { background: #dc3545; color: white; }
+
+        .oportunidad-info {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .oportunidad-info strong {
+            color: #366092;
+        }
+
+        .oportunidad-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .oportunidad-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
@@ -87,6 +217,107 @@
                         <label>Observaciones:</label>
                         <span>{{ administrador.observaciones }}</span>
                     </div>
+                    {% endif %}
+                </div>
+
+                <!-- RESUMEN EJECUTIVO -->
+                <div class="seccion">
+                    <h2>Resumen Ejecutivo</h2>
+                    <div class="metrics-grid">
+                        <div class="metric-card total">
+                            <div class="metric-label">Total Oportunidades</div>
+                            <div class="metric-number">{{ stats.total }}</div>
+                            <div class="metric-sublabel">
+                                {% if stats.valor_total > 0 %}
+                                    {{ "{:,.2f}".format(stats.valor_total) }} €
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="metric-card activas">
+                            <div class="metric-label">Activas</div>
+                            <div class="metric-number">{{ stats.activas }}</div>
+                            <div class="metric-sublabel">
+                                {% if stats.valor_activas > 0 %}
+                                    {{ "{:,.2f}".format(stats.valor_activas) }} €
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="metric-card ganadas">
+                            <div class="metric-label">Ganadas</div>
+                            <div class="metric-number">{{ stats.ganadas }}</div>
+                        </div>
+                        <div class="metric-card perdidas">
+                            <div class="metric-label">Perdidas</div>
+                            <div class="metric-number">{{ stats.perdidas }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OPORTUNIDADES COMERCIALES -->
+                <div class="seccion">
+                    <h2>Oportunidades Comerciales ({{ oportunidades|length }})</h2>
+
+                    {% if oportunidades %}
+                        <!-- Filtro rápido por estado -->
+                        <div style="margin-bottom: 15px;">
+                            <button onclick="filtrarOportunidades('todas')" class="btn-accion-small" style="background: #366092;">Todas ({{ stats.total }})</button>
+                            <button onclick="filtrarOportunidades('activa')" class="btn-accion-small" style="background: #28a745;">Activas ({{ stats.activas }})</button>
+                            <button onclick="filtrarOportunidades('ganada')" class="btn-accion-small" style="background: #007bff;">Ganadas ({{ stats.ganadas }})</button>
+                            <button onclick="filtrarOportunidades('perdida')" class="btn-accion-small" style="background: #dc3545;">Perdidas ({{ stats.perdidas }})</button>
+                        </div>
+
+                        {% for op in oportunidades %}
+                        <div class="oportunidad-item {{ op.estado }}" data-estado="{{ op.estado }}">
+                            <div class="oportunidad-header">
+                                <div>
+                                    <div class="oportunidad-tipo">{{ op.tipo }}</div>
+                                    <div style="font-size: 12px; color: #888; margin-top: 3px;">
+                                        📍 {{ op.clientes.direccion }}, {{ op.clientes.localidad }}
+                                    </div>
+                                </div>
+                                <div class="oportunidad-badges">
+                                    <span class="badge {{ op.estado }}">{{ op.estado|upper }}</span>
+                                    {% if op.estado_presupuesto and op.estado_presupuesto != 'No' %}
+                                    <span class="badge" style="background: #ffc107; color: #000;">PRESUP: {{ op.estado_presupuesto }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="oportunidad-info">
+                                {% if op.descripcion %}
+                                <p style="margin: 5px 0;"><strong>Descripción:</strong> {{ op.descripcion }}</p>
+                                {% endif %}
+
+                                {% if op.valor_estimado %}
+                                <p style="margin: 5px 0;"><strong>Valor estimado:</strong> {{ "{:,.2f}".format(op.valor_estimado) }} €</p>
+                                {% endif %}
+
+                                <p style="margin: 5px 0;"><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
+
+                                {% if op.fecha_cierre %}
+                                <p style="margin: 5px 0;"><strong>Cerrada:</strong> {{ op.fecha_cierre[:10] }}</p>
+                                {% endif %}
+
+                                {% if op.observaciones %}
+                                <p style="margin: 5px 0;"><strong>Observaciones:</strong> {{ op.observaciones }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="oportunidad-actions">
+                                <a href="/ver_oportunidad/{{ op.id }}" class="btn-accion-small btn-ver">Ver Detalle</a>
+                                <a href="/editar_oportunidad/{{ op.id }}" class="btn-accion-small">Editar</a>
+                                <a href="/ver_lead/{{ op.cliente_id }}" class="btn-accion-small" style="background: #17a2b8;">Ver Comunidad</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-clientes">
+                            No hay oportunidades registradas para los clientes de este administrador
+                        </div>
                     {% endif %}
                 </div>
 
@@ -149,6 +380,22 @@
                 menu.classList.remove('active');
             }
         });
+
+        // Filtrar oportunidades por estado
+        function filtrarOportunidades(estado) {
+            const items = document.querySelectorAll('.oportunidad-item');
+            items.forEach(item => {
+                if (estado === 'todas') {
+                    item.style.display = 'block';
+                } else {
+                    if (item.dataset.estado === estado) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        }
     </script>
     <script src="/static/sidebar.js"></script>
 </body>

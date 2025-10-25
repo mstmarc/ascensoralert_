@@ -1824,6 +1824,53 @@ def administradores_dashboard():
     # Limpiar None
     administradores = [limpiar_none(admin) for admin in administradores]
 
+    # Obtener conteo de oportunidades activas por administrador
+    if administradores:
+        admin_ids = [str(admin['id']) for admin in administradores]
+
+        # Obtener todos los clientes de estos administradores
+        clientes_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/clientes?administrador_id=in.({','.join(admin_ids)})&select=id,administrador_id",
+            headers=HEADERS
+        )
+
+        if clientes_response.status_code == 200:
+            clientes = clientes_response.json()
+
+            # Mapear cliente_id -> administrador_id
+            cliente_to_admin = {c['id']: c['administrador_id'] for c in clientes}
+            cliente_ids = list(cliente_to_admin.keys())
+
+            if cliente_ids:
+                # Obtener oportunidades activas de estos clientes
+                oportunidades_response = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=in.({','.join(map(str, cliente_ids))})&estado=eq.activa&select=cliente_id",
+                    headers=HEADERS
+                )
+
+                if oportunidades_response.status_code == 200:
+                    oportunidades = oportunidades_response.json()
+
+                    # Contar oportunidades por administrador
+                    oportunidades_por_admin = {}
+                    for op in oportunidades:
+                        admin_id = cliente_to_admin.get(op['cliente_id'])
+                        if admin_id:
+                            oportunidades_por_admin[admin_id] = oportunidades_por_admin.get(admin_id, 0) + 1
+
+                    # Agregar conteo a cada administrador
+                    for admin in administradores:
+                        admin['oportunidades_activas'] = oportunidades_por_admin.get(admin['id'], 0)
+                else:
+                    for admin in administradores:
+                        admin['oportunidades_activas'] = 0
+            else:
+                for admin in administradores:
+                    admin['oportunidades_activas'] = 0
+        else:
+            for admin in administradores:
+                admin['oportunidades_activas'] = 0
+
     # Calcular páginas
     total_pages = (total_registros + limit - 1) // limit
 
@@ -1901,10 +1948,53 @@ def ver_administrador(admin_id):
     if clientes_response.status_code == 200:
         clientes = [limpiar_none(c) for c in clientes_response.json()]
 
+    # Obtener oportunidades de todos los clientes asociados
+    oportunidades = []
+    stats = {
+        'total': 0,
+        'activas': 0,
+        'ganadas': 0,
+        'perdidas': 0,
+        'valor_total': 0,
+        'valor_activas': 0
+    }
+
+    if clientes:
+        # Obtener IDs de clientes
+        cliente_ids = [str(c['id']) for c in clientes]
+
+        # Consultar oportunidades de estos clientes
+        oportunidades_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=in.({','.join(cliente_ids)})&select=*,clientes(direccion,localidad)&order=fecha_creacion.desc",
+            headers=HEADERS
+        )
+
+        if oportunidades_response.status_code == 200:
+            oportunidades = oportunidades_response.json()
+
+            # Calcular estadísticas
+            for op in oportunidades:
+                stats['total'] += 1
+                estado = op.get('estado', '').lower()
+
+                if estado == 'activa':
+                    stats['activas'] += 1
+                    if op.get('valor_estimado'):
+                        stats['valor_activas'] += float(op.get('valor_estimado', 0))
+                elif estado == 'ganada':
+                    stats['ganadas'] += 1
+                elif estado == 'perdida':
+                    stats['perdidas'] += 1
+
+                if op.get('valor_estimado'):
+                    stats['valor_total'] += float(op.get('valor_estimado', 0))
+
     return render_template(
         "ver_administrador.html",
         administrador=administrador,
-        clientes=clientes
+        clientes=clientes,
+        oportunidades=oportunidades,
+        stats=stats
     )
 
 
