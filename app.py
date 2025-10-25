@@ -33,6 +33,46 @@ EMAIL_FROM = os.environ.get("EMAIL_FROM", "onboarding@resend.dev")
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
 
+# ============================================
+# SISTEMA DE CACHÉ PARA ADMINISTRADORES
+# ============================================
+# Evita consultas repetidas a Supabase, mejorando el rendimiento
+cache_administradores = {
+    'data': [],
+    'timestamp': None
+}
+
+def get_administradores_cached():
+    """
+    Obtiene la lista de administradores usando caché.
+    Se renueva automáticamente cada 5 minutos.
+    Esto reduce drásticamente las consultas a Supabase.
+    """
+    now = datetime.now()
+
+    # Si no hay caché o pasaron 5 minutos, renovar
+    if not cache_administradores['timestamp'] or \
+       (now - cache_administradores['timestamp']) > timedelta(minutes=5):
+
+        try:
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
+                headers=HEADERS,
+                timeout=5  # Timeout de 5 segundos
+            )
+
+            if response.status_code == 200:
+                cache_administradores['data'] = response.json()
+                cache_administradores['timestamp'] = now
+                print(f"✅ Caché de administradores actualizado: {len(cache_administradores['data'])} registros")
+            else:
+                print(f"⚠️ Error al actualizar caché de administradores: {response.status_code}")
+        except Exception as e:
+            print(f"❌ Excepción al actualizar caché de administradores: {e}")
+            # Si falla, devolver lo que haya en caché (aunque esté desactualizado)
+
+    return cache_administradores['data']
+
 # FUNCIONES AUXILIARES
 
 def limpiar_none(data):
@@ -564,15 +604,9 @@ def formulario_lead():
         else:
             return f"<h3 style='color:red;'>Error al registrar lead</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
-    # GET - Obtener lista de administradores
+    # GET - Obtener lista de administradores (usando caché)
     fecha_hoy = date.today().strftime('%Y-%m-%d')
-    administradores_response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
-        headers=HEADERS
-    )
-    administradores = []
-    if administradores_response.status_code == 200:
-        administradores = administradores_response.json()
+    administradores = get_administradores_cached()
 
     return render_template("formulario_lead.html", fecha_hoy=fecha_hoy, administradores=administradores)
 
@@ -632,15 +666,9 @@ def visita_administrador():
             flash(f"Error al registrar visita: {response.text}", "error")
             return redirect(request.referrer)
 
-    # GET - Obtener lista de administradores
+    # GET - Obtener lista de administradores (usando caché)
     fecha_hoy = date.today().strftime('%Y-%m-%d')
-    administradores_response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
-        headers=HEADERS
-    )
-    administradores = []
-    if administradores_response.status_code == 200:
-        administradores = administradores_response.json()
+    administradores = get_administradores_cached()
 
     return render_template("visita_administrador.html",
                          fecha_hoy=fecha_hoy,
@@ -737,14 +765,8 @@ def editar_visita_admin(visita_id):
 
     visita = limpiar_none(response.json()[0])
 
-    # Obtener lista de administradores
-    administradores_response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
-        headers=HEADERS
-    )
-    administradores = []
-    if administradores_response.status_code == 200:
-        administradores = administradores_response.json()
+    # Obtener lista de administradores (usando caché)
+    administradores = get_administradores_cached()
 
     return render_template("editar_visita_admin.html", visita=visita, administradores=administradores)
 
@@ -1321,14 +1343,8 @@ def editar_lead(lead_id):
     else:
         return f"<h3 style='color:red;'>Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
-    # Obtener lista de administradores
-    administradores_response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
-        headers=HEADERS
-    )
-    administradores = []
-    if administradores_response.status_code == 200:
-        administradores = administradores_response.json()
+    # Obtener lista de administradores (usando caché)
+    administradores = get_administradores_cached()
 
     return render_template("editar_lead.html", lead=lead, administradores=administradores)
 
@@ -2135,17 +2151,9 @@ def test_dropdown_admin():
     if "usuario" not in session:
         return redirect("/")
 
-    # Obtener administradores
-    administradores_response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
-        headers=HEADERS
-    )
-
-    administradores = []
-    status_code = administradores_response.status_code
-
-    if status_code == 200:
-        administradores = administradores_response.json()
+    # Obtener administradores (usando caché)
+    administradores = get_administradores_cached()
+    status_code = 200 if administradores else 500
 
     # HTML de prueba
     html = f"""
