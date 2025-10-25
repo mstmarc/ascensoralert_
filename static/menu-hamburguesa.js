@@ -228,13 +228,26 @@
 
                 <div class="menu-divider"></div>
 
+                <!-- Administradores de Fincas -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Administradores de Fincas</div>
+                    <a href="/administradores_dashboard" class="menu-link">
+                        <span class="emoji">🏢</span> Ver Administradores
+                    </a>
+                    <a href="/nuevo_administrador" class="menu-link">
+                        <span class="emoji">➕</span> Nuevo Administrador
+                    </a>
+                </div>
+
+                <div class="menu-divider"></div>
+
                 <!-- Visitas Admin -->
                 <div class="menu-section">
                     <div class="menu-section-title">Visitas Administrador</div>
                     <a href="/visita_administrador" class="menu-link">
                         <span class="emoji">👤</span> Nueva Visita
                     </a>
-                    <a href="/visitas_admin_dashboard" class="menu-link">
+                    <a href="/visitas_administradores_dashboard" class="menu-link">
                         <span class="emoji">📈</span> Dashboard Visitas
                     </a>
                 </div>
