@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Administrador</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .botones-form{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+        .btn-eliminar-form{background:#dc3545;}
+        .btn-eliminar-form:hover{background:#c82333;}
+        .menu-toggle{display:none;position:fixed;top:20px;right:20px;z-index:1000;background:#366092;color:white;border:none;padding:10px 15px;border-radius:5px;cursor:pointer;font-size:20px;}
+        .menu-lateral{display:none;position:fixed;top:0;right:-300px;width:250px;height:100%;background:#2c3e50;z-index:999;transition:right 0.3s ease;padding-top:60px;box-shadow:-2px 0 5px rgba(0,0,0,0.3);}
+        .menu-lateral.active{right:0;}
+        .menu-lateral a{display:block;color:white;padding:15px 20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);transition:background 0.3s;}
+        .menu-lateral a:hover{background:rgba(255,255,255,0.1);}
+        @media (max-width:768px){.menu-toggle{display:block;}.menu-lateral{display:block;}}
+    </style>
+    <script>
+        function confirmarEliminacion(){
+            return confirm('⚠️ ATENCIÓN: ¿Estás seguro de que quieres eliminar este administrador?\n\nEsta acción no se puede deshacer.');
+        }
+    </script>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/administradores_dashboard">Administradores de Fincas</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home"><img src="/static/logo-fedes-ascensores.png" alt="Logo" class="logo"></a>
+            </div>
+            <div class="title-container">
+                <h1>Editar Administrador de Fincas</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <form method="POST">
+                <label>Nombre de la Empresa: *</label><br>
+                <input type="text" name="nombre_empresa" value="{{ administrador.nombre_empresa }}" required><br><br>
+
+                <label>Teléfono:</label><br>
+                <input type="text" name="telefono" value="{{ administrador.telefono }}"><br><br>
+
+                <label>Email:</label><br>
+                <input type="email" name="email" value="{{ administrador.email }}"><br><br>
+
+                <label>Dirección:</label><br>
+                <input type="text" name="direccion" value="{{ administrador.direccion }}"><br><br>
+
+                <label>Localidad:</label><br>
+                <select name="localidad">
+                    <option value="">-- Selecciona una localidad --</option>
+                    <option value="Agaete" {% if administrador.localidad == 'Agaete' %}selected{% endif %}>Agaete</option>
+                    <option value="Agüimes" {% if administrador.localidad == 'Agüimes' %}selected{% endif %}>Agüimes</option>
+                    <option value="Arguineguín" {% if administrador.localidad == 'Arguineguín' %}selected{% endif %}>Arguineguín</option>
+                    <option value="Arinaga" {% if administrador.localidad == 'Arinaga' %}selected{% endif %}>Arinaga</option>
+                    <option value="Artenara" {% if administrador.localidad == 'Artenara' %}selected{% endif %}>Artenara</option>
+                    <option value="Arucas" {% if administrador.localidad == 'Arucas' %}selected{% endif %}>Arucas</option>
+                    <option value="Carrizal" {% if administrador.localidad == 'Carrizal' %}selected{% endif %}>Carrizal</option>
+                    <option value="Cruce de Arinaga" {% if administrador.localidad == 'Cruce de Arinaga' %}selected{% endif %}>Cruce de Arinaga</option>
+                    <option value="Cruce de Melenara" {% if administrador.localidad == 'Cruce de Melenara' %}selected{% endif %}>Cruce de Melenara</option>
+                    <option value="Cruce de Sardina" {% if administrador.localidad == 'Cruce de Sardina' %}selected{% endif %}>Cruce de Sardina</option>
+                    <option value="El Burrero" {% if administrador.localidad == 'El Burrero' %}selected{% endif %}>El Burrero</option>
+                    <option value="El Tablero" {% if administrador.localidad == 'El Tablero' %}selected{% endif %}>El Tablero</option>
+                    <option value="Firgas" {% if administrador.localidad == 'Firgas' %}selected{% endif %}>Firgas</option>
+                    <option value="Gáldar" {% if administrador.localidad == 'Gáldar' %}selected{% endif %}>Gáldar</option>
+                    <option value="Ingenio" {% if administrador.localidad == 'Ingenio' %}selected{% endif %}>Ingenio</option>
+                    <option value="Jinámar" {% if administrador.localidad == 'Jinámar' %}selected{% endif %}>Jinámar</option>
+                    <option value="La Aldea de San Nicolás" {% if administrador.localidad == 'La Aldea de San Nicolás' %}selected{% endif %}>La Aldea de San Nicolás</option>
+                    <option value="La Pardilla" {% if administrador.localidad == 'La Pardilla' %}selected{% endif %}>La Pardilla</option>
+                    <option value="Las Palmas de Gran Canaria" {% if administrador.localidad == 'Las Palmas de Gran Canaria' %}selected{% endif %}>Las Palmas de Gran Canaria</option>
+                    <option value="Maspalomas" {% if administrador.localidad == 'Maspalomas' %}selected{% endif %}>Maspalomas</option>
+                    <option value="Melenara" {% if administrador.localidad == 'Melenara' %}selected{% endif %}>Melenara</option>
+                    <option value="Mogán" {% if administrador.localidad == 'Mogán' %}selected{% endif %}>Mogán</option>
+                    <option value="Moya" {% if administrador.localidad == 'Moya' %}selected{% endif %}>Moya</option>
+                    <option value="Playa de Mogán" {% if administrador.localidad == 'Playa de Mogán' %}selected{% endif %}>Playa de Mogán</option>
+                    <option value="Playa del Inglés" {% if administrador.localidad == 'Playa del Inglés' %}selected{% endif %}>Playa del Inglés</option>
+                    <option value="Puerto Rico" {% if administrador.localidad == 'Puerto Rico' %}selected{% endif %}>Puerto Rico</option>
+                    <option value="Salinetas" {% if administrador.localidad == 'Salinetas' %}selected{% endif %}>Salinetas</option>
+                    <option value="San Bartolomé de Tirajana" {% if administrador.localidad == 'San Bartolomé de Tirajana' %}selected{% endif %}>San Bartolomé de Tirajana</option>
+                    <option value="San Fernando" {% if administrador.localidad == 'San Fernando' %}selected{% endif %}>San Fernando</option>
+                    <option value="San Mateo" {% if administrador.localidad == 'San Mateo' %}selected{% endif %}>San Mateo</option>
+                    <option value="Santa Brígida" {% if administrador.localidad == 'Santa Brígida' %}selected{% endif %}>Santa Brígida</option>
+                    <option value="Santa Lucía de Tirajana" {% if administrador.localidad == 'Santa Lucía de Tirajana' %}selected{% endif %}>Santa Lucía de Tirajana</option>
+                    <option value="Santa María de Guía" {% if administrador.localidad == 'Santa María de Guía' %}selected{% endif %}>Santa María de Guía</option>
+                    <option value="Sardina del Norte" {% if administrador.localidad == 'Sardina del Norte' %}selected{% endif %}>Sardina del Norte</option>
+                    <option value="Tafira" {% if administrador.localidad == 'Tafira' %}selected{% endif %}>Tafira</option>
+                    <option value="Tejeda" {% if administrador.localidad == 'Tejeda' %}selected{% endif %}>Tejeda</option>
+                    <option value="Telde" {% if administrador.localidad == 'Telde' %}selected{% endif %}>Telde</option>
+                    <option value="Teror" {% if administrador.localidad == 'Teror' %}selected{% endif %}>Teror</option>
+                    <option value="Valleseco" {% if administrador.localidad == 'Valleseco' %}selected{% endif %}>Valleseco</option>
+                    <option value="Valsequillo" {% if administrador.localidad == 'Valsequillo' %}selected{% endif %}>Valsequillo</option>
+                    <option value="Vecindario" {% if administrador.localidad == 'Vecindario' %}selected{% endif %}>Vecindario</option>
+                </select><br><br>
+
+                <label>Observaciones:</label><br>
+                <textarea name="observaciones">{{ administrador.observaciones }}</textarea><br><br>
+
+                <div class="botones-form">
+                    <button type="submit" class="button">Actualizar</button>
+                    <a href="/ver_administrador/{{ administrador.id }}" class="button">Ver Detalles</a>
+                    <a href="/administradores_dashboard" class="button">Volver al Listado</a>
+                    <a href="/eliminar_administrador/{{ administrador.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacion()">Eliminar</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function toggleMenu(){
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+        document.addEventListener('click',function(event){
+            const menu=document.getElementById('menuLateral');
+            const toggle=document.querySelector('.menu-toggle');
+            if(!menu.contains(event.target)&&!toggle.contains(event.target)){
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+<script src="/static/sidebar.js"></script>
+</body>
+</html>

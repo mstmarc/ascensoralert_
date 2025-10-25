@@ -524,6 +524,16 @@ def formulario_lead():
     if "usuario" not in session:
         return redirect("/")
     if request.method == "POST":
+        # Obtener administrador_id y convertir a int o None
+        administrador_id = request.form.get("administrador_id")
+        if administrador_id and administrador_id.strip():
+            try:
+                administrador_id = int(administrador_id)
+            except ValueError:
+                administrador_id = None
+        else:
+            administrador_id = None
+
         data = {
             "fecha_visita": request.form.get("fecha_visita") or None,
             "tipo_cliente": request.form.get("tipo_lead") or None,
@@ -536,6 +546,7 @@ def formulario_lead():
             "telefono": request.form.get("telefono") or None,
             "email": request.form.get("email") or None,
             "administrador_fincas": request.form.get("administrador_fincas") or None,
+            "administrador_id": administrador_id,
             "empresa_mantenedora": request.form.get("empresa_mantenedora") or None,
             "numero_ascensores": request.form.get("numero_ascensores") or None,
             "observaciones": request.form.get("observaciones") or None
@@ -553,8 +564,17 @@ def formulario_lead():
         else:
             return f"<h3 style='color:red;'>Error al registrar lead</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
+    # GET - Obtener lista de administradores
     fecha_hoy = date.today().strftime('%Y-%m-%d')
-    return render_template("formulario_lead.html", fecha_hoy=fecha_hoy)
+    administradores_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
+        headers=HEADERS
+    )
+    administradores = []
+    if administradores_response.status_code == 200:
+        administradores = administradores_response.json()
+
+    return render_template("formulario_lead.html", fecha_hoy=fecha_hoy, administradores=administradores)
 
 # Visita a Administrador
 @app.route("/visita_administrador", methods=["GET", "POST"])
@@ -1199,6 +1219,16 @@ def editar_lead(lead_id):
         return redirect("/")
 
     if request.method == "POST":
+        # Obtener administrador_id y convertir a int o None
+        administrador_id = request.form.get("administrador_id")
+        if administrador_id and administrador_id.strip():
+            try:
+                administrador_id = int(administrador_id)
+            except ValueError:
+                administrador_id = None
+        else:
+            administrador_id = None
+
         data = {
             "fecha_visita": request.form.get("fecha_visita") or None,
             "tipo_cliente": request.form.get("tipo_lead") or None,
@@ -1211,16 +1241,17 @@ def editar_lead(lead_id):
             "telefono": request.form.get("telefono") or None,
             "email": request.form.get("email") or None,
             "administrador_fincas": request.form.get("administrador_fincas") or None,
+            "administrador_id": administrador_id,
             "empresa_mantenedora": request.form.get("empresa_mantenedora") or None,
             "numero_ascensores": request.form.get("numero_ascensores") or None,
             "observaciones": request.form.get("observaciones") or None
         }
-        
+
         # Solo dirección y localidad son obligatorios
         if not data["direccion"] or not data["localidad"]:
             flash("Dirección y Localidad son obligatorios", "error")
             return redirect(request.referrer)
-        
+
         res = requests.patch(
             f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}",
             json=data,
@@ -1242,7 +1273,16 @@ def editar_lead(lead_id):
     else:
         return f"<h3 style='color:red;'>Error al obtener Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
-    return render_template("editar_lead.html", lead=lead)
+    # Obtener lista de administradores
+    administradores_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
+        headers=HEADERS
+    )
+    administradores = []
+    if administradores_response.status_code == 200:
+        administradores = administradores_response.json()
+
+    return render_template("editar_lead.html", lead=lead, administradores=administradores)
 
 # Editar Equipo - CON LIMPIEZA DE NONE
 @app.route("/editar_equipo/<int:equipo_id>", methods=["GET", "POST"])
@@ -1740,6 +1780,213 @@ def enviar_avisos_manual():
     )
     
     return f"<h3>{resultado}</h3><br><a href='/home'>Volver al inicio</a>"
+
+# ============================================
+# ADMINISTRADORES
+# ============================================
+
+# Dashboard de Administradores
+@app.route("/administradores_dashboard", methods=["GET"])
+def administradores_dashboard():
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Búsqueda
+    buscar = request.args.get("buscar", "")
+
+    # Paginación
+    page = int(request.args.get("page", 1))
+    limit = 50
+    offset = (page - 1) * limit
+
+    # Construir URL con filtros
+    url = f"{SUPABASE_URL}/rest/v1/administradores?select=*&order=nombre_empresa.asc"
+
+    if buscar:
+        url += f"&or=(nombre_empresa.ilike.%{buscar}%,localidad.ilike.%{buscar}%,email.ilike.%{buscar}%)"
+
+    # Obtener total de registros
+    count_url = url.replace("select=*", "select=count")
+    count_headers = HEADERS.copy()
+    count_headers["Prefer"] = "count=exact"
+    count_response = requests.get(count_url, headers=count_headers)
+    total_registros = int(count_response.headers.get("Content-Range", "0-0/0").split("/")[-1])
+
+    # Obtener registros paginados
+    url += f"&limit={limit}&offset={offset}"
+    response = requests.get(url, headers=HEADERS)
+
+    if response.status_code != 200:
+        return f"Error al cargar administradores: {response.text}", 500
+
+    administradores = response.json()
+
+    # Limpiar None
+    administradores = [limpiar_none(admin) for admin in administradores]
+
+    # Calcular páginas
+    total_pages = (total_registros + limit - 1) // limit
+
+    return render_template(
+        "administradores_dashboard.html",
+        administradores=administradores,
+        buscar=buscar,
+        page=page,
+        total_pages=total_pages,
+        total_registros=total_registros
+    )
+
+
+# Alta de Administrador
+@app.route("/nuevo_administrador", methods=["GET", "POST"])
+def nuevo_administrador():
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        data = {
+            "nombre_empresa": request.form.get("nombre_empresa"),
+            "telefono": request.form.get("telefono") or None,
+            "email": request.form.get("email") or None,
+            "direccion": request.form.get("direccion") or None,
+            "localidad": request.form.get("localidad") or None,
+            "observaciones": request.form.get("observaciones") or None
+        }
+
+        # Validar campo obligatorio
+        if not data["nombre_empresa"]:
+            flash("El nombre de la empresa es obligatorio", "error")
+            return redirect(request.referrer)
+
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/administradores",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 201]:
+            flash("Administrador creado correctamente", "success")
+            return redirect("/administradores_dashboard")
+        else:
+            flash(f"Error al crear administrador: {response.text}", "error")
+            return redirect(request.referrer)
+
+    return render_template("nuevo_administrador.html")
+
+
+# Ver Administrador
+@app.route("/ver_administrador/<int:admin_id>", methods=["GET"])
+def ver_administrador(admin_id):
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Obtener administrador
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/administradores?id=eq.{admin_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        return "Administrador no encontrado", 404
+
+    administrador = limpiar_none(response.json()[0])
+
+    # Obtener clientes asociados
+    clientes_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/clientes?administrador_id=eq.{admin_id}&select=*",
+        headers=HEADERS
+    )
+
+    clientes = []
+    if clientes_response.status_code == 200:
+        clientes = [limpiar_none(c) for c in clientes_response.json()]
+
+    return render_template(
+        "ver_administrador.html",
+        administrador=administrador,
+        clientes=clientes
+    )
+
+
+# Editar Administrador
+@app.route("/editar_administrador/<int:admin_id>", methods=["GET", "POST"])
+def editar_administrador(admin_id):
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        data = {
+            "nombre_empresa": request.form.get("nombre_empresa"),
+            "telefono": request.form.get("telefono") or None,
+            "email": request.form.get("email") or None,
+            "direccion": request.form.get("direccion") or None,
+            "localidad": request.form.get("localidad") or None,
+            "observaciones": request.form.get("observaciones") or None
+        }
+
+        # Validar campo obligatorio
+        if not data["nombre_empresa"]:
+            flash("El nombre de la empresa es obligatorio", "error")
+            return redirect(request.referrer)
+
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/administradores?id=eq.{admin_id}",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 201, 204]:
+            flash("Administrador actualizado correctamente", "success")
+            return redirect(f"/ver_administrador/{admin_id}")
+        else:
+            flash(f"Error al actualizar administrador: {response.text}", "error")
+            return redirect(request.referrer)
+
+    # GET - Obtener datos del administrador
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/administradores?id=eq.{admin_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        return "Administrador no encontrado", 404
+
+    administrador = limpiar_none(response.json()[0])
+
+    return render_template("editar_administrador.html", administrador=administrador)
+
+
+# Eliminar Administrador
+@app.route("/eliminar_administrador/<int:admin_id>", methods=["GET"])
+def eliminar_administrador(admin_id):
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Verificar si tiene clientes asociados
+    clientes_check = requests.get(
+        f"{SUPABASE_URL}/rest/v1/clientes?administrador_id=eq.{admin_id}&select=count",
+        headers=HEADERS
+    )
+
+    if clientes_check.status_code == 200 and clientes_check.json():
+        num_clientes = len(clientes_check.json())
+        if num_clientes > 0:
+            flash(f"No se puede eliminar: el administrador tiene {num_clientes} cliente(s) asociado(s)", "error")
+            return redirect(f"/ver_administrador/{admin_id}")
+
+    # Eliminar administrador
+    response = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/administradores?id=eq.{admin_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Administrador eliminado correctamente", "success")
+        return redirect("/administradores_dashboard")
+    else:
+        flash(f"Error al eliminar administrador: {response.text}", "error")
+        return redirect(f"/ver_administrador/{admin_id}")
+
 
 # ============================================
 # CIERRE

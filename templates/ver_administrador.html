@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Administrador</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <style>
+        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
+        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
+        .menu-lateral.active { right: 0; }
+        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
+        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+
+        .detalle-container { max-width: 1200px; margin: 0 auto; }
+        .seccion { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .seccion h2 { color: #366092; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #366092; }
+
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .info-item { padding: 10px; background: #f8f9fa; border-radius: 4px; }
+        .info-item label { font-weight: bold; color: #366092; display: block; margin-bottom: 5px; font-size: 14px; }
+        .info-item span { color: #333; font-size: 15px; }
+
+        .clientes-tabla { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .clientes-tabla th { background: #366092; color: white; padding: 10px; text-align: left; border: 1px solid #2a4a70; }
+        .clientes-tabla td { padding: 10px; border: 1px solid #ddd; }
+        .clientes-tabla tr:nth-child(even) { background: #f8f9fa; }
+        .clientes-tabla tr:hover { background: #e9ecef; }
+
+        .btn-accion-small { background: #366092; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 12px; display: inline-block; transition: all 0.3s; margin: 2px; }
+        .btn-accion-small:hover { background: #2a4a70; }
+        .btn-ver { background: #28a745; }
+        .btn-ver:hover { background: #218838; }
+        .botones-accion { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .no-clientes { text-align: center; padding: 30px; color: #999; font-style: italic; background: #f8f9fa; border-radius: 6px; border: 2px dashed #ddd; }
+
+        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/administradores_dashboard">Administradores de Fincas</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Detalle del Administrador</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <div class="detalle-container">
+
+                <!-- INFORMACIÓN DEL ADMINISTRADOR -->
+                <div class="seccion">
+                    <h2>Información del Administrador</h2>
+                    <div class="info-grid">
+                        <div class="info-item"><label>Nombre de la Empresa:</label><span>{{ administrador.nombre_empresa or '-' }}</span></div>
+                        <div class="info-item"><label>Teléfono:</label><span>{{ administrador.telefono or '-' }}</span></div>
+                        <div class="info-item"><label>Email:</label><span>{{ administrador.email or '-' }}</span></div>
+                        <div class="info-item"><label>Localidad:</label><span>{{ administrador.localidad or '-' }}</span></div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item" style="grid-column: 1/-1;">
+                            <label>Dirección:</label>
+                            <span>{{ administrador.direccion or '-' }}</span>
+                        </div>
+                    </div>
+
+                    {% if administrador.observaciones %}
+                    <div class="info-item" style="grid-column: 1/-1;">
+                        <label>Observaciones:</label>
+                        <span>{{ administrador.observaciones }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- CLIENTES ASOCIADOS -->
+                <div class="seccion">
+                    <h2>Clientes Asociados ({{ clientes|length }})</h2>
+
+                    {% if clientes %}
+                    <table class="clientes-tabla">
+                        <thead>
+                            <tr>
+                                <th>Dirección</th>
+                                <th>Localidad</th>
+                                <th>Contacto</th>
+                                <th>Teléfono</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cliente in clientes %}
+                            <tr>
+                                <td>{{ cliente.direccion }}</td>
+                                <td>{{ cliente.localidad }}</td>
+                                <td>{{ cliente.persona_contacto or '-' }}</td>
+                                <td>{{ cliente.telefono or '-' }}</td>
+                                <td style="white-space: nowrap;">
+                                    <a href="/ver_lead/{{ cliente.id }}" class="btn-accion-small btn-ver">Ver</a>
+                                    <a href="/editar_lead/{{ cliente.id }}" class="btn-accion-small">Editar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="no-clientes">
+                        No hay clientes asociados a este administrador
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- BOTONES DE ACCIÓN -->
+                <div class="botones-accion">
+                    <a href="/editar_administrador/{{ administrador.id }}" class="button">Editar Administrador</a>
+                    <a href="/administradores_dashboard" class="button">Volver al Listado</a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+    <script src="/static/sidebar.js"></script>
+</body>
+</html>
