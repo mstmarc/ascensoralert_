@@ -1,177 +1,271 @@
-// admin-dropdown.js - Componente reutilizable de dropdown con búsqueda para administradores
-// Usa Select2 para búsqueda avanzada y mejor UX
+// admin-dropdown.js - Componente de dropdown con búsqueda para administradores
+// SOLUCIÓN SIMPLIFICADA SIN SELECT2 - Usa datalist nativo de HTML5
 
 (function() {
-    // Inicializar Select2 cuando el DOM esté listo
+    console.log('🔧 Iniciando dropdown de administradores (versión simplificada)...');
+
     function initAdminDropdown() {
-        // Configurar Select2 en el campo de administrador
         const adminSelect = document.getElementById('administrador_id');
 
         if (!adminSelect) {
-            console.warn('No se encontró el elemento administrador_id');
+            console.warn('⚠️ No se encontró el elemento #administrador_id');
             return;
         }
 
-        // Verificar si Select2 está disponible
-        if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
-            console.error('Select2 no está cargado. Asegúrate de incluir jQuery y Select2.');
-            return;
+        console.log('✅ Elemento encontrado');
+        console.log('📊 Opciones disponibles:', adminSelect.options.length);
+
+        // Convertir select a input con datalist para búsqueda nativa
+        const parentElement = adminSelect.parentElement;
+        const selectValue = adminSelect.value;
+        const options = Array.from(adminSelect.options);
+
+        // Crear input de búsqueda
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.id = 'administrador_search';
+        searchInput.className = 'admin-search-input';
+        searchInput.placeholder = '🔍 Buscar administrador...';
+        searchInput.autocomplete = 'off';
+
+        // Crear select oculto para mantener el valor real
+        const hiddenSelect = document.createElement('select');
+        hiddenSelect.id = 'administrador_id';
+        hiddenSelect.name = 'administrador_id';
+        hiddenSelect.style.display = 'none';
+
+        // Copiar todas las opciones al select oculto
+        options.forEach(option => {
+            const newOption = option.cloneNode(true);
+            hiddenSelect.appendChild(newOption);
+        });
+
+        // Crear dropdown de resultados
+        const dropdown = document.createElement('div');
+        dropdown.className = 'admin-dropdown-results';
+        dropdown.style.display = 'none';
+
+        // Insertar los nuevos elementos
+        adminSelect.replaceWith(searchInput);
+        parentElement.appendChild(hiddenSelect);
+        parentElement.appendChild(dropdown);
+
+        // Crear lista de opciones para búsqueda
+        const adminList = options.slice(1).map(opt => ({
+            id: opt.value,
+            text: opt.textContent.trim()
+        }));
+
+        console.log('📋 Administradores cargados:', adminList.length);
+
+        // Función para mostrar resultados
+        function showResults(query) {
+            dropdown.innerHTML = '';
+
+            if (!query || query.trim().length === 0) {
+                // Mostrar todos
+                const filtered = adminList;
+
+                if (filtered.length === 0) {
+                    dropdown.innerHTML = '<div class="admin-dropdown-item no-results">No hay administradores disponibles</div>';
+                    dropdown.style.display = 'block';
+                    return;
+                }
+
+                filtered.forEach(admin => {
+                    const item = document.createElement('div');
+                    item.className = 'admin-dropdown-item';
+                    item.textContent = admin.text;
+                    item.dataset.id = admin.id;
+                    item.onclick = function() {
+                        selectAdmin(admin);
+                    };
+                    dropdown.appendChild(item);
+                });
+
+                dropdown.style.display = 'block';
+            } else {
+                // Filtrar por búsqueda
+                const searchTerm = query.toLowerCase();
+                const filtered = adminList.filter(admin =>
+                    admin.text.toLowerCase().includes(searchTerm)
+                );
+
+                if (filtered.length === 0) {
+                    dropdown.innerHTML = '<div class="admin-dropdown-item no-results">No se encontraron resultados</div>';
+                } else {
+                    filtered.forEach(admin => {
+                        const item = document.createElement('div');
+                        item.className = 'admin-dropdown-item';
+
+                        // Resaltar coincidencias
+                        const regex = new RegExp(`(${searchTerm})`, 'gi');
+                        const highlightedText = admin.text.replace(regex, '<strong>$1</strong>');
+                        item.innerHTML = highlightedText;
+
+                        item.dataset.id = admin.id;
+                        item.onclick = function() {
+                            selectAdmin(admin);
+                        };
+                        dropdown.appendChild(item);
+                    });
+                }
+
+                dropdown.style.display = 'block';
+            }
         }
 
-        // Configurar Select2
-        $(adminSelect).select2({
-            placeholder: "🔍 Buscar administrador...",
-            allowClear: true,
-            language: {
-                noResults: function() {
-                    return "No se encontraron resultados";
-                },
-                searching: function() {
-                    return "Buscando...";
-                },
-                inputTooShort: function() {
-                    return "Por favor, escribe más caracteres";
-                }
-            },
-            width: '100%',
-            theme: 'default',
-            // Búsqueda case-insensitive mejorada
-            matcher: function(params, data) {
-                // Si no hay término de búsqueda, mostrar todo
-                if ($.trim(params.term) === '') {
-                    return data;
-                }
+        // Función para seleccionar un administrador
+        function selectAdmin(admin) {
+            searchInput.value = admin.text;
+            hiddenSelect.value = admin.id;
+            dropdown.style.display = 'none';
+            console.log('✅ Administrador seleccionado:', admin.text, '(ID:', admin.id + ')');
+        }
 
-                // Si no hay texto en la opción, no mostrar
-                if (typeof data.text === 'undefined') {
-                    return null;
-                }
+        // Eventos del input
+        searchInput.addEventListener('focus', function() {
+            showResults(this.value);
+        });
 
-                // Búsqueda case-insensitive
-                const searchTerm = params.term.toLowerCase();
-                const optionText = data.text.toLowerCase();
+        searchInput.addEventListener('input', function() {
+            showResults(this.value);
+        });
 
-                // Buscar en el texto de la opción
-                if (optionText.indexOf(searchTerm) > -1) {
-                    return data;
-                }
-
-                // No coincide
-                return null;
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
             }
         });
 
-        // Estilos personalizados para que coincida con el diseño
-        const customStyles = `
-            <style>
-                /* Estilos personalizados para Select2 */
-                .select2-container--default .select2-selection--single {
-                    border: 2px solid #e1e5e9 !important;
-                    border-radius: 8px !important;
-                    height: 48px !important;
-                    padding: 8px !important;
-                    font-size: 16px !important;
-                    font-family: 'Montserrat', sans-serif !important;
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (!parentElement.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Si había un valor seleccionado, mantenerlo
+        if (selectValue) {
+            const selected = adminList.find(a => a.id === selectValue);
+            if (selected) {
+                selectAdmin(selected);
+            }
+        }
+
+        console.log('✅ Dropdown inicializado correctamente');
+    }
+
+    // Añadir estilos
+    function addStyles() {
+        if (document.getElementById('admin-dropdown-styles')) {
+            return;
+        }
+
+        const styles = `
+            <style id="admin-dropdown-styles">
+                .admin-search-input {
+                    width: 100%;
+                    padding: 12px 15px;
+                    border: 2px solid #e1e5e9;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-family: 'Montserrat', sans-serif;
+                    transition: all 0.3s ease;
+                    box-sizing: border-box;
                 }
 
-                .select2-container--default .select2-selection--single .select2-selection__rendered {
-                    line-height: 30px !important;
-                    padding-left: 8px !important;
-                    color: #333 !important;
+                .admin-search-input:focus {
+                    outline: none;
+                    border-color: #366092;
+                    box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1);
                 }
 
-                .select2-container--default .select2-selection--single .select2-selection__arrow {
-                    height: 46px !important;
+                .admin-dropdown-results {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    max-height: 300px;
+                    overflow-y: auto;
+                    background: white;
+                    border: 2px solid #366092;
+                    border-radius: 8px;
+                    margin-top: 5px;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+                    z-index: 9999;
                 }
 
-                .select2-container--default.select2-container--focus .select2-selection--single {
-                    border-color: #366092 !important;
-                    box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1) !important;
+                .admin-dropdown-item {
+                    padding: 12px 15px;
+                    cursor: pointer;
+                    font-size: 15px;
+                    font-family: 'Montserrat', sans-serif;
+                    transition: background 0.2s;
+                    border-bottom: 1px solid #f0f0f0;
                 }
 
-                .select2-dropdown {
-                    border: 2px solid #366092 !important;
-                    border-radius: 8px !important;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+                .admin-dropdown-item:last-child {
+                    border-bottom: none;
                 }
 
-                .select2-search--dropdown .select2-search__field {
-                    border: 2px solid #e1e5e9 !important;
-                    border-radius: 6px !important;
-                    padding: 8px 12px !important;
-                    font-size: 14px !important;
-                    font-family: 'Montserrat', sans-serif !important;
+                .admin-dropdown-item:hover {
+                    background-color: #366092;
+                    color: white;
                 }
 
-                .select2-search--dropdown .select2-search__field:focus {
-                    border-color: #366092 !important;
-                    outline: none !important;
+                .admin-dropdown-item.no-results {
+                    color: #999;
+                    cursor: default;
+                    font-style: italic;
                 }
 
-                .select2-results__option {
-                    padding: 10px 15px !important;
-                    font-size: 15px !important;
-                    font-family: 'Montserrat', sans-serif !important;
+                .admin-dropdown-item.no-results:hover {
+                    background-color: transparent;
+                    color: #999;
                 }
 
-                .select2-results__option--highlighted {
-                    background-color: #366092 !important;
+                .admin-dropdown-item strong {
+                    background-color: rgba(54, 96, 146, 0.2);
+                    font-weight: 600;
                 }
 
-                .select2-container--default .select2-results__option[aria-selected=true] {
-                    background-color: #e8f0f8 !important;
-                    color: #366092 !important;
+                /* Asegurar que el contenedor del dropdown tenga position relative */
+                .form-group {
+                    position: relative;
                 }
 
-                /* Placeholder */
-                .select2-container--default .select2-selection--single .select2-selection__placeholder {
-                    color: #999 !important;
-                }
-
-                /* Clear button */
-                .select2-container--default .select2-selection--single .select2-selection__clear {
-                    color: #999 !important;
-                    font-size: 18px !important;
-                    margin-right: 10px !important;
-                }
-
-                /* Mensaje de "no results" */
-                .select2-results__option.select2-results__message {
-                    color: #666 !important;
-                }
-
-                /* Ajuste responsivo */
                 @media (max-width: 768px) {
-                    .select2-container--default .select2-selection--single {
-                        font-size: 14px !important;
+                    .admin-search-input {
+                        font-size: 14px;
                     }
 
-                    .select2-results__option {
-                        font-size: 14px !important;
+                    .admin-dropdown-item {
+                        font-size: 14px;
+                        padding: 10px 12px;
                     }
                 }
             </style>
         `;
 
-        // Insertar estilos personalizados si no existen
-        if (!document.getElementById('admin-dropdown-styles')) {
-            const styleElement = document.createElement('div');
-            styleElement.id = 'admin-dropdown-styles';
-            styleElement.innerHTML = customStyles;
-            document.head.appendChild(styleElement);
-        }
-
-        console.log('✅ Dropdown de administradores inicializado correctamente');
+        document.head.insertAdjacentHTML('beforeend', styles);
+        console.log('🎨 Estilos añadidos');
     }
 
-    // Ejecutar cuando el DOM esté listo
+    // Inicializar cuando el DOM esté listo
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAdminDropdown);
+        document.addEventListener('DOMContentLoaded', function() {
+            addStyles();
+            initAdminDropdown();
+        });
     } else {
-        // DOM ya está listo
+        addStyles();
         initAdminDropdown();
     }
 
-    // También exponer la función globalmente por si se necesita re-inicializar
-    window.initAdminDropdown = initAdminDropdown;
+    // Exponer función global
+    window.initAdminDropdown = function() {
+        addStyles();
+        initAdminDropdown();
+    };
 })();

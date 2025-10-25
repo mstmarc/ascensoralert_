@@ -2127,6 +2127,98 @@ def eliminar_administrador(admin_id):
 
 
 # ============================================
+# RUTA DE PRUEBA - DROPDOWN ADMINISTRADORES
+# ============================================
+
+@app.route("/test_dropdown_admin")
+def test_dropdown_admin():
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Obtener administradores
+    administradores_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/administradores?select=id,nombre_empresa&order=nombre_empresa.asc",
+        headers=HEADERS
+    )
+
+    administradores = []
+    status_code = administradores_response.status_code
+
+    if status_code == 200:
+        administradores = administradores_response.json()
+
+    # HTML de prueba
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Test Dropdown Administradores</title>
+
+        <!-- jQuery y Select2 -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+        <style>
+            body {{ font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }}
+            .debug-info {{ background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 5px; }}
+            .form-group {{ margin: 20px 0; }}
+            label {{ display: block; margin-bottom: 5px; font-weight: bold; }}
+            select {{ width: 100%; padding: 10px; }}
+            .success {{ color: green; }}
+            .error {{ color: red; }}
+        </style>
+    </head>
+    <body>
+        <h1>🧪 Test Dropdown Administradores</h1>
+
+        <div class="debug-info">
+            <h3>Información de Debug:</h3>
+            <p><strong>Status Code:</strong> {status_code}</p>
+            <p><strong>Total Administradores:</strong> {len(administradores)}</p>
+            <p><strong>jQuery cargado:</strong> <span id="jquery-status">Verificando...</span></p>
+            <p><strong>Select2 cargado:</strong> <span id="select2-status">Verificando...</span></p>
+        </div>
+
+        <div class="debug-info">
+            <h3>Administradores en la BD:</h3>
+            <pre>{administradores}</pre>
+        </div>
+
+        <div class="form-group">
+            <label for="administrador_id">Dropdown de Administradores:</label>
+            <select id="administrador_id" name="administrador_id">
+                <option value="">-- Selecciona un administrador --</option>
+                {''.join([f'<option value="{admin["id"]}">{admin["nombre_empresa"]}</option>' for admin in administradores])}
+            </select>
+        </div>
+
+        <div class="debug-info">
+            <h3>Logs de Consola:</h3>
+            <p>Abre la consola del navegador (F12) para ver los logs de inicialización</p>
+        </div>
+
+        <p><a href="/home">← Volver al inicio</a></p>
+
+        <script src="/static/admin-dropdown.js"></script>
+
+        <script>
+            // Verificar dependencias
+            document.getElementById('jquery-status').textContent = typeof jQuery !== 'undefined' ? '✅ Sí' : '❌ No';
+            document.getElementById('select2-status').textContent = typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined' ? '✅ Sí' : '❌ No';
+
+            // Log adicional
+            console.log('🔍 Total de opciones en el select:', jQuery('#administrador_id option').length);
+        </script>
+    </body>
+    </html>
+    """
+
+    return html
+
+# ============================================
 # CIERRE
 # ============================================
 
