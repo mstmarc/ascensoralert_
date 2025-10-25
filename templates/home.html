@@ -14,13 +14,10 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* Buscador destacado */
+        /* Estilos específicos del buscador en homepage */
         .search-section {
-            background: #366092;
             padding: 40px;
-            border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(54, 96, 146, 0.3);
         }
 
         .search-section h2 {
@@ -32,37 +29,8 @@
         }
 
         .search-box {
-            display: flex;
-            gap: 10px;
             max-width: 700px;
             margin: 0 auto;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 15px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            margin-bottom: 0;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .search-box button {
-            padding: 15px 30px;
-            white-space: nowrap;
-            margin: 0;
-            background: white;
-            color: #366092;
-            font-weight: 600;
-            font-family: 'Montserrat', sans-serif;
-            border: 2px solid white;
-        }
-
-        .search-box button:hover {
-            background: #f8f9fa;
-            transform: translateY(0);
-            border-color: #f8f9fa;
         }
 
         /* Cards de métricas */
@@ -128,9 +96,7 @@
                 font-family: 'Montserrat', sans-serif;
                 color: #666;
             }
-            .search-box {
-                flex-direction: column;
-            }
+            /* Los estilos responsive de buscador ahora están en styles.css */
 
             .metrics-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -163,17 +129,18 @@
     <main>
         <div class="homepage-container">
             <!-- Buscador destacado -->
-            <div class="search-section">
+            <div class="buscador-destacado search-section">
                 <h2>🔍 Buscar Comunidad</h2>
-                <form action="/leads_dashboard" method="GET" class="search-box">
-                    <input 
-                        type="text" 
-                        name="search" 
-                        placeholder="Escribe una dirección, localidad o nombre..." 
+                <form action="/leads_dashboard" method="GET" class="buscador-input-container search-box">
+                    <input
+                        type="text"
+                        name="search"
+                        class="buscador-input"
+                        placeholder="Escribe una dirección, localidad o nombre..."
                         value="{{ request.args.get('search', '') }}"
                         autofocus
                     >
-                    <button type="submit">Buscar</button>
+                    <button type="submit" class="btn-buscar">Buscar</button>
                 </form>
             </div>
 
