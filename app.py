@@ -2286,6 +2286,47 @@ def test_dropdown_admin():
 
     return html
 
+@app.route("/admin/clear_cache")
+def clear_cache():
+    """Endpoint para limpiar manualmente el caché de administradores"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Limpiar el caché
+    cache_administradores['data'] = []
+    cache_administradores['timestamp'] = None
+
+    # Forzar recarga inmediata
+    administradores = get_administradores_cached()
+
+    return f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Caché Actualizado</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; text-align: center; }}
+            .success {{ color: #28a745; font-size: 48px; margin-bottom: 20px; }}
+            h1 {{ color: #333; }}
+            .count {{ font-size: 32px; font-weight: bold; color: #366092; margin: 20px 0; }}
+            .btn {{ display: inline-block; margin: 10px; padding: 12px 24px; background: #366092; color: white; text-decoration: none; border-radius: 5px; }}
+            .btn:hover {{ background: #2a4a70; }}
+        </style>
+    </head>
+    <body>
+        <div class="success">✅</div>
+        <h1>Caché Actualizado</h1>
+        <div class="count">{len(administradores)} administradores cargados</div>
+        <p>El caché se ha limpiado y recargado correctamente.</p>
+        <a href="/test_dropdown_admin" class="btn">Ver Diagnóstico</a>
+        <a href="/visita_administrador" class="btn">Probar Dropdown</a>
+        <a href="/home" class="btn">Volver al Inicio</a>
+    </body>
+    </html>
+    """
+
 # ============================================
 # CIERRE
 # ============================================
