@@ -78,6 +78,7 @@
     <nav class="menu-lateral" id="menuLateral">
         <a href="/home">Inicio</a>
         <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/administradores_dashboard">Administradores de Fincas</a>
         <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
         <a href="/oportunidades">Oportunidades</a>
         <a href="/reporte_mensual">Descargo Comercial</a>
@@ -102,8 +103,16 @@
                 <label>Fecha de Visita:</label><br>
                 <input type="date" name="fecha_visita" value="{{ visita.fecha_visita }}" required><br><br>
 
-                <label>Administrador de Fincas:</label><br>
-                <input type="text" name="administrador_fincas" value="{{ visita.administrador_fincas }}" required><br><br>
+                <label>Administrador de Fincas (de la base de datos):</label><br>
+                <select name="administrador_id">
+                    <option value="">-- Selecciona un administrador o déjalo vacío --</option>
+                    {% for admin in administradores %}
+                    <option value="{{ admin.id }}" {% if visita.administrador_id == admin.id %}selected{% endif %}>{{ admin.nombre_empresa }}</option>
+                    {% endfor %}
+                </select><br><br>
+
+                <label>Administrador de Fincas (texto libre):</label><br>
+                <input type="text" name="administrador_fincas" value="{{ visita.administrador_fincas }}" placeholder="O escribe el nombre si no está en la lista"><br><br>
 
                 <label>Persona de Contacto:</label><br>
                 <input type="text" name="persona_contacto" value="{{ visita.persona_contacto or '' }}"><br><br>

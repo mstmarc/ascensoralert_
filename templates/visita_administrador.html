@@ -186,6 +186,7 @@
     <nav class="menu-lateral" id="menuLateral">
         <a href="/home">Inicio</a>
         <a href="/leads_dashboard">Ver Comunidades</a>
+        <a href="/administradores_dashboard">Administradores de Fincas</a>
         <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
         <a href="/oportunidades">Oportunidades</a>
         <a href="/reporte_mensual">Descargo Comercial</a>
@@ -229,9 +230,22 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="administrador_fincas">Administrador de Fincas <span class="required">*</span></label>
+                        <label for="administrador_id">Administrador de Fincas (de la base de datos) <span class="required">*</span></label>
+                        <select id="administrador_id" name="administrador_id" style="width: 100%; padding: 12px 15px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px;">
+                            <option value="">-- Selecciona un administrador o déjalo vacío --</option>
+                            {% for admin in administradores %}
+                            <option value="{{ admin.id }}">{{ admin.nombre_empresa }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="administrador_fincas">Administrador de Fincas (texto libre)</label>
                         <input type="text" id="administrador_fincas" name="administrador_fincas"
-                               placeholder="Nombre del administrador o empresa" required>
+                               placeholder="O escribe el nombre si no está en la lista">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            * Debes seleccionar uno de la lista O escribir un nombre
+                        </small>
                     </div>
 
                     <div class="form-group">
