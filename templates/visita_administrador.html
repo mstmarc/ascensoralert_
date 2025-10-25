@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visita a Administrador - Ascensor Alert</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=5">
+
+    <!-- jQuery y Select2 para dropdown con búsqueda -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <style>
         .menu-toggle {
             display: none;
@@ -231,7 +237,7 @@
 
                     <div class="form-group">
                         <label for="administrador_id">Administrador de Fincas (de la base de datos) <span class="required">*</span></label>
-                        <select id="administrador_id" name="administrador_id" style="width: 100%; padding: 12px 15px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px;">
+                        <select id="administrador_id" name="administrador_id">
                             <option value="">-- Selecciona un administrador o déjalo vacío --</option>
                             {% for admin in administradores %}
                             <option value="{{ admin.id }}">{{ admin.nombre_empresa }}</option>
@@ -287,5 +293,6 @@
         });
     </script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin-dropdown.js') }}"></script>
 </body>
 </html>
