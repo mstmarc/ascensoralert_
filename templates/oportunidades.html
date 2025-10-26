@@ -76,10 +76,11 @@
             color: #366092;
         }
 
-        .oportunidad-comunidad {
-            font-size: 10px;
-            color: #999;
+        .oportunidad-tipo {
+            font-size: 11px;
+            color: #1a1a1a;
             display: block;
+            margin-top: 2px;
         }
 
         .badge {
@@ -115,8 +116,8 @@
                 font-size: 12px;
             }
 
-            .oportunidad-comunidad {
-                font-size: 10px;
+            .oportunidad-tipo {
+                font-size: 11px;
             }
         }
     </style>
@@ -167,10 +168,10 @@
                         <div class="oportunidad-item">
                             <div class="oportunidad-info">
                                 <a href="/ver_oportunidad/{{ op.id }}" class="oportunidad-direccion">
-                                    {{ op.clientes.direccion }}
+                                    {{ op.clientes.direccion }} - {{ op.clientes.nombre_cliente or 'Sin nombre' }}
                                 </a>
-                                <span class="oportunidad-comunidad">
-                                    {{ op.clientes.nombre_cliente or 'Sin nombre' }}
+                                <span class="oportunidad-tipo">
+                                    {{ op.tipo }}
                                 </span>
                             </div>
                             <span class="badge {{ op.estado }}">{{ op.estado|upper }}</span>
