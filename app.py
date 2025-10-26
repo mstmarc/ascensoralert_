@@ -1915,60 +1915,6 @@ def administradores_dashboard():
         # Limpiar None
         administradores = [limpiar_none(admin) for admin in administradores]
 
-        # Obtener conteo de oportunidades activas por administrador
-        if administradores:
-            admin_ids = [str(admin['id']) for admin in administradores]
-
-            try:
-                # Obtener todos los clientes de estos administradores
-                clientes_response = requests.get(
-                    f"{SUPABASE_URL}/rest/v1/clientes?administrador_id=in.({','.join(admin_ids)})&select=id,administrador_id",
-                    headers=HEADERS,
-                    timeout=5
-                )
-
-                if clientes_response.status_code == 200:
-                    clientes = clientes_response.json()
-
-                    # Mapear cliente_id -> administrador_id
-                    cliente_to_admin = {c['id']: c['administrador_id'] for c in clientes}
-                    cliente_ids = list(cliente_to_admin.keys())
-
-                    if cliente_ids:
-                        # Obtener oportunidades activas de estos clientes
-                        oportunidades_response = requests.get(
-                            f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=in.({','.join(map(str, cliente_ids))})&estado=eq.activa&select=cliente_id",
-                            headers=HEADERS,
-                            timeout=5
-                        )
-
-                        if oportunidades_response.status_code == 200:
-                            oportunidades = oportunidades_response.json()
-
-                            # Contar oportunidades por administrador
-                            oportunidades_por_admin = {}
-                            for op in oportunidades:
-                                admin_id = cliente_to_admin.get(op['cliente_id'])
-                                if admin_id:
-                                    oportunidades_por_admin[admin_id] = oportunidades_por_admin.get(admin_id, 0) + 1
-
-                            # Agregar conteo a cada administrador
-                            for admin in administradores:
-                                admin['oportunidades_activas'] = oportunidades_por_admin.get(admin['id'], 0)
-                        else:
-                            for admin in administradores:
-                                admin['oportunidades_activas'] = 0
-                    else:
-                        for admin in administradores:
-                            admin['oportunidades_activas'] = 0
-                else:
-                    for admin in administradores:
-                        admin['oportunidades_activas'] = 0
-            except Exception as e:
-                print(f"Error al obtener oportunidades de administradores: {e}")
-                for admin in administradores:
-                    admin['oportunidades_activas'] = 0
-
         # Calcular páginas
         total_pages = max(1, (total_registros + limit - 1) // limit)  # Al menos 1 página
 
