@@ -154,6 +154,142 @@
             width: 100% !important;
             margin: 0 !important;
         }
+
+        /* Estilos para los displays de últimas instalaciones y oportunidades */
+        .recent-items-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .recent-items-display {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #f0f0f0;
+        }
+
+        .recent-items-display h3 {
+            font-size: 18px;
+            color: #366092;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .recent-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .recent-item {
+            padding: 8px 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid #000;
+            border-radius: 6px;
+        }
+
+        .recent-item:hover {
+            background: #f8f9fa;
+        }
+
+        .recent-item-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: block;
+            transition: color 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        .recent-item-title:hover {
+            color: #366092;
+        }
+
+        .recent-item-info {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .recent-item-info-item {
+            font-size: 11px;
+            color: #1a1a1a;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .badge.activa {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.ganada {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge.perdida {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .oportunidad-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .oportunidad-info {
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+        }
+
+        /* Hacer que los números sean clicables */
+        .metric-card .number a {
+            color: #366092;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .metric-card .number a:hover {
+            color: #2a4d73;
+        }
+
+        /* Responsive para tablets */
+        @media (max-width: 1024px) {
+            .recent-items-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 768px) {
+            .recent-items-display {
+                padding: 15px;
+            }
+
+            .recent-items-display h3 {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -192,7 +328,7 @@
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="icon">🏢</div>
-                    <div class="number">{{ metricas.total_comunidades }}</div>
+                    <div class="number"><a href="/leads_dashboard">{{ metricas.total_comunidades }}</a></div>
                     <div class="label">Instalaciones</div>
                 </div>
                 <div class="metric-card">
@@ -202,13 +338,64 @@
                 </div>
                 <div class="metric-card">
                     <div class="icon">💰</div>
-                    <div class="number">{{ metricas.total_oportunidades }}</div>
+                    <div class="number"><a href="/oportunidades">{{ metricas.total_oportunidades }}</a></div>
                     <div class="label">Oportunidades</div>
                 </div>
                 <div class="metric-card">
                     <div class="icon">📅</div>
                     <div class="number">{{ metricas.ipos_hoy }}</div>
                     <div class="label">IPOs Hoy</div>
+                </div>
+            </div>
+
+            <!-- Displays de Últimas Instalaciones y Oportunidades -->
+            <div class="recent-items-container">
+                <!-- Últimas 5 Instalaciones -->
+                <div class="recent-items-display">
+                    <h3>📋 Últimas 5 Instalaciones</h3>
+                    <div class="recent-items-list">
+                        {% if ultimas_instalaciones %}
+                            {% for instalacion in ultimas_instalaciones %}
+                                <div class="recent-item">
+                                    <a href="/ver_lead/{{ instalacion.id }}" class="recent-item-title">
+                                        {{ instalacion.direccion }}
+                                    </a>
+                                    <div class="recent-item-info">
+                                        <span class="recent-item-info-item">{{ instalacion.localidad }}</span>
+                                        <span class="recent-item-info-item">Ascensores: {{ instalacion.num_equipos }}</span>
+                                        <span class="recent-item-info-item">Fecha: {{ instalacion.fecha_registro }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #666; padding: 20px;">No hay instalaciones registradas</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Últimas 5 Oportunidades -->
+                <div class="recent-items-display">
+                    <h3>💼 Últimas 5 Oportunidades</h3>
+                    <div class="recent-items-list">
+                        {% if ultimas_oportunidades %}
+                            {% for oportunidad in ultimas_oportunidades %}
+                                <div class="recent-item oportunidad-item">
+                                    <div class="oportunidad-info">
+                                        <a href="/ver_oportunidad/{{ oportunidad.id }}" class="recent-item-title">
+                                            {{ oportunidad.nombre_cliente }}
+                                        </a>
+                                        <div class="recent-item-info">
+                                            <span class="recent-item-info-item">{{ oportunidad.tipo_oportunidad }}</span>
+                                            <span class="recent-item-info-item">{{ oportunidad.importe_estimado }}€</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge {{ oportunidad.estado }}">{{ oportunidad.estado|upper }}</span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #666; padding: 20px;">No hay oportunidades registradas</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
