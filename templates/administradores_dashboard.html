@@ -6,10 +6,26 @@
     <title>Administradores de Fincas</title>
     <link rel="stylesheet" href="/static/styles.css?v=5">
     <style>
-        /* Ajustar main para dashboard amplio */
+        /* Ajustar layout para dashboard amplio */
         main {
-            max-width: 100%;
-            padding: 30px;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 30px !important;
+            margin-left: 240px !important;
+        }
+
+        main .menu {
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+        /* Móvil: quitar margen lateral */
+        @media (max-width: 768px) {
+            main {
+                margin-left: 0 !important;
+                padding: 20px !important;
+            }
         }
 
         .paginacion {
@@ -63,12 +79,6 @@
             background: #e7f3ff;
             padding: 8px;
             border-radius: 6px;
-        }
-
-        /* Ajustar el contenedor menu para dashboards */
-        main .menu {
-            max-width: 100%;
-            width: 100%;
         }
 
         .tabla-container {
@@ -262,6 +272,15 @@
             <!-- Contenido según pestaña activa -->
             {% if tab == 'administradores' or not tab %}
             <!-- TAB: ADMINISTRADORES -->
+
+            <!-- DEBUG INFO (temporal) -->
+            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px;">
+                <strong>📊 Estado:</strong> Pestaña activa: <strong>{{ tab or 'administradores' }}</strong> |
+                Total registros: <strong>{{ total_registros }}</strong> |
+                Mostrando: <strong>{{ administradores|length }}</strong> |
+                Página: <strong>{{ page }}/{{ total_pages }}</strong>
+            </div>
+
             <form method="GET" action="/administradores_dashboard">
                 <div class="buscador-destacado">
                     <div class="buscador-label">Buscar Administrador</div>
