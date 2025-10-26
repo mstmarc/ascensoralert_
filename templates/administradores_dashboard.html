@@ -254,7 +254,13 @@
     </header>
     <main>
         <div class="menu">
-            <a href="/nuevo_administrador" class="btn-nuevo">+ Nuevo Administrador</a>
+            <!-- Botón destacado para crear administrador -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h2 style="margin: 0; color: #366092; font-size: 20px;">Lista de Administradores</h2>
+                <a href="/nuevo_administrador" class="btn-nuevo" style="margin: 0;">
+                    ➕ Nuevo Administrador
+                </a>
+            </div>
 
             <form method="GET" action="/administradores_dashboard">
                 <div class="buscador-destacado">
