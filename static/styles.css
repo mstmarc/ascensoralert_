@@ -490,13 +490,13 @@ td a:hover {
 
 .buscador-input {
     flex: 1;
-    padding: 15px 20px;
+    padding: 8px 12px;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
     font-family: 'Montserrat', sans-serif;
     box-sizing: border-box;
-    height: 50px;
+    height: 32px;
     margin-bottom: 0 !important;
 }
 
@@ -507,18 +507,21 @@ td a:hover {
 button.btn-buscar {
     background: white !important;
     color: #366092 !important;
-    padding: 15px 30px;
+    padding: 0 20px;
     border: 2px solid white;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
-    font-size: 16px;
+    font-size: 14px;
     font-family: 'Montserrat', sans-serif;
     white-space: nowrap;
     box-sizing: border-box;
-    height: 50px;
+    height: 32px;
     margin: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 button.btn-buscar:hover {
