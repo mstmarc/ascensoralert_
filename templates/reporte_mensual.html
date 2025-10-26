@@ -11,6 +11,19 @@
         .menu-lateral.active{right:0;}
         .menu-lateral a{display:block;color:white;padding:15px 20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.1);transition:background 0.3s;}
         .menu-lateral a:hover{background:rgba(255,255,255,0.1);}
+
+        /* Ajustar contenedor del dashboard para ancho completo */
+        main {
+            max-width: none !important;
+            padding: 30px !important;
+        }
+
+        main .menu {
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
         @media (max-width:768px){.menu-toggle{display:block;}.menu-lateral{display:block;}}
     </style>
 </head>
