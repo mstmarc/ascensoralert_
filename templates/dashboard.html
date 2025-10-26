@@ -167,6 +167,62 @@
             white-space: nowrap;
         }
         
+        /* LISTADO ULTRA-COMPACTO PARA INSTALACIONES */
+        .leads-list {
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .lead-list-item {
+            padding: 8px 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid #000;
+            border-radius: 6px;
+        }
+
+        .lead-list-item:hover {
+            background: #f8f9fa;
+        }
+
+        .lead-list-direccion {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: block;
+            transition: color 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        .lead-list-direccion:hover {
+            color: #366092;
+        }
+
+        .lead-list-info {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .lead-list-info-item {
+            font-size: 10px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .lead-list-info-item strong {
+            color: #666;
+        }
+
         .leyenda {
             background: #f8f9fa;
             padding: 10px;
@@ -174,28 +230,28 @@
             margin: 15px 0;
             border: 1px solid #ddd;
         }
-        
+
         .leyenda h3 {
             color: #366092;
             margin-bottom: 8px;
             font-size: 13px;
             font-weight: 600;
         }
-        
+
         .leyenda-items {
             display: flex;
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
         }
-        
+
         .leyenda-item {
             display: flex;
             align-items: center;
             gap: 6px;
             font-size: 12px;
         }
-        
+
         .color-box {
             width: 20px;
             height: 15px;
@@ -203,7 +259,7 @@
             border: 1px solid #999;
             flex-shrink: 0;
         }
-        
+
         .color-amarillo { background-color: #FFF59D; }
         .color-rojo { background-color: #FFCDD2; }
         
@@ -216,36 +272,54 @@
             .filtros {
                 padding: 10px;
             }
-            
+
             .filtros-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             /* Botones de filtro en móvil */
             .filtros button[type="submit"],
             .filtros a {
                 width: 100% !important;
             }
-            
+
+            /* Ajustar listado compacto en móvil */
+            .lead-list-item {
+                padding: 8px 10px;
+            }
+
+            .lead-list-direccion {
+                font-size: 12px;
+            }
+
+            .lead-list-info {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .lead-list-info-item {
+                font-size: 10px;
+            }
+
             table {
                 font-size: 12px;
                 min-width: 600px;
             }
-            
+
             th, td {
                 padding: 8px 6px;
             }
-            
+
             .btn-accion {
                 padding: 6px 10px;
                 font-size: 12px;
             }
-            
+
             .leyenda-items {
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .paginacion-info {
                 font-size: 14px;
             }
@@ -359,89 +433,34 @@
                 {% endif %}
             </div>
             
-            <div class="tabla-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Direccion</th>
-                            <th>Localidad</th>
-                            <th>Num Asc</th>
-                            <th>Empresa Mant</th>
-                            <th>Proxima IPO</th>
-                            <th>Contrato Vence</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if rows %}
-                            {% for row in rows %}
-                            <tr>
-                                <td>{{ row.direccion }}</td>
-                                <td>{{ row.localidad }}</td>
-                                <td style="text-align: center;">{{ row.total_equipos }}</td>
-                                <td>{{ row.empresa_mantenedora }}</td>
-                                <td style="{{ row.color_ipo }}">{{ row.ipo_proxima }}</td>
-                                <td style="{{ row.color_contrato }}">{{ row.contrato_vence }}</td>
-                                <td class="acciones-cell">
-                                    <a href="/ver_lead/{{ row.lead_id }}" class="btn btn-success btn-sm">Ver</a>
-                                    <a href="/editar_lead/{{ row.lead_id }}" class="btn btn-primary btn-sm">Editar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
-                                    No se encontraron comunidades con los filtros aplicados
-                                </td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mobile Cards (solo visible en móvil) -->
+            <!-- Listado Ultra-Compacto de Instalaciones -->
             {% if rows %}
-                {% for row in rows %}
-                <div class="mobile-card">
-                    <h3>🏢 {{ row.direccion }}</h3>
-                    <p><strong>📍 Localidad:</strong> {{ row.localidad }}</p>
-                    <p><strong>🔧 Ascensores:</strong> {{ row.total_equipos }}</p>
-                    <p><strong>🏢 Empresa:</strong> {{ row.empresa_mantenedora }}</p>
-                    <p style="{{ row.color_ipo }}"><strong>📅 Próxima IPO:</strong> {{ row.ipo_proxima }}</p>
-                    <p style="{{ row.color_contrato }}"><strong>📄 Contrato vence:</strong> {{ row.contrato_vence }}</p>
-                    <div class="actions">
-                        <a href="/ver_lead/{{ row.lead_id }}" class="btn btn-success btn-sm">Ver</a>
-                        <a href="/editar_lead/{{ row.lead_id }}" class="btn btn-primary btn-sm">Editar</a>
+                <div class="leads-list">
+                    {% for row in rows %}
+                    <div class="lead-list-item">
+                        <a href="/ver_lead/{{ row.lead_id }}" class="lead-list-direccion">
+                            {{ row.direccion }}
+                        </a>
+                        <div class="lead-list-info">
+                            <span class="lead-list-info-item">
+                                <strong>Localidad:</strong> {{ row.localidad }}
+                            </span>
+                            <span class="lead-list-info-item">
+                                <strong>Ascensores:</strong> {{ row.total_equipos }}
+                            </span>
+                            <span class="lead-list-info-item">
+                                <strong>Empresa:</strong> {{ row.empresa_mantenedora }}
+                            </span>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             {% else %}
-                <div class="mobile-card">
-                    <p style="text-align: center; color: #999;">No se encontraron comunidades con los filtros aplicados</p>
+                <div style="text-align: center; padding: 40px; color: #999; background: white; border-radius: 8px; margin-top: 20px;">
+                    No se encontraron comunidades con los filtros aplicados
                 </div>
             {% endif %}
 
-            <div class="leyenda">
-                <h3>Leyenda de Colores:</h3>
-                <div class="leyenda-items">
-                    <div class="leyenda-item">
-                        <span class="color-box color-amarillo"></span>
-                        <span><strong>IPO:</strong> 15 dias antes</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="color-box color-rojo"></span>
-                        <span><strong>IPO:</strong> Pasada hasta 30 dias</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="color-box color-amarillo"></span>
-                        <span><strong>Contrato:</strong> Vence 30-90 dias</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="color-box color-rojo"></span>
-                        <span><strong>Contrato:</strong> Vencido o menos 30 dias</span>
-                    </div>
-                </div>
-            </div>
             
             <div class="paginacion">
                 {% if page > 1 %}
