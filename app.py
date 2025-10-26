@@ -916,13 +916,20 @@ def reporte_mensual():
         )
         
         response_admin = requests.get(f"{SUPABASE_URL}/rest/v1/visitas_administradores?{query_clientes}&select=*", headers=HEADERS)
-        
+
+        # Obtener oportunidades activas (no filtradas por mes)
+        response_oportunidades = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?estado=eq.activa&select=*,clientes(direccion)",
+            headers=HEADERS
+        )
+
         if response_clientes.status_code != 200:
             return f"Error al obtener datos: {response_clientes.text}"
-        
+
         clientes_mes = response_clientes.json()
         visitas_seguimiento_mes = response_seguimiento.json() if response_seguimiento.status_code == 200 else []
         visitas_admin_mes = response_admin.json() if response_admin.status_code == 200 else []
+        oportunidades_activas = response_oportunidades.json() if response_oportunidades.status_code == 200 else []
         
         from openpyxl import Workbook
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -1009,7 +1016,38 @@ def reporte_mensual():
         ws2.column_dimensions['B'].width = 50
         ws2.column_dimensions['C'].width = 30
         ws2.column_dimensions['D'].width = 70
-        
+
+        # Tercera pestaña: OPORTUNIDADES ACTIVAS
+        ws3 = wb.create_sheet(title="OPORTUNIDADES ACTIVAS")
+
+        headers_oportunidades = ['DIRECCION', 'TIPO DE OPORTUNIDAD', 'DESCRIPCION']
+
+        for col, header in enumerate(headers_oportunidades, 1):
+            cell = ws3.cell(row=1, column=col)
+            cell.value = header
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+            cell.alignment = Alignment(horizontal='center')
+            cell.border = thin_border
+
+        row = 2
+        for oportunidad in oportunidades_activas:
+            # Obtener dirección del cliente relacionado
+            direccion = oportunidad.get('clientes', {}).get('direccion', '') if oportunidad.get('clientes') else ''
+
+            ws3.cell(row=row, column=1, value=direccion)
+            ws3.cell(row=row, column=2, value=oportunidad.get('tipo', ''))
+            ws3.cell(row=row, column=3, value=oportunidad.get('descripcion', ''))
+
+            for col in range(1, 4):
+                ws3.cell(row=row, column=col).border = thin_border
+
+            row += 1
+
+        ws3.column_dimensions['A'].width = 50
+        ws3.column_dimensions['B'].width = 30
+        ws3.column_dimensions['C'].width = 70
+
         output = io.BytesIO()
         wb.save(output)
         output.seek(0)
