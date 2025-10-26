@@ -472,6 +472,7 @@ def home():
             ultimas_instalaciones.append({
                 'id': lead['id'],
                 'direccion': lead.get('direccion', 'Sin dirección'),
+                'nombre_cliente': lead.get('nombre_cliente', ''),
                 'localidad': lead.get('localidad', '-'),
                 'num_equipos': num_equipos,
                 'empresa_mantenedora': empresa_mantenedora

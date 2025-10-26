@@ -207,6 +207,7 @@
             display: block;
             transition: color 0.2s ease;
             margin-bottom: 4px;
+            text-align: center;
         }
 
         .recent-item-title:hover {
@@ -361,7 +362,7 @@
                             {% for instalacion in ultimas_instalaciones %}
                                 <div class="recent-item">
                                     <a href="/ver_lead/{{ instalacion.id }}" class="recent-item-title">
-                                        {{ instalacion.direccion }}
+                                        {{ instalacion.direccion }}{% if instalacion.nombre_cliente %} - {{ instalacion.nombre_cliente }}{% endif %}
                                     </a>
                                     <div class="recent-item-info">
                                         <span class="recent-item-info-item">{{ instalacion.localidad }}</span>
