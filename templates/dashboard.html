@@ -209,18 +209,12 @@
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
         .lead-list-info-item {
-            font-size: 10px;
+            font-size: 11px;
             color: #999;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .lead-list-info-item strong {
-            color: #666;
         }
 
         .leyenda {
@@ -295,10 +289,11 @@
             .lead-list-info {
                 flex-direction: column;
                 gap: 4px;
+                align-items: center;
             }
 
             .lead-list-info-item {
-                font-size: 10px;
+                font-size: 11px;
             }
 
             table {
@@ -442,15 +437,9 @@
                             {{ row.direccion }}
                         </a>
                         <div class="lead-list-info">
-                            <span class="lead-list-info-item">
-                                <strong>Localidad:</strong> {{ row.localidad }}
-                            </span>
-                            <span class="lead-list-info-item">
-                                <strong>Ascensores:</strong> {{ row.total_equipos }}
-                            </span>
-                            <span class="lead-list-info-item">
-                                <strong>Empresa:</strong> {{ row.empresa_mantenedora }}
-                            </span>
+                            <span class="lead-list-info-item">{{ row.localidad }}</span>
+                            <span class="lead-list-info-item">{{ row.total_equipos }}</span>
+                            <span class="lead-list-info-item">{{ row.empresa_mantenedora }}</span>
                         </div>
                     </div>
                     {% endfor %}
