@@ -458,16 +458,16 @@ def home():
     if response_ultimas.ok:
         leads_data = response_ultimas.json()
         for lead in leads_data:
-            # Contar equipos de este lead y obtener empresa mantenedora
+            # Contar equipos de este lead
             response_equipos = requests.get(
-                f"{SUPABASE_URL}/rest/v1/equipos?select=id,empresa_mantenedora&cliente_id=eq.{lead['id']}",
+                f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead['id']}",
                 headers=HEADERS
             )
             equipos_data = response_equipos.json() if response_equipos.ok else []
-            num_equipos = len(equipos_data)
+            num_equipos = len(equipos_data) if equipos_data else lead.get('numero_ascensores', 0)
 
-            # Obtener la primera empresa mantenedora (si hay equipos)
-            empresa_mantenedora = equipos_data[0].get('empresa_mantenedora', '-') if equipos_data else '-'
+            # Obtener empresa mantenedora del cliente (no de equipos)
+            empresa_mantenedora = lead.get('empresa_mantenedora', '-')
 
             ultimas_instalaciones.append({
                 'id': lead['id'],
