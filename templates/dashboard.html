@@ -64,8 +64,18 @@
         
         .filtros-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 120px 120px;
+            grid-template-columns: 1fr 1fr 1fr auto auto;
             gap: 10px;
+            align-items: end;
+        }
+
+        .filtros .btn {
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            white-space: nowrap;
         }
         
         .filtro-grupo {
@@ -395,39 +405,19 @@
                             </select>
                         </div>
                         
-                        <button type="submit" class="btn-primary btn-sm">
-                            🔍 Buscar
+                        <button type="submit" class="btn btn-primary">
+                            Filtrar
                         </button>
 
-                        <a href="/leads_dashboard" class="btn btn-secondary btn-sm">
-                            🗑️ Limpiar
+                        <a href="/leads_dashboard" class="btn btn-secondary">
+                            Limpiar
                         </a>
                     </div>
                 </div>
                 
                 <input type="hidden" name="page" value="1">
             </form>
-            
-            <div class="info-resultados">
-                Mostrando {{ rows|length }} registros de {{ total_registros }} totales
-            </div>
-            
-            <div class="paginacion">
-                {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Anterior</a>
-                {% else %}
-                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
-                {% endif %}
 
-                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
-
-                {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Siguiente</a>
-                {% else %}
-                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
-                {% endif %}
-            </div>
-            
             <!-- Listado Ultra-Compacto de Instalaciones -->
             {% if rows %}
                 <div class="leads-list">
@@ -450,7 +440,10 @@
                 </div>
             {% endif %}
 
-            
+            <div class="info-resultados">
+                Mostrando {{ rows|length }} registros de {{ total_registros }} totales
+            </div>
+
             <div class="paginacion">
                 {% if page > 1 %}
                     <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Anterior</a>
