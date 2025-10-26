@@ -172,21 +172,6 @@
             white-space: nowrap;
         }
 
-        .badge-oportunidades {
-            display: inline-block;
-            background: #28a745;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-
-        .badge-oportunidades.cero {
-            background: #6c757d;
-        }
-
         .btn-nuevo {
             background: #28a745;
             color: white;
@@ -373,7 +358,6 @@
                             <th>Localidad</th>
                             <th>Teléfono</th>
                             <th>Email</th>
-                            <th style="text-align: center;">Oport. Activas</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -381,18 +365,10 @@
                         {% if administradores %}
                             {% for admin in administradores %}
                             <tr>
-                                <td>
-                                    {{ admin.nombre_empresa }}
-                                    {% if admin.oportunidades_activas > 0 %}
-                                    <span class="badge-oportunidades">{{ admin.oportunidades_activas }} activa{% if admin.oportunidades_activas > 1 %}s{% endif %}</span>
-                                    {% endif %}
-                                </td>
+                                <td>{{ admin.nombre_empresa }}</td>
                                 <td>{{ admin.localidad }}</td>
                                 <td>{{ admin.telefono }}</td>
                                 <td>{{ admin.email }}</td>
-                                <td style="text-align: center; font-weight: bold; color: {% if admin.oportunidades_activas > 0 %}#28a745{% else %}#999{% endif %};">
-                                    {{ admin.oportunidades_activas }}
-                                </td>
                                 <td class="acciones-cell">
                                     <a href="/ver_administrador/{{ admin.id }}" class="btn-accion btn-ver">Ver</a>
                                     <a href="/editar_administrador/{{ admin.id }}" class="btn-accion">Editar</a>
@@ -401,7 +377,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 40px; color: #999;">
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
                                     No se encontraron administradores con los filtros aplicados
                                 </td>
                             </tr>
