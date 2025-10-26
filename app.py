@@ -448,40 +448,33 @@ def home():
     }
     
     # ========== ÚLTIMAS INSTALACIONES ==========
-    
+
     response_ultimas = requests.get(
         f"{SUPABASE_URL}/rest/v1/clientes?select=*&order=fecha_visita.desc&limit=5",
         headers=HEADERS
     )
-    
+
     ultimas_instalaciones = []
     if response_ultimas.ok:
         leads_data = response_ultimas.json()
         for lead in leads_data:
-            # Contar equipos de este lead
-            response_count = requests.get(
-                f"{SUPABASE_URL}/rest/v1/equipos?select=id&cliente_id=eq.{lead['id']}",
+            # Contar equipos de este lead y obtener empresa mantenedora
+            response_equipos = requests.get(
+                f"{SUPABASE_URL}/rest/v1/equipos?select=id,empresa_mantenedora&cliente_id=eq.{lead['id']}",
                 headers=HEADERS
             )
-            num_equipos = len(response_count.json()) if response_count.ok else 0
-            
-            # Formatear fecha
-            fecha_str = lead.get('fecha_visita', '')
-            if fecha_str:
-                try:
-                    fecha_obj = datetime.strptime(fecha_str.split('T')[0], '%Y-%m-%d')
-                    fecha_formateada = fecha_obj.strftime('%d/%m/%Y')
-                except:
-                    fecha_formateada = fecha_str.split('T')[0]
-            else:
-                fecha_formateada = '-'
-            
+            equipos_data = response_equipos.json() if response_equipos.ok else []
+            num_equipos = len(equipos_data)
+
+            # Obtener la primera empresa mantenedora (si hay equipos)
+            empresa_mantenedora = equipos_data[0].get('empresa_mantenedora', '-') if equipos_data else '-'
+
             ultimas_instalaciones.append({
                 'id': lead['id'],
                 'direccion': lead.get('direccion', 'Sin dirección'),
                 'localidad': lead.get('localidad', '-'),
                 'num_equipos': num_equipos,
-                'fecha_registro': fecha_formateada
+                'empresa_mantenedora': empresa_mantenedora
             })
     
     # ========== ÚLTIMAS OPORTUNIDADES ==========
@@ -494,29 +487,20 @@ def home():
     ultimas_oportunidades = []
     if response_oport.ok:
         for op in response_oport.json():
-            # Obtener nombre del cliente de la relación
+            # Obtener nombre y dirección del cliente de la relación
             cliente_info = op.get('clientes', {})
             if isinstance(cliente_info, list) and len(cliente_info) > 0:
                 cliente_info = cliente_info[0]
-            
+
             nombre_cliente = cliente_info.get('nombre_cliente', 'Sin nombre') if cliente_info else 'Sin nombre'
-            
-            # Formatear importe
-            importe = op.get('valor_estimado', 0)
-            if importe:
-                try:
-                    importe_formateado = f"{float(importe):,.0f}".replace(',', '.')
-                except:
-                    importe_formateado = str(importe)
-            else:
-                importe_formateado = '-'
-            
+            direccion_cliente = cliente_info.get('direccion', 'Sin dirección') if cliente_info else 'Sin dirección'
+
             ultimas_oportunidades.append({
                 'id': op['id'],
                 'nombre_cliente': nombre_cliente,
-                'tipo_oportunidad': op.get('tipo', '-'),
-                'estado': op.get('estado', '-'),
-                'importe_estimado': importe_formateado
+                'direccion': direccion_cliente,
+                'tipo': op.get('tipo', '-'),
+                'estado': op.get('estado', '-')
             })
     
     # ========== PRÓXIMAS IPOs ESTA SEMANA ==========

@@ -262,6 +262,14 @@
             text-align: center;
         }
 
+        .oportunidad-tipo {
+            font-size: 11px;
+            color: #1a1a1a;
+            display: block;
+            margin-top: 2px;
+            text-align: center;
+        }
+
         /* Hacer que los números sean clicables */
         .metric-card .number a {
             color: #366092;
@@ -358,7 +366,7 @@
                                     <div class="recent-item-info">
                                         <span class="recent-item-info-item">{{ instalacion.localidad }}</span>
                                         <span class="recent-item-info-item">Ascensores: {{ instalacion.num_equipos }}</span>
-                                        <span class="recent-item-info-item">Fecha: {{ instalacion.fecha_registro }}</span>
+                                        <span class="recent-item-info-item">{{ instalacion.empresa_mantenedora }}</span>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -377,12 +385,9 @@
                                 <div class="recent-item oportunidad-item">
                                     <div class="oportunidad-info">
                                         <a href="/ver_oportunidad/{{ oportunidad.id }}" class="recent-item-title">
-                                            {{ oportunidad.nombre_cliente }}
+                                            {{ oportunidad.direccion }} - {{ oportunidad.nombre_cliente }}
                                         </a>
-                                        <div class="recent-item-info">
-                                            <span class="recent-item-info-item">{{ oportunidad.tipo_oportunidad }}</span>
-                                            <span class="recent-item-info-item">{{ oportunidad.importe_estimado }}€</span>
-                                        </div>
+                                        <span class="oportunidad-tipo">{{ oportunidad.tipo }}</span>
                                     </div>
                                     <span class="badge {{ oportunidad.estado }}">{{ oportunidad.estado|upper }}</span>
                                 </div>
