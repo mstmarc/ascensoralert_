@@ -1873,7 +1873,7 @@ def administradores_dashboard():
         except (ValueError, TypeError):
             page = 1
 
-        limit = 20  # Reducido de 50 a 20 para mejorar rendimiento
+        limit = 10  # Paginación de 10 administradores por página
         offset = (page - 1) * limit
 
         # Construir URL con filtros
@@ -1892,7 +1892,8 @@ def administradores_dashboard():
         try:
             response = requests.get(url, headers=headers_with_count, timeout=10)
 
-            if response.status_code != 200:
+            # 200 = OK, 206 = Partial Content (respuesta válida con paginación)
+            if response.status_code not in [200, 206]:
                 print(f"Error al cargar administradores: {response.status_code} - {response.text}")
                 flash(f"Error al cargar administradores desde la base de datos (Código: {response.status_code})", "error")
                 # Renderizar con datos vacíos
@@ -2010,7 +2011,8 @@ def administradores_dashboard():
         try:
             response = requests.get(data_url, headers=headers_with_count, timeout=10)
 
-            if response.status_code != 200:
+            # 200 = OK, 206 = Partial Content (respuesta válida con paginación)
+            if response.status_code not in [200, 206]:
                 print(f"Error al cargar visitas: {response.status_code} - {response.text}")
                 flash(f"Error al cargar visitas desde la base de datos (Código: {response.status_code})", "error")
                 # Renderizar con datos vacíos
