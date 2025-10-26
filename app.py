@@ -1887,26 +1887,28 @@ def administradores_dashboard():
         if buscar:
             url += f"&or=(nombre_empresa.ilike.%{buscar}%,localidad.ilike.%{buscar}%,email.ilike.%{buscar}%)"
 
-        # Obtener total de registros
-        count_url = url.replace("select=*", "select=count")
-        count_headers = HEADERS.copy()
-        count_headers["Prefer"] = "count=exact"
-        try:
-            count_response = requests.get(count_url, headers=count_headers, timeout=10)
-            total_registros = int(count_response.headers.get("Content-Range", "0-0/0").split("/")[-1])
-        except Exception as e:
-            print(f"Error al obtener conteo de administradores: {e}")
-            total_registros = 0
-
-        # Obtener registros paginados
+        # Obtener registros paginados con conteo
         url += f"&limit={limit}&offset={offset}"
+
+        # Headers para obtener el conteo total
+        headers_with_count = HEADERS.copy()
+        headers_with_count["Prefer"] = "count=exact"
+
         try:
-            response = requests.get(url, headers=HEADERS, timeout=10)
+            response = requests.get(url, headers=headers_with_count, timeout=10)
         except Exception as e:
             return f"Error de timeout al cargar administradores: {e}", 500
 
         if response.status_code != 200:
             return f"Error al cargar administradores: {response.text}", 500
+
+        # Obtener total de registros del header Content-Range
+        try:
+            content_range = response.headers.get("Content-Range", "*/0")
+            total_registros = int(content_range.split("/")[-1])
+        except Exception as e:
+            print(f"Error al parsear Content-Range: {e}")
+            total_registros = 0
 
         administradores = response.json()
 
@@ -1989,26 +1991,30 @@ def administradores_dashboard():
         per_page = 25
         offset = (page - 1) * per_page
 
-        # Obtener total de registros
-        count_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=*"
-        try:
-            count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"}, timeout=10)
-            total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
-        except Exception as e:
-            print(f"Error al obtener conteo de visitas: {e}")
-            total_registros = 0
-
-        total_pages = max(1, (total_registros + per_page - 1) // per_page)
-
-        # Obtener registros paginados con JOIN a administradores
+        # Obtener registros paginados con JOIN a administradores y conteo
         data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=*,administradores(nombre_empresa)&order=fecha_visita.desc&limit={per_page}&offset={offset}"
+
+        # Headers para obtener el conteo total
+        headers_with_count = HEADERS.copy()
+        headers_with_count["Prefer"] = "count=exact"
+
         try:
-            response = requests.get(data_url, headers=HEADERS, timeout=10)
+            response = requests.get(data_url, headers=headers_with_count, timeout=10)
         except Exception as e:
             return f"Error de timeout al cargar visitas: {e}", 500
 
         if response.status_code != 200:
             return f"Error al cargar visitas: {response.text}", 500
+
+        # Obtener total de registros del header Content-Range
+        try:
+            content_range = response.headers.get("Content-Range", "*/0")
+            total_registros = int(content_range.split("/")[-1])
+        except Exception as e:
+            print(f"Error al parsear Content-Range: {e}")
+            total_registros = 0
+
+        total_pages = max(1, (total_registros + per_page - 1) // per_page)
 
         visitas = response.json()
         visitas = [limpiar_none(v) for v in visitas]
