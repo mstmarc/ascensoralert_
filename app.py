@@ -1279,12 +1279,23 @@ def ver_lead(lead_id):
     visitas_seguimiento = []
     if visitas_response.status_code == 200:
         visitas_seguimiento = visitas_response.json()
-    
-    return render_template("ver_lead.html", 
-        lead=lead, 
-        equipos=equipos, 
+
+    # Obtener datos del administrador si existe relación
+    administrador = None
+    if lead.get('administrador_id'):
+        admin_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/administradores?id=eq.{lead['administrador_id']}",
+            headers=HEADERS
+        )
+        if admin_response.status_code == 200 and admin_response.json():
+            administrador = admin_response.json()[0]
+
+    return render_template("ver_lead.html",
+        lead=lead,
+        equipos=equipos,
         oportunidades=oportunidades,
-        visitas_seguimiento=visitas_seguimiento
+        visitas_seguimiento=visitas_seguimiento,
+        administrador=administrador
     )
 
 # Eliminar Lead

@@ -49,8 +49,21 @@
         .visita-fecha { font-weight: bold; color: #366092; margin-bottom: 5px; }
         .visita-observaciones { color: #555; font-size: 14px; }
         .visita-oportunidad { color: #666; font-size: 12px; font-style: italic; margin-top: 5px; }
-        
-        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } .seccion-header { flex-direction: column; align-items: flex-start; gap: 10px; } }
+
+        /* Estilos para la nueva estructura vertical de información */
+        .info-section { margin-bottom: 20px; padding: 15px; background: #ffffff; border-left: 4px solid #366092; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .section-subtitle { color: #366092; font-size: 16px; font-weight: bold; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #e1e5e9; }
+        .info-row { display: flex; flex-wrap: wrap; gap: 12px; }
+        .info-item-full { flex: 1 1 100%; padding: 8px 12px; background: #f8f9fa; border-radius: 4px; }
+        .info-item-inline { flex: 1 1 calc(50% - 6px); padding: 8px 12px; background: #f8f9fa; border-radius: 4px; min-width: 200px; }
+        .info-item-full label, .info-item-inline label { font-weight: bold; color: #366092; display: inline-block; margin-right: 8px; font-size: 14px; }
+        .info-item-full span, .info-item-inline span { color: #333; font-size: 15px; }
+        .admin-link { color: #366092; text-decoration: none; font-weight: 600; font-size: 15px; padding: 4px 8px; border-radius: 4px; transition: all 0.3s ease; display: inline-block; }
+        .admin-link:hover { background: #366092; color: white; transform: translateX(5px); }
+        .observaciones-box { background: #f8f9fa; padding: 15px; min-height: 60px; border: 1px solid #ddd; }
+        .observaciones-box p { margin: 0; color: #555; line-height: 1.6; }
+
+        @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } .seccion-header { flex-direction: column; align-items: flex-start; gap: 10px; } .info-item-inline { flex: 1 1 100%; } }
     </style>
 </head>
 <body>
@@ -84,31 +97,107 @@
                 <!-- INFORMACIÓN DE LA COMUNIDAD -->
                 <div class="seccion">
                     <h2>Informacion de la Comunidad</h2>
-                    <div class="info-grid">
-                        <div class="info-item"><label>Direccion:</label><span>{{ lead.direccion or '-' }}</span></div>
-                        <div class="info-item"><label>Nombre:</label><span>{{ lead.nombre_cliente or '-' }}</span></div>
-                        <div class="info-item"><label>Tipo:</label><span>{{ lead.tipo_cliente or '-' }}</span></div>
-                        <div class="info-item"><label>Localidad:</label><span>{{ lead.localidad or '-' }}</span></div>
-                        <div class="info-item"><label>Codigo Postal:</label><span>{{ lead.codigo_postal or '-' }}</span></div>
-                        <div class="info-item"><label>Zona:</label><span>{{ lead.zona or '-' }}</span></div>
-                        <div class="info-item"><label>Fecha de Visita:</label><span>{{ lead.fecha_visita or '-' }}</span></div>
-                        <div class="info-item"><label>Num Ascensores Previsto:</label><span>{{ lead.numero_ascensores or '-' }}</span></div>
+
+                    <!-- 1. UBICACIÓN -->
+                    <div class="info-section">
+                        <h3 class="section-subtitle">Ubicacion</h3>
+                        <div class="info-row">
+                            <div class="info-item-full">
+                                <label>Nombre:</label>
+                                <span>{{ lead.nombre_cliente or '-' }}</span>
+                            </div>
+                            <div class="info-item-full">
+                                <label>Direccion:</label>
+                                <span>{{ lead.direccion or '-' }}</span>
+                            </div>
+                            <div class="info-item-inline">
+                                <label>Poblacion:</label>
+                                <span>{{ lead.localidad or '-' }}</span>
+                            </div>
+                            <div class="info-item-inline">
+                                <label>Codigo Postal:</label>
+                                <span>{{ lead.codigo_postal or '-' }}</span>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="info-grid">
-                        <div class="info-item"><label>Persona de Contacto:</label><span>{{ lead.persona_contacto or '-' }}</span></div>
-                        <div class="info-item"><label>Telefono:</label><span>{{ lead.telefono or '-' }}</span></div>
-                        <div class="info-item"><label>Email:</label><span>{{ lead.email or '-' }}</span></div>
-                        <div class="info-item"><label>Administrador de Fincas:</label><span>{{ lead.administrador_fincas or '-' }}</span></div>
-                        <div class="info-item"><label>Empresa Mantenedora Actual:</label><span>{{ lead.empresa_mantenedora or '-' }}</span></div>
+
+                    <!-- 2. CARACTERÍSTICAS -->
+                    <div class="info-section">
+                        <h3 class="section-subtitle">Caracteristicas</h3>
+                        <div class="info-row">
+                            <div class="info-item-inline">
+                                <label>Tipo:</label>
+                                <span>{{ lead.tipo_cliente or '-' }}</span>
+                            </div>
+                            <div class="info-item-inline">
+                                <label>Numero de Ascensores:</label>
+                                <span>{{ lead.numero_ascensores or '-' }}</span>
+                            </div>
+                            <div class="info-item-full">
+                                <label>Empresa Mantenedora Actual:</label>
+                                <span>{{ lead.empresa_mantenedora or '-' }}</span>
+                            </div>
+                        </div>
                     </div>
-                    
-                    {% if lead.observaciones %}
-                    <div class="info-item" style="grid-column: 1/-1;">
-                        <label>Observaciones:</label>
-                        <span>{{ lead.observaciones }}</span>
+
+                    <!-- 3. ADMINISTRADOR DE FINCAS -->
+                    <div class="info-section">
+                        <h3 class="section-subtitle">Administrador de Fincas</h3>
+                        <div class="info-row">
+                            <div class="info-item-full">
+                                <label>Administrador:</label>
+                                {% if administrador %}
+                                    <a href="/ver_administrador/{{ administrador.id }}" class="admin-link">
+                                        {{ administrador.nombre_empresa }}
+                                    </a>
+                                {% elif lead.administrador_fincas %}
+                                    <span>{{ lead.administrador_fincas }}</span>
+                                {% else %}
+                                    <span>-</span>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                    {% endif %}
+
+                    <!-- 4. DATOS DE CONTACTO -->
+                    <div class="info-section">
+                        <h3 class="section-subtitle">Datos de Contacto</h3>
+                        <div class="info-row">
+                            <div class="info-item-full">
+                                <label>Persona de Contacto:</label>
+                                <span>{{ lead.persona_contacto or '-' }}</span>
+                            </div>
+                            <div class="info-item-inline">
+                                <label>Telefono:</label>
+                                <span>{{ lead.telefono or '-' }}</span>
+                            </div>
+                            <div class="info-item-inline">
+                                <label>Email:</label>
+                                <span>{{ lead.email or '-' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. OBSERVACIONES -->
+                    <div class="info-section">
+                        <h3 class="section-subtitle">Observaciones</h3>
+                        <div class="info-row">
+                            <div class="info-item-full observaciones-box">
+                                <p>{{ lead.observaciones or 'Sin observaciones' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. FECHA DE VISITA -->
+                    <div class="info-section">
+                        <h3 class="section-subtitle">Fecha de Visita</h3>
+                        <div class="info-row">
+                            <div class="info-item-full">
+                                <label>Primera Visita:</label>
+                                <span>{{ lead.fecha_visita or '-' }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- OPORTUNIDADES COMERCIALES -->
