@@ -322,31 +322,47 @@
                     <h2>Clientes Asociados ({{ clientes|length }})</h2>
 
                     {% if clientes %}
-                    <table class="clientes-tabla">
-                        <thead>
-                            <tr>
-                                <th>Dirección</th>
-                                <th>Localidad</th>
-                                <th>Contacto</th>
-                                <th>Teléfono</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cliente in clientes %}
-                            <tr>
-                                <td>{{ cliente.direccion }}</td>
-                                <td>{{ cliente.localidad }}</td>
-                                <td>{{ cliente.persona_contacto or '-' }}</td>
-                                <td>{{ cliente.telefono or '-' }}</td>
-                                <td style="white-space: nowrap;">
-                                    <a href="/ver_lead/{{ cliente.id }}" class="btn btn-success btn-sm">Ver</a>
-                                    <a href="/editar_lead/{{ cliente.id }}" class="btn btn-primary btn-sm">Editar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="clientes-tabla">
+                            <thead>
+                                <tr>
+                                    <th>Dirección</th>
+                                    <th>Localidad</th>
+                                    <th>Contacto</th>
+                                    <th>Teléfono</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cliente in clientes %}
+                                <tr>
+                                    <td>{{ cliente.direccion }}</td>
+                                    <td>{{ cliente.localidad }}</td>
+                                    <td>{{ cliente.persona_contacto or '-' }}</td>
+                                    <td>{{ cliente.telefono or '-' }}</td>
+                                    <td style="white-space: nowrap;">
+                                        <a href="/ver_lead/{{ cliente.id }}" class="btn btn-success btn-sm">Ver</a>
+                                        <a href="/editar_lead/{{ cliente.id }}" class="btn btn-primary btn-sm">Editar</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Cards (solo visible en móvil) -->
+                    {% for cliente in clientes %}
+                    <div class="mobile-card">
+                        <h3>🏢 {{ cliente.direccion }}</h3>
+                        <p><strong>📍 Localidad:</strong> {{ cliente.localidad }}</p>
+                        <p><strong>👤 Contacto:</strong> {{ cliente.persona_contacto or '-' }}</p>
+                        <p><strong>📞 Teléfono:</strong> {{ cliente.telefono or '-' }}</p>
+                        <div class="actions">
+                            <a href="/ver_lead/{{ cliente.id }}" class="btn btn-success btn-sm">Ver</a>
+                            <a href="/editar_lead/{{ cliente.id }}" class="btn btn-primary btn-sm">Editar</a>
+                        </div>
+                    </div>
+                    {% endfor %}
                     {% else %}
                     <div class="no-clientes">
                         No hay clientes asociados a este administrador

@@ -180,34 +180,53 @@
                     </div>
                     
                     {% if equipos %}
-                    <table class="equipos-tabla">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Identificacion</th>
-                                <th>RAE</th>
-                                <th>Proxima IPO</th>
-                                <th>Contrato Vence</th>
-                                <th>Observaciones</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for equipo in equipos %}
-                            <tr>
-                                <td>{{ equipo.tipo_equipo }}</td>
-                                <td>{{ equipo.identificacion }}</td>
-                                <td>{{ equipo.rae }}</td>
-                                <td>{{ equipo.ipo_proxima }}</td>
-                                <td>{{ equipo.fecha_vencimiento_contrato }}</td>
-                                <td>{{ equipo.descripcion }}</td>
-                                <td style="white-space: nowrap;">
-                                    <a href="/editar_equipo/{{ equipo.id }}" class="btn btn-primary btn-sm">Editar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="equipos-tabla">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Identificacion</th>
+                                    <th>RAE</th>
+                                    <th>Proxima IPO</th>
+                                    <th>Contrato Vence</th>
+                                    <th>Observaciones</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipo in equipos %}
+                                <tr>
+                                    <td>{{ equipo.tipo_equipo }}</td>
+                                    <td>{{ equipo.identificacion }}</td>
+                                    <td>{{ equipo.rae }}</td>
+                                    <td>{{ equipo.ipo_proxima }}</td>
+                                    <td>{{ equipo.fecha_vencimiento_contrato }}</td>
+                                    <td>{{ equipo.descripcion }}</td>
+                                    <td style="white-space: nowrap;">
+                                        <a href="/editar_equipo/{{ equipo.id }}" class="btn btn-primary btn-sm">Editar</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Cards (solo visible en móvil) -->
+                    {% for equipo in equipos %}
+                    <div class="mobile-card">
+                        <h3>🔧 {{ equipo.tipo_equipo }}</h3>
+                        <p><strong>🔢 Identificación:</strong> {{ equipo.identificacion }}</p>
+                        <p><strong>📋 RAE:</strong> {{ equipo.rae or '-' }}</p>
+                        <p><strong>📅 Próxima IPO:</strong> {{ equipo.ipo_proxima or '-' }}</p>
+                        <p><strong>📄 Contrato vence:</strong> {{ equipo.fecha_vencimiento_contrato or '-' }}</p>
+                        {% if equipo.descripcion %}
+                        <p><strong>📝 Observaciones:</strong> {{ equipo.descripcion }}</p>
+                        {% endif %}
+                        <div class="actions">
+                            <a href="/editar_equipo/{{ equipo.id }}" class="btn btn-primary btn-sm">Editar</a>
+                        </div>
+                    </div>
+                    {% endfor %}
                     {% else %}
                     <div class="no-equipos no-equipos-con-boton">
                         <p style="margin: 0;">🔧 Esta instalación aún no tiene equipos registrados</p>

@@ -243,16 +243,37 @@
                     {% endif %}
                 </tbody>
             </table>
-            
+
+            <!-- Mobile Cards (solo visible en móvil) -->
+            {% if visitas %}
+                {% for visita in visitas %}
+                <div class="mobile-card">
+                    <h3>📅 {{ visita.fecha_visita }}</h3>
+                    <p><strong>🏢 Administrador:</strong> {{ visita.administrador_fincas }}</p>
+                    {% if visita.observaciones %}
+                    <p><strong>📝 Observaciones:</strong> {{ visita.observaciones }}</p>
+                    {% endif %}
+                    <div class="actions">
+                        <a href="/ver_visita_admin/{{ visita.id }}" class="btn btn-success btn-sm">Ver</a>
+                        <a href="/editar_visita_admin/{{ visita.id }}" class="btn btn-primary btn-sm">Editar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="mobile-card">
+                    <p style="text-align: center; color: #999;">No se encontraron visitas registradas</p>
+                </div>
+            {% endif %}
+
             <div class="paginacion">
                 {% if page > 1 %}
                     <a href="?page={{ page - 1 }}" class="btn btn-primary btn-sm">Anterior</a>
                 {% else %}
                     <button class="btn btn-primary btn-sm" disabled>Anterior</button>
                 {% endif %}
-                
-                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
-                
+
+                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+
                 {% if page < total_pages %}
                     <a href="?page={{ page + 1 }}" class="btn btn-primary btn-sm">Siguiente</a>
                 {% else %}

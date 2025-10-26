@@ -292,6 +292,26 @@
                 </table>
             </div>
 
+            <!-- Mobile Cards para administradores (solo visible en móvil) -->
+            {% if administradores %}
+                {% for admin in administradores %}
+                <div class="mobile-card">
+                    <h3>🏢 {{ admin.nombre_empresa }}</h3>
+                    <p><strong>📍 Localidad:</strong> {{ admin.localidad }}</p>
+                    <p><strong>📞 Teléfono:</strong> {{ admin.telefono }}</p>
+                    <p><strong>✉️ Email:</strong> {{ admin.email }}</p>
+                    <div class="actions">
+                        <a href="/ver_administrador/{{ admin.id }}" class="btn btn-success btn-sm">Ver</a>
+                        <a href="/editar_administrador/{{ admin.id }}" class="btn btn-primary btn-sm">Editar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="mobile-card">
+                    <p style="text-align: center; color: #999;">No se encontraron administradores con los filtros aplicados</p>
+                </div>
+            {% endif %}
+
             <div class="paginacion">
                 {% if page > 1 %}
                     <a href="?tab=administradores&page={{ page - 1 }}&buscar={{ buscar }}" class="btn btn-primary btn-sm">Anterior</a>
@@ -373,6 +393,34 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Cards para visitas (solo visible en móvil) -->
+            {% if visitas %}
+                {% for visita in visitas %}
+                <div class="mobile-card">
+                    <h3>📅 {{ visita.fecha_visita }}</h3>
+                    <p><strong>🏢 Administrador:</strong>
+                        {% if visita.administradores %}
+                            {{ visita.administradores.nombre_empresa }}
+                        {% else %}
+                            {{ visita.administrador_fincas or '-' }}
+                        {% endif %}
+                    </p>
+                    <p><strong>👤 Contacto:</strong> {{ visita.persona_contacto or '-' }}</p>
+                    {% if visita.observaciones %}
+                    <p><strong>📝 Observaciones:</strong> {{ visita.observaciones }}</p>
+                    {% endif %}
+                    <div class="actions">
+                        <a href="/ver_visita_admin/{{ visita.id }}" class="btn btn-success btn-sm">Ver</a>
+                        <a href="/editar_visita_admin/{{ visita.id }}" class="btn btn-primary btn-sm">Editar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="mobile-card">
+                    <p style="text-align: center; color: #999;">No se encontraron visitas a administradores</p>
+                </div>
+            {% endif %}
 
             <div class="paginacion">
                 {% if page > 1 %}

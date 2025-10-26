@@ -398,7 +398,29 @@
                     </tbody>
                 </table>
             </div>
-            
+
+            <!-- Mobile Cards (solo visible en móvil) -->
+            {% if rows %}
+                {% for row in rows %}
+                <div class="mobile-card">
+                    <h3>🏢 {{ row.direccion }}</h3>
+                    <p><strong>📍 Localidad:</strong> {{ row.localidad }}</p>
+                    <p><strong>🔧 Ascensores:</strong> {{ row.total_equipos }}</p>
+                    <p><strong>🏢 Empresa:</strong> {{ row.empresa_mantenedora }}</p>
+                    <p style="{{ row.color_ipo }}"><strong>📅 Próxima IPO:</strong> {{ row.ipo_proxima }}</p>
+                    <p style="{{ row.color_contrato }}"><strong>📄 Contrato vence:</strong> {{ row.contrato_vence }}</p>
+                    <div class="actions">
+                        <a href="/ver_lead/{{ row.lead_id }}" class="btn btn-success btn-sm">Ver</a>
+                        <a href="/editar_lead/{{ row.lead_id }}" class="btn btn-primary btn-sm">Editar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="mobile-card">
+                    <p style="text-align: center; color: #999;">No se encontraron comunidades con los filtros aplicados</p>
+                </div>
+            {% endif %}
+
             <div class="leyenda">
                 <h3>Leyenda de Colores:</h3>
                 <div class="leyenda-items">
