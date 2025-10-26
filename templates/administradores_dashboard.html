@@ -139,59 +139,63 @@
             border-color: #f8f9fa;
         }
 
-        /* GRID DE CARDS - DISEÑO MINIMALISTA */
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+        /* LISTADO MINIMALISTA */
+        .admin-list {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
             margin-top: 20px;
         }
 
-        .admin-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid #e1e5e9;
+        .admin-list-item {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
         }
 
-        .admin-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(54, 96, 146, 0.15);
-            border-color: #366092;
+        .admin-list-item:last-child {
+            border-bottom: none;
         }
 
-        .admin-card-title {
-            font-size: 18px;
-            font-weight: 700;
+        .admin-list-item:hover {
+            background: #f8f9fa;
+            padding-left: 28px;
+        }
+
+        .admin-list-item-content {
+            flex: 1;
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .admin-list-name {
+            font-size: 16px;
+            font-weight: 600;
             color: #366092;
-            margin: 0;
             text-decoration: none;
-            transition: color 0.3s ease;
-            line-height: 1.3;
+            transition: color 0.2s ease;
         }
 
-        .admin-card-title:hover {
+        .admin-list-name:hover {
             color: #2a4a70;
             text-decoration: underline;
         }
 
-        .admin-card-location {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .admin-list-location {
             font-size: 14px;
             color: #666;
-            margin-top: 4px;
         }
 
-        .admin-card-location::before {
-            content: "📍";
-            font-size: 16px;
+        .admin-list-location::before {
+            content: "•";
+            margin-right: 8px;
+            color: #ccc;
         }
 
         .no-results {
@@ -200,8 +204,7 @@
             color: #999;
             font-size: 16px;
             background: white;
-            border-radius: 12px;
-            border: 2px dashed #e1e5e9;
+            border-radius: 8px;
         }
 
         /* ESTILOS MOBILE-CARD (mantener para vista de visitas) */
@@ -404,10 +407,24 @@
         }
 
         @media (max-width: 767px) {
-            /* Ajustar grid de cards en móvil */
-            .admin-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
+            /* Ajustar listado en móvil */
+            .admin-list-item {
+                padding: 16px 20px;
+            }
+
+            .admin-list-item:hover {
+                padding-left: 24px;
+            }
+
+            .admin-list-item-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .admin-list-location::before {
+                content: "📍";
+                margin-right: 6px;
             }
 
             /* Ocultar tabla en móvil (para pestaña visitas) */
@@ -542,16 +559,18 @@
                 {% endif %}
             </div>
 
-            <!-- Grid de Cards Minimalista -->
+            <!-- Listado Minimalista -->
             {% if administradores %}
-                <div class="admin-grid">
+                <div class="admin-list">
                     {% for admin in administradores %}
-                    <div class="admin-card">
-                        <a href="/ver_administrador/{{ admin.id }}" class="admin-card-title">
-                            {{ admin.nombre_empresa }}
-                        </a>
-                        <div class="admin-card-location">
-                            {{ admin.localidad or 'Sin localidad' }}
+                    <div class="admin-list-item">
+                        <div class="admin-list-item-content">
+                            <a href="/ver_administrador/{{ admin.id }}" class="admin-list-name">
+                                {{ admin.nombre_empresa }}
+                            </a>
+                            <span class="admin-list-location">
+                                {{ admin.localidad or 'Sin localidad' }}
+                            </span>
                         </div>
                     </div>
                     {% endfor %}
