@@ -197,10 +197,10 @@
 
                 <!-- BLOQUE 2: VER/LISTAR -->
                 <a href="/leads_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Ver Instalaciones
+                    Instalaciones
                 </a>
                 <a href="/oportunidades" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Ver Oportunidades
+                    Oportunidades
                 </a>
                 <a href="/administradores_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Administradores
