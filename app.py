@@ -1887,11 +1887,34 @@ def administradores_dashboard():
 
         try:
             response = requests.get(url, headers=headers_with_count, timeout=10)
-        except Exception as e:
-            return f"Error de timeout al cargar administradores: {e}", 500
 
-        if response.status_code != 200:
-            return f"Error al cargar administradores: {response.text}", 500
+            if response.status_code != 200:
+                print(f"Error al cargar administradores: {response.status_code} - {response.text}")
+                flash(f"Error al cargar administradores desde la base de datos", "error")
+                # Renderizar con datos vacíos
+                return render_template(
+                    "administradores_dashboard.html",
+                    tab=tab,
+                    administradores=[],
+                    buscar=buscar,
+                    page=1,
+                    total_pages=1,
+                    total_registros=0
+                )
+
+        except Exception as e:
+            print(f"Error de timeout al cargar administradores: {e}")
+            flash(f"Error de conexión al cargar administradores. Por favor, intente nuevamente.", "error")
+            # Renderizar con datos vacíos
+            return render_template(
+                "administradores_dashboard.html",
+                tab=tab,
+                administradores=[],
+                buscar=buscar,
+                page=1,
+                total_pages=1,
+                total_registros=0
+            )
 
         # Obtener total de registros del header Content-Range
         try:
@@ -1937,11 +1960,32 @@ def administradores_dashboard():
 
         try:
             response = requests.get(data_url, headers=headers_with_count, timeout=10)
-        except Exception as e:
-            return f"Error de timeout al cargar visitas: {e}", 500
 
-        if response.status_code != 200:
-            return f"Error al cargar visitas: {response.text}", 500
+            if response.status_code != 200:
+                print(f"Error al cargar visitas: {response.status_code} - {response.text}")
+                flash(f"Error al cargar visitas desde la base de datos", "error")
+                # Renderizar con datos vacíos
+                return render_template(
+                    "administradores_dashboard.html",
+                    tab=tab,
+                    visitas=[],
+                    page=1,
+                    total_pages=1,
+                    total_registros=0
+                )
+
+        except Exception as e:
+            print(f"Error de timeout al cargar visitas: {e}")
+            flash(f"Error de conexión al cargar visitas. Por favor, intente nuevamente.", "error")
+            # Renderizar con datos vacíos
+            return render_template(
+                "administradores_dashboard.html",
+                tab=tab,
+                visitas=[],
+                page=1,
+                total_pages=1,
+                total_registros=0
+            )
 
         # Obtener total de registros del header Content-Range
         try:
