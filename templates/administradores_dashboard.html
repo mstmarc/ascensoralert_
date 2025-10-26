@@ -30,29 +30,6 @@
             font-size: 14px;
         }
 
-        .btn-paginacion {
-            background: #366092;
-            color: white;
-            padding: 8px 16px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-        }
-
-        .btn-paginacion:hover:not(:disabled) {
-            background: #2a4a70;
-            transform: translateY(-2px);
-        }
-
-        .btn-paginacion:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
 
         .info-resultados {
             text-align: center;
@@ -110,29 +87,6 @@
             background: #e9ecef;
         }
 
-        .btn-accion {
-            background: #366092;
-            color: white;
-            padding: 6px 10px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 12px;
-            display: inline-block;
-            transition: all 0.3s;
-            margin: 2px;
-        }
-
-        .btn-accion:hover {
-            background: #2a4a70;
-        }
-
-        .btn-ver {
-            background: #28a745;
-        }
-
-        .btn-ver:hover {
-            background: #218838;
-        }
 
         .acciones-cell {
             white-space: nowrap;
@@ -288,17 +242,17 @@
 
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&buscar={{ buscar }}" class="btn-paginacion">Anterior</a>
+                    <a href="?page={{ page - 1 }}&buscar={{ buscar }}" class="btn btn-primary btn-sm">Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Anterior</button>
+                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
                 {% endif %}
 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&buscar={{ buscar }}" class="btn-paginacion">Siguiente</a>
+                    <a href="?page={{ page + 1 }}&buscar={{ buscar }}" class="btn btn-primary btn-sm">Siguiente</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente</button>
+                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
                 {% endif %}
             </div>
 
@@ -322,8 +276,8 @@
                                 <td>{{ admin.telefono }}</td>
                                 <td>{{ admin.email }}</td>
                                 <td class="acciones-cell">
-                                    <a href="/ver_administrador/{{ admin.id }}" class="btn-accion btn-ver">Ver</a>
-                                    <a href="/editar_administrador/{{ admin.id }}" class="btn-accion">Editar</a>
+                                    <a href="/ver_administrador/{{ admin.id }}" class="btn btn-success btn-sm">Ver</a>
+                                    <a href="/editar_administrador/{{ admin.id }}" class="btn btn-primary btn-sm">Editar</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -338,19 +292,39 @@
                 </table>
             </div>
 
+            <!-- Mobile Cards para administradores (solo visible en móvil) -->
+            {% if administradores %}
+                {% for admin in administradores %}
+                <div class="mobile-card">
+                    <h3>🏢 {{ admin.nombre_empresa }}</h3>
+                    <p><strong>📍 Localidad:</strong> {{ admin.localidad }}</p>
+                    <p><strong>📞 Teléfono:</strong> {{ admin.telefono }}</p>
+                    <p><strong>✉️ Email:</strong> {{ admin.email }}</p>
+                    <div class="actions">
+                        <a href="/ver_administrador/{{ admin.id }}" class="btn btn-success btn-sm">Ver</a>
+                        <a href="/editar_administrador/{{ admin.id }}" class="btn btn-primary btn-sm">Editar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="mobile-card">
+                    <p style="text-align: center; color: #999;">No se encontraron administradores con los filtros aplicados</p>
+                </div>
+            {% endif %}
+
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?tab=administradores&page={{ page - 1 }}&buscar={{ buscar }}" class="btn-paginacion">Anterior</a>
+                    <a href="?tab=administradores&page={{ page - 1 }}&buscar={{ buscar }}" class="btn btn-primary btn-sm">Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Anterior</button>
+                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
                 {% endif %}
 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
 
                 {% if page < total_pages %}
-                    <a href="?tab=administradores&page={{ page + 1 }}&buscar={{ buscar }}" class="btn-paginacion">Siguiente</a>
+                    <a href="?tab=administradores&page={{ page + 1 }}&buscar={{ buscar }}" class="btn btn-primary btn-sm">Siguiente</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente</button>
+                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
                 {% endif %}
             </div>
 
@@ -362,17 +336,17 @@
 
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?tab=visitas&page={{ page - 1 }}" class="btn-paginacion">Anterior</a>
+                    <a href="?tab=visitas&page={{ page - 1 }}" class="btn btn-primary btn-sm">Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Anterior</button>
+                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
                 {% endif %}
 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
 
                 {% if page < total_pages %}
-                    <a href="?tab=visitas&page={{ page + 1 }}" class="btn-paginacion">Siguiente</a>
+                    <a href="?tab=visitas&page={{ page + 1 }}" class="btn btn-primary btn-sm">Siguiente</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente</button>
+                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
                 {% endif %}
             </div>
 
@@ -404,8 +378,8 @@
                                     {{ visita.observaciones or '-' }}
                                 </td>
                                 <td class="acciones-cell">
-                                    <a href="/ver_visita_admin/{{ visita.id }}" class="btn-accion btn-ver">Ver</a>
-                                    <a href="/editar_visita_admin/{{ visita.id }}" class="btn-accion">Editar</a>
+                                    <a href="/ver_visita_admin/{{ visita.id }}" class="btn btn-success btn-sm">Ver</a>
+                                    <a href="/editar_visita_admin/{{ visita.id }}" class="btn btn-primary btn-sm">Editar</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -420,19 +394,47 @@
                 </table>
             </div>
 
+            <!-- Mobile Cards para visitas (solo visible en móvil) -->
+            {% if visitas %}
+                {% for visita in visitas %}
+                <div class="mobile-card">
+                    <h3>📅 {{ visita.fecha_visita }}</h3>
+                    <p><strong>🏢 Administrador:</strong>
+                        {% if visita.administradores %}
+                            {{ visita.administradores.nombre_empresa }}
+                        {% else %}
+                            {{ visita.administrador_fincas or '-' }}
+                        {% endif %}
+                    </p>
+                    <p><strong>👤 Contacto:</strong> {{ visita.persona_contacto or '-' }}</p>
+                    {% if visita.observaciones %}
+                    <p><strong>📝 Observaciones:</strong> {{ visita.observaciones }}</p>
+                    {% endif %}
+                    <div class="actions">
+                        <a href="/ver_visita_admin/{{ visita.id }}" class="btn btn-success btn-sm">Ver</a>
+                        <a href="/editar_visita_admin/{{ visita.id }}" class="btn btn-primary btn-sm">Editar</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="mobile-card">
+                    <p style="text-align: center; color: #999;">No se encontraron visitas a administradores</p>
+                </div>
+            {% endif %}
+
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?tab=visitas&page={{ page - 1 }}" class="btn-paginacion">Anterior</a>
+                    <a href="?tab=visitas&page={{ page - 1 }}" class="btn btn-primary btn-sm">Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Anterior</button>
+                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
                 {% endif %}
 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
 
                 {% if page < total_pages %}
-                    <a href="?tab=visitas&page={{ page + 1 }}" class="btn-paginacion">Siguiente</a>
+                    <a href="?tab=visitas&page={{ page + 1 }}" class="btn btn-primary btn-sm">Siguiente</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente</button>
+                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
                 {% endif %}
             </div>
 

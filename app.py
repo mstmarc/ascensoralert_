@@ -372,20 +372,11 @@ def logout():
 # Home - ACTUALIZADO: Dashboard en desktop, menú simple en móvil
 @app.route("/home")
 def home():
-    """Homepage - Dashboard en desktop, menú simple en móvil"""
+    """Homepage - Dashboard responsive para todos los dispositivos"""
     if "usuario" not in session:
         return redirect("/")
-    
-    # Detectar si es móvil
-    user_agent = request.headers.get('User-Agent', '').lower()
-    is_mobile = any(x in user_agent for x in ['mobile', 'android', 'iphone', 'ipod', 'blackberry', 'windows phone'])
-    
-    # Si es móvil, mostrar homepage antigua (menú simple)
-    if is_mobile:
-        usuario = session.get('usuario', 'Usuario')
-        return render_template('home_mobile.html', usuario=usuario)
-    
-    # Desktop: Dashboard completo
+
+    # Dashboard responsive (funciona en desktop, tablet y móvil)
     
     # ========== MÉTRICAS ==========
     

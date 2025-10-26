@@ -182,19 +182,6 @@
             color: #999;
         }
 
-        .accion-delete {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .accion-delete:hover {
-            background: #c82333;
-        }
 
         .add-accion-form {
             display: flex;
@@ -250,21 +237,6 @@
             border-color: #366092;
         }
 
-        .save-notas-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .save-notas-btn:hover {
-            background: #218838;
-        }
 
         .visitas-list {
             list-style: none;
@@ -303,23 +275,6 @@
             margin-top: 5px;
         }
 
-        .btn-registrar-visita {
-            display: inline-block;
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-registrar-visita:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
-        }
 
         .oportunidad-footer {
             background: #f8f9fa;
@@ -336,37 +291,6 @@
             flex-wrap: wrap;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
 
         .alert {
             padding: 12px 20px;
@@ -507,7 +431,7 @@
                                     {{ accion.texto }}
                                 </span>
                                 <form method="POST" action="{{ url_for('delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}" style="display: inline;">
-                                    <button type="submit" class="accion-delete" onclick="return confirm('¿Eliminar esta acción?')">×</button>
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta acción?')">×</button>
                                 </form>
                             </li>
                             {% endfor %}
@@ -536,7 +460,7 @@
                         <input type="hidden" name="valor_estimado" value="{{ oportunidad.valor_estimado }}">
                         {% endif %}
                         <textarea name="notas" class="notas-area" placeholder="Escribe tus notas aquí...">{{ oportunidad.notas or '' }}</textarea>
-                        <button type="submit" class="save-notas-btn">Guardar Notas</button>
+                        <button type="submit" class="btn btn-success">Guardar Notas</button>
                     </form>
                 </div>
             </div>
@@ -570,9 +494,9 @@
 
                     <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                         <a href="{{ url_for('crear_visita_seguimiento', cliente_id=oportunidad.cliente_id, oportunidad_id=oportunidad.id) }}"
-                           class="btn-registrar-visita">+ Registrar Visita a Instalación</a>
+                           class="btn btn-primary">+ Registrar Visita a Instalación</a>
                         <a href="{{ url_for('visita_administrador', oportunidad_id=oportunidad.id) }}"
-                           class="btn-registrar-visita" style="background: #5a6268;">+ Registrar Visita a Administrador</a>
+                           class="btn btn-secondary">+ Registrar Visita a Administrador</a>
                     </div>
                 </div>
             </div>

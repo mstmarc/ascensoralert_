@@ -77,37 +77,68 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            /* Ocultar dashboard completo en móvil */
-            .homepage-container {
-                display: none;
-            }
-            
-            /* Mostrar mensaje alternativo si llegan aquí */
-            body::after {
-                content: "Por favor, accede desde un ordenador para ver el dashboard completo.";
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100vh;
-                padding: 20px;
-                text-align: center;
-                font-family: 'Montserrat', sans-serif;
-                color: #666;
-            }
-            /* Los estilos responsive de buscador ahora están en styles.css */
-
+        /* Responsive para tablets */
+        @media (max-width: 1024px) {
             .metrics-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+        }
 
+        /* Responsive para móviles */
+        @media (max-width: 768px) {
             .homepage-container {
-                padding: 15px;
+                padding: 15px 10px;
             }
 
             .search-section {
-                padding: 25px 20px;
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .search-section h2 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .metric-card {
+                padding: 20px 15px;
+            }
+
+            .metric-card .icon {
+                font-size: 28px;
+            }
+
+            .metric-card .number {
+                font-size: 24px;
+            }
+
+            .metric-card .label {
+                font-size: 12px;
+            }
+        }
+
+        /* Responsive para móviles pequeños */
+        @media (max-width: 480px) {
+            .search-section {
+                padding: 15px 10px;
+            }
+
+            .search-section h2 {
+                font-size: 18px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .metric-card {
+                padding: 18px 12px;
             }
         }
     </style>

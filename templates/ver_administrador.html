@@ -27,10 +27,6 @@
         .clientes-tabla tr:nth-child(even) { background: #f8f9fa; }
         .clientes-tabla tr:hover { background: #e9ecef; }
 
-        .btn-accion-small { background: #366092; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 12px; display: inline-block; transition: all 0.3s; margin: 2px; }
-        .btn-accion-small:hover { background: #2a4a70; }
-        .btn-ver { background: #28a745; }
-        .btn-ver:hover { background: #218838; }
         .botones-accion { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .no-clientes { text-align: center; padding: 30px; color: #999; font-style: italic; background: #f8f9fa; border-radius: 6px; border: 2px dashed #ddd; }
 
@@ -264,10 +260,10 @@
                     {% if oportunidades %}
                         <!-- Filtro rápido por estado -->
                         <div style="margin-bottom: 15px;">
-                            <button onclick="filtrarOportunidades('todas')" class="btn-accion-small" style="background: #366092;">Todas ({{ stats.total }})</button>
-                            <button onclick="filtrarOportunidades('activa')" class="btn-accion-small" style="background: #28a745;">Activas ({{ stats.activas }})</button>
-                            <button onclick="filtrarOportunidades('ganada')" class="btn-accion-small" style="background: #007bff;">Ganadas ({{ stats.ganadas }})</button>
-                            <button onclick="filtrarOportunidades('perdida')" class="btn-accion-small" style="background: #dc3545;">Perdidas ({{ stats.perdidas }})</button>
+                            <button onclick="filtrarOportunidades('todas')" class="btn btn-primary btn-sm">Todas ({{ stats.total }})</button>
+                            <button onclick="filtrarOportunidades('activa')" class="btn btn-success btn-sm">Activas ({{ stats.activas }})</button>
+                            <button onclick="filtrarOportunidades('ganada')" class="btn btn-info btn-sm">Ganadas ({{ stats.ganadas }})</button>
+                            <button onclick="filtrarOportunidades('perdida')" class="btn btn-danger btn-sm">Perdidas ({{ stats.perdidas }})</button>
                         </div>
 
                         {% for op in oportunidades %}
@@ -308,9 +304,9 @@
                             </div>
 
                             <div class="oportunidad-actions">
-                                <a href="/ver_oportunidad/{{ op.id }}" class="btn-accion-small btn-ver">Ver Detalle</a>
-                                <a href="/editar_oportunidad/{{ op.id }}" class="btn-accion-small">Editar</a>
-                                <a href="/ver_lead/{{ op.cliente_id }}" class="btn-accion-small" style="background: #17a2b8;">Ver Comunidad</a>
+                                <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-success btn-sm">Ver Detalle</a>
+                                <a href="/editar_oportunidad/{{ op.id }}" class="btn btn-primary btn-sm">Editar</a>
+                                <a href="/ver_lead/{{ op.cliente_id }}" class="btn btn-info btn-sm">Ver Comunidad</a>
                             </div>
                         </div>
                         {% endfor %}
@@ -326,31 +322,47 @@
                     <h2>Clientes Asociados ({{ clientes|length }})</h2>
 
                     {% if clientes %}
-                    <table class="clientes-tabla">
-                        <thead>
-                            <tr>
-                                <th>Dirección</th>
-                                <th>Localidad</th>
-                                <th>Contacto</th>
-                                <th>Teléfono</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cliente in clientes %}
-                            <tr>
-                                <td>{{ cliente.direccion }}</td>
-                                <td>{{ cliente.localidad }}</td>
-                                <td>{{ cliente.persona_contacto or '-' }}</td>
-                                <td>{{ cliente.telefono or '-' }}</td>
-                                <td style="white-space: nowrap;">
-                                    <a href="/ver_lead/{{ cliente.id }}" class="btn-accion-small btn-ver">Ver</a>
-                                    <a href="/editar_lead/{{ cliente.id }}" class="btn-accion-small">Editar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="clientes-tabla">
+                            <thead>
+                                <tr>
+                                    <th>Dirección</th>
+                                    <th>Localidad</th>
+                                    <th>Contacto</th>
+                                    <th>Teléfono</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cliente in clientes %}
+                                <tr>
+                                    <td>{{ cliente.direccion }}</td>
+                                    <td>{{ cliente.localidad }}</td>
+                                    <td>{{ cliente.persona_contacto or '-' }}</td>
+                                    <td>{{ cliente.telefono or '-' }}</td>
+                                    <td style="white-space: nowrap;">
+                                        <a href="/ver_lead/{{ cliente.id }}" class="btn btn-success btn-sm">Ver</a>
+                                        <a href="/editar_lead/{{ cliente.id }}" class="btn btn-primary btn-sm">Editar</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Cards (solo visible en móvil) -->
+                    {% for cliente in clientes %}
+                    <div class="mobile-card">
+                        <h3>🏢 {{ cliente.direccion }}</h3>
+                        <p><strong>📍 Localidad:</strong> {{ cliente.localidad }}</p>
+                        <p><strong>👤 Contacto:</strong> {{ cliente.persona_contacto or '-' }}</p>
+                        <p><strong>📞 Teléfono:</strong> {{ cliente.telefono or '-' }}</p>
+                        <div class="actions">
+                            <a href="/ver_lead/{{ cliente.id }}" class="btn btn-success btn-sm">Ver</a>
+                            <a href="/editar_lead/{{ cliente.id }}" class="btn btn-primary btn-sm">Editar</a>
+                        </div>
+                    </div>
+                    {% endfor %}
                     {% else %}
                     <div class="no-clientes">
                         No hay clientes asociados a este administrador
