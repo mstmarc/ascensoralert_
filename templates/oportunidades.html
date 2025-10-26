@@ -9,6 +9,52 @@
     <style>
         /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
 
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #366092;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .menu-lateral {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 999;
+            transition: right 0.3s ease;
+            padding-top: 60px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+
+        .menu-lateral.active {
+            right: 0;
+        }
+
+        .menu-lateral a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s;
+        }
+
+        .menu-lateral a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
         /* Ajustar contenedor del dashboard para ancho completo */
         main {
             max-width: none !important;
@@ -106,6 +152,9 @@
         .alert.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         
         @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .menu-lateral { display: block; }
+
             .stats { flex-direction: column; }
             .stat-card { min-width: 100%; }
 
@@ -126,6 +175,17 @@
     </style>
 </head>
 <body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav class="menu-lateral" id="menuLateral">
+        <a href="/home">Inicio</a>
+        <a href="/_dashboard">Ver Comunidades</a>
+        <a href="/administradores_dashboard">Administradores de Fincas</a>
+        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
+        <a href="/oportunidades">Oportunidades</a>
+        <a href="/reporte_mensual">Descargo Comercial</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </nav>
+
     <header>
         <div class="header-container">
             <div class="logo-container">
@@ -194,6 +254,19 @@
         </div>
     </main>
 
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuLateral').classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuLateral');
+            const toggle = document.querySelector('.menu-toggle');
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
     <script src="/static/sidebar.js"></script>
 </body>
 </html>
