@@ -260,19 +260,20 @@ button[type="submit"]:active {
     transform: translateY(0);
 }
 
-/* Secondary - Azul outline */
+/* Secondary - Borde negro */
 .btn-secondary {
-    background: transparent;
-    color: #366092;
-    border: 2px solid #366092;
+    background: white;
+    color: #1a1a1a;
+    border: 1px solid #000;
     box-shadow: none;
 }
 
 .btn-secondary:hover {
-    background: #366092;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+    background: #f8f9fa;
+    color: #1a1a1a;
+    transform: translateY(0);
+    box-shadow: none;
+    border-color: #000;
 }
 
 .btn-secondary:active {
