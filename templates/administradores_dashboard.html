@@ -139,7 +139,7 @@
             border-color: #f8f9fa;
         }
 
-        /* LISTADO MINIMALISTA */
+        /* LISTADO MINIMALISTA CON BADGES */
         .admin-list {
             background: white;
             border-radius: 8px;
@@ -148,9 +148,9 @@
         }
 
         .admin-list-item {
-            padding: 20px 24px;
+            padding: 18px 24px;
             border-bottom: 1px solid #f0f0f0;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -162,40 +162,39 @@
         }
 
         .admin-list-item:hover {
-            background: #f8f9fa;
-            padding-left: 28px;
-        }
-
-        .admin-list-item-content {
-            flex: 1;
-            display: flex;
-            align-items: baseline;
-            gap: 16px;
-            flex-wrap: wrap;
+            background: #fafbfc;
         }
 
         .admin-list-name {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             color: #366092;
             text-decoration: none;
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
+            flex: 1;
         }
 
         .admin-list-name:hover {
             color: #2a4a70;
-            text-decoration: underline;
         }
 
-        .admin-list-location {
-            font-size: 14px;
-            color: #666;
+        .admin-badge {
+            background: linear-gradient(135deg, #e7f3ff 0%, #d4e8f7 100%);
+            color: #366092;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid rgba(54, 96, 146, 0.15);
+            transition: all 0.2s ease;
         }
 
-        .admin-list-location::before {
-            content: "•";
-            margin-right: 8px;
-            color: #ccc;
+        .admin-list-item:hover .admin-badge {
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            color: white;
+            border-color: #366092;
+            transform: scale(1.05);
         }
 
         .no-results {
@@ -409,22 +408,20 @@
         @media (max-width: 767px) {
             /* Ajustar listado en móvil */
             .admin-list-item {
-                padding: 16px 20px;
-            }
-
-            .admin-list-item:hover {
-                padding-left: 24px;
-            }
-
-            .admin-list-item-content {
+                padding: 14px 16px;
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 8px;
+                gap: 10px;
             }
 
-            .admin-list-location::before {
-                content: "📍";
-                margin-right: 6px;
+            .admin-list-name {
+                font-size: 16px;
+            }
+
+            .admin-badge {
+                align-self: flex-start;
+                font-size: 12px;
+                padding: 5px 14px;
             }
 
             /* Ocultar tabla en móvil (para pestaña visitas) */
@@ -559,19 +556,17 @@
                 {% endif %}
             </div>
 
-            <!-- Listado Minimalista -->
+            <!-- Listado Minimalista con Badges -->
             {% if administradores %}
                 <div class="admin-list">
                     {% for admin in administradores %}
                     <div class="admin-list-item">
-                        <div class="admin-list-item-content">
-                            <a href="/ver_administrador/{{ admin.id }}" class="admin-list-name">
-                                {{ admin.nombre_empresa }}
-                            </a>
-                            <span class="admin-list-location">
-                                {{ admin.localidad or 'Sin localidad' }}
-                            </span>
-                        </div>
+                        <a href="/ver_administrador/{{ admin.id }}" class="admin-list-name">
+                            {{ admin.nombre_empresa }}
+                        </a>
+                        <span class="admin-badge">
+                            {{ admin.localidad or 'Sin localidad' }}
+                        </span>
                     </div>
                     {% endfor %}
                 </div>
