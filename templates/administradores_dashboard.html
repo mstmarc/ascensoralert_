@@ -4,28 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administradores de Fincas</title>
-    <link rel="stylesheet" href="/static/styles.css?v=6">
+    <link rel="stylesheet" href="/static/styles.css?v=7">
     <style>
-        /* Ajustar layout para dashboard amplio */
+        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
+
+        /* Ajustar contenedor del dashboard para ancho completo */
         main {
             max-width: none !important;
-            margin: 0 !important;
             padding: 30px !important;
-            margin-left: 240px !important;
         }
 
         main .menu {
             max-width: none !important;
             width: 100% !important;
             margin: 0 !important;
-        }
-
-        /* Móvil: quitar margen lateral */
-        @media (max-width: 768px) {
-            main {
-                margin-left: 0 !important;
-                padding: 20px !important;
-            }
         }
 
         /* ESTILOS CRÍTICOS DE BOTONES */
