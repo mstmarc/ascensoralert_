@@ -1860,103 +1860,167 @@ def enviar_avisos_manual():
 # ADMINISTRADORES
 # ============================================
 
-# Dashboard de Administradores
+# Dashboard de Administradores (con pestañas)
 @app.route("/administradores_dashboard", methods=["GET"])
 def administradores_dashboard():
     if "usuario" not in session:
         return redirect("/")
 
-    # Búsqueda
-    buscar = request.args.get("buscar", "")
+    # Determinar pestaña activa
+    tab = request.args.get("tab", "administradores")  # administradores | visitas
 
-    # Paginación
-    page = int(request.args.get("page", 1))
-    limit = 50
-    offset = (page - 1) * limit
+    # ============================================
+    # TAB: ADMINISTRADORES
+    # ============================================
+    if tab == "administradores":
+        # Búsqueda
+        buscar = request.args.get("buscar", "")
 
-    # Construir URL con filtros
-    url = f"{SUPABASE_URL}/rest/v1/administradores?select=*&order=nombre_empresa.asc"
+        # Paginación
+        page = int(request.args.get("page", 1))
+        limit = 20  # Reducido de 50 a 20 para mejorar rendimiento
+        offset = (page - 1) * limit
 
-    if buscar:
-        url += f"&or=(nombre_empresa.ilike.%{buscar}%,localidad.ilike.%{buscar}%,email.ilike.%{buscar}%)"
+        # Construir URL con filtros
+        url = f"{SUPABASE_URL}/rest/v1/administradores?select=*&order=nombre_empresa.asc"
 
-    # Obtener total de registros
-    count_url = url.replace("select=*", "select=count")
-    count_headers = HEADERS.copy()
-    count_headers["Prefer"] = "count=exact"
-    count_response = requests.get(count_url, headers=count_headers)
-    total_registros = int(count_response.headers.get("Content-Range", "0-0/0").split("/")[-1])
+        if buscar:
+            url += f"&or=(nombre_empresa.ilike.%{buscar}%,localidad.ilike.%{buscar}%,email.ilike.%{buscar}%)"
 
-    # Obtener registros paginados
-    url += f"&limit={limit}&offset={offset}"
-    response = requests.get(url, headers=HEADERS)
+        # Obtener total de registros
+        count_url = url.replace("select=*", "select=count")
+        count_headers = HEADERS.copy()
+        count_headers["Prefer"] = "count=exact"
+        try:
+            count_response = requests.get(count_url, headers=count_headers, timeout=10)
+            total_registros = int(count_response.headers.get("Content-Range", "0-0/0").split("/")[-1])
+        except Exception as e:
+            print(f"Error al obtener conteo de administradores: {e}")
+            total_registros = 0
 
-    if response.status_code != 200:
-        return f"Error al cargar administradores: {response.text}", 500
+        # Obtener registros paginados
+        url += f"&limit={limit}&offset={offset}"
+        try:
+            response = requests.get(url, headers=HEADERS, timeout=10)
+        except Exception as e:
+            return f"Error de timeout al cargar administradores: {e}", 500
 
-    administradores = response.json()
+        if response.status_code != 200:
+            return f"Error al cargar administradores: {response.text}", 500
 
-    # Limpiar None
-    administradores = [limpiar_none(admin) for admin in administradores]
+        administradores = response.json()
 
-    # Obtener conteo de oportunidades activas por administrador
-    if administradores:
-        admin_ids = [str(admin['id']) for admin in administradores]
+        # Limpiar None
+        administradores = [limpiar_none(admin) for admin in administradores]
 
-        # Obtener todos los clientes de estos administradores
-        clientes_response = requests.get(
-            f"{SUPABASE_URL}/rest/v1/clientes?administrador_id=in.({','.join(admin_ids)})&select=id,administrador_id",
-            headers=HEADERS
-        )
+        # Obtener conteo de oportunidades activas por administrador
+        if administradores:
+            admin_ids = [str(admin['id']) for admin in administradores]
 
-        if clientes_response.status_code == 200:
-            clientes = clientes_response.json()
-
-            # Mapear cliente_id -> administrador_id
-            cliente_to_admin = {c['id']: c['administrador_id'] for c in clientes}
-            cliente_ids = list(cliente_to_admin.keys())
-
-            if cliente_ids:
-                # Obtener oportunidades activas de estos clientes
-                oportunidades_response = requests.get(
-                    f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=in.({','.join(map(str, cliente_ids))})&estado=eq.activa&select=cliente_id",
-                    headers=HEADERS
+            try:
+                # Obtener todos los clientes de estos administradores
+                clientes_response = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/clientes?administrador_id=in.({','.join(admin_ids)})&select=id,administrador_id",
+                    headers=HEADERS,
+                    timeout=5
                 )
 
-                if oportunidades_response.status_code == 200:
-                    oportunidades = oportunidades_response.json()
+                if clientes_response.status_code == 200:
+                    clientes = clientes_response.json()
 
-                    # Contar oportunidades por administrador
-                    oportunidades_por_admin = {}
-                    for op in oportunidades:
-                        admin_id = cliente_to_admin.get(op['cliente_id'])
-                        if admin_id:
-                            oportunidades_por_admin[admin_id] = oportunidades_por_admin.get(admin_id, 0) + 1
+                    # Mapear cliente_id -> administrador_id
+                    cliente_to_admin = {c['id']: c['administrador_id'] for c in clientes}
+                    cliente_ids = list(cliente_to_admin.keys())
 
-                    # Agregar conteo a cada administrador
-                    for admin in administradores:
-                        admin['oportunidades_activas'] = oportunidades_por_admin.get(admin['id'], 0)
+                    if cliente_ids:
+                        # Obtener oportunidades activas de estos clientes
+                        oportunidades_response = requests.get(
+                            f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=in.({','.join(map(str, cliente_ids))})&estado=eq.activa&select=cliente_id",
+                            headers=HEADERS,
+                            timeout=5
+                        )
+
+                        if oportunidades_response.status_code == 200:
+                            oportunidades = oportunidades_response.json()
+
+                            # Contar oportunidades por administrador
+                            oportunidades_por_admin = {}
+                            for op in oportunidades:
+                                admin_id = cliente_to_admin.get(op['cliente_id'])
+                                if admin_id:
+                                    oportunidades_por_admin[admin_id] = oportunidades_por_admin.get(admin_id, 0) + 1
+
+                            # Agregar conteo a cada administrador
+                            for admin in administradores:
+                                admin['oportunidades_activas'] = oportunidades_por_admin.get(admin['id'], 0)
+                        else:
+                            for admin in administradores:
+                                admin['oportunidades_activas'] = 0
+                    else:
+                        for admin in administradores:
+                            admin['oportunidades_activas'] = 0
                 else:
                     for admin in administradores:
                         admin['oportunidades_activas'] = 0
-            else:
+            except Exception as e:
+                print(f"Error al obtener oportunidades de administradores: {e}")
                 for admin in administradores:
                     admin['oportunidades_activas'] = 0
-        else:
-            for admin in administradores:
-                admin['oportunidades_activas'] = 0
 
-    # Calcular páginas
-    total_pages = (total_registros + limit - 1) // limit
+        # Calcular páginas
+        total_pages = max(1, (total_registros + limit - 1) // limit)  # Al menos 1 página
 
-    return render_template(
-        "administradores_dashboard.html",
-        administradores=administradores,
-        buscar=buscar,
-        page=page,
-        total_pages=total_pages,
-        total_registros=total_registros
-    )
+        return render_template(
+            "administradores_dashboard.html",
+            tab=tab,
+            administradores=administradores,
+            buscar=buscar,
+            page=page,
+            total_pages=total_pages,
+            total_registros=total_registros
+        )
+
+    # ============================================
+    # TAB: VISITAS
+    # ============================================
+    elif tab == "visitas":
+        # Paginación
+        page = int(request.args.get("page", 1))
+        per_page = 25
+        offset = (page - 1) * per_page
+
+        # Obtener total de registros
+        count_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=*"
+        try:
+            count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"}, timeout=10)
+            total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
+        except Exception as e:
+            print(f"Error al obtener conteo de visitas: {e}")
+            total_registros = 0
+
+        total_pages = max(1, (total_registros + per_page - 1) // per_page)
+
+        # Obtener registros paginados con JOIN a administradores
+        data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=*,administradores(nombre_empresa)&order=fecha_visita.desc&limit={per_page}&offset={offset}"
+        try:
+            response = requests.get(data_url, headers=HEADERS, timeout=10)
+        except Exception as e:
+            return f"Error de timeout al cargar visitas: {e}", 500
+
+        if response.status_code != 200:
+            return f"Error al cargar visitas: {response.text}", 500
+
+        visitas = response.json()
+        visitas = [limpiar_none(v) for v in visitas]
+
+        return render_template(
+            "administradores_dashboard.html",
+            tab=tab,
+            visitas=visitas,
+            page=page,
+            total_pages=total_pages,
+            total_registros=total_registros
+        )
 
 
 # Alta de Administrador

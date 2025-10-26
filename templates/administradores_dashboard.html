@@ -204,6 +204,54 @@
             transform: translateY(-2px);
         }
 
+        /* Pestañas - Siguiendo directrices corporativas */
+        .tabs-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #366092;
+            padding-bottom: 0;
+        }
+
+        .tab-button {
+            background: #f8f9fa;
+            border: none;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+            border: 1px solid #e1e5e9;
+            border-bottom: none;
+            position: relative;
+            bottom: -3px;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+            color: #366092;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            color: white;
+            border-color: #366092;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        }
+
+        .tab-button.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+        }
+
         @media (max-width: 768px) {
             .menu-toggle { display: block; }
             .menu-lateral { display: block; }
@@ -254,8 +302,29 @@
     </header>
     <main>
         <div class="menu">
-            <a href="/nuevo_administrador" class="btn-nuevo">+ Nuevo Administrador</a>
+            <!-- Botón destacado para crear administrador -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h2 style="margin: 0; color: #366092; font-size: 20px;">Gestión de Administradores</h2>
+                <a href="/nuevo_administrador" class="btn-nuevo" style="margin: 0;">
+                    ➕ Nuevo Administrador
+                </a>
+            </div>
 
+            <!-- Pestañas -->
+            <div class="tabs-container">
+                <a href="/administradores_dashboard?tab=administradores"
+                   class="tab-button {% if tab == 'administradores' or not tab %}active{% endif %}">
+                    🏢 Administradores
+                </a>
+                <a href="/administradores_dashboard?tab=visitas"
+                   class="tab-button {% if tab == 'visitas' %}active{% endif %}">
+                    📅 Visitas
+                </a>
+            </div>
+
+            <!-- Contenido según pestaña activa -->
+            {% if tab == 'administradores' or not tab %}
+            <!-- TAB: ADMINISTRADORES -->
             <form method="GET" action="/administradores_dashboard">
                 <div class="buscador-destacado">
                     <div class="buscador-label">Buscar Administrador</div>
@@ -272,6 +341,7 @@
                     </div>
                 </div>
 
+                <input type="hidden" name="tab" value="administradores">
                 <input type="hidden" name="page" value="1">
             </form>
 
@@ -342,7 +412,7 @@
 
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&buscar={{ buscar }}" class="btn-paginacion">Anterior</a>
+                    <a href="?tab=administradores&page={{ page - 1 }}&buscar={{ buscar }}" class="btn-paginacion">Anterior</a>
                 {% else %}
                     <button class="btn-paginacion" disabled>Anterior</button>
                 {% endif %}
@@ -350,11 +420,96 @@
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&buscar={{ buscar }}" class="btn-paginacion">Siguiente</a>
+                    <a href="?tab=administradores&page={{ page + 1 }}&buscar={{ buscar }}" class="btn-paginacion">Siguiente</a>
                 {% else %}
                     <button class="btn-paginacion" disabled>Siguiente</button>
                 {% endif %}
             </div>
+
+            {% elif tab == 'visitas' %}
+            <!-- TAB: VISITAS -->
+            <div class="info-resultados">
+                Mostrando {{ visitas|length }} registros de {{ total_registros }} totales
+            </div>
+
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?tab=visitas&page={{ page - 1 }}" class="btn-paginacion">Anterior</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Anterior</button>
+                {% endif %}
+
+                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+
+                {% if page < total_pages %}
+                    <a href="?tab=visitas&page={{ page + 1 }}" class="btn-paginacion">Siguiente</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Siguiente</button>
+                {% endif %}
+            </div>
+
+            <div class="tabla-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha Visita</th>
+                            <th>Administrador</th>
+                            <th>Persona Contacto</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if visitas %}
+                            {% for visita in visitas %}
+                            <tr>
+                                <td>{{ visita.fecha_visita }}</td>
+                                <td>
+                                    {% if visita.administradores %}
+                                        {{ visita.administradores.nombre_empresa }}
+                                    {% else %}
+                                        {{ visita.administrador_fincas or '-' }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ visita.persona_contacto or '-' }}</td>
+                                <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ visita.observaciones or '-' }}
+                                </td>
+                                <td class="acciones-cell">
+                                    <a href="/ver_visita_admin/{{ visita.id }}" class="btn-accion btn-ver">Ver</a>
+                                    <a href="/editar_visita_admin/{{ visita.id }}" class="btn-accion">Editar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
+                                    No se encontraron visitas a administradores
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?tab=visitas&page={{ page - 1 }}" class="btn-paginacion">Anterior</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Anterior</button>
+                {% endif %}
+
+                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+
+                {% if page < total_pages %}
+                    <a href="?tab=visitas&page={{ page + 1 }}" class="btn-paginacion">Siguiente</a>
+                {% else %}
+                    <button class="btn-paginacion" disabled>Siguiente</button>
+                {% endif %}
+            </div>
+
+            {% endif %}
+            <!-- Fin pestañas -->
 
             <br>
             <a href="/home" class="button">Volver al Home</a>
