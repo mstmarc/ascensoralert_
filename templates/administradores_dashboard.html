@@ -492,14 +492,6 @@
             {% if tab == 'administradores' or not tab %}
             <!-- TAB: ADMINISTRADORES -->
 
-            <!-- DEBUG INFO (temporal) -->
-            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 12px;">
-                <strong>📊 Estado:</strong> Pestaña activa: <strong>{{ tab or 'administradores' }}</strong> |
-                Total registros: <strong>{{ total_registros }}</strong> |
-                Mostrando: <strong>{{ administradores|length }}</strong> |
-                Página: <strong>{{ page }}/{{ total_pages }}</strong>
-            </div>
-
             <form method="GET" action="/administradores_dashboard">
                 <div class="buscador-destacado">
                     <div class="buscador-label">Buscar Administrador</div>
