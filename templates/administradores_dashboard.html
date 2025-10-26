@@ -520,26 +520,6 @@
                 <input type="hidden" name="page" value="1">
             </form>
 
-            <div class="info-resultados">
-                Mostrando {{ administradores|length }} registros de {{ total_registros }} totales
-            </div>
-
-            <div class="paginacion">
-                {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&buscar={{ buscar }}" class="btn btn-primary btn-sm">Anterior</a>
-                {% else %}
-                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
-                {% endif %}
-
-                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
-
-                {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&buscar={{ buscar }}" class="btn btn-primary btn-sm">Siguiente</a>
-                {% else %}
-                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
-                {% endif %}
-            </div>
-
             <!-- Listado Ultra-Compacto -->
             {% if administradores %}
                 <div class="admin-list">
@@ -559,6 +539,10 @@
                     No se encontraron administradores con los filtros aplicados
                 </div>
             {% endif %}
+
+            <div class="info-resultados">
+                Mostrando {{ administradores|length }} registros de {{ total_registros }} totales
+            </div>
 
             <div class="paginacion">
                 {% if page > 1 %}
