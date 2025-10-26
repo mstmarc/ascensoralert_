@@ -28,11 +28,7 @@
         .equipos-tabla td { padding: 10px; border: 1px solid #ddd; }
         .equipos-tabla tr:nth-child(even) { background: #f8f9fa; }
         .equipos-tabla tr:hover { background: #e9ecef; }
-        
-        .btn-accion-small { background: #366092; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 12px; display: inline-block; transition: all 0.3s; margin: 2px; }
-        .btn-accion-small:hover { background: #2a4a70; }
-        .btn-añadir-equipo { background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; transition: all 0.3s; }
-        .btn-añadir-equipo:hover { background: #218838; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
         .botones-accion { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .no-equipos { text-align: center; padding: 30px; color: #999; font-style: italic; background: #f8f9fa; border-radius: 6px; border: 2px dashed #ddd; }
         .no-equipos-con-boton { display: flex; flex-direction: column; align-items: center; gap: 15px; }
@@ -48,10 +44,7 @@
         .oportunidad-estado.ganada { background: #007bff; color: white; }
         .oportunidad-estado.perdida { background: #dc3545; color: white; }
         .oportunidad-detalles { font-size: 14px; color: #555; line-height: 1.6; }
-        
-        .btn-crear-oportunidad { background: #28a745; }
-        .btn-crear-oportunidad:hover { background: #218838; }
-        
+
         .visita-item { background: #f8f9fa; padding: 12px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #366092; }
         .visita-fecha { font-weight: bold; color: #366092; margin-bottom: 5px; }
         .visita-observaciones { color: #555; font-size: 14px; }
@@ -135,9 +128,9 @@
                                 <p><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
                                 {% if op.observaciones %}<p><strong>Observaciones:</strong> {{ op.observaciones }}</p>{% endif %}
                                 <div style="margin-top: 10px;">
-                                    <a href="/ver_oportunidad/{{ op.id }}" class="btn-accion-small">Ver Detalle</a>
-                                    <a href="/editar_oportunidad/{{ op.id }}" class="btn-accion-small">Editar</a>
-                                    <a href="/crear_visita_seguimiento/{{ lead.id }}?oportunidad_id={{ op.id }}" class="btn-accion-small" style="background:#28a745;">Registrar Visita</a>
+                                    <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-info btn-sm">Ver Detalle</a>
+                                    <a href="/editar_oportunidad/{{ op.id }}" class="btn btn-primary btn-sm">Editar</a>
+                                    <a href="/crear_visita_seguimiento/{{ lead.id }}?oportunidad_id={{ op.id }}" class="btn btn-success btn-sm">Registrar Visita</a>
                                 </div>
                             </div>
                         </div>
@@ -147,7 +140,7 @@
                     {% endif %}
                     
                     <div style="margin-top: 15px;">
-                        <a href="/crear_oportunidad/{{ lead.id }}" class="button btn-crear-oportunidad">+ Crear Oportunidad</a>
+                        <a href="/crear_oportunidad/{{ lead.id }}" class="btn btn-success">+ Crear Oportunidad</a>
                     </div>
                 </div>
                 
@@ -181,7 +174,7 @@
                 <div class="seccion">
                     <div class="seccion-header">
                         <h2>Equipos/Ascensores ({{ equipos|length }})</h2>
-                        <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn-añadir-equipo">
+                        <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn btn-success">
                             🔧 Añadir Nuevo Equipo
                         </a>
                     </div>
@@ -209,7 +202,7 @@
                                 <td>{{ equipo.fecha_vencimiento_contrato }}</td>
                                 <td>{{ equipo.descripcion }}</td>
                                 <td style="white-space: nowrap;">
-                                    <a href="/editar_equipo/{{ equipo.id }}" class="btn-accion-small">Editar</a>
+                                    <a href="/editar_equipo/{{ equipo.id }}" class="btn btn-primary btn-sm">Editar</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -218,7 +211,7 @@
                     {% else %}
                     <div class="no-equipos no-equipos-con-boton">
                         <p style="margin: 0;">🔧 Esta instalación aún no tiene equipos registrados</p>
-                        <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn-añadir-equipo">
+                        <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn btn-success">
                             Añadir Primer Equipo
                         </a>
                     </div>

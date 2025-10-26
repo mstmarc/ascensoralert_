@@ -94,24 +94,7 @@
             outline: none;
             border-color: #366092;
         }
-        
-        .btn-limpiar {
-            background: #6c757d;
-            color: white;
-            padding: 10px 25px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            display: inline-block;
-            text-align: center;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .btn-limpiar:hover {
-            background: #5a6268;
-        }
-        
+
         .paginacion {
             display: flex;
             justify-content: center;
@@ -129,31 +112,7 @@
             font-weight: 600;
             font-size: 14px;
         }
-        
-        .btn-paginacion {
-            background: #366092;
-            color: white;
-            padding: 8px 16px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        
-        .btn-paginacion:hover:not(:disabled) {
-            background: #2a4a70;
-            transform: translateY(-2px);
-        }
-        
-        .btn-paginacion:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        
+
         .info-resultados {
             text-align: center;
             color: #366092;
@@ -203,31 +162,7 @@
         tr:hover {
             background: #e9ecef;
         }
-        
-        .btn-accion {
-            background: #366092;
-            color: white;
-            padding: 6px 10px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 12px;
-            display: inline-block;
-            transition: all 0.3s;
-            margin: 2px;
-        }
-        
-        .btn-accion:hover {
-            background: #2a4a70;
-        }
-        
-        .btn-ver {
-            background: #28a745;
-        }
-        
-        .btn-ver:hover {
-            background: #218838;
-        }
-        
+
         .acciones-cell {
             white-space: nowrap;
         }
@@ -391,11 +326,11 @@
                             </select>
                         </div>
                         
-                        <button type="submit" style="background: #2a4a70; color: white; padding: 0; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box; margin-top: 23px;">
+                        <button type="submit" class="btn-primary btn-sm">
                             🔍 Buscar
                         </button>
-                        
-                        <a href="/leads_dashboard" style="background: #5ba3d0; color: white; padding: 0; text-decoration: none; border-radius: 6px; font-weight: 600; text-align: center; font-size: 13px; white-space: nowrap; height: 36px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; margin-top: 23px;">
+
+                        <a href="/leads_dashboard" class="btn btn-secondary btn-sm">
                             🗑️ Limpiar
                         </a>
                     </div>
@@ -410,17 +345,17 @@
             
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Anterior</button>
+                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
                 {% endif %}
-                
-                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
-                
+
+                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Siguiente</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente</button>
+                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
                 {% endif %}
             </div>
             
@@ -448,8 +383,8 @@
                                 <td style="{{ row.color_ipo }}">{{ row.ipo_proxima }}</td>
                                 <td style="{{ row.color_contrato }}">{{ row.contrato_vence }}</td>
                                 <td class="acciones-cell">
-                                    <a href="/ver_lead/{{ row.lead_id }}" class="btn-accion btn-ver">Ver</a>
-                                    <a href="/editar_lead/{{ row.lead_id }}" class="btn-accion">Editar</a>
+                                    <a href="/ver_lead/{{ row.lead_id }}" class="btn btn-success btn-sm">Ver</a>
+                                    <a href="/editar_lead/{{ row.lead_id }}" class="btn btn-primary btn-sm">Editar</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -488,17 +423,17 @@
             
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Anterior</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Anterior</button>
+                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
                 {% endif %}
-                
-                <span class="paginacion-info">Pagina {{ page }} de {{ total_pages }}</span>
-                
+
+                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn-paginacion">Siguiente</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Siguiente</a>
                 {% else %}
-                    <button class="btn-paginacion" disabled>Siguiente</button>
+                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
                 {% endif %}
             </div>
             
