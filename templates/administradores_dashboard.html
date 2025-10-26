@@ -139,7 +139,72 @@
             border-color: #f8f9fa;
         }
 
-        /* ESTILOS MOBILE-CARD */
+        /* GRID DE CARDS - DISEÑO MINIMALISTA */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(54, 96, 146, 0.15);
+            border-color: #366092;
+        }
+
+        .admin-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #366092;
+            margin: 0;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            line-height: 1.3;
+        }
+
+        .admin-card-title:hover {
+            color: #2a4a70;
+            text-decoration: underline;
+        }
+
+        .admin-card-location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .admin-card-location::before {
+            content: "📍";
+            font-size: 16px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 16px;
+            background: white;
+            border-radius: 12px;
+            border: 2px dashed #e1e5e9;
+        }
+
+        /* ESTILOS MOBILE-CARD (mantener para vista de visitas) */
         .mobile-card {
             display: none;
             background: white;
@@ -339,12 +404,18 @@
         }
 
         @media (max-width: 767px) {
-            /* Ocultar tabla en móvil */
+            /* Ajustar grid de cards en móvil */
+            .admin-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            /* Ocultar tabla en móvil (para pestaña visitas) */
             .tabla-container {
                 display: none !important;
             }
 
-            /* Mostrar mobile-cards en móvil */
+            /* Mostrar mobile-cards en móvil (para pestaña visitas) */
             .mobile-card {
                 display: block !important;
             }
@@ -471,59 +542,23 @@
                 {% endif %}
             </div>
 
-            <div class="tabla-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nombre Empresa</th>
-                            <th>Localidad</th>
-                            <th>Teléfono</th>
-                            <th>Email</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if administradores %}
-                            {% for admin in administradores %}
-                            <tr>
-                                <td>{{ admin.nombre_empresa }}</td>
-                                <td>{{ admin.localidad }}</td>
-                                <td>{{ admin.telefono }}</td>
-                                <td>{{ admin.email }}</td>
-                                <td class="acciones-cell">
-                                    <a href="/ver_administrador/{{ admin.id }}" class="btn btn-success btn-sm">Ver</a>
-                                    <a href="/editar_administrador/{{ admin.id }}" class="btn btn-primary btn-sm">Editar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
-                                    No se encontraron administradores con los filtros aplicados
-                                </td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mobile Cards para administradores (solo visible en móvil) -->
+            <!-- Grid de Cards Minimalista -->
             {% if administradores %}
-                {% for admin in administradores %}
-                <div class="mobile-card">
-                    <h3>🏢 {{ admin.nombre_empresa }}</h3>
-                    <p><strong>📍 Localidad:</strong> {{ admin.localidad }}</p>
-                    <p><strong>📞 Teléfono:</strong> {{ admin.telefono }}</p>
-                    <p><strong>✉️ Email:</strong> {{ admin.email }}</p>
-                    <div class="actions">
-                        <a href="/ver_administrador/{{ admin.id }}" class="btn btn-success btn-sm">Ver</a>
-                        <a href="/editar_administrador/{{ admin.id }}" class="btn btn-primary btn-sm">Editar</a>
+                <div class="admin-grid">
+                    {% for admin in administradores %}
+                    <div class="admin-card">
+                        <a href="/ver_administrador/{{ admin.id }}" class="admin-card-title">
+                            {{ admin.nombre_empresa }}
+                        </a>
+                        <div class="admin-card-location">
+                            {{ admin.localidad or 'Sin localidad' }}
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             {% else %}
-                <div class="mobile-card">
-                    <p style="text-align: center; color: #999;">No se encontraron administradores con los filtros aplicados</p>
+                <div class="no-results">
+                    No se encontraron administradores con los filtros aplicados
                 </div>
             {% endif %}
 
