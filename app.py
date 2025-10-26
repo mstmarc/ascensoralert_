@@ -1868,7 +1868,11 @@ def administradores_dashboard():
         buscar = request.args.get("buscar", "")
 
         # Paginación
-        page = int(request.args.get("page", 1))
+        try:
+            page = int(request.args.get("page", 1))
+        except (ValueError, TypeError):
+            page = 1
+
         limit = 20  # Reducido de 50 a 20 para mejorar rendimiento
         offset = (page - 1) * limit
 
@@ -1890,7 +1894,7 @@ def administradores_dashboard():
 
             if response.status_code != 200:
                 print(f"Error al cargar administradores: {response.status_code} - {response.text}")
-                flash(f"Error al cargar administradores desde la base de datos", "error")
+                flash(f"Error al cargar administradores desde la base de datos (Código: {response.status_code})", "error")
                 # Renderizar con datos vacíos
                 return render_template(
                     "administradores_dashboard.html",
@@ -1902,10 +1906,77 @@ def administradores_dashboard():
                     total_registros=0
                 )
 
+            # Obtener total de registros del header Content-Range
+            try:
+                content_range = response.headers.get("Content-Range", "*/0")
+                total_registros = int(content_range.split("/")[-1])
+            except Exception as e:
+                print(f"Error al parsear Content-Range: {e}")
+                total_registros = 0
+
+            # Parsear respuesta JSON
+            try:
+                administradores = response.json()
+            except Exception as e:
+                print(f"Error al parsear JSON: {e}")
+                flash(f"Error al procesar datos de administradores", "error")
+                return render_template(
+                    "administradores_dashboard.html",
+                    tab=tab,
+                    administradores=[],
+                    buscar=buscar,
+                    page=1,
+                    total_pages=1,
+                    total_registros=0
+                )
+
+            # Limpiar None
+            try:
+                administradores = [limpiar_none(admin) for admin in administradores]
+            except Exception as e:
+                print(f"Error al limpiar datos: {e}")
+                administradores = []
+
+            # Calcular páginas
+            total_pages = max(1, (total_registros + limit - 1) // limit)  # Al menos 1 página
+
+            return render_template(
+                "administradores_dashboard.html",
+                tab=tab,
+                administradores=administradores,
+                buscar=buscar,
+                page=page,
+                total_pages=total_pages,
+                total_registros=total_registros
+            )
+
+        except requests.exceptions.Timeout:
+            print(f"Error de timeout al cargar administradores")
+            flash(f"Error de conexión: La base de datos tardó demasiado en responder. Por favor, intente nuevamente.", "error")
+            return render_template(
+                "administradores_dashboard.html",
+                tab=tab,
+                administradores=[],
+                buscar=buscar,
+                page=1,
+                total_pages=1,
+                total_registros=0
+            )
+        except requests.exceptions.RequestException as e:
+            print(f"Error de conexión al cargar administradores: {e}")
+            flash(f"Error de conexión al cargar administradores. Por favor, verifique su conexión a internet.", "error")
+            return render_template(
+                "administradores_dashboard.html",
+                tab=tab,
+                administradores=[],
+                buscar=buscar,
+                page=1,
+                total_pages=1,
+                total_registros=0
+            )
         except Exception as e:
-            print(f"Error de timeout al cargar administradores: {e}")
-            flash(f"Error de conexión al cargar administradores. Por favor, intente nuevamente.", "error")
-            # Renderizar con datos vacíos
+            print(f"Error inesperado al cargar administradores: {e}")
+            flash(f"Error inesperado al cargar administradores. Por favor, contacte al administrador del sistema.", "error")
             return render_template(
                 "administradores_dashboard.html",
                 tab=tab,
@@ -1916,38 +1987,16 @@ def administradores_dashboard():
                 total_registros=0
             )
 
-        # Obtener total de registros del header Content-Range
-        try:
-            content_range = response.headers.get("Content-Range", "*/0")
-            total_registros = int(content_range.split("/")[-1])
-        except Exception as e:
-            print(f"Error al parsear Content-Range: {e}")
-            total_registros = 0
-
-        administradores = response.json()
-
-        # Limpiar None
-        administradores = [limpiar_none(admin) for admin in administradores]
-
-        # Calcular páginas
-        total_pages = max(1, (total_registros + limit - 1) // limit)  # Al menos 1 página
-
-        return render_template(
-            "administradores_dashboard.html",
-            tab=tab,
-            administradores=administradores,
-            buscar=buscar,
-            page=page,
-            total_pages=total_pages,
-            total_registros=total_registros
-        )
-
     # ============================================
     # TAB: VISITAS
     # ============================================
     elif tab == "visitas":
         # Paginación
-        page = int(request.args.get("page", 1))
+        try:
+            page = int(request.args.get("page", 1))
+        except (ValueError, TypeError):
+            page = 1
+
         per_page = 25
         offset = (page - 1) * per_page
 
@@ -1963,7 +2012,7 @@ def administradores_dashboard():
 
             if response.status_code != 200:
                 print(f"Error al cargar visitas: {response.status_code} - {response.text}")
-                flash(f"Error al cargar visitas desde la base de datos", "error")
+                flash(f"Error al cargar visitas desde la base de datos (Código: {response.status_code})", "error")
                 # Renderizar con datos vacíos
                 return render_template(
                     "administradores_dashboard.html",
@@ -1974,10 +2023,73 @@ def administradores_dashboard():
                     total_registros=0
                 )
 
+            # Obtener total de registros del header Content-Range
+            try:
+                content_range = response.headers.get("Content-Range", "*/0")
+                total_registros = int(content_range.split("/")[-1])
+            except Exception as e:
+                print(f"Error al parsear Content-Range: {e}")
+                total_registros = 0
+
+            # Parsear respuesta JSON
+            try:
+                visitas = response.json()
+            except Exception as e:
+                print(f"Error al parsear JSON: {e}")
+                flash(f"Error al procesar datos de visitas", "error")
+                return render_template(
+                    "administradores_dashboard.html",
+                    tab=tab,
+                    visitas=[],
+                    page=1,
+                    total_pages=1,
+                    total_registros=0
+                )
+
+            # Calcular páginas
+            total_pages = max(1, (total_registros + per_page - 1) // per_page)
+
+            # Limpiar None
+            try:
+                visitas = [limpiar_none(v) for v in visitas]
+            except Exception as e:
+                print(f"Error al limpiar datos: {e}")
+                visitas = []
+
+            return render_template(
+                "administradores_dashboard.html",
+                tab=tab,
+                visitas=visitas,
+                page=page,
+                total_pages=total_pages,
+                total_registros=total_registros
+            )
+
+        except requests.exceptions.Timeout:
+            print(f"Error de timeout al cargar visitas")
+            flash(f"Error de conexión: La base de datos tardó demasiado en responder. Por favor, intente nuevamente.", "error")
+            return render_template(
+                "administradores_dashboard.html",
+                tab=tab,
+                visitas=[],
+                page=1,
+                total_pages=1,
+                total_registros=0
+            )
+        except requests.exceptions.RequestException as e:
+            print(f"Error de conexión al cargar visitas: {e}")
+            flash(f"Error de conexión al cargar visitas. Por favor, verifique su conexión a internet.", "error")
+            return render_template(
+                "administradores_dashboard.html",
+                tab=tab,
+                visitas=[],
+                page=1,
+                total_pages=1,
+                total_registros=0
+            )
         except Exception as e:
-            print(f"Error de timeout al cargar visitas: {e}")
-            flash(f"Error de conexión al cargar visitas. Por favor, intente nuevamente.", "error")
-            # Renderizar con datos vacíos
+            print(f"Error inesperado al cargar visitas: {e}")
+            flash(f"Error inesperado al cargar visitas. Por favor, contacte al administrador del sistema.", "error")
             return render_template(
                 "administradores_dashboard.html",
                 tab=tab,
@@ -1987,27 +2099,12 @@ def administradores_dashboard():
                 total_registros=0
             )
 
-        # Obtener total de registros del header Content-Range
-        try:
-            content_range = response.headers.get("Content-Range", "*/0")
-            total_registros = int(content_range.split("/")[-1])
-        except Exception as e:
-            print(f"Error al parsear Content-Range: {e}")
-            total_registros = 0
-
-        total_pages = max(1, (total_registros + per_page - 1) // per_page)
-
-        visitas = response.json()
-        visitas = [limpiar_none(v) for v in visitas]
-
-        return render_template(
-            "administradores_dashboard.html",
-            tab=tab,
-            visitas=visitas,
-            page=page,
-            total_pages=total_pages,
-            total_registros=total_registros
-        )
+    # ============================================
+    # TAB INVÁLIDO - Redirigir a tab por defecto
+    # ============================================
+    else:
+        print(f"Tab inválido recibido: {tab}")
+        return redirect("/administradores_dashboard?tab=administradores")
 
 
 # Alta de Administrador
