@@ -204,37 +204,52 @@
             transform: translateY(-2px);
         }
 
-        /* Pestañas */
+        /* Pestañas - Siguiendo directrices corporativas */
         .tabs-container {
             display: flex;
-            gap: 0;
-            border-bottom: 2px solid #366092;
-            margin-bottom: 20px;
+            gap: 5px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #366092;
+            padding-bottom: 0;
         }
 
         .tab-button {
-            background: #f0f0f0;
+            background: #f8f9fa;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 28px;
             font-size: 15px;
             font-weight: 600;
-            color: #666;
+            color: #555;
             cursor: pointer;
-            transition: all 0.3s;
-            border-top-left-radius: 6px;
-            border-top-right-radius: 6px;
+            transition: all 0.3s ease;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
             text-decoration: none;
             display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+            border: 1px solid #e1e5e9;
+            border-bottom: none;
+            position: relative;
+            bottom: -3px;
         }
 
         .tab-button:hover {
-            background: #e0e0e0;
+            background: #e9ecef;
             color: #366092;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
         }
 
         .tab-button.active {
-            background: #366092;
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
             color: white;
+            border-color: #366092;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        }
+
+        .tab-button.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
         }
 
         @media (max-width: 768px) {
