@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administradores de Fincas</title>
-    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <link rel="stylesheet" href="/static/styles.css?v=6">
     <style>
         /* Ajustar layout para dashboard amplio */
         main {
@@ -26,6 +26,164 @@
                 margin-left: 0 !important;
                 padding: 20px !important;
             }
+        }
+
+        /* ESTILOS CRÍTICOS DE BOTONES */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px 10px 0;
+            min-width: 120px;
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.5;
+            vertical-align: middle;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+            background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #218838 0%, #28a745 100%);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+            min-width: auto;
+            margin: 5px;
+        }
+
+        /* ESTILOS DEL BUSCADOR */
+        .buscador-destacado {
+            background: #366092;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
+        }
+
+        .buscador-label {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: block;
+        }
+
+        .buscador-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .buscador-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            box-sizing: border-box;
+            height: 50px;
+            margin-bottom: 0 !important;
+        }
+
+        .buscador-input:focus {
+            outline: 2px solid rgba(255,255,255,0.5);
+        }
+
+        button.btn-buscar {
+            background: white !important;
+            color: #366092 !important;
+            padding: 15px 30px;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            white-space: nowrap;
+            box-sizing: border-box;
+            height: 50px;
+            margin: 0 !important;
+        }
+
+        button.btn-buscar:hover {
+            background: #f8f9fa !important;
+            transform: translateY(0);
+            border-color: #f8f9fa;
+        }
+
+        /* ESTILOS MOBILE-CARD */
+        .mobile-card {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #366092;
+        }
+
+        .mobile-card h3 {
+            color: #366092;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .mobile-card p {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .mobile-card .actions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e1e5e9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .mobile-card .button,
+        .mobile-card .btn {
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            margin: 0;
         }
 
         .paginacion {
@@ -167,23 +325,39 @@
             box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
         }
 
-        @media (max-width: 768px) {
-            table {
-                font-size: 12px;
-                min-width: 600px;
+        @media (max-width: 767px) {
+            /* Ocultar tabla en móvil */
+            .tabla-container {
+                display: none !important;
             }
 
-            th, td {
-                padding: 8px 6px;
+            /* Mostrar mobile-cards en móvil */
+            .mobile-card {
+                display: block !important;
             }
 
-            .btn-accion {
-                padding: 6px 10px;
-                font-size: 12px;
+            /* Ajustar buscador en móvil */
+            .buscador-input-container {
+                flex-direction: column;
+            }
+
+            .buscador-input {
+                min-width: 100%;
+            }
+
+            .btn-buscar {
+                width: 100%;
             }
 
             .paginacion-info {
                 font-size: 14px;
+            }
+
+            /* Ajustar botones en móvil */
+            .mobile-card .btn {
+                width: auto;
+                flex: 1;
+                min-width: 120px;
             }
         }
     </style>
