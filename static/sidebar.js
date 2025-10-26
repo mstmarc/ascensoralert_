@@ -202,6 +202,9 @@
                 <a href="/oportunidades" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Ver Oportunidades
                 </a>
+                <a href="/administradores_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    Ver Administradores
+                </a>
                 <a href="/visitas_administradores_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Ver Visitas a Administradores
                 </a>
