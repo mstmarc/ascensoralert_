@@ -349,9 +349,28 @@
         // Sincronizar cuando el usuario cambia el campo
         searchInput.addEventListener('input', syncAdministradorFields);
 
+        // Debug: Mostrar valores iniciales
+        console.log('DEBUG: Valores iniciales al cargar:');
+        console.log('  administrador_search:', searchInput.value);
+        console.log('  administrador_id:', hiddenInput.value);
+        console.log('  administrador_fincas:', administradorFincasInput.value);
+
         // Sincronizar al cargar la página si ya hay un valor pre-cargado
         if (searchInput.value) {
             syncAdministradorFields();
+        }
+
+        // Si hay administrador_id pero no administrador_fincas, intentar buscar en la lista
+        if (hiddenInput.value && !administradorFincasInput.value) {
+            const adminId = hiddenInput.value;
+            const matchingOption = Array.from(datalist.options).find(
+                option => option.dataset.id === adminId
+            );
+            if (matchingOption) {
+                searchInput.value = matchingOption.value;
+                administradorFincasInput.value = matchingOption.value;
+                console.log('DEBUG: Campo administrador_fincas llenado automáticamente con:', matchingOption.value);
+            }
         }
     </script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
