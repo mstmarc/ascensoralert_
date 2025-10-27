@@ -587,6 +587,10 @@ def home():
 
     # Dashboard responsive (funciona en desktop, tablet y móvil)
 
+    # Variables de fecha usadas en varias secciones
+    hoy = date.today().isoformat()
+    fin_semana = (date.today() + timedelta(days=7)).isoformat()
+
     # ========== MÉTRICAS Y ALERTAS (OPTIMIZADO CON CACHÉ) ==========
     # Usar caché de métricas (TTL: 5 minutos)
     # Reduce de 10+ queries a 0 queries en cargas subsecuentes
