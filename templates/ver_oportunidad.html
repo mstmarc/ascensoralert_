@@ -168,7 +168,7 @@
 
         .accion-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             padding: 10px;
             border-bottom: 1px solid #eee;
             gap: 10px;
@@ -178,16 +178,28 @@
             border-bottom: none;
         }
 
+        .accion-item form {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
         .accion-checkbox {
             width: 20px;
             height: 20px;
             cursor: pointer;
+            flex-shrink: 0;
+            margin: 0;
         }
 
         .accion-texto {
             flex: 1;
             font-size: 14px;
             color: #333;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.5;
+            padding-top: 2px;
         }
 
         .accion-texto.completada {
@@ -434,7 +446,7 @@
                         <ul class="acciones-list">
                             {% for accion in oportunidad.acciones %}
                             <li class="accion-item">
-                                <form method="POST" action="{{ url_for('toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}" style="display: inline;">
+                                <form method="POST" action="{{ url_for('toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
                                     <input type="checkbox"
                                            class="accion-checkbox"
                                            {% if accion.completada %}checked{% endif %}
@@ -443,7 +455,7 @@
                                 <span class="accion-texto {% if accion.completada %}completada{% endif %}">
                                     {{ accion.texto }}
                                 </span>
-                                <form method="POST" action="{{ url_for('delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}" style="display: inline;">
+                                <form method="POST" action="{{ url_for('delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
                                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta acción?')">×</button>
                                 </form>
                             </li>
