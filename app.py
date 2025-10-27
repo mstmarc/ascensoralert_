@@ -448,9 +448,10 @@ def home():
     }
     
     # ========== ÚLTIMAS INSTALACIONES ==========
-
+    # OPTIMIZACIÓN: Usar join de Supabase para obtener equipos en una sola query
+    # En lugar de hacer 1 + 5 queries (1 para leads + 5 para equipos), hacemos solo 1 query
     response_ultimas = requests.get(
-        f"{SUPABASE_URL}/rest/v1/clientes?select=*&order=fecha_visita.desc&limit=5",
+        f"{SUPABASE_URL}/rest/v1/clientes?select=*,equipos(id)&order=fecha_visita.desc&limit=5",
         headers=HEADERS
     )
 
@@ -458,12 +459,8 @@ def home():
     if response_ultimas.ok:
         leads_data = response_ultimas.json()
         for lead in leads_data:
-            # Contar equipos de este lead
-            response_equipos = requests.get(
-                f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead['id']}",
-                headers=HEADERS
-            )
-            equipos_data = response_equipos.json() if response_equipos.ok else []
+            # Los equipos ya están incluidos gracias al join de Supabase
+            equipos_data = lead.get('equipos', [])
             num_equipos = len(equipos_data) if equipos_data else lead.get('numero_ascensores', 0)
 
             # Obtener empresa mantenedora del cliente (no de equipos)
@@ -1088,67 +1085,69 @@ def leads_dashboard():
     total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
     total_pages = max(1, (total_registros + per_page - 1) // per_page)
     
-    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=*&limit={per_page}&offset={offset}"
+    # OPTIMIZACIÓN: Usar join de Supabase para obtener equipos en una sola query
+    # En lugar de hacer 25 queries separadas (1 por lead), obtenemos todo en 1 query
+    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=*,equipos(ipo_proxima,fecha_vencimiento_contrato)&limit={per_page}&offset={offset}"
     if query_string:
         data_url += f"&{query_string}"
-    
+
     response = requests.get(data_url, headers=HEADERS)
-    
+
     if response.status_code != 200:
         return f"<h3 style='color:red;'>Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
-    
+
     leads_data = response.json()
     rows = []
     localidades_disponibles = set()
     empresas_disponibles = set()
-    
-    all_leads_response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=localidad,empresa_mantenedora", headers=HEADERS)
-    if all_leads_response.status_code == 200:
-        all_leads = all_leads_response.json()
-        for lead in all_leads:
-            if lead.get("localidad"):
-                localidades_disponibles.add(lead["localidad"])
-            if lead.get("empresa_mantenedora"):
-                empresas_disponibles.add(lead["empresa_mantenedora"])
-    
+
+    # OPTIMIZACIÓN: Obtener solo las localidades y empresas únicas
+    # En lugar de cargar todos los leads completos, solo pedimos los campos necesarios
+    localidades_response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=localidad", headers=HEADERS)
+    empresas_response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=empresa_mantenedora", headers=HEADERS)
+
+    if localidades_response.status_code == 200:
+        for item in localidades_response.json():
+            if item.get("localidad"):
+                localidades_disponibles.add(item["localidad"])
+
+    if empresas_response.status_code == 200:
+        for item in empresas_response.json():
+            if item.get("empresa_mantenedora"):
+                empresas_disponibles.add(item["empresa_mantenedora"])
+
+    # OPTIMIZACIÓN: Procesar equipos que ya vienen embedidos en la respuesta
     for lead in leads_data:
-        lead_id = lead["id"]
-        
-        equipos_response = requests.get(
-            f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", 
-            headers=HEADERS
-        )
-        
-        if equipos_response.status_code == 200:
-            equipos = equipos_response.json()
-            
-            direccion = lead.get("direccion", "-")
-            localidad = lead.get("localidad", "-")
-            empresa_mantenedora = lead.get("empresa_mantenedora", "-")
-            total_equipos = len(equipos) if equipos else lead.get("numero_ascensores", 0)
-            
-            ipo_proxima = None
-            contrato_vence = None
-            
-            if equipos:
-                for equipo in equipos:
-                    ipo_equipo = equipo.get("ipo_proxima")
-                    if ipo_equipo:
-                        try:
-                            ipo_date = datetime.strptime(ipo_equipo, "%Y-%m-%d")
-                            if ipo_proxima is None or ipo_date < ipo_proxima:
-                                ipo_proxima = ipo_date
-                        except:
-                            pass
-                    
-                    contrato_equipo = equipo.get("fecha_vencimiento_contrato")
-                    if contrato_equipo:
-                        try:
-                            contrato_date = datetime.strptime(contrato_equipo, "%Y-%m-%d")
-                            if contrato_vence is None or contrato_date < contrato_vence:
-                                contrato_vence = contrato_date
-                        except:
-                            pass
+        # Los equipos ya están incluidos gracias al join de Supabase
+        equipos = lead.get("equipos", [])
+
+        direccion = lead.get("direccion", "-")
+        localidad = lead.get("localidad", "-")
+        empresa_mantenedora = lead.get("empresa_mantenedora", "-")
+        total_equipos = len(equipos) if equipos else lead.get("numero_ascensores", 0)
+
+        ipo_proxima = None
+        contrato_vence = None
+
+        if equipos:
+            for equipo in equipos:
+                ipo_equipo = equipo.get("ipo_proxima")
+                if ipo_equipo:
+                    try:
+                        ipo_date = datetime.strptime(ipo_equipo, "%Y-%m-%d")
+                        if ipo_proxima is None or ipo_date < ipo_proxima:
+                            ipo_proxima = ipo_date
+                    except:
+                        pass
+
+                contrato_equipo = equipo.get("fecha_vencimiento_contrato")
+                if contrato_equipo:
+                    try:
+                        contrato_date = datetime.strptime(contrato_equipo, "%Y-%m-%d")
+                        if contrato_vence is None or contrato_date < contrato_vence:
+                            contrato_vence = contrato_date
+                    except:
+                        pass
             
             ipo_proxima_str = ipo_proxima.strftime("%d/%m/%Y") if ipo_proxima else "-"
             contrato_vence_str = contrato_vence.strftime("%d/%m/%Y") if contrato_vence else "-"
