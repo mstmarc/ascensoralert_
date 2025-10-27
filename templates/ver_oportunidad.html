@@ -163,25 +163,35 @@
 
         .acciones-list {
             list-style: none;
-            margin-bottom: 15px;
+            margin: 0 0 15px 0;
+            padding: 0;
         }
 
         .accion-item {
             display: flex;
             align-items: flex-start;
-            padding: 10px;
+            padding: 10px 10px 10px 5px;
             border-bottom: 1px solid #eee;
-            gap: 10px;
+            gap: 8px;
         }
 
         .accion-item:last-child {
             border-bottom: none;
         }
 
-        .accion-item form {
+        .accion-item form:first-child {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             flex-shrink: 0;
+            width: 20px;
+            margin-right: 2px;
+        }
+
+        .accion-item form:last-child {
+            display: flex;
+            align-items: flex-start;
+            flex-shrink: 0;
+            margin-left: auto;
         }
 
         .accion-checkbox {
@@ -189,22 +199,29 @@
             height: 20px;
             cursor: pointer;
             flex-shrink: 0;
-            margin: 0;
+            margin: 2px 0 0 0;
         }
 
         .accion-texto {
             flex: 1;
+            min-width: 0;
             font-size: 14px;
             color: #333;
             word-wrap: break-word;
             overflow-wrap: break-word;
             line-height: 1.5;
-            padding-top: 2px;
+            padding: 2px 0;
         }
 
         .accion-texto.completada {
             text-decoration: line-through;
             color: #999;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 16px;
+            min-width: auto;
         }
 
 
