@@ -261,24 +261,27 @@
                             list="administradores-list"
                             placeholder="🔍 Buscar administrador..."
                             autocomplete="off"
+                            {% if oportunidad and oportunidad.clientes.administrador_fincas %}value="{{ oportunidad.clientes.administrador_fincas }}"{% endif %}
                         >
                         <datalist id="administradores-list">
                             {% for admin in administradores %}
                             <option value="{{ admin.nombre_empresa }}" data-id="{{ admin.id }}">
                             {% endfor %}
                         </datalist>
-                        <input type="hidden" id="administrador_id" name="administrador_id">
+                        <input type="hidden" id="administrador_id" name="administrador_id"
+                               {% if oportunidad and oportunidad.clientes.administrador_id %}value="{{ oportunidad.clientes.administrador_id }}"{% endif %}>
                         <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                            💡 Escribe para buscar o selecciona de la lista
+                            💡 {% if oportunidad %}Pre-cargado desde la comunidad. Puedes cambiarlo si es necesario{% else %}Escribe para buscar o selecciona de la lista{% endif %}
                         </small>
                     </div>
 
                     <div class="form-group">
                         <label for="administrador_fincas">Administrador de Fincas (texto libre)</label>
                         <input type="text" id="administrador_fincas" name="administrador_fincas"
-                               placeholder="O escribe el nombre si no está en la lista">
+                               placeholder="O escribe el nombre si no está en la lista"
+                               {% if oportunidad and oportunidad.clientes.administrador_fincas %}value="{{ oportunidad.clientes.administrador_fincas }}"{% endif %}>
                         <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                            * Debes seleccionar uno de la lista O escribir un nombre
+                            * {% if oportunidad %}Pre-cargado desde la comunidad{% else %}Debes seleccionar uno de la lista O escribir un nombre{% endif %}
                         </small>
                     </div>
 
@@ -321,23 +324,35 @@
             }
         });
 
-        // Script simple para capturar el ID del administrador seleccionado
+        // Script para capturar el ID del administrador seleccionado
         const searchInput = document.getElementById('administrador_search');
         const hiddenInput = document.getElementById('administrador_id');
+        const administradorFincasInput = document.getElementById('administrador_fincas');
         const datalist = document.getElementById('administradores-list');
 
-        searchInput.addEventListener('input', function() {
+        function syncAdministradorFields() {
             const selectedOption = Array.from(datalist.options).find(
-                option => option.value === this.value
+                option => option.value === searchInput.value
             );
 
             if (selectedOption) {
                 hiddenInput.value = selectedOption.dataset.id;
-                console.log('Administrador seleccionado:', this.value, 'ID:', selectedOption.dataset.id);
-            } else {
+                // Llenar automáticamente el campo administrador_fincas
+                administradorFincasInput.value = searchInput.value;
+                console.log('Administrador seleccionado:', searchInput.value, 'ID:', selectedOption.dataset.id);
+            } else if (!hiddenInput.value) {
+                // Solo limpiar si no hay un ID pre-cargado
                 hiddenInput.value = '';
             }
-        });
+        }
+
+        // Sincronizar cuando el usuario cambia el campo
+        searchInput.addEventListener('input', syncAdministradorFields);
+
+        // Sincronizar al cargar la página si ya hay un valor pre-cargado
+        if (searchInput.value) {
+            syncAdministradorFields();
+        }
     </script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
