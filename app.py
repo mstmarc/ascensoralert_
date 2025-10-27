@@ -869,7 +869,7 @@ def visitas_administradores_dashboard():
     total_pages = max(1, (total_registros + per_page - 1) // per_page)
 
     # OPTIMIZACIÓN: Seleccionar campos específicos (ajusta según lo que necesite la vista)
-    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,notas,tipo_visita&order=fecha_visita.desc&limit={per_page}&offset={offset}"
+    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,administrador_fincas,persona_contacto,observaciones,oportunidad_id&order=fecha_visita.desc&limit={per_page}&offset={offset}"
     response = requests.get(data_url, headers=HEADERS)
     
     if response.status_code != 200:
