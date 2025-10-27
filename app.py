@@ -756,8 +756,31 @@ def visita_administrador():
         )
         if oportunidad_response.status_code == 200 and oportunidad_response.json():
             oportunidad_data = oportunidad_response.json()[0]
-    
+
+            # Si el cliente tiene administrador_id pero no administrador_fincas, buscar el nombre
+            if oportunidad_data.get('clientes'):
+                cliente = oportunidad_data['clientes']
+                admin_id = cliente.get('administrador_id')
+                admin_nombre = cliente.get('administrador_fincas')
+
+                # Si hay ID pero no nombre, buscar en la base de datos
+                if admin_id and not admin_nombre:
+                    admin_response = requests.get(
+                        f"{SUPABASE_URL}/rest/v1/administradores_fincas?id=eq.{admin_id}&select=nombre_empresa",
+                        headers=HEADERS
+                    )
+                    if admin_response.status_code == 200 and admin_response.json():
+                        nombre_empresa = admin_response.json()[0].get("nombre_empresa")
+                        # Actualizar el cliente en oportunidad_data con el nombre encontrado
+                        oportunidad_data['clientes']['administrador_fincas'] = nombre_empresa
+                        print(f"DEBUG GET: Administrador encontrado para pre-carga: {nombre_empresa} (ID: {admin_id})")
+
     if request.method == "POST":
+        # Debug: Ver datos recibidos del formulario
+        print(f"DEBUG POST: Datos recibidos del formulario:")
+        print(f"  administrador_id: '{request.form.get('administrador_id')}'")
+        print(f"  administrador_fincas: '{request.form.get('administrador_fincas')}'")
+
         # Obtener administrador_id y convertir a int o None
         administrador_id = request.form.get("administrador_id")
         if administrador_id and administrador_id.strip():
