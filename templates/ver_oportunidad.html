@@ -168,49 +168,38 @@
         }
 
         .accion-item {
-            display: flex;
-            align-items: flex-start;
-            padding: 10px 10px 10px 5px;
+            padding: 12px 10px;
             border-bottom: 1px solid #eee;
-            gap: 8px;
+            display: block;
         }
 
         .accion-item:last-child {
             border-bottom: none;
         }
 
-        .accion-item form:first-child {
+        .accion-content {
             display: flex;
             align-items: flex-start;
-            flex-shrink: 0;
-            width: 20px;
-            margin-right: 2px;
+            gap: 10px;
         }
 
-        .accion-item form:last-child {
-            display: flex;
-            align-items: flex-start;
+        .accion-checkbox-wrapper {
             flex-shrink: 0;
-            margin-left: auto;
         }
 
         .accion-checkbox {
             width: 20px;
             height: 20px;
             cursor: pointer;
-            flex-shrink: 0;
-            margin: 2px 0 0 0;
+            margin: 0;
         }
 
         .accion-texto {
             flex: 1;
-            min-width: 0;
             font-size: 14px;
             color: #333;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            line-height: 1.5;
-            padding: 2px 0;
+            line-height: 1.6;
+            word-break: break-word;
         }
 
         .accion-texto.completada {
@@ -218,10 +207,15 @@
             color: #999;
         }
 
-        .btn-sm {
-            padding: 4px 8px;
-            font-size: 16px;
-            min-width: auto;
+        .accion-delete {
+            flex-shrink: 0;
+        }
+
+        .accion-delete .btn {
+            padding: 2px 8px;
+            font-size: 18px;
+            line-height: 1;
+            min-width: 28px;
         }
 
 
@@ -463,18 +457,24 @@
                         <ul class="acciones-list">
                             {% for accion in oportunidad.acciones %}
                             <li class="accion-item">
-                                <form method="POST" action="{{ url_for('toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
-                                    <input type="checkbox"
-                                           class="accion-checkbox"
-                                           {% if accion.completada %}checked{% endif %}
-                                           onchange="this.form.submit()">
-                                </form>
-                                <span class="accion-texto {% if accion.completada %}completada{% endif %}">
-                                    {{ accion.texto }}
-                                </span>
-                                <form method="POST" action="{{ url_for('delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta acción?')">×</button>
-                                </form>
+                                <div class="accion-content">
+                                    <div class="accion-checkbox-wrapper">
+                                        <form method="POST" action="{{ url_for('toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
+                                            <input type="checkbox"
+                                                   class="accion-checkbox"
+                                                   {% if accion.completada %}checked{% endif %}
+                                                   onchange="this.form.submit()">
+                                        </form>
+                                    </div>
+                                    <div class="accion-texto {% if accion.completada %}completada{% endif %}">
+                                        {{ accion.texto }}
+                                    </div>
+                                    <div class="accion-delete">
+                                        <form method="POST" action="{{ url_for('delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta acción?')">×</button>
+                                        </form>
+                                    </div>
+                                </div>
                             </li>
                             {% endfor %}
                         </ul>
