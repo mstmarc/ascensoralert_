@@ -1118,6 +1118,8 @@ def leads_dashboard():
 
     # OPTIMIZACIÓN: Procesar equipos que ya vienen embedidos en la respuesta
     for lead in leads_data:
+        lead_id = lead["id"]
+
         # Los equipos ya están incluidos gracias al join de Supabase
         equipos = lead.get("equipos", [])
 
