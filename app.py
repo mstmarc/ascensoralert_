@@ -769,7 +769,16 @@ def visita_administrador():
             administrador_id = None
 
         # Si se proporcionó administrador_id pero no administrador_fincas, buscar el nombre
-        administrador_fincas = request.form.get("administrador_fincas") or None
+        administrador_fincas = request.form.get("administrador_fincas")
+        # Limpiar cadenas vacías o solo con espacios en blanco
+        if administrador_fincas:
+            administrador_fincas = administrador_fincas.strip()
+            if not administrador_fincas:
+                administrador_fincas = None
+        else:
+            administrador_fincas = None
+
+        # Si hay administrador_id pero no administrador_fincas, buscar el nombre
         if administrador_id and not administrador_fincas:
             # Buscar el nombre del administrador en la base de datos
             admin_response = requests.get(
@@ -778,6 +787,9 @@ def visita_administrador():
             )
             if admin_response.status_code == 200 and admin_response.json():
                 administrador_fincas = admin_response.json()[0].get("nombre_empresa")
+                print(f"DEBUG: Administrador encontrado: {administrador_fincas} para ID {administrador_id}")
+            else:
+                print(f"DEBUG: No se encontró administrador con ID {administrador_id}")
 
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
@@ -787,6 +799,9 @@ def visita_administrador():
             "observaciones": request.form.get("observaciones") or None,
             "oportunidad_id": int(request.form.get("oportunidad_id")) if request.form.get("oportunidad_id") else None
         }
+
+        # Debug: Mostrar datos antes de enviar
+        print(f"DEBUG: Datos a enviar: {data}")
 
         # Solo fecha es obligatoria, al menos uno de los dos campos de administrador debe estar
         if not data["fecha_visita"] or (not data["administrador_fincas"] and not data["administrador_id"]):
