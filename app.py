@@ -231,8 +231,9 @@ def get_ultimas_instalaciones_cached():
         try:
             print(f"🔄 Consultando últimas instalaciones desde Supabase...")
 
+            # OPTIMIZACIÓN: Seleccionar solo campos necesarios en lugar de *
             response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/clientes?select=*,equipos(id)&order=fecha_visita.desc&limit=5",
+                f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,nombre_cliente,localidad,empresa_mantenedora,numero_ascensores,equipos(id)&order=fecha_visita.desc&limit=5",
                 headers=HEADERS,
                 timeout=10
             )
@@ -277,8 +278,9 @@ def get_ultimas_oportunidades_cached():
         try:
             print(f"🔄 Consultando últimas oportunidades desde Supabase...")
 
+            # OPTIMIZACIÓN: Seleccionar solo campos necesarios en lugar de *
             response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/oportunidades?select=*,clientes(nombre_cliente,direccion)&order=fecha_creacion.desc&limit=5",
+                f"{SUPABASE_URL}/rest/v1/oportunidades?select=id,tipo,estado,clientes(nombre_cliente,direccion)&order=fecha_creacion.desc&limit=5",
                 headers=HEADERS,
                 timeout=10
             )
@@ -644,9 +646,9 @@ def home():
             })
     
     # ========== PRÓXIMAS IPOs ESTA SEMANA ==========
-    
+    # OPTIMIZACIÓN: Seleccionar solo campos necesarios en lugar de *
     response_ipos = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?select=*,clientes(direccion,localidad)&ipo_proxima=gte.{hoy}&ipo_proxima=lte.{fin_semana}&order=ipo_proxima.asc",
+        f"{SUPABASE_URL}/rest/v1/equipos?select=cliente_id,ipo_proxima,clientes(direccion,localidad)&ipo_proxima=gte.{hoy}&ipo_proxima=lte.{fin_semana}&order=ipo_proxima.asc",
         headers=HEADERS
     )
     
@@ -810,13 +812,15 @@ def visitas_administradores_dashboard():
     page = int(request.args.get("page", 1))
     per_page = 25
     offset = (page - 1) * per_page
-    
-    count_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=*"
+
+    # OPTIMIZACIÓN: Para count solo necesitamos id, no todos los campos
+    count_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id"
     count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"})
     total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
     total_pages = max(1, (total_registros + per_page - 1) // per_page)
-    
-    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=*&order=fecha_visita.desc&limit={per_page}&offset={offset}"
+
+    # OPTIMIZACIÓN: Seleccionar campos específicos (ajusta según lo que necesite la vista)
+    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,notas,tipo_visita&order=fecha_visita.desc&limit={per_page}&offset={offset}"
     response = requests.get(data_url, headers=HEADERS)
     
     if response.status_code != 200:
@@ -1218,18 +1222,20 @@ def leads_dashboard():
         query_params.append(f"direccion=ilike.*{buscar_direccion}*")
     
     query_string = "&".join(query_params) if query_params else ""
-    
-    count_url = f"{SUPABASE_URL}/rest/v1/clientes?select=*"
+
+    # OPTIMIZACIÓN: Para count solo necesitamos id, no todos los campos
+    count_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id"
     if query_string:
         count_url += f"&{query_string}"
-    
+
     count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"})
     total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
     total_pages = max(1, (total_registros + per_page - 1) // per_page)
-    
-    # OPTIMIZACIÓN: Usar join de Supabase para obtener equipos en una sola query
+
+    # OPTIMIZACIÓN: Usar join de Supabase + selección específica de campos
     # En lugar de hacer 25 queries separadas (1 por lead), obtenemos todo en 1 query
-    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=*,equipos(ipo_proxima,fecha_vencimiento_contrato)&limit={per_page}&offset={offset}"
+    # Y solo seleccionamos los campos que realmente necesitamos
+    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,localidad,empresa_mantenedora,numero_ascensores,equipos(ipo_proxima,fecha_vencimiento_contrato)&limit={per_page}&offset={offset}"
     if query_string:
         data_url += f"&{query_string}"
 
