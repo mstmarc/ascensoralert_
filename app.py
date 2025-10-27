@@ -34,10 +34,37 @@ if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
 
 # ============================================
-# SISTEMA DE CACHÉ PARA ADMINISTRADORES
+# SISTEMA DE CACHÉ OPTIMIZADO
 # ============================================
 # Evita consultas repetidas a Supabase, mejorando el rendimiento
+
+# Caché para administradores (5 min)
 cache_administradores = {
+    'data': [],
+    'timestamp': None
+}
+
+# Caché para métricas del dashboard home (5 min)
+cache_metricas_home = {
+    'data': None,
+    'timestamp': None
+}
+
+# Caché para filtros de localidades y empresas (30 min - cambian poco)
+cache_filtros = {
+    'localidades': [],
+    'empresas': [],
+    'timestamp': None
+}
+
+# Caché para últimas instalaciones (10 min)
+cache_ultimas_instalaciones = {
+    'data': [],
+    'timestamp': None
+}
+
+# Caché para últimas oportunidades (10 min)
+cache_ultimas_oportunidades = {
     'data': [],
     'timestamp': None
 }
@@ -83,6 +110,188 @@ def get_administradores_cached():
             # Si falla, devolver lo que haya en caché (aunque esté desactualizado)
 
     return cache_administradores['data']
+
+def get_metricas_home_cached():
+    """
+    Obtiene las métricas del dashboard home usando caché.
+    Se renueva cada 5 minutos.
+    """
+    now = datetime.now()
+
+    if not cache_metricas_home['timestamp'] or \
+       (now - cache_metricas_home['timestamp']) > timedelta(minutes=5):
+
+        try:
+            print(f"🔄 Consultando métricas del home desde Supabase...")
+
+            # Obtener todas las métricas en paralelo sería ideal, pero las hacemos secuenciales
+            metricas = {}
+
+            # Total clientes
+            resp = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=id", headers=HEADERS, timeout=10)
+            metricas['total_clientes'] = len(resp.json()) if resp.ok else 0
+
+            # Total equipos
+            resp = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?select=id", headers=HEADERS, timeout=10)
+            metricas['total_equipos'] = len(resp.json()) if resp.ok else 0
+
+            # Total oportunidades
+            resp = requests.get(f"{SUPABASE_URL}/rest/v1/oportunidades?select=id", headers=HEADERS, timeout=10)
+            metricas['total_oportunidades'] = len(resp.json()) if resp.ok else 0
+
+            # IPOs de hoy
+            hoy = datetime.now().strftime("%Y-%m-%d")
+            resp = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?select=id&ipo_proxima=eq.{hoy}", headers=HEADERS, timeout=10)
+            metricas['ipos_hoy'] = len(resp.json()) if resp.ok else 0
+
+            # Contratos por vencer (próximos 30 días)
+            fecha_inicio = datetime.now().strftime("%Y-%m-%d")
+            fecha_fin = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
+            resp = requests.get(
+                f"{SUPABASE_URL}/rest/v1/equipos?select=id&fecha_vencimiento_contrato=gte.{fecha_inicio}&fecha_vencimiento_contrato=lte.{fecha_fin}",
+                headers=HEADERS, timeout=10
+            )
+            metricas['contratos_vencer'] = len(resp.json()) if resp.ok else 0
+
+            # IPOs de esta semana
+            fecha_fin_semana = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+            resp = requests.get(
+                f"{SUPABASE_URL}/rest/v1/equipos?select=id&ipo_proxima=gte.{fecha_inicio}&ipo_proxima=lte.{fecha_fin_semana}",
+                headers=HEADERS, timeout=10
+            )
+            metricas['ipos_semana'] = len(resp.json()) if resp.ok else 0
+
+            # Oportunidades pendientes
+            resp = requests.get(
+                f"{SUPABASE_URL}/rest/v1/oportunidades?select=id&estado=eq.activa",
+                headers=HEADERS, timeout=10
+            )
+            metricas['oportunidades_pendientes'] = len(resp.json()) if resp.ok else 0
+
+            cache_metricas_home['data'] = metricas
+            cache_metricas_home['timestamp'] = now
+            print(f"✅ Caché de métricas home actualizado")
+
+        except Exception as e:
+            print(f"❌ Error al actualizar caché de métricas: {type(e).__name__}: {str(e)}")
+            # Si falla, devolver lo que haya en caché
+
+    return cache_metricas_home['data']
+
+def get_filtros_cached():
+    """
+    Obtiene los filtros (localidades y empresas) usando caché.
+    Se renueva cada 30 minutos (cambian poco).
+    """
+    now = datetime.now()
+
+    if not cache_filtros['timestamp'] or \
+       (now - cache_filtros['timestamp']) > timedelta(minutes=30):
+
+        try:
+            print(f"🔄 Consultando filtros desde Supabase...")
+
+            localidades = set()
+            empresas = set()
+
+            # Localidades
+            resp = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=localidad", headers=HEADERS, timeout=10)
+            if resp.ok:
+                for item in resp.json():
+                    if item.get("localidad"):
+                        localidades.add(item["localidad"])
+
+            # Empresas
+            resp = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=empresa_mantenedora", headers=HEADERS, timeout=10)
+            if resp.ok:
+                for item in resp.json():
+                    if item.get("empresa_mantenedora"):
+                        empresas.add(item["empresa_mantenedora"])
+
+            cache_filtros['localidades'] = sorted(list(localidades))
+            cache_filtros['empresas'] = sorted(list(empresas))
+            cache_filtros['timestamp'] = now
+            print(f"✅ Caché de filtros actualizado: {len(localidades)} localidades, {len(empresas)} empresas")
+
+        except Exception as e:
+            print(f"❌ Error al actualizar caché de filtros: {type(e).__name__}: {str(e)}")
+
+    return cache_filtros['localidades'], cache_filtros['empresas']
+
+def get_ultimas_instalaciones_cached():
+    """
+    Obtiene las últimas instalaciones usando caché.
+    Se renueva cada 10 minutos.
+    """
+    now = datetime.now()
+
+    if not cache_ultimas_instalaciones['timestamp'] or \
+       (now - cache_ultimas_instalaciones['timestamp']) > timedelta(minutes=10):
+
+        try:
+            print(f"🔄 Consultando últimas instalaciones desde Supabase...")
+
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/clientes?select=*,equipos(id)&order=fecha_visita.desc&limit=5",
+                headers=HEADERS,
+                timeout=10
+            )
+
+            if response.ok:
+                leads_data = response.json()
+                instalaciones = []
+
+                for lead in leads_data:
+                    equipos_data = lead.get('equipos', [])
+                    num_equipos = len(equipos_data) if equipos_data else lead.get('numero_ascensores', 0)
+                    empresa_mantenedora = lead.get('empresa_mantenedora', '-')
+
+                    instalaciones.append({
+                        'id': lead['id'],
+                        'direccion': lead.get('direccion', 'Sin dirección'),
+                        'nombre_cliente': lead.get('nombre_cliente', ''),
+                        'localidad': lead.get('localidad', '-'),
+                        'num_equipos': num_equipos,
+                        'empresa_mantenedora': empresa_mantenedora
+                    })
+
+                cache_ultimas_instalaciones['data'] = instalaciones
+                cache_ultimas_instalaciones['timestamp'] = now
+                print(f"✅ Caché de últimas instalaciones actualizado: {len(instalaciones)} registros")
+
+        except Exception as e:
+            print(f"❌ Error al actualizar caché de instalaciones: {type(e).__name__}: {str(e)}")
+
+    return cache_ultimas_instalaciones['data']
+
+def get_ultimas_oportunidades_cached():
+    """
+    Obtiene las últimas oportunidades usando caché.
+    Se renueva cada 10 minutos.
+    """
+    now = datetime.now()
+
+    if not cache_ultimas_oportunidades['timestamp'] or \
+       (now - cache_ultimas_oportunidades['timestamp']) > timedelta(minutes=10):
+
+        try:
+            print(f"🔄 Consultando últimas oportunidades desde Supabase...")
+
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/oportunidades?select=*,clientes(nombre_cliente,direccion)&order=fecha_creacion.desc&limit=5",
+                headers=HEADERS,
+                timeout=10
+            )
+
+            if response.ok:
+                cache_ultimas_oportunidades['data'] = response.json()
+                cache_ultimas_oportunidades['timestamp'] = now
+                print(f"✅ Caché de últimas oportunidades actualizado: {len(cache_ultimas_oportunidades['data'])} registros")
+
+        except Exception as e:
+            print(f"❌ Error al actualizar caché de oportunidades: {type(e).__name__}: {str(e)}")
+
+    return cache_ultimas_oportunidades['data']
 
 # FUNCIONES AUXILIARES
 
@@ -377,114 +586,43 @@ def home():
         return redirect("/")
 
     # Dashboard responsive (funciona en desktop, tablet y móvil)
-    
-    # ========== MÉTRICAS ==========
-    
-    # Total de comunidades (leads únicos)
-    response_leads = requests.get(
-        f"{SUPABASE_URL}/rest/v1/clientes?select=id",
-        headers=HEADERS
-    )
-    total_comunidades = len(response_leads.json()) if response_leads.ok else 0
-    
-    # Total de equipos
-    response_equipos = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?select=id",
-        headers=HEADERS
-    )
-    total_equipos = len(response_equipos.json()) if response_equipos.ok else 0
-    
-    # Total de oportunidades
-    response_oportunidades = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?select=id",
-        headers=HEADERS
-    )
-    total_oportunidades = len(response_oportunidades.json()) if response_oportunidades.ok else 0
-    
-    # IPOs hoy
-    hoy = date.today().isoformat()
-    response_ipos_hoy = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?select=id&ipo_proxima=eq.{hoy}",
-        headers=HEADERS
-    )
-    ipos_hoy = len(response_ipos_hoy.json()) if response_ipos_hoy.ok else 0
-    
-    metricas = {
-        'total_comunidades': total_comunidades,
-        'total_equipos': total_equipos,
-        'total_oportunidades': total_oportunidades,
-        'ipos_hoy': ipos_hoy
-    }
-    
-    # ========== ALERTAS ==========
-    
-    # Contratos que vencen en 30 días
-    fecha_limite = (date.today() + timedelta(days=30)).isoformat()
-    response_contratos = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?select=id&fecha_vencimiento_contrato=lte.{fecha_limite}&fecha_vencimiento_contrato=gte.{hoy}",
-        headers=HEADERS
-    )
-    contratos_criticos = len(response_contratos.json()) if response_contratos.ok else 0
-    
-    # IPOs esta semana
-    fin_semana = (date.today() + timedelta(days=7)).isoformat()
-    response_ipos_semana = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?select=id&ipo_proxima=gte.{hoy}&ipo_proxima=lte.{fin_semana}",
-        headers=HEADERS
-    )
-    ipos_semana = len(response_ipos_semana.json()) if response_ipos_semana.ok else 0
-    
-    # Oportunidades pendientes (estado "activa")
-    response_op_pendientes = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?select=id&estado=eq.activa",
-        headers=HEADERS
-    )
-    oportunidades_pendientes = len(response_op_pendientes.json()) if response_op_pendientes.ok else 0
-    
-    alertas = {
-        'contratos_criticos': contratos_criticos,
-        'ipos_semana': ipos_semana,
-        'oportunidades_pendientes': oportunidades_pendientes
-    }
-    
-    # ========== ÚLTIMAS INSTALACIONES ==========
-    # OPTIMIZACIÓN: Usar join de Supabase para obtener equipos en una sola query
-    # En lugar de hacer 1 + 5 queries (1 para leads + 5 para equipos), hacemos solo 1 query
-    response_ultimas = requests.get(
-        f"{SUPABASE_URL}/rest/v1/clientes?select=*,equipos(id)&order=fecha_visita.desc&limit=5",
-        headers=HEADERS
-    )
 
-    ultimas_instalaciones = []
-    if response_ultimas.ok:
-        leads_data = response_ultimas.json()
-        for lead in leads_data:
-            # Los equipos ya están incluidos gracias al join de Supabase
-            equipos_data = lead.get('equipos', [])
-            num_equipos = len(equipos_data) if equipos_data else lead.get('numero_ascensores', 0)
+    # ========== MÉTRICAS Y ALERTAS (OPTIMIZADO CON CACHÉ) ==========
+    # Usar caché de métricas (TTL: 5 minutos)
+    # Reduce de 10+ queries a 0 queries en cargas subsecuentes
+    metricas_cached = get_metricas_home_cached()
 
-            # Obtener empresa mantenedora del cliente (no de equipos)
-            empresa_mantenedora = lead.get('empresa_mantenedora', '-')
+    if metricas_cached:
+        metricas = {
+            'total_comunidades': metricas_cached.get('total_clientes', 0),
+            'total_equipos': metricas_cached.get('total_equipos', 0),
+            'total_oportunidades': metricas_cached.get('total_oportunidades', 0),
+            'ipos_hoy': metricas_cached.get('ipos_hoy', 0)
+        }
 
-            ultimas_instalaciones.append({
-                'id': lead['id'],
-                'direccion': lead.get('direccion', 'Sin dirección'),
-                'nombre_cliente': lead.get('nombre_cliente', ''),
-                'localidad': lead.get('localidad', '-'),
-                'num_equipos': num_equipos,
-                'empresa_mantenedora': empresa_mantenedora
-            })
-    
-    # ========== ÚLTIMAS OPORTUNIDADES ==========
-    
-    response_oport = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?select=*,clientes(nombre_cliente,direccion)&order=fecha_creacion.desc&limit=5",
-        headers=HEADERS
-    )
-    
+        alertas = {
+            'contratos_criticos': metricas_cached.get('contratos_vencer', 0),
+            'ipos_semana': metricas_cached.get('ipos_semana', 0),
+            'oportunidades_pendientes': metricas_cached.get('oportunidades_pendientes', 0)
+        }
+    else:
+        # Fallback si el caché falla (no debería pasar)
+        metricas = {'total_comunidades': 0, 'total_equipos': 0, 'total_oportunidades': 0, 'ipos_hoy': 0}
+        alertas = {'contratos_criticos': 0, 'ipos_semana': 0, 'oportunidades_pendientes': 0}
+
+    # ========== ÚLTIMAS INSTALACIONES (OPTIMIZADO CON CACHÉ) ==========
+    # Usar caché de instalaciones (TTL: 10 minutos)
+    # Reduce de 1 query a 0 queries en cargas subsecuentes
+    ultimas_instalaciones = get_ultimas_instalaciones_cached()
+
+    # ========== ÚLTIMAS OPORTUNIDADES (OPTIMIZADO CON CACHÉ) ==========
+    # Usar caché de oportunidades (TTL: 10 minutos)
+    # Reduce de 1 query a 0 queries en cargas subsecuentes
+    oportunidades_cached = get_ultimas_oportunidades_cached()
+
     ultimas_oportunidades = []
-    if response_oport.ok:
-        for op in response_oport.json():
+    if oportunidades_cached:
+        for op in oportunidades_cached:
             # Obtener nombre y dirección del cliente de la relación
             cliente_info = op.get('clientes', {})
             if isinstance(cliente_info, list) and len(cliente_info) > 0:
@@ -1098,23 +1236,10 @@ def leads_dashboard():
 
     leads_data = response.json()
     rows = []
-    localidades_disponibles = set()
-    empresas_disponibles = set()
 
-    # OPTIMIZACIÓN: Obtener solo las localidades y empresas únicas
-    # En lugar de cargar todos los leads completos, solo pedimos los campos necesarios
-    localidades_response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=localidad", headers=HEADERS)
-    empresas_response = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?select=empresa_mantenedora", headers=HEADERS)
-
-    if localidades_response.status_code == 200:
-        for item in localidades_response.json():
-            if item.get("localidad"):
-                localidades_disponibles.add(item["localidad"])
-
-    if empresas_response.status_code == 200:
-        for item in empresas_response.json():
-            if item.get("empresa_mantenedora"):
-                empresas_disponibles.add(item["empresa_mantenedora"])
+    # OPTIMIZACIÓN: Usar caché de filtros (TTL: 30 minutos)
+    # Reduce de 2 queries a 0 queries en cargas subsecuentes
+    localidades_disponibles, empresas_disponibles = get_filtros_cached()
 
     # OPTIMIZACIÓN: Procesar equipos que ya vienen embedidos en la respuesta
     for lead in leads_data:
@@ -1187,10 +1312,10 @@ def leads_dashboard():
                 rows.append(row)
     
     rows.sort(key=lambda x: x["ipo_fecha_original"] if x["ipo_fecha_original"] else datetime.max)
-    
-    localidades_disponibles = sorted([l for l in localidades_disponibles if l])
-    empresas_disponibles = sorted([e for e in empresas_disponibles if e])
-    
+
+    # Los filtros ya vienen ordenados del caché, no es necesario volver a ordenar
+    # localidades_disponibles y empresas_disponibles ya están ordenados
+
     return render_template("dashboard.html",
         rows=rows,
         localidades=localidades_disponibles,
