@@ -324,6 +324,7 @@
         // Script simple para capturar el ID del administrador seleccionado
         const searchInput = document.getElementById('administrador_search');
         const hiddenInput = document.getElementById('administrador_id');
+        const administradorFincasInput = document.getElementById('administrador_fincas');
         const datalist = document.getElementById('administradores-list');
 
         searchInput.addEventListener('input', function() {
@@ -333,6 +334,8 @@
 
             if (selectedOption) {
                 hiddenInput.value = selectedOption.dataset.id;
+                // Llenar automáticamente el campo administrador_fincas
+                administradorFincasInput.value = this.value;
                 console.log('Administrador seleccionado:', this.value, 'ID:', selectedOption.dataset.id);
             } else {
                 hiddenInput.value = '';

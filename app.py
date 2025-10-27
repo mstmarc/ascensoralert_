@@ -768,9 +768,20 @@ def visita_administrador():
         else:
             administrador_id = None
 
+        # Si se proporcionó administrador_id pero no administrador_fincas, buscar el nombre
+        administrador_fincas = request.form.get("administrador_fincas") or None
+        if administrador_id and not administrador_fincas:
+            # Buscar el nombre del administrador en la base de datos
+            admin_response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/administradores_fincas?id=eq.{administrador_id}&select=nombre_empresa",
+                headers=HEADERS
+            )
+            if admin_response.status_code == 200 and admin_response.json():
+                administrador_fincas = admin_response.json()[0].get("nombre_empresa")
+
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
-            "administrador_fincas": request.form.get("administrador_fincas") or None,
+            "administrador_fincas": administrador_fincas,
             "administrador_id": administrador_id,
             "persona_contacto": request.form.get("persona_contacto") or None,
             "observaciones": request.form.get("observaciones") or None,
