@@ -1315,6 +1315,7 @@ def leads_dashboard():
         ipo_proxima = None
         contrato_vence = None
 
+        # Procesar equipos si existen
         if equipos:
             for equipo in equipos:
                 ipo_equipo = equipo.get("ipo_proxima")
@@ -1334,41 +1335,43 @@ def leads_dashboard():
                             contrato_vence = contrato_date
                     except:
                         pass
-            
-            ipo_proxima_str = ipo_proxima.strftime("%d/%m/%Y") if ipo_proxima else "-"
-            contrato_vence_str = contrato_vence.strftime("%d/%m/%Y") if contrato_vence else "-"
-            
-            color_ipo = calcular_color_ipo(ipo_proxima_str)
-            color_contrato = calcular_color_contrato(contrato_vence_str)
-            
-            row = {
-                "lead_id": lead_id,
-                "direccion": direccion,
-                "localidad": localidad,
-                "total_equipos": total_equipos,
-                "empresa_mantenedora": empresa_mantenedora,
-                "ipo_proxima": ipo_proxima_str,
-                "ipo_fecha_original": ipo_proxima,
-                "contrato_vence": contrato_vence_str,
-                "contrato_fecha_original": contrato_vence,
-                "color_ipo": color_ipo,
-                "color_contrato": color_contrato
-            }
-            
-            incluir_fila = True
-            if filtro_ipo_urgencia and ipo_proxima:
-                hoy = datetime.now()
-                diferencia_dias = (ipo_proxima - hoy).days
-                
-                if filtro_ipo_urgencia == "15_dias" and not (-15 <= diferencia_dias < 0):
-                    incluir_fila = False
-                elif filtro_ipo_urgencia == "ipo_pasada_30" and not (0 <= diferencia_dias <= 30):
-                    incluir_fila = False
-                elif filtro_ipo_urgencia == "30_90_dias" and not (30 < diferencia_dias <= 90):
-                    incluir_fila = False
-            
-            if incluir_fila:
-                rows.append(row)
+
+        # Crear fila SIEMPRE, tenga o no equipos
+        ipo_proxima_str = ipo_proxima.strftime("%d/%m/%Y") if ipo_proxima else "-"
+        contrato_vence_str = contrato_vence.strftime("%d/%m/%Y") if contrato_vence else "-"
+
+        color_ipo = calcular_color_ipo(ipo_proxima_str)
+        color_contrato = calcular_color_contrato(contrato_vence_str)
+
+        row = {
+            "lead_id": lead_id,
+            "direccion": direccion,
+            "localidad": localidad,
+            "total_equipos": total_equipos,
+            "empresa_mantenedora": empresa_mantenedora,
+            "ipo_proxima": ipo_proxima_str,
+            "ipo_fecha_original": ipo_proxima,
+            "contrato_vence": contrato_vence_str,
+            "contrato_fecha_original": contrato_vence,
+            "color_ipo": color_ipo,
+            "color_contrato": color_contrato
+        }
+
+        # Aplicar filtro de IPO si está activo
+        incluir_fila = True
+        if filtro_ipo_urgencia and ipo_proxima:
+            hoy = datetime.now()
+            diferencia_dias = (ipo_proxima - hoy).days
+
+            if filtro_ipo_urgencia == "15_dias" and not (-15 <= diferencia_dias < 0):
+                incluir_fila = False
+            elif filtro_ipo_urgencia == "ipo_pasada_30" and not (0 <= diferencia_dias <= 30):
+                incluir_fila = False
+            elif filtro_ipo_urgencia == "30_90_dias" and not (30 < diferencia_dias <= 90):
+                incluir_fila = False
+
+        if incluir_fila:
+            rows.append(row)
     
     rows.sort(key=lambda x: x["ipo_fecha_original"] if x["ipo_fecha_original"] else datetime.max)
 
