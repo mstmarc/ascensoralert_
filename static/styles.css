@@ -5,6 +5,12 @@
     box-sizing: border-box;
 }
 
+:root {
+    /* Tamaños tipográficos unificados para listados compactos */
+    --list-heading-font-size: 13px;
+    --list-body-font-size: 12px;
+}
+
 @font-face {
     font-family: 'Montserrat';
     src: url('/static/fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
@@ -510,7 +516,7 @@ td a:hover {
 .admin-list-name,
 .oportunidad-direccion,
 .listado-titulo {
-    font-size: 13px;
+    font-size: var(--list-heading-font-size);
     font-weight: 600;
     color: #1a1a1a;
     text-decoration: none;
@@ -557,7 +563,7 @@ td a:hover {
 
 .lead-list-info-item,
 .listado-metadata-item {
-    font-size: 12px;
+    font-size: var(--list-body-font-size);
     color: #1a1a1a;
 }
 
@@ -622,12 +628,12 @@ td a:hover {
     .admin-list-name,
     .oportunidad-direccion,
     .listado-titulo {
-        font-size: 13px;
+        font-size: var(--list-heading-font-size);
     }
 
     .lead-list-info-item,
     .listado-metadata-item {
-        font-size: 12px;
+        font-size: var(--list-body-font-size);
     }
 }
 
