@@ -591,6 +591,15 @@ td a:hover {
     background: #f8f9fa;
 }
 
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 16px;
+    background: white;
+    border-radius: 8px;
+}
+
 @media (max-width: 768px) {
     .lead-list-info,
     .listado-metadata {
@@ -600,6 +609,25 @@ td a:hover {
     .lead-list-actions,
     .listado-actions {
         justify-content: flex-start;
+    }
+
+    .lead-list-item,
+    .admin-list-item,
+    .oportunidad-item,
+    .listado-item {
+        padding: 8px 10px;
+    }
+
+    .lead-list-direccion,
+    .admin-list-name,
+    .oportunidad-direccion,
+    .listado-titulo {
+        font-size: 13px;
+    }
+
+    .lead-list-info-item,
+    .listado-metadata-item {
+        font-size: 12px;
     }
 }
 

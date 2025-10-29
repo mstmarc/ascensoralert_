@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administradores de Fincas</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="/static/styles.css?v=7">
+    <link rel="stylesheet" href="/static/styles.css?v=8">
     <style>
         /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
 
@@ -19,181 +19,6 @@
             max-width: none !important;
             width: 100% !important;
             margin: 0 !important;
-        }
-
-        /* ESTILOS CRÍTICOS DE BOTONES */
-        .btn,
-        .button {
-            display: inline-block;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px 5px 10px 0;
-            min-width: 120px;
-            font-family: 'Montserrat', sans-serif;
-            line-height: 1.5;
-            vertical-align: middle;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
-            background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-            background: linear-gradient(135deg, #218838 0%, #28a745 100%);
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 14px;
-            min-width: auto;
-            margin: 5px;
-        }
-
-        /* ESTILOS DEL BUSCADOR */
-        .buscador-destacado {
-            background: #366092;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
-        }
-
-        .buscador-label {
-            color: white;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-            display: block;
-        }
-
-        .buscador-input-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .buscador-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: 'Montserrat', sans-serif;
-            box-sizing: border-box;
-            height: 32px;
-            margin-bottom: 0 !important;
-        }
-
-        .buscador-input:focus {
-            outline: 2px solid rgba(255,255,255,0.5);
-        }
-
-        button.btn-buscar {
-            background: white !important;
-            color: #366092 !important;
-            padding: 0 20px;
-            border: 2px solid white;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-family: 'Montserrat', sans-serif;
-            white-space: nowrap;
-            box-sizing: border-box;
-            height: 32px;
-            margin: 0 !important;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        button.btn-buscar:hover {
-            background: #f8f9fa !important;
-            transform: translateY(0);
-            border-color: #f8f9fa;
-        }
-
-        /* LISTADO ULTRA-COMPACTO MINIMALISTA */
-        .admin-list {
-            background: white;
-            border-radius: 8px;
-            padding: 8px;
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .admin-list-item {
-            padding: 8px 12px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            position: relative;
-            border: 1px solid #000;
-            border-radius: 6px;
-        }
-
-        .admin-list-item:hover {
-            background: #f8f9fa;
-        }
-
-        .admin-list-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a1a1a;
-            text-decoration: none;
-            display: block;
-            transition: color 0.2s ease;
-        }
-
-        .admin-list-name:hover {
-            color: #366092;
-        }
-
-        .admin-list-location {
-            font-size: 11px;
-            color: #999;
-            display: block;
-            margin-top: 2px;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-            font-size: 16px;
-            background: white;
-            border-radius: 8px;
         }
 
         /* ESTILOS MOBILE-CARD (mantener para vista de visitas) */
@@ -396,19 +221,6 @@
         }
 
         @media (max-width: 767px) {
-            /* Ajustar listado en móvil */
-            .admin-list-item {
-                padding: 8px 16px;
-            }
-
-            .admin-list-name {
-                font-size: 13px;
-            }
-
-            .admin-list-location {
-                font-size: 11px;
-            }
-
             /* Ocultar tabla en móvil (para pestaña visitas) */
             .tabla-container {
                 display: none !important;
