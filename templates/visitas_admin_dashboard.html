@@ -94,43 +94,6 @@
             border-radius: 8px;
         }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid #ddd;
-            margin-top: 20px;
-        }
-        
-        th {
-            background: #366092;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: bold;
-            border: 1px solid #2a4a70;
-        }
-        
-        td {
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-        }
-        
-        tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-        
-        tr:hover {
-            background: #e9ecef;
-        }
-        
-        
-        .observaciones-resumen {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
         .alert {
             padding: 12px 20px;
             margin-bottom: 20px;
@@ -153,17 +116,6 @@
             .menu-toggle { display: block; }
             .menu-lateral { display: block; }
             
-            table {
-                font-size: 12px;
-            }
-            
-            th, td {
-                padding: 8px;
-            }
-            
-            .observaciones-resumen {
-                max-width: 150px;
-            }
         }
     </style>
 </head>
@@ -221,60 +173,27 @@
                 {% endif %}
             </div>
             
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Administrador</th>
-                        <th>Observaciones</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if visitas %}
-                        {% for visita in visitas %}
-                        <tr>
-                            <td>{{ visita.fecha_visita }}</td>
-                            <td>{{ visita.administrador_fincas }}</td>
-                            <td>
-                                <div class="observaciones-resumen">
-                                    {{ visita.observaciones or '-' }}
-                                </div>
-                            </td>
-                            <td style="white-space: nowrap;">
-                                <a href="/ver_visita_admin/{{ visita.id }}" class="btn btn-success btn-sm">Ver</a>
-                                <a href="/editar_visita_admin/{{ visita.id }}" class="btn btn-primary btn-sm">Editar</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="4" style="text-align: center; padding: 40px; color: #999;">
-                                No se encontraron visitas registradas
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-
-            <!-- Mobile Cards (solo visible en móvil) -->
             {% if visitas %}
-                {% for visita in visitas %}
-                <div class="mobile-card">
-                    <h3>📅 {{ visita.fecha_visita }}</h3>
-                    <p><strong>🏢 Administrador:</strong> {{ visita.administrador_fincas }}</p>
-                    {% if visita.observaciones %}
-                    <p><strong>📝 Observaciones:</strong> {{ visita.observaciones }}</p>
-                    {% endif %}
-                    <div class="actions">
-                        <a href="/ver_visita_admin/{{ visita.id }}" class="btn btn-success btn-sm">Ver</a>
-                        <a href="/editar_visita_admin/{{ visita.id }}" class="btn btn-primary btn-sm">Editar</a>
+                <div class="leads-list listado-visitas">
+                    {% for visita in visitas %}
+                    <div class="lead-list-item lead-list-item--with-actions">
+                        <div class="lead-list-content">
+                            <div class="lead-list-direccion lead-list-direccion--static">📅 {{ visita.fecha_visita }}</div>
+                            <div class="lead-list-info lead-list-info--left">
+                                <span class="lead-list-info-item">Administrador: {{ visita.administrador_fincas }}</span>
+                                <span class="lead-list-info-item lead-list-info-item--grow">Observaciones: {{ visita.observaciones or '-' }}</span>
+                            </div>
+                        </div>
+                        <div class="lead-list-actions">
+                            <a href="/ver_visita_admin/{{ visita.id }}" class="btn btn-success btn-sm">Ver</a>
+                            <a href="/editar_visita_admin/{{ visita.id }}" class="btn btn-primary btn-sm">Editar</a>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             {% else %}
-                <div class="mobile-card">
-                    <p style="text-align: center; color: #999;">No se encontraron visitas registradas</p>
+                <div style="text-align: center; padding: 40px; color: #999; background: white; border-radius: 8px; margin-top: 20px;">
+                    No se encontraron visitas registradas
                 </div>
             {% endif %}
 
