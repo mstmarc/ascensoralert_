@@ -470,6 +470,140 @@ td a:hover {
 }
 
 /* ==========================================
+   LISTADOS UNIFICADOS
+   ========================================== */
+
+.leads-list,
+.admin-list,
+.oportunidades-list,
+.listado-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lead-list-item,
+.admin-list-item,
+.oportunidad-item,
+.listado-item {
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid #000;
+    border-radius: 6px;
+    background: white;
+}
+
+.lead-list-item:hover,
+.admin-list-item:hover,
+.oportunidad-item:hover,
+.listado-item:hover {
+    background: #f8f9fa;
+}
+
+.lead-list-direccion,
+.admin-list-name,
+.oportunidad-direccion,
+.listado-titulo {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-decoration: none;
+    display: block;
+    transition: color 0.2s ease;
+}
+
+.lead-list-direccion:hover,
+.admin-list-name:hover,
+.oportunidad-direccion:hover,
+.listado-titulo:hover {
+    color: #366092;
+}
+
+.lead-list-direccion--static {
+    cursor: default;
+}
+
+.lead-list-direccion--static:hover {
+    color: #1a1a1a;
+}
+
+.lead-list-info,
+.listado-metadata {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.lead-list-content,
+.listado-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+
+.lead-list-info--left,
+.listado-metadata--left {
+    justify-content: flex-start;
+}
+
+.lead-list-info-item,
+.listado-metadata-item {
+    font-size: 11px;
+    color: #1a1a1a;
+}
+
+.lead-list-info-item--grow,
+.listado-metadata-item--grow {
+    flex: 1 1 100%;
+    min-width: 220px;
+}
+
+.lead-list-actions,
+.listado-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.lead-list-item--with-actions,
+.listado-item--with-actions {
+    cursor: default;
+}
+
+.lead-list-item--with-actions .lead-list-direccion:not(.lead-list-direccion--static),
+.listado-item--with-actions .listado-titulo {
+    cursor: pointer;
+}
+
+.lead-list-item--with-actions:hover,
+.listado-item--with-actions:hover {
+    background: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    .lead-list-info,
+    .listado-metadata {
+        justify-content: flex-start;
+    }
+
+    .lead-list-actions,
+    .listado-actions {
+        justify-content: flex-start;
+    }
+}
+
+/* ==========================================
    BUSCADORES ESTANDARIZADOS
    ========================================== */
 
