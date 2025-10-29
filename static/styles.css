@@ -298,19 +298,25 @@ button[type="submit"]:active {
 }
 
 /* Danger - Rojo */
-.btn-danger {
+.btn-danger,
+.btn-eliminar,
+.btn-eliminar-form {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: white;
     box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
-.btn-danger:hover {
+.btn-danger:hover,
+.btn-eliminar:hover,
+.btn-eliminar-form:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
     background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
 }
 
-.btn-danger:active {
+.btn-danger:active,
+.btn-eliminar:active,
+.btn-eliminar-form:active {
     transform: translateY(0);
 }
 

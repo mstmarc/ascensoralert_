@@ -154,39 +154,6 @@
             margin-top: 25px;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
         .alert {
             padding: 12px 20px;
             margin-bottom: 20px;
@@ -319,6 +286,7 @@
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                         <a href="{{ url_for('ver_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-secondary">Cancelar</a>
+                        <a href="{{ url_for('eliminar_oportunidad', oportunidad_id=oportunidad.id) }}" class="button btn-eliminar-form" onclick="return confirm('¿Estás seguro de que deseas eliminar esta oportunidad? Esta acción no se puede deshacer.');">Eliminar Oportunidad</a>
                     </div>
                 </form>
             </div>
