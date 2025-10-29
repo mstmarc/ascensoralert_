@@ -283,7 +283,7 @@
                                 <div class="lead-list-direccion lead-list-direccion--static">🔧 {{ equipo.tipo_equipo }}</div>
                                 <div class="lead-list-info lead-list-info--left">
                                     <span class="lead-list-info-item">RAE: {{ equipo.rae or '-' }}</span>
-                                    <span class="lead-list-info-item">Próxima IPO: {{ equipo.ipo_proxima or '-' }}</span>
+                                    <span class="lead-list-info-item lead-list-info-item--grow">Próxima IPO: {{ equipo.ipo_proxima or '-' }}</span>
                                 </div>
                             </div>
                             <div class="lead-list-actions">
@@ -293,7 +293,7 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <div class="no-equipos no-equipos-con-boton">
+                    <div class="no-results no-equipos no-equipos-con-boton">
                         <p style="margin: 0;">🔧 Esta instalación aún no tiene equipos registrados</p>
                         <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn btn-success">
                             Añadir Primer Equipo

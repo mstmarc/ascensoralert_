@@ -9,6 +9,8 @@
     /* Tamaños tipográficos unificados para listados compactos */
     --list-heading-font-size: 13px;
     --list-body-font-size: 12px;
+    --list-border-color: #dfe3eb;
+    --list-item-radius: 8px;
 }
 
 @font-face {
@@ -496,13 +498,14 @@ td a:hover {
 .admin-list-item,
 .oportunidad-item,
 .listado-item {
-    padding: 8px 12px;
+    padding: 10px 14px;
     transition: all 0.2s ease;
     cursor: pointer;
     position: relative;
-    border: 1px solid #000;
-    border-radius: 6px;
+    border: 1px solid var(--list-border-color);
+    border-radius: var(--list-item-radius);
     background: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .lead-list-item:hover,
@@ -510,6 +513,7 @@ td a:hover {
 .oportunidad-item:hover,
 .listado-item:hover {
     background: #f8f9fa;
+    box-shadow: 0 2px 6px rgba(54, 96, 146, 0.08);
 }
 
 .lead-list-direccion,
@@ -522,6 +526,7 @@ td a:hover {
     text-decoration: none;
     display: block;
     transition: color 0.2s ease;
+    line-height: 1.45;
 }
 
 .lead-list-direccion:hover,
@@ -565,6 +570,7 @@ td a:hover {
 .listado-metadata-item {
     font-size: var(--list-body-font-size);
     color: #1a1a1a;
+    line-height: 1.4;
 }
 
 .lead-list-info-item--grow,
@@ -580,6 +586,10 @@ td a:hover {
     gap: 8px;
     justify-content: flex-end;
     flex-wrap: wrap;
+}
+
+.listado-equipos .lead-list-item {
+    border-left: 4px solid #366092;
 }
 
 .lead-list-item--with-actions,
