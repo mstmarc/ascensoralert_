@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oportunidades Post-IPO</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="/static/styles.css?v=7">
+    <style>
+        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
+
+        /* Ajustar contenedor del dashboard para ancho completo */
+        main {
+            max-width: none !important;
+            padding: 30px !important;
+        }
+
+        main .menu {
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+        /* ESTILOS CRÍTICOS DE BOTONES */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px 10px 0;
+            min-width: 120px;
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.5;
+            vertical-align: middle;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+            background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #218838 0%, #28a745 100%);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 15px;
+            min-width: auto;
+            margin: 5px;
+        }
+
+        /* Pestañas elegantes */
+        .tabs-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #366092;
+            padding-bottom: 0;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            background: #f8f9fa;
+            border: none;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Montserrat', sans-serif;
+            border: 1px solid #e1e5e9;
+            border-bottom: none;
+            position: relative;
+            bottom: -3px;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+            color: #366092;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            color: white;
+            border-color: #366092;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        }
+
+        .tab-button.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+        }
+
+        .tab-count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .tab-button.active .tab-count {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Métricas destacadas */
+        .metricas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .metrica-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #366092;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .metrica-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .metrica-card.urgente {
+            border-left-color: #dc3545;
+        }
+
+        .metrica-card.proximo {
+            border-left-color: #ffc107;
+        }
+
+        .metrica-card.futuro {
+            border-left-color: #17a2b8;
+        }
+
+        .metrica-numero {
+            font-size: 36px;
+            font-weight: 700;
+            color: #366092;
+            margin-bottom: 5px;
+        }
+
+        .metrica-card.urgente .metrica-numero {
+            color: #dc3545;
+        }
+
+        .metrica-card.proximo .metrica-numero {
+            color: #ffc107;
+        }
+
+        .metrica-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Listado elegante */
+        .ipo-list {
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ipo-list-item {
+            padding: 16px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .ipo-list-item:hover {
+            background: #f8f9fa;
+            border-color: #366092;
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.15);
+            transform: translateX(3px);
+        }
+
+        .ipo-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ipo-item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ipo-direccion {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .ipo-direccion:hover {
+            color: #366092;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-urgente {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-proximo {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .badge-futuro {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .badge-pasado {
+            background: #6c757d;
+            color: white;
+        }
+
+        .ipo-item-details {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .ipo-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ipo-detail-item strong {
+            color: #333;
+        }
+
+        .ipo-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #366092;
+            font-size: 14px;
+            color: #0066cc;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #004080;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 16px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* ESTILOS DE ALERTAS */
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 767px) {
+            .metricas-container {
+                grid-template-columns: 1fr;
+            }
+
+            .ipo-list-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .ipo-item-actions {
+                width: 100%;
+            }
+
+            .ipo-item-actions .btn-sm {
+                flex: 1;
+            }
+
+            .tabs-container {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .tab-button {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Oportunidades Post-IPO</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <!-- Mensajes Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Info contextual -->
+            <div class="info-box">
+                <strong>💡 Timing perfecto:</strong> Después de la IPO, la OCA envía el informe y la empresa actual pasa presupuesto (10-30 días).
+                Este es el <strong>momento ideal</strong> para contactar y ofrecer una segunda opinión.
+            </div>
+
+            <!-- Métricas destacadas -->
+            <div class="metricas-container">
+                <div class="metrica-card urgente">
+                    <div class="metrica-numero">{{ contactar_ahora_count }}</div>
+                    <div class="metrica-label">🔥 Contactar AHORA</div>
+                </div>
+                <div class="metrica-card proximo">
+                    <div class="metrica-numero">{{ proximamente_count }}</div>
+                    <div class="metrica-label">⏰ Próximamente</div>
+                </div>
+                <div class="metrica-card futuro">
+                    <div class="metrica-numero">{{ esta_semana_count }}</div>
+                    <div class="metrica-label">🔔 IPOs Esta Semana</div>
+                </div>
+            </div>
+
+            <!-- Pestañas -->
+            <div class="tabs-container">
+                <a href="/oportunidades_post_ipo?tab=contactar_ahora"
+                   class="tab-button {% if tab == 'contactar_ahora' or not tab %}active{% endif %}">
+                    🔥 Contactar AHORA
+                    <span class="tab-count">{{ contactar_ahora_count }}</span>
+                </a>
+                <a href="/oportunidades_post_ipo?tab=proximamente"
+                   class="tab-button {% if tab == 'proximamente' %}active{% endif %}">
+                    ⏰ Próximamente
+                    <span class="tab-count">{{ proximamente_count }}</span>
+                </a>
+                <a href="/oportunidades_post_ipo?tab=esta_semana"
+                   class="tab-button {% if tab == 'esta_semana' %}active{% endif %}">
+                    🔔 IPOs Esta Semana
+                    <span class="tab-count">{{ esta_semana_count }}</span>
+                </a>
+                <a href="/oportunidades_post_ipo?tab=oportunidad_pasada"
+                   class="tab-button {% if tab == 'oportunidad_pasada' %}active{% endif %}">
+                    ⏸️ Oportunidad Pasada
+                    <span class="tab-count">{{ oportunidad_pasada_count }}</span>
+                </a>
+            </div>
+
+            <!-- Contenido según pestaña activa -->
+            {% if tab == 'contactar_ahora' or not tab %}
+            <!-- TAB: CONTACTAR AHORA (IPO hace 10-30 días) -->
+            <h3 style="color: #dc3545; margin-bottom: 15px;">🔥 Ventana de oportunidad activa - Contactar inmediatamente</h3>
+            {% if contactar_ahora %}
+                <div class="ipo-list">
+                    {% for item in contactar_ahora %}
+                    <div class="ipo-list-item">
+                        <div class="ipo-item-content">
+                            <div class="ipo-item-header">
+                                <a href="/ver_lead/{{ item.cliente_id }}" class="ipo-direccion">
+                                    📍 {{ item.direccion }}, {{ item.localidad }}
+                                </a>
+                                <span class="badge badge-urgente">IPO hace {{ item.dias_desde_ipo }} días</span>
+                            </div>
+                            <div class="ipo-item-details">
+                                {% if item.telefono %}
+                                <div class="ipo-detail-item">
+                                    📞 <strong>{{ item.telefono }}</strong>
+                                </div>
+                                {% endif %}
+                                {% if item.persona_contacto %}
+                                <div class="ipo-detail-item">
+                                    👤 {{ item.persona_contacto }}
+                                </div>
+                                {% endif %}
+                                <div class="ipo-detail-item">
+                                    📅 IPO: <strong>{{ item.ipo_proxima }}</strong>
+                                </div>
+                                {% if item.rae %}
+                                <div class="ipo-detail-item">
+                                    🔧 RAE: {{ item.rae }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="ipo-item-actions">
+                            <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-success btn-sm">Ver detalle</a>
+                            <a href="/crear_oportunidad/{{ item.cliente_id }}" class="btn btn-primary btn-sm">Crear oportunidad</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    <div class="no-results-icon">✓</div>
+                    No hay comunidades en ventana crítica ahora mismo
+                </div>
+            {% endif %}
+
+            {% elif tab == 'proximamente' %}
+            <!-- TAB: PRÓXIMAMENTE (IPO hace 0-10 días) -->
+            <h3 style="color: #ffc107; margin-bottom: 15px;">⏰ Esperando informe OCA - Planificar contacto próxima semana</h3>
+            {% if proximamente %}
+                <div class="ipo-list">
+                    {% for item in proximamente %}
+                    <div class="ipo-list-item">
+                        <div class="ipo-item-content">
+                            <div class="ipo-item-header">
+                                <a href="/ver_lead/{{ item.cliente_id }}" class="ipo-direccion">
+                                    📍 {{ item.direccion }}, {{ item.localidad }}
+                                </a>
+                                <span class="badge badge-proximo">IPO hace {{ item.dias_desde_ipo }} días</span>
+                            </div>
+                            <div class="ipo-item-details">
+                                {% if item.telefono %}
+                                <div class="ipo-detail-item">
+                                    📞 <strong>{{ item.telefono }}</strong>
+                                </div>
+                                {% endif %}
+                                <div class="ipo-detail-item">
+                                    📅 IPO: <strong>{{ item.ipo_proxima }}</strong>
+                                </div>
+                                <div class="ipo-detail-item">
+                                    ⏰ Contactar en: <strong>{{ 10 - item.dias_desde_ipo }} días aprox.</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ipo-item-actions">
+                            <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-success btn-sm">Ver detalle</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    <div class="no-results-icon">📭</div>
+                    No hay IPOs recientes esperando
+                </div>
+            {% endif %}
+
+            {% elif tab == 'esta_semana' %}
+            <!-- TAB: IPOs ESTA SEMANA (próximos 7 días) -->
+            <h3 style="color: #17a2b8; margin-bottom: 15px;">🔔 Inspecciones programadas - Para tu información</h3>
+            {% if esta_semana %}
+                <div class="ipo-list">
+                    {% for item in esta_semana %}
+                    <div class="ipo-list-item">
+                        <div class="ipo-item-content">
+                            <div class="ipo-item-header">
+                                <a href="/ver_lead/{{ item.cliente_id }}" class="ipo-direccion">
+                                    📍 {{ item.direccion }}, {{ item.localidad }}
+                                </a>
+                                <span class="badge badge-futuro">En {{ item.dias_hasta_ipo }} días</span>
+                            </div>
+                            <div class="ipo-item-details">
+                                <div class="ipo-detail-item">
+                                    📅 IPO programada: <strong>{{ item.ipo_proxima }}</strong>
+                                </div>
+                                {% if item.empresa_mantenedora %}
+                                <div class="ipo-detail-item">
+                                    🏢 Empresa actual: {{ item.empresa_mantenedora }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="ipo-item-actions">
+                            <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-success btn-sm">Ver detalle</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    <div class="no-results-icon">📅</div>
+                    No hay IPOs programadas esta semana
+                </div>
+            {% endif %}
+
+            {% elif tab == 'oportunidad_pasada' %}
+            <!-- TAB: OPORTUNIDAD PASADA (IPO hace 30-90 días) -->
+            <h3 style="color: #6c757d; margin-bottom: 15px;">⏸️ Ventana pasada - Intentar por si acaso (baja prioridad)</h3>
+            {% if oportunidad_pasada %}
+                <div class="ipo-list">
+                    {% for item in oportunidad_pasada %}
+                    <div class="ipo-list-item">
+                        <div class="ipo-item-content">
+                            <div class="ipo-item-header">
+                                <a href="/ver_lead/{{ item.cliente_id }}" class="ipo-direccion">
+                                    📍 {{ item.direccion }}, {{ item.localidad }}
+                                </a>
+                                <span class="badge badge-pasado">IPO hace {{ item.dias_desde_ipo }} días</span>
+                            </div>
+                            <div class="ipo-item-details">
+                                {% if item.telefono %}
+                                <div class="ipo-detail-item">
+                                    📞 {{ item.telefono }}
+                                </div>
+                                {% endif %}
+                                <div class="ipo-detail-item">
+                                    📅 IPO: {{ item.ipo_proxima }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ipo-item-actions">
+                            <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-success btn-sm">Ver detalle</a>
+                            <a href="/crear_oportunidad/{{ item.cliente_id }}" class="btn btn-primary btn-sm">Crear oportunidad</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    <div class="no-results-icon">✓</div>
+                    No hay oportunidades pasadas registradas
+                </div>
+            {% endif %}
+
+            {% endif %}
+            <!-- Fin pestañas -->
+
+            <br>
+            <a href="/home" class="button">Volver al Home</a>
+        </div>
+    </main>
+
+    <script src="/static/sidebar.js"></script>
+</body>
+</html>
