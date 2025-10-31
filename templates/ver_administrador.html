@@ -7,13 +7,8 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="/static/styles.css?v=5">
     <style>
-        .menu-toggle { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #366092; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
-        .menu-lateral { display: none; position: fixed; top: 0; right: -300px; width: 250px; height: 100%; background: #2c3e50; z-index: 999; transition: right 0.3s ease; padding-top: 60px; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
-        .menu-lateral.active { right: 0; }
-        .menu-lateral a { display: block; color: white; padding: 15px 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.3s; }
-        .menu-lateral a:hover { background: rgba(255,255,255,0.1); }
+        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
 
-        /* Ajustar contenedor del dashboard para ancho completo */
         main {
             max-width: none !important;
             padding: 30px !important;
@@ -25,50 +20,187 @@
             margin: 0 !important;
         }
 
-        .detalle-container { max-width: 1200px; margin: 0 auto; }
-        .seccion { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ddd; }
-        .seccion h2 { color: #366092; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #366092; }
+        /* BOTONES ELEGANTES */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            min-width: 120px;
+            font-family: 'Montserrat', sans-serif;
+        }
 
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .info-item { padding: 10px; background: #f8f9fa; border-radius: 4px; }
-        .info-item label { font-weight: bold; color: #366092; display: block; margin-bottom: 5px; font-size: 14px; }
-        .info-item span { color: #333; font-size: 15px; }
+        .btn-primary, .button {
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        }
 
-        .botones-accion { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-        .no-clientes { text-align: center; padding: 30px; color: #999; font-style: italic; background: #f8f9fa; border-radius: 6px; border: 2px dashed #ddd; }
+        .btn-primary:hover, .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+        }
 
-        /* Métricas del administrador */
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 15px;
+            min-width: auto;
+        }
+
+        /* CONTENEDOR */
+        .detalle-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* SECCIONES */
+        .seccion {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #366092;
+            transition: all 0.3s ease;
+        }
+
+        .seccion:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .seccion h2 {
+            color: #366092;
+            margin: 0 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e1e5e9;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        /* INFO GRID */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background: white;
+            box-shadow: 0 2px 6px rgba(54, 96, 146, 0.1);
+        }
+
+        .info-item label {
+            font-weight: 600;
+            color: #366092;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .info-item span {
+            color: #333;
+            font-size: 15px;
+        }
+
+        /* MÉTRICAS ELEGANTES */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
 
         .metric-card {
             background: white;
-            padding: 20px;
+            padding: 24px;
             border-radius: 8px;
             text-align: center;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s;
+            border-left: 4px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
         }
 
         .metric-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
         }
 
-        .metric-card.activas { border-color: #28a745; background: #d4edda; }
-        .metric-card.ganadas { border-color: #007bff; background: #d1ecf1; }
-        .metric-card.perdidas { border-color: #dc3545; background: #f8d7da; }
-        .metric-card.total { border-color: #366092; background: #e7f3ff; }
+        .metric-card.activas {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+
+        .metric-card.ganadas {
+            border-left-color: #007bff;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        }
+
+        .metric-card.perdidas {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        }
+
+        .metric-card.total {
+            border-left-color: #366092;
+            background: linear-gradient(135deg, #e7f3ff 0%, #dbeafe 100%);
+        }
 
         .metric-number {
-            font-size: 32px;
+            font-size: 42px;
             font-weight: 700;
             color: #366092;
-            margin: 5px 0;
+            margin: 8px 0;
+            line-height: 1;
         }
 
         .metric-card.activas .metric-number { color: #28a745; }
@@ -80,46 +212,60 @@
             color: #666;
             font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .metric-sublabel {
-            font-size: 12px;
-            color: #888;
-            margin-top: 5px;
+            font-size: 14px;
+            color: #555;
+            margin-top: 8px;
+            font-weight: 600;
         }
 
-        /* Oportunidades */
+        /* OPORTUNIDADES */
         .oportunidad-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 10px;
+            background: white;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             border-left: 4px solid #366092;
-            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
         }
 
         .oportunidad-item:hover {
-            background: #e9ecef;
             transform: translateX(3px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
         }
 
-        .oportunidad-item.activa { border-left-color: #28a745; }
-        .oportunidad-item.ganada { border-left-color: #007bff; }
-        .oportunidad-item.perdida { border-left-color: #dc3545; }
+        .oportunidad-item.activa {
+            border-left-color: #28a745;
+            background: #f0fdf4;
+        }
+
+        .oportunidad-item.ganada {
+            border-left-color: #007bff;
+            background: #eff6ff;
+        }
+
+        .oportunidad-item.perdida {
+            border-left-color: #dc3545;
+            background: #fef2f2;
+        }
 
         .oportunidad-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
             gap: 10px;
         }
 
         .oportunidad-tipo {
-            font-weight: bold;
-            font-size: 16px;
-            color: #333;
+            font-weight: 700;
+            font-size: 17px;
+            color: #1a1a1a;
         }
 
         .oportunidad-badges {
@@ -128,60 +274,89 @@
             flex-wrap: wrap;
         }
 
+        /* BADGES */
         .badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .badge.activa { background: #28a745; color: white; }
-        .badge.ganada { background: #007bff; color: white; }
-        .badge.perdida { background: #dc3545; color: white; }
+        .badge.activa {
+            background: #28a745;
+            color: white;
+            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+        }
+
+        .badge.ganada {
+            background: #007bff;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+        }
+
+        .badge.perdida {
+            background: #dc3545;
+            color: white;
+            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+        }
 
         .oportunidad-info {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.6;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.7;
         }
 
         .oportunidad-info strong {
             color: #366092;
+            font-weight: 600;
         }
 
         .oportunidad-actions {
-            margin-top: 10px;
+            margin-top: 12px;
             display: flex;
-            gap: 5px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
+        /* ESTADOS VACÍOS */
+        .no-clientes {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #d1d5db;
+        }
+
+        /* ACCIONES */
+        .botones-accion {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .menu-toggle { display: block; }
-            .menu-lateral { display: block; }
             .metrics-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
             .oportunidad-header {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .btn, .button {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <nav class="menu-lateral" id="menuLateral">
-        <a href="/home">Inicio</a>
-        <a href="/leads_dashboard">Ver Comunidades</a>
-        <a href="/administradores_dashboard">Administradores de Fincas</a>
-        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
-        <a href="/oportunidades">Oportunidades</a>
-        <a href="/reporte_mensual">Descargo Comercial</a>
-        <a href="/logout">Cerrar Sesión</a>
-    </nav>
-
     <header>
         <div class="header-container">
             <div class="logo-container">
@@ -278,7 +453,7 @@
                             <div class="oportunidad-header">
                                 <div>
                                     <div class="oportunidad-tipo">{{ op.tipo }}</div>
-                                    <div style="font-size: 12px; color: #888; margin-top: 3px;">
+                                    <div style="font-size: 13px; color: #888; margin-top: 4px;">
                                         📍 {{ op.clientes.direccion }}, {{ op.clientes.localidad }}
                                     </div>
                                 </div>
@@ -367,18 +542,6 @@
     </main>
 
     <script>
-        function toggleMenu() {
-            document.getElementById('menuLateral').classList.toggle('active');
-        }
-
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('menuLateral');
-            const toggle = document.querySelector('.menu-toggle');
-            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
-                menu.classList.remove('active');
-            }
-        });
-
         // Filtrar oportunidades por estado
         function filtrarOportunidades(estado) {
             const items = document.querySelectorAll('.oportunidad-item');
