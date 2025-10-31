@@ -206,7 +206,7 @@
                     Oportunidades
                 </a>
                 <a href="/oportunidades_post_ipo" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Oportunidades Post-IPO
+                    Seguimiento Comercial
                 </a>
 
                 <div class="sidebar-integrated-divider"></div>
