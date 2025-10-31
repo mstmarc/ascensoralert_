@@ -7,51 +7,7 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=5">
     <style>
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: #366092;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        .menu-lateral {
-            display: none;
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 250px;
-            height: 100%;
-            background: #2c3e50;
-            z-index: 999;
-            transition: right 0.3s ease;
-            padding-top: 60px;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-        }
-
-        .menu-lateral.active {
-            right: 0;
-        }
-
-        .menu-lateral a {
-            display: block;
-            color: white;
-            padding: 15px 20px;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            transition: background 0.3s;
-        }
-
-        .menu-lateral a:hover {
-            background: rgba(255,255,255,0.1);
-        }
+        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
 
         /* Ajustar contenedor del dashboard para ancho completo */
         main {
@@ -137,9 +93,33 @@
             font-weight: 500;
         }
 
-        .badge.activa { background: #d4edda; color: #155724; }
-        .badge.ganada { background: #d1ecf1; color: #0c5460; }
-        .badge.perdida { background: #f8d7da; color: #721c24; }
+        .badge.activa {
+            background: #28a745;
+            color: white;
+            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+        .badge.ganada {
+            background: #007bff;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+        .badge.perdida {
+            background: #dc3545;
+            color: white;
+            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
 
         .presupuesto-dropdown {
             display: inline-block;
@@ -347,8 +327,6 @@
         }
 
         @media (max-width: 768px) {
-            .menu-toggle { display: block; }
-            .menu-lateral { display: block; }
             .section-content { padding: 15px; }
             .add-accion-form { flex-direction: column; }
             .action-buttons { flex-direction: column; }
@@ -357,17 +335,6 @@
     </style>
 </head>
 <body>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <nav class="menu-lateral" id="menuLateral">
-        <a href="/home">Inicio</a>
-        <a href="/leads_dashboard">Ver Comunidades</a>
-        <a href="/administradores_dashboard">Administradores de Fincas</a>
-        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
-        <a href="/oportunidades">Oportunidades</a>
-        <a href="/reporte_mensual">Descargo Comercial</a>
-        <a href="/logout">Cerrar Sesión</a>
-    </nav>
-
     <header>
         <div class="header-container">
             <div class="logo-container">
@@ -559,19 +526,6 @@
         </div>
     </main>
 
-    <script>
-        function toggleMenu() {
-            document.getElementById('menuLateral').classList.toggle('active');
-        }
-
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('menuLateral');
-            const toggle = document.querySelector('.menu-toggle');
-            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
-                menu.classList.remove('active');
-            }
-        });
-    </script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
 </html>

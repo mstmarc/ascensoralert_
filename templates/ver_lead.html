@@ -21,52 +21,362 @@
             margin: 0 !important;
         }
 
-        .detalle-container { max-width: 1200px; margin: 0 auto; }
-        .seccion { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ddd; }
-        .seccion h2 { color: #366092; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #366092; }
-        .seccion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #366092; }
-        .seccion-header h2 { margin: 0; padding: 0; border: none; }
-        
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .info-item { padding: 10px; background: #f8f9fa; border-radius: 4px; }
-        .info-item label { font-weight: bold; color: #366092; display: block; margin-bottom: 5px; font-size: 14px; }
-        .info-item span { color: #333; font-size: 15px; }
-        
-        .botones-accion { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-        .no-equipos { text-align: center; padding: 30px; color: #999; font-style: italic; background: #f8f9fa; border-radius: 6px; border: 2px dashed #ddd; }
-        .no-equipos-con-boton { display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        
-        .oportunidad-card { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #366092; }
-        .oportunidad-card.activa { border-left-color: #28a745; background: #d4edda; }
-        .oportunidad-card.ganada { border-left-color: #007bff; background: #d1ecf1; }
-        .oportunidad-card.perdida { border-left-color: #dc3545; background: #f8d7da; }
-        .oportunidad-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .oportunidad-tipo { font-weight: bold; font-size: 16px; }
-        .oportunidad-estado { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .oportunidad-estado.activa { background: #28a745; color: white; }
-        .oportunidad-estado.ganada { background: #007bff; color: white; }
-        .oportunidad-estado.perdida { background: #dc3545; color: white; }
-        .oportunidad-detalles { font-size: 14px; color: #555; line-height: 1.6; }
+        /* ESTILOS DE BOTONES ELEGANTES */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            min-width: 120px;
+            font-family: 'Montserrat', sans-serif;
+        }
 
-        .visita-item { background: #f8f9fa; padding: 12px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #366092; }
-        .visita-fecha { font-weight: bold; color: #366092; margin-bottom: 5px; }
-        .visita-observaciones { color: #555; font-size: 14px; }
-        .visita-oportunidad { color: #666; font-size: 12px; font-style: italic; margin-top: 5px; }
+        .btn-primary, .button {
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        }
 
-        /* Estilos para la nueva estructura vertical de información */
-        .info-section { margin-bottom: 20px; padding: 15px; background: #ffffff; border-left: 4px solid #366092; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .section-subtitle { color: #366092; font-size: 16px; font-weight: bold; margin: 0 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #e1e5e9; }
-        .info-row { display: flex; flex-wrap: wrap; gap: 12px; }
-        .info-item-full { flex: 1 1 100%; padding: 8px 12px; background: #f8f9fa; border-radius: 4px; }
-        .info-item-inline { flex: 1 1 calc(50% - 6px); padding: 8px 12px; background: #f8f9fa; border-radius: 4px; min-width: 200px; }
-        .info-item-full label, .info-item-inline label { font-weight: bold; color: #366092; display: inline-block; margin-right: 8px; font-size: 14px; }
-        .info-item-full span, .info-item-inline span { color: #333; font-size: 15px; }
-        .admin-link { color: #007bff; text-decoration: underline; font-weight: 600; font-size: 15px; padding: 4px 8px; border-radius: 4px; transition: all 0.3s ease; display: inline-block; }
-        .admin-link:hover { background: #007bff; color: white; text-decoration: none; transform: translateX(5px); }
-        .observaciones-box { background: #f8f9fa; padding: 15px; min-height: 60px; border: 1px solid #ddd; }
-        .observaciones-box p { margin: 0; color: #555; line-height: 1.6; }
+        .btn-primary:hover, .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+            background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
+        }
 
-        @media (max-width: 768px) { .seccion-header { flex-direction: column; align-items: flex-start; gap: 10px; } .info-item-inline { flex: 1 1 100%; } }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #218838 0%, #28a745 100%);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 15px;
+            min-width: auto;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        .detalle-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* SECCIONES ELEGANTES */
+        .seccion {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #366092;
+            transition: all 0.3s ease;
+        }
+
+        .seccion:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .seccion h2 {
+            color: #366092;
+            margin: 0 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e1e5e9;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .seccion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .seccion-header h2 {
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+
+        /* INFO SECTIONS */
+        .info-section {
+            margin-bottom: 20px;
+            padding: 18px;
+            background: #f8f9fa;
+            border-left: 4px solid #366092;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .info-section:hover {
+            transform: translateX(3px);
+            box-shadow: 0 2px 6px rgba(54, 96, 146, 0.15);
+        }
+
+        .section-subtitle {
+            color: #366092;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #d1d5db;
+        }
+
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .info-item-full {
+            flex: 1 1 100%;
+            padding: 10px 14px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .info-item-inline {
+            flex: 1 1 calc(50% - 6px);
+            padding: 10px 14px;
+            background: white;
+            border-radius: 6px;
+            min-width: 200px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .info-item-full label, .info-item-inline label {
+            font-weight: 600;
+            color: #366092;
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        .info-item-full span, .info-item-inline span {
+            color: #333;
+            font-size: 15px;
+        }
+
+        .admin-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: 2px solid transparent;
+        }
+
+        .admin-link:hover {
+            background: #007bff;
+            color: white;
+            transform: translateX(5px);
+            border-color: #007bff;
+        }
+
+        .observaciones-box {
+            background: white;
+            padding: 15px;
+            min-height: 60px;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+        }
+
+        .observaciones-box p {
+            margin: 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* TARJETAS DE OPORTUNIDADES */
+        .oportunidad-card {
+            background: white;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #366092;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .oportunidad-card:hover {
+            transform: translateX(3px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+        }
+
+        .oportunidad-card.activa {
+            border-left-color: #28a745;
+            background: #f0fdf4;
+        }
+
+        .oportunidad-card.ganada {
+            border-left-color: #007bff;
+            background: #eff6ff;
+        }
+
+        .oportunidad-card.perdida {
+            border-left-color: #dc3545;
+            background: #fef2f2;
+        }
+
+        .oportunidad-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .oportunidad-tipo {
+            font-weight: 700;
+            font-size: 17px;
+            color: #1a1a1a;
+        }
+
+        /* BADGES ELEGANTES */
+        .oportunidad-estado {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .oportunidad-estado.activa {
+            background: #28a745;
+            color: white;
+            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+        }
+
+        .oportunidad-estado.ganada {
+            background: #007bff;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+        }
+
+        .oportunidad-estado.perdida {
+            background: #dc3545;
+            color: white;
+            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+        }
+
+        .oportunidad-detalles {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        /* ITEMS DE VISITAS */
+        .visita-item {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #366092;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .visita-item:hover {
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.15);
+        }
+
+        .visita-fecha {
+            font-weight: 700;
+            color: #366092;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .visita-observaciones {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .visita-oportunidad {
+            color: #666;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        /* ESTADOS VACÍOS */
+        .no-equipos {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #d1d5db;
+        }
+
+        .no-equipos-con-boton {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* ACCIONES */
+        .botones-accion {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .seccion-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .info-item-inline {
+                flex: 1 1 100%;
+            }
+
+            .btn, .button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
