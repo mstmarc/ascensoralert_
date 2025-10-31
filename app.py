@@ -1253,22 +1253,31 @@ def leads_dashboard():
     page = int(request.args.get("page", 1))
     per_page = 25
     offset = (page - 1) * per_page
-    
+
     filtro_localidad = request.args.get("localidad", "")
     filtro_empresa = request.args.get("empresa", "")
-    buscar_direccion = request.args.get("buscar_direccion", "")
+    # Aceptar tanto 'search' (desde home) como 'buscar_direccion' (desde dashboard)
+    buscar_direccion = request.args.get("search", "") or request.args.get("buscar_direccion", "")
     filtro_ipo_urgencia = request.args.get("ipo_urgencia", "")
-    
+
     query_params = []
-    
+
     if filtro_localidad:
         query_params.append(f"localidad=eq.{filtro_localidad}")
-    
+
     if filtro_empresa:
         query_params.append(f"empresa_mantenedora=eq.{filtro_empresa}")
-    
+
     if buscar_direccion:
-        query_params.append(f"direccion=ilike.*{buscar_direccion}*")
+        # Buscar en dirección, nombre_cliente y localidad (sin distinción de mayúsculas ni acentos)
+        # NOTA: Requiere ejecutar BUSQUEDA_SIN_ACENTOS.sql en Supabase primero
+        # Si f_unaccent no está disponible, usar búsqueda normal: direccion.ilike.*{buscar_direccion}*
+        termino_busqueda = urllib.parse.quote(buscar_direccion)
+        query_params.append(
+            f"or=(f_unaccent(direccion).ilike.*{termino_busqueda}*,"
+            f"f_unaccent(nombre_cliente).ilike.*{termino_busqueda}*,"
+            f"f_unaccent(localidad).ilike.*{termino_busqueda}*)"
+        )
     
     query_string = "&".join(query_params) if query_params else ""
 
@@ -1284,7 +1293,7 @@ def leads_dashboard():
     # OPTIMIZACIÓN: Usar join de Supabase + selección específica de campos
     # En lugar de hacer 25 queries separadas (1 por lead), obtenemos todo en 1 query
     # Y solo seleccionamos los campos que realmente necesitamos
-    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,localidad,empresa_mantenedora,numero_ascensores,equipos(ipo_proxima,fecha_vencimiento_contrato)&limit={per_page}&offset={offset}"
+    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,nombre_cliente,localidad,empresa_mantenedora,numero_ascensores,equipos(ipo_proxima,fecha_vencimiento_contrato)&limit={per_page}&offset={offset}"
     if query_string:
         data_url += f"&{query_string}"
 
@@ -1308,6 +1317,7 @@ def leads_dashboard():
         equipos = lead.get("equipos", [])
 
         direccion = lead.get("direccion", "-")
+        nombre_cliente = lead.get("nombre_cliente", "")
         localidad = lead.get("localidad", "-")
         empresa_mantenedora = lead.get("empresa_mantenedora", "-")
         total_equipos = len(equipos) if equipos else lead.get("numero_ascensores", 0)
@@ -1346,6 +1356,7 @@ def leads_dashboard():
         row = {
             "lead_id": lead_id,
             "direccion": direccion,
+            "nombre_cliente": nombre_cliente,
             "localidad": localidad,
             "total_equipos": total_equipos,
             "empresa_mantenedora": empresa_mantenedora,
@@ -2102,7 +2113,9 @@ def administradores_dashboard():
         url = f"{SUPABASE_URL}/rest/v1/administradores?select=*&order=nombre_empresa.asc"
 
         if buscar:
-            url += f"&or=(nombre_empresa.ilike.%{buscar}%,localidad.ilike.%{buscar}%,email.ilike.%{buscar}%)"
+            # Búsqueda sin distinción de acentos (requiere BUSQUEDA_SIN_ACENTOS.sql ejecutado)
+            termino_busqueda = urllib.parse.quote(buscar)
+            url += f"&or=(f_unaccent(nombre_empresa).ilike.%{termino_busqueda}%,f_unaccent(localidad).ilike.%{termino_busqueda}%,email.ilike.%{termino_busqueda}%)"
 
         # Obtener registros paginados con conteo
         url += f"&limit={limit}&offset={offset}"
