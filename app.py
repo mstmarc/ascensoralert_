@@ -1549,103 +1549,7 @@ def eliminar_equipo(equipo_id):
     else:
         return f"<h3 style='color:red;'>Error al obtener Equipo</h3><a href='/home'>Volver</a>"
 
-# Dashboard de Equipos
-@app.route("/equipos_dashboard", methods=["GET"])
-def equipos_dashboard():
-    if "usuario" not in session:
-        return redirect("/")
-
-    # Búsqueda y filtros
-    buscar = request.args.get("buscar", "")
-    filtro_tipo_equipo = request.args.get("tipo_equipo", "")
-    filtro_cliente_id = request.args.get("cliente_id", "")
-
-    # Paginación
-    try:
-        page = int(request.args.get("page", 1))
-    except (ValueError, TypeError):
-        page = 1
-
-    limit = 20
-    offset = (page - 1) * limit
-
-    # Construir query base
-    query_params = []
-
-    # Filtro por tipo de equipo
-    if filtro_tipo_equipo:
-        query_params.append(f"tipo_equipo=eq.{filtro_tipo_equipo}")
-
-    # Filtro por cliente
-    if filtro_cliente_id:
-        query_params.append(f"cliente_id=eq.{filtro_cliente_id}")
-
-    # Búsqueda por identificación o RAE
-    if buscar:
-        # Buscar en identificación o RAE
-        query_params.append(f"or=(identificacion.ilike.*{buscar}*,rae.ilike.*{buscar}*)")
-
-    # Construir URL con filtros
-    query_string = "&".join(query_params) if query_params else ""
-    base_url = f"{SUPABASE_URL}/rest/v1/equipos"
-
-    # Obtener equipos con JOIN a clientes
-    if query_string:
-        data_url = f"{base_url}?{query_string}&select=*,cliente:clientes(id,direccion,localidad)&order=tipo_equipo.asc,identificacion.asc&limit={limit}&offset={offset}"
-    else:
-        data_url = f"{base_url}?select=*,cliente:clientes(id,direccion,localidad)&order=tipo_equipo.asc,identificacion.asc&limit={limit}&offset={offset}"
-
-    # Headers para obtener conteo total
-    headers_with_count = HEADERS.copy()
-    headers_with_count["Prefer"] = "count=exact"
-
-    try:
-        response = requests.get(data_url, headers=headers_with_count, timeout=10)
-
-        if response.status_code not in [200, 206]:
-            flash(f"Error al cargar equipos (Código: {response.status_code})", "error")
-            equipos = []
-            total_registros = 0
-        else:
-            equipos = response.json()
-            content_range = response.headers.get("Content-Range", "*/0")
-            total_registros = int(content_range.split("/")[-1])
-
-    except Exception as e:
-        print(f"Error al cargar equipos: {str(e)}")
-        flash("Error de conexión al cargar equipos", "error")
-        equipos = []
-        total_registros = 0
-
-    # Calcular páginas
-    total_pages = max(1, (total_registros + limit - 1) // limit)
-
-    # Obtener lista de clientes para el filtro
-    clientes = []
-    try:
-        clientes_response = requests.get(
-            f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,localidad&order=direccion.asc",
-            headers=HEADERS,
-            timeout=10
-        )
-        if clientes_response.status_code == 200:
-            clientes = clientes_response.json()
-    except Exception as e:
-        print(f"Error al cargar clientes: {str(e)}")
-
-    return render_template(
-        "equipos_dashboard.html",
-        equipos=equipos,
-        clientes=clientes,
-        buscar=buscar,
-        filtro_tipo_equipo=filtro_tipo_equipo,
-        filtro_cliente_id=filtro_cliente_id,
-        page=page,
-        total_pages=total_pages,
-        total_registros=total_registros
-    )
-
-# Ver detalle de equipo
+# Ver detalle de equipo (accesible solo desde ver_lead)
 @app.route("/ver_equipo/<int:equipo_id>")
 def ver_equipo(equipo_id):
     if "usuario" not in session:
@@ -1659,7 +1563,7 @@ def ver_equipo(equipo_id):
 
     if response.status_code != 200 or not response.json():
         flash("Equipo no encontrado", "error")
-        return redirect("/equipos_dashboard")
+        return redirect("/leads_dashboard")
 
     equipo = limpiar_none(response.json()[0])
 
@@ -1667,6 +1571,104 @@ def ver_equipo(equipo_id):
     cliente = equipo.pop('cliente', None) if 'cliente' in equipo else None
 
     return render_template("ver_equipo.html", equipo=equipo, cliente=cliente)
+
+# Dashboard de Oportunidades Post-IPO
+@app.route("/oportunidades_post_ipo", methods=["GET"])
+def oportunidades_post_ipo():
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Determinar pestaña activa
+    tab = request.args.get("tab", "contactar_ahora")
+
+    # Calcular fechas
+    hoy = datetime.now().date()
+    hace_10_dias = hoy - timedelta(days=10)
+    hace_30_dias = hoy - timedelta(days=30)
+    hace_90_dias = hoy - timedelta(days=90)
+    en_7_dias = hoy + timedelta(days=7)
+
+    # Obtener todos los equipos con IPO y datos del cliente
+    try:
+        equipos_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/equipos?select=id,ipo_proxima,rae,cliente_id,clientes(direccion,localidad,telefono,persona_contacto,empresa_mantenedora)&ipo_proxima=not.is.null",
+            headers=HEADERS,
+            timeout=10
+        )
+
+        if equipos_response.status_code != 200:
+            flash("Error al cargar datos de IPOs", "error")
+            equipos_data = []
+        else:
+            equipos_data = equipos_response.json()
+    except Exception as e:
+        print(f"Error al cargar equipos: {str(e)}")
+        flash("Error de conexión al cargar datos", "error")
+        equipos_data = []
+
+    # Procesar y clasificar equipos por categorías
+    contactar_ahora = []
+    proximamente = []
+    esta_semana = []
+    oportunidad_pasada = []
+
+    for equipo in equipos_data:
+        if not equipo.get('ipo_proxima'):
+            continue
+
+        # Parsear fecha IPO
+        try:
+            ipo_date = datetime.strptime(equipo['ipo_proxima'], '%Y-%m-%d').date()
+        except:
+            continue
+
+        # Calcular días desde/hasta IPO
+        dias_diff = (hoy - ipo_date).days
+
+        # Extraer datos del cliente
+        cliente = equipo.get('clientes', {}) if equipo.get('clientes') else {}
+
+        item = {
+            'cliente_id': equipo['cliente_id'],
+            'direccion': cliente.get('direccion', 'Sin dirección'),
+            'localidad': cliente.get('localidad', 'Sin localidad'),
+            'telefono': cliente.get('telefono'),
+            'persona_contacto': cliente.get('persona_contacto'),
+            'empresa_mantenedora': cliente.get('empresa_mantenedora'),
+            'ipo_proxima': equipo['ipo_proxima'],
+            'rae': equipo.get('rae'),
+            'dias_desde_ipo': abs(dias_diff) if dias_diff > 0 else 0,
+            'dias_hasta_ipo': abs(dias_diff) if dias_diff < 0 else 0
+        }
+
+        # Clasificar según timing
+        if 10 <= dias_diff <= 30:  # IPO hace 10-30 días - CONTACTAR AHORA
+            contactar_ahora.append(item)
+        elif 0 <= dias_diff < 10:  # IPO hace 0-10 días - PRÓXIMAMENTE
+            proximamente.append(item)
+        elif -7 <= dias_diff < 0:  # IPO en próximos 7 días - ESTA SEMANA
+            esta_semana.append(item)
+        elif 30 < dias_diff <= 90:  # IPO hace 30-90 días - OPORTUNIDAD PASADA
+            oportunidad_pasada.append(item)
+
+    # Ordenar listas
+    contactar_ahora.sort(key=lambda x: x['dias_desde_ipo'])
+    proximamente.sort(key=lambda x: x['dias_desde_ipo'], reverse=True)
+    esta_semana.sort(key=lambda x: x['dias_hasta_ipo'])
+    oportunidad_pasada.sort(key=lambda x: x['dias_desde_ipo'])
+
+    return render_template(
+        "oportunidades_post_ipo.html",
+        tab=tab,
+        contactar_ahora=contactar_ahora,
+        proximamente=proximamente,
+        esta_semana=esta_semana,
+        oportunidad_pasada=oportunidad_pasada,
+        contactar_ahora_count=len(contactar_ahora),
+        proximamente_count=len(proximamente),
+        esta_semana_count=len(esta_semana),
+        oportunidad_pasada_count=len(oportunidad_pasada)
+    )
 
 # Editar Lead - CON LIMPIEZA DE NONE
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])

@@ -199,8 +199,8 @@
                 <a href="/leads_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Instalaciones
                 </a>
-                <a href="/equipos_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Equipos
+                <a href="/oportunidades_post_ipo" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    Oportunidades Post-IPO
                 </a>
                 <a href="/administradores_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Administradores
