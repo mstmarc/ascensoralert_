@@ -147,38 +147,44 @@
             white-space: nowrap;
         }
         
-        /* LISTADO ULTRA-COMPACTO PARA INSTALACIONES */
-        .-list {
+        /* LISTADO ELEGANTE PARA INSTALACIONES */
+        .leads-list {
             background: white;
             border-radius: 8px;
-            padding: 8px;
+            padding: 10px;
             margin-top: 20px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 10px;
         }
 
         .lead-list-item {
-            padding: 8px 12px;
-            transition: all 0.2s ease;
+            padding: 14px 16px;
+            transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
-            border: 1px solid #000;
-            border-radius: 6px;
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-left: 4px solid #366092;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
         }
 
         .lead-list-item:hover {
             background: #f8f9fa;
+            border-left-color: #2a4a70;
+            box-shadow: 0 4px 12px rgba(54, 96, 146, 0.15);
+            transform: translateX(3px);
         }
 
         .lead-list-direccion {
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             color: #1a1a1a;
             text-decoration: none;
             display: block;
-            transition: color 0.2s ease;
-            margin-bottom: 4px;
+            transition: color 0.3s ease;
+            margin-bottom: 6px;
         }
 
         .lead-list-direccion:hover {
@@ -193,8 +199,9 @@
         }
 
         .lead-list-info-item {
-            font-size: 12px;
-            color: #1a1a1a;
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
         }
 
         .leyenda {
