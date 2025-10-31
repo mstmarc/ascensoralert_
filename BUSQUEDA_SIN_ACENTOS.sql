@@ -73,3 +73,118 @@ ON administradores USING gin(f_unaccent(nombre_empresa) gin_trgm_ops);
 -- SELECT indexname FROM pg_indexes
 -- WHERE schemaname = 'public'
 -- AND indexname LIKE '%unaccent%';
+
+-- ============================================
+-- PASO 4: Crear función RPC para búsqueda de clientes sin acentos
+-- ============================================
+-- Esta función permite buscar clientes desde la API usando búsqueda sin acentos
+
+CREATE OR REPLACE FUNCTION buscar_clientes_sin_acentos(
+    termino_busqueda text DEFAULT '',
+    filtro_localidad text DEFAULT '',
+    filtro_empresa text DEFAULT '',
+    limite int DEFAULT 25,
+    desplazamiento int DEFAULT 0
+)
+RETURNS TABLE (
+    id int,
+    direccion text,
+    nombre_cliente text,
+    localidad text,
+    empresa_mantenedora text,
+    numero_ascensores int,
+    total_count bigint
+)
+LANGUAGE sql
+STABLE
+AS $$
+    WITH filtered_data AS (
+        SELECT
+            c.id,
+            c.direccion,
+            c.nombre_cliente,
+            c.localidad,
+            c.empresa_mantenedora,
+            c.numero_ascensores,
+            COUNT(*) OVER() as total_count
+        FROM clientes c
+        WHERE
+            -- Filtro de búsqueda sin acentos
+            (
+                termino_busqueda = ''
+                OR f_unaccent(COALESCE(c.direccion, '')) ILIKE '%' || f_unaccent(termino_busqueda) || '%'
+                OR f_unaccent(COALESCE(c.nombre_cliente, '')) ILIKE '%' || f_unaccent(termino_busqueda) || '%'
+                OR f_unaccent(COALESCE(c.localidad, '')) ILIKE '%' || f_unaccent(termino_busqueda) || '%'
+            )
+            -- Filtro de localidad
+            AND (filtro_localidad = '' OR c.localidad = filtro_localidad)
+            -- Filtro de empresa
+            AND (filtro_empresa = '' OR c.empresa_mantenedora = filtro_empresa)
+    )
+    SELECT
+        id,
+        direccion,
+        nombre_cliente,
+        localidad,
+        empresa_mantenedora,
+        numero_ascensores,
+        total_count
+    FROM filtered_data
+    ORDER BY id
+    LIMIT limite
+    OFFSET desplazamiento;
+$$;
+
+-- ============================================
+-- PASO 5: Crear función RPC para búsqueda de administradores sin acentos
+-- ============================================
+
+CREATE OR REPLACE FUNCTION buscar_administradores_sin_acentos(
+    termino_busqueda text DEFAULT '',
+    limite int DEFAULT 10,
+    desplazamiento int DEFAULT 0
+)
+RETURNS TABLE (
+    id int,
+    nombre_empresa text,
+    localidad text,
+    telefono text,
+    email text,
+    direccion text,
+    observaciones text,
+    total_count bigint
+)
+LANGUAGE sql
+STABLE
+AS $$
+    WITH filtered_data AS (
+        SELECT
+            a.id,
+            a.nombre_empresa,
+            a.localidad,
+            a.telefono,
+            a.email,
+            a.direccion,
+            a.observaciones,
+            COUNT(*) OVER() as total_count
+        FROM administradores a
+        WHERE
+            termino_busqueda = ''
+            OR f_unaccent(COALESCE(a.nombre_empresa, '')) ILIKE '%' || f_unaccent(termino_busqueda) || '%'
+            OR f_unaccent(COALESCE(a.localidad, '')) ILIKE '%' || f_unaccent(termino_busqueda) || '%'
+            OR COALESCE(a.email, '') ILIKE '%' || termino_busqueda || '%'
+    )
+    SELECT
+        id,
+        nombre_empresa,
+        localidad,
+        telefono,
+        email,
+        direccion,
+        observaciones,
+        total_count
+    FROM filtered_data
+    ORDER BY nombre_empresa ASC
+    LIMIT limite
+    OFFSET desplazamiento;
+$$;

@@ -1249,7 +1249,7 @@ def reporte_mensual():
 def leads_dashboard():
     if "usuario" not in session:
         return redirect("/")
-    
+
     page = int(request.args.get("page", 1))
     per_page = 25
     offset = (page - 1) * per_page
@@ -1260,61 +1260,93 @@ def leads_dashboard():
     buscar_direccion = request.args.get("search", "") or request.args.get("buscar_direccion", "")
     filtro_ipo_urgencia = request.args.get("ipo_urgencia", "")
 
-    query_params = []
-
-    if filtro_localidad:
-        query_params.append(f"localidad=eq.{filtro_localidad}")
-
-    if filtro_empresa:
-        query_params.append(f"empresa_mantenedora=eq.{filtro_empresa}")
-
+    # Si hay búsqueda de texto, usar RPC para búsqueda sin acentos
     if buscar_direccion:
-        # Buscar en dirección, nombre_cliente y localidad (sin distinción de mayúsculas ni acentos)
-        # NOTA: Requiere ejecutar BUSQUEDA_SIN_ACENTOS.sql en Supabase primero
-        # Si f_unaccent no está disponible, usar búsqueda normal: direccion.ilike.*{buscar_direccion}*
-        termino_busqueda = urllib.parse.quote(buscar_direccion)
-        query_params.append(
-            f"or=(f_unaccent(direccion).ilike.*{termino_busqueda}*,"
-            f"f_unaccent(nombre_cliente).ilike.*{termino_busqueda}*,"
-            f"f_unaccent(localidad).ilike.*{termino_busqueda}*)"
-        )
-    
-    query_string = "&".join(query_params) if query_params else ""
+        # Usar función RPC para búsqueda sin acentos
+        rpc_url = f"{SUPABASE_URL}/rest/v1/rpc/buscar_clientes_sin_acentos"
 
-    # OPTIMIZACIÓN: Para count solo necesitamos id, no todos los campos
-    count_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id"
-    if query_string:
-        count_url += f"&{query_string}"
+        rpc_params = {
+            "termino_busqueda": buscar_direccion,
+            "filtro_localidad": filtro_localidad,
+            "filtro_empresa": filtro_empresa,
+            "limite": per_page,
+            "desplazamiento": offset
+        }
 
-    count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"})
-    total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
-    total_pages = max(1, (total_registros + per_page - 1) // per_page)
+        response = requests.post(rpc_url, json=rpc_params, headers=HEADERS)
 
-    # OPTIMIZACIÓN: Usar join de Supabase + selección específica de campos
-    # En lugar de hacer 25 queries separadas (1 por lead), obtenemos todo en 1 query
-    # Y solo seleccionamos los campos que realmente necesitamos
-    data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,nombre_cliente,localidad,empresa_mantenedora,numero_ascensores,equipos(ipo_proxima,fecha_vencimiento_contrato)&limit={per_page}&offset={offset}"
-    if query_string:
-        data_url += f"&{query_string}"
+        if response.status_code != 200:
+            return f"<h3 style='color:red;'>Error al buscar leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
 
-    response = requests.get(data_url, headers=HEADERS)
+        leads_base = response.json()
 
-    if response.status_code != 200:
-        return f"<h3 style='color:red;'>Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+        # Obtener total_count del primer resultado si existe
+        total_registros = leads_base[0].get('total_count', 0) if leads_base else 0
+        total_pages = max(1, (total_registros + per_page - 1) // per_page)
 
-    leads_data = response.json()
+    else:
+        # Búsqueda normal con filtros (sin texto de búsqueda)
+        query_params = []
+
+        if filtro_localidad:
+            query_params.append(f"localidad=eq.{filtro_localidad}")
+
+        if filtro_empresa:
+            query_params.append(f"empresa_mantenedora=eq.{filtro_empresa}")
+
+        query_string = "&".join(query_params) if query_params else ""
+
+        # OPTIMIZACIÓN: Para count solo necesitamos id, no todos los campos
+        count_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id"
+        if query_string:
+            count_url += f"&{query_string}"
+
+        count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"})
+        total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
+        total_pages = max(1, (total_registros + per_page - 1) // per_page)
+
+        # OPTIMIZACIÓN: Usar join de Supabase + selección específica de campos
+        data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,nombre_cliente,localidad,empresa_mantenedora,numero_ascensores&limit={per_page}&offset={offset}"
+        if query_string:
+            data_url += f"&{query_string}"
+
+        response = requests.get(data_url, headers=HEADERS)
+
+        if response.status_code != 200:
+            return f"<h3 style='color:red;'>Error al obtener leads</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+
+        leads_base = response.json()
+
+    # Ahora obtener equipos para cada cliente encontrado
+    # Esto es necesario porque RPC no devuelve relaciones anidadas
+    cliente_ids = [lead['id'] for lead in leads_base]
+
+    equipos_por_cliente = {}
+    if cliente_ids:
+        # Obtener todos los equipos de estos clientes en una sola query
+        equipos_url = f"{SUPABASE_URL}/rest/v1/equipos?select=cliente_id,ipo_proxima,fecha_vencimiento_contrato&cliente_id=in.({','.join(map(str, cliente_ids))})"
+        equipos_response = requests.get(equipos_url, headers=HEADERS)
+
+        if equipos_response.status_code == 200:
+            equipos_data = equipos_response.json()
+            # Agrupar equipos por cliente_id
+            for equipo in equipos_data:
+                cliente_id = equipo['cliente_id']
+                if cliente_id not in equipos_por_cliente:
+                    equipos_por_cliente[cliente_id] = []
+                equipos_por_cliente[cliente_id].append(equipo)
     rows = []
 
     # OPTIMIZACIÓN: Usar caché de filtros (TTL: 30 minutos)
     # Reduce de 2 queries a 0 queries en cargas subsecuentes
     localidades_disponibles, empresas_disponibles = get_filtros_cached()
 
-    # OPTIMIZACIÓN: Procesar equipos que ya vienen embedidos en la respuesta
-    for lead in leads_data:
+    # Procesar leads y sus equipos
+    for lead in leads_base:
         lead_id = lead["id"]
 
-        # Los equipos ya están incluidos gracias al join de Supabase
-        equipos = lead.get("equipos", [])
+        # Obtener equipos de este cliente
+        equipos = equipos_por_cliente.get(lead_id, [])
 
         direccion = lead.get("direccion", "-")
         nombre_cliente = lead.get("nombre_cliente", "")
@@ -2109,119 +2141,108 @@ def administradores_dashboard():
         limit = 10  # Paginación de 10 administradores por página
         offset = (page - 1) * limit
 
-        # Construir URL con filtros
-        url = f"{SUPABASE_URL}/rest/v1/administradores?select=*&order=nombre_empresa.asc"
-
+        # Si hay búsqueda, usar RPC para búsqueda sin acentos
         if buscar:
-            # Búsqueda sin distinción de acentos (requiere BUSQUEDA_SIN_ACENTOS.sql ejecutado)
-            termino_busqueda = urllib.parse.quote(buscar)
-            url += f"&or=(f_unaccent(nombre_empresa).ilike.%{termino_busqueda}%,f_unaccent(localidad).ilike.%{termino_busqueda}%,email.ilike.%{termino_busqueda}%)"
+            # Usar función RPC para búsqueda sin acentos
+            rpc_url = f"{SUPABASE_URL}/rest/v1/rpc/buscar_administradores_sin_acentos"
 
-        # Obtener registros paginados con conteo
-        url += f"&limit={limit}&offset={offset}"
+            rpc_params = {
+                "termino_busqueda": buscar,
+                "limite": limit,
+                "desplazamiento": offset
+            }
 
-        # Headers para obtener el conteo total
-        headers_with_count = HEADERS.copy()
-        headers_with_count["Prefer"] = "count=exact"
-
-        try:
-            response = requests.get(url, headers=headers_with_count, timeout=10)
-
-            # 200 = OK, 206 = Partial Content (respuesta válida con paginación)
-            if response.status_code not in [200, 206]:
-                print(f"Error al cargar administradores: {response.status_code} - {response.text}")
-                flash(f"Error al cargar administradores desde la base de datos (Código: {response.status_code})", "error")
-                # Renderizar con datos vacíos
-                return render_template(
-                    "administradores_dashboard.html",
-                    tab=tab,
-                    administradores=[],
-                    buscar=buscar,
-                    page=1,
-                    total_pages=1,
-                    total_registros=0
-                )
-
-            # Obtener total de registros del header Content-Range
             try:
+                response = requests.post(rpc_url, json=rpc_params, headers=HEADERS, timeout=10)
+
+                if response.status_code != 200:
+                    print(f"Error al buscar administradores: {response.status_code} - {response.text}")
+                    flash(f"Error al buscar administradores (Código: {response.status_code})", "error")
+                    return render_template(
+                        "administradores_dashboard.html",
+                        tab=tab,
+                        administradores=[],
+                        buscar=buscar,
+                        page=1,
+                        total_pages=1,
+                        total_registros=0
+                    )
+
+                administradores_data = response.json()
+
+                # Obtener total_count del primer resultado si existe
+                total_registros = administradores_data[0].get('total_count', 0) if administradores_data else 0
+                total_pages = max(1, (total_registros + limit - 1) // limit)
+
+                # Remover total_count de cada registro (no es parte del modelo)
+                administradores = [{k: v for k, v in admin.items() if k != 'total_count'} for admin in administradores_data]
+
+            except Exception as e:
+                print(f"Excepción al buscar administradores: {str(e)}")
+                flash(f"Error de conexión al buscar administradores", "error")
+                administradores = []
+                total_registros = 0
+                total_pages = 1
+
+        else:
+            # Búsqueda normal sin filtro de texto
+            url = f"{SUPABASE_URL}/rest/v1/administradores?select=*&order=nombre_empresa.asc&limit={limit}&offset={offset}"
+
+            # Headers para obtener el conteo total
+            headers_with_count = HEADERS.copy()
+            headers_with_count["Prefer"] = "count=exact"
+
+            try:
+                response = requests.get(url, headers=headers_with_count, timeout=10)
+
+                # 200 = OK, 206 = Partial Content (respuesta válida con paginación)
+                if response.status_code not in [200, 206]:
+                    print(f"Error al cargar administradores: {response.status_code} - {response.text}")
+                    flash(f"Error al cargar administradores desde la base de datos (Código: {response.status_code})", "error")
+                    # Renderizar con datos vacíos
+                    return render_template(
+                        "administradores_dashboard.html",
+                        tab=tab,
+                        administradores=[],
+                        buscar=buscar,
+                        page=1,
+                        total_pages=1,
+                        total_registros=0
+                    )
+
+                # Obtener total de registros del header Content-Range
                 content_range = response.headers.get("Content-Range", "*/0")
                 total_registros = int(content_range.split("/")[-1])
-            except Exception as e:
-                print(f"Error al parsear Content-Range: {e}")
-                total_registros = 0
 
-            # Parsear respuesta JSON
-            try:
+                # Parsear respuesta JSON
                 administradores = response.json()
-            except Exception as e:
-                print(f"Error al parsear JSON: {e}")
-                flash(f"Error al procesar datos de administradores", "error")
-                return render_template(
-                    "administradores_dashboard.html",
-                    tab=tab,
-                    administradores=[],
-                    buscar=buscar,
-                    page=1,
-                    total_pages=1,
-                    total_registros=0
-                )
 
-            # Limpiar None
-            try:
-                administradores = [limpiar_none(admin) for admin in administradores]
             except Exception as e:
-                print(f"Error al limpiar datos: {e}")
+                print(f"Excepción al cargar administradores: {str(e)}")
+                flash(f"Error de conexión al cargar administradores", "error")
                 administradores = []
+                total_registros = 0
 
             # Calcular páginas
             total_pages = max(1, (total_registros + limit - 1) // limit)  # Al menos 1 página
 
-            return render_template(
-                "administradores_dashboard.html",
-                tab=tab,
-                administradores=administradores,
-                buscar=buscar,
-                page=page,
-                total_pages=total_pages,
-                total_registros=total_registros
-            )
-
-        except requests.exceptions.Timeout:
-            print(f"Error de timeout al cargar administradores")
-            flash(f"Error de conexión: La base de datos tardó demasiado en responder. Por favor, intente nuevamente.", "error")
-            return render_template(
-                "administradores_dashboard.html",
-                tab=tab,
-                administradores=[],
-                buscar=buscar,
-                page=1,
-                total_pages=1,
-                total_registros=0
-            )
-        except requests.exceptions.RequestException as e:
-            print(f"Error de conexión al cargar administradores: {e}")
-            flash(f"Error de conexión al cargar administradores. Por favor, verifique su conexión a internet.", "error")
-            return render_template(
-                "administradores_dashboard.html",
-                tab=tab,
-                administradores=[],
-                buscar=buscar,
-                page=1,
-                total_pages=1,
-                total_registros=0
-            )
+        # Limpiar None en todos los casos
+        try:
+            administradores = [limpiar_none(admin) for admin in administradores]
         except Exception as e:
-            print(f"Error inesperado al cargar administradores: {e}")
-            flash(f"Error inesperado al cargar administradores. Por favor, contacte al administrador del sistema.", "error")
-            return render_template(
-                "administradores_dashboard.html",
-                tab=tab,
-                administradores=[],
-                buscar=buscar,
-                page=1,
-                total_pages=1,
-                total_registros=0
-            )
+            print(f"Error al limpiar datos: {e}")
+            administradores = []
+
+        # Renderizar template con los resultados
+        return render_template(
+            "administradores_dashboard.html",
+            tab=tab,
+            administradores=administradores,
+            buscar=buscar,
+            page=page,
+            total_pages=total_pages,
+            total_registros=total_registros
+        )
 
     # ============================================
     # TAB: VISITAS
