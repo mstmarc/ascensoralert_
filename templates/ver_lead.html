@@ -9,10 +9,18 @@
     <style>
         /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
 
+        /* --- Estilo Detalle Comunidad v2 --- */
+
+        /* Fondo general tipo dashboard moderno */
+        body {
+            background: #f5f7fa !important;
+        }
+
         /* Ajustar contenedor del dashboard para ancho completo */
         main {
             max-width: none !important;
             padding: 30px !important;
+            background: #f5f7fa !important;
         }
 
         main .menu {
@@ -21,7 +29,49 @@
             margin: 0 !important;
         }
 
-        /* ESTILOS DE BOTONES ELEGANTES */
+        /* Cabecera moderna con degradado azul corporativo */
+        header {
+            background: linear-gradient(135deg, #004b8d 0%, #0073e6 100%) !important;
+            box-shadow: 0 4px 12px rgba(0, 75, 141, 0.3);
+            padding: 25px 0;
+        }
+
+        header .title-container h1 {
+            color: white !important;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header .title-container h1::before {
+            content: "🏢 ";
+            font-size: 28px;
+        }
+
+        /* Animación fade-in para los bloques principales */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .seccion {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .seccion:nth-child(1) { animation-delay: 0.1s; }
+        .seccion:nth-child(2) { animation-delay: 0.2s; }
+        .seccion:nth-child(3) { animation-delay: 0.3s; }
+        .seccion:nth-child(4) { animation-delay: 0.4s; }
+
+        /* ESTILOS DE BOTONES ELEGANTES - Colores Corporativos */
         .btn,
         .button {
             display: inline-block;
@@ -40,15 +90,15 @@
         }
 
         .btn-primary, .button {
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            background: #0073e6;
             color: white;
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 115, 230, 0.3);
         }
 
         .btn-primary:hover, .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
-            background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 115, 230, 0.4);
+            background: #005bb5;
         }
 
         .btn-success {
@@ -58,26 +108,28 @@
         }
 
         .btn-success:hover {
-            transform: translateY(-2px);
+            transform: scale(1.05) translateY(-2px);
             box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
             background: linear-gradient(135deg, #218838 0%, #28a745 100%);
         }
 
         .btn-info {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            background: #0073e6;
             color: white;
-            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 115, 230, 0.3);
         }
 
         .btn-info:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 115, 230, 0.4);
+            background: #005bb5;
         }
 
         .btn-sm {
-            padding: 8px 16px;
-            font-size: 15px;
+            padding: 10px 18px;
+            font-size: 14px;
             min-width: auto;
+            font-weight: 600;
         }
 
         /* CONTENEDOR PRINCIPAL */
@@ -86,28 +138,31 @@
             margin: 0 auto;
         }
 
-        /* SECCIONES ELEGANTES */
+        /* SECCIONES ELEGANTES - Estilo Dashboard Moderno */
         .seccion {
             background: white;
-            padding: 25px;
+            padding: 30px;
             margin-bottom: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            border-left: 4px solid #366092;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: none;
             transition: all 0.3s ease;
         }
 
         .seccion:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 6px 20px rgba(0, 75, 141, 0.12);
+            transform: translateY(-2px);
         }
 
         .seccion h2 {
-            color: #366092;
-            margin: 0 0 20px 0;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e1e5e9;
-            font-size: 22px;
+            color: #2c3e50;
+            margin: 0 0 25px 0;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #0073e6;
+            font-size: 24px;
             font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.5px;
         }
 
         .seccion-header {
@@ -125,29 +180,35 @@
             border: none;
         }
 
-        /* INFO SECTIONS */
+        /* INFO SECTIONS - Estilo Dashboard Moderno */
         .info-section {
-            margin-bottom: 20px;
-            padding: 18px;
-            background: #f8f9fa;
-            border-left: 4px solid #366092;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8fafb;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
             transition: all 0.3s ease;
+            border: 1px solid #e8ecf0;
         }
 
         .info-section:hover {
-            transform: translateX(3px);
-            box-shadow: 0 2px 6px rgba(54, 96, 146, 0.15);
+            background: #f0f4f8;
+            box-shadow: 0 4px 12px rgba(0, 115, 230, 0.1);
         }
 
         .section-subtitle {
-            color: #366092;
-            font-size: 16px;
+            color: #2c3e50;
+            font-size: 18px;
             font-weight: 700;
-            margin: 0 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #d1d5db;
+            margin: 0 0 15px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #0073e6;
+            text-align: center;
+        }
+
+        .section-subtitle::before {
+            margin-right: 8px;
+            font-size: 20px;
         }
 
         .info-row {
@@ -158,65 +219,84 @@
 
         .info-item-full {
             flex: 1 1 100%;
-            padding: 10px 14px;
+            padding: 15px 18px;
             background: white;
-            border-radius: 6px;
-            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
+            line-height: 1.8;
         }
 
         .info-item-inline {
             flex: 1 1 calc(50% - 6px);
-            padding: 10px 14px;
+            padding: 15px 18px;
             background: white;
-            border-radius: 6px;
+            border-radius: 8px;
             min-width: 200px;
-            border: 1px solid #e1e5e9;
+            border: 1px solid #e1e8ed;
+            line-height: 1.8;
         }
 
         .info-item-full label, .info-item-inline label {
-            font-weight: 600;
-            color: #366092;
+            font-weight: 700;
+            color: #004b8d;
             display: inline-block;
-            margin-right: 8px;
+            margin-right: 10px;
             font-size: 14px;
         }
 
         .info-item-full span, .info-item-inline span {
-            color: #333;
+            color: #2c3e50;
             font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* TAGS/CHIPS para valores destacados */
+        .tag {
+            display: inline-block;
+            background: #e9eef7;
+            color: #2c3e50;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0, 75, 141, 0.1);
         }
 
         .admin-link {
-            color: #007bff;
+            color: #0073e6;
             text-decoration: none;
             font-weight: 600;
             font-size: 15px;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             transition: all 0.3s ease;
             display: inline-block;
             border: 2px solid transparent;
+            background: #e9eef7;
         }
 
         .admin-link:hover {
-            background: #007bff;
+            background: #0073e6;
             color: white;
-            transform: translateX(5px);
-            border-color: #007bff;
+            transform: translateX(5px) scale(1.05);
+            border-color: #0073e6;
+            box-shadow: 0 4px 12px rgba(0, 115, 230, 0.3);
         }
 
         .observaciones-box {
             background: white;
-            padding: 15px;
-            min-height: 60px;
-            border: 1px solid #e1e5e9;
-            border-radius: 6px;
+            padding: 18px;
+            min-height: 80px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
 
         .observaciones-box p {
             margin: 0;
-            color: #555;
-            line-height: 1.6;
+            color: #2c3e50;
+            line-height: 1.8;
+            font-size: 15px;
         }
 
         /* TARJETAS DE OPORTUNIDADES */
@@ -402,7 +482,7 @@
 
                     <!-- 1. UBICACIÓN -->
                     <div class="info-section">
-                        <h3 class="section-subtitle">Ubicacion</h3>
+                        <h3 class="section-subtitle">📍 Ubicación</h3>
                         <div class="info-row">
                             <div class="info-item-full">
                                 <label>Nombre:</label>
@@ -425,11 +505,11 @@
 
                     <!-- 2. CARACTERÍSTICAS -->
                     <div class="info-section">
-                        <h3 class="section-subtitle">Caracteristicas</h3>
+                        <h3 class="section-subtitle">⚙️ Características</h3>
                         <div class="info-row">
                             <div class="info-item-inline">
                                 <label>Tipo:</label>
-                                <span>{{ lead.tipo_cliente or '-' }}</span>
+                                <span class="tag">{{ lead.tipo_cliente or '-' }}</span>
                             </div>
                             <div class="info-item-inline">
                                 <label>Numero de Ascensores:</label>
@@ -437,14 +517,14 @@
                             </div>
                             <div class="info-item-full">
                                 <label>Empresa Mantenedora Actual:</label>
-                                <span>{{ lead.empresa_mantenedora or '-' }}</span>
+                                <span class="tag">{{ lead.empresa_mantenedora or '-' }}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- 3. ADMINISTRADOR DE FINCAS -->
                     <div class="info-section">
-                        <h3 class="section-subtitle">Administrador de Fincas</h3>
+                        <h3 class="section-subtitle">🧾 Administrador de Fincas</h3>
                         <div class="info-row">
                             <div class="info-item-full">
                                 <label>Administrador:</label>
@@ -463,7 +543,7 @@
 
                     <!-- 4. DATOS DE CONTACTO -->
                     <div class="info-section">
-                        <h3 class="section-subtitle">Datos de Contacto</h3>
+                        <h3 class="section-subtitle">📞 Datos de Contacto</h3>
                         <div class="info-row">
                             <div class="info-item-full">
                                 <label>Persona de Contacto:</label>
@@ -482,7 +562,7 @@
 
                     <!-- 5. OBSERVACIONES -->
                     <div class="info-section">
-                        <h3 class="section-subtitle">Observaciones</h3>
+                        <h3 class="section-subtitle">📝 Observaciones</h3>
                         <div class="info-row">
                             <div class="info-item-full observaciones-box">
                                 <p>{{ lead.observaciones or 'Sin observaciones' }}</p>
@@ -492,7 +572,7 @@
 
                     <!-- 6. FECHA DE VISITA -->
                     <div class="info-section">
-                        <h3 class="section-subtitle">Fecha de Visita</h3>
+                        <h3 class="section-subtitle">📅 Fecha de Visita</h3>
                         <div class="info-row">
                             <div class="info-item-full">
                                 <label>Primera Visita:</label>
