@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipos/Ascensores</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="/static/styles.css?v=7">
+    <style>
+        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
+
+        /* Ajustar contenedor del dashboard para ancho completo */
+        main {
+            max-width: none !important;
+            padding: 30px !important;
+        }
+
+        main .menu {
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+        /* ESTILOS CRÍTICOS DE BOTONES */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px 10px 0;
+            min-width: 120px;
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.5;
+            vertical-align: middle;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+            background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #218838 0%, #28a745 100%);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 15px;
+            min-width: auto;
+            margin: 5px;
+        }
+
+        /* ESTILOS DEL BUSCADOR */
+        .buscador-destacado {
+            background: #366092;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
+        }
+
+        .buscador-label {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 15px;
+            display: block;
+        }
+
+        .buscador-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .buscador-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            box-sizing: border-box;
+            height: 32px;
+            margin-bottom: 0 !important;
+        }
+
+        .buscador-input:focus {
+            outline: 2px solid rgba(255,255,255,0.5);
+        }
+
+        button.btn-buscar {
+            background: white !important;
+            color: #366092 !important;
+            padding: 0 20px;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            white-space: nowrap;
+            box-sizing: border-box;
+            height: 32px;
+            margin: 0 !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button.btn-buscar:hover {
+            background: #f8f9fa !important;
+            transform: translateY(0);
+            border-color: #f8f9fa;
+        }
+
+        /* Filtros */
+        .filtros {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto auto;
+            gap: 10px;
+            align-items: start;
+        }
+
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filtro-grupo label {
+            font-weight: 600;
+            color: #366092;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .filtro-grupo select {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+            height: 36px;
+            box-sizing: border-box;
+        }
+
+        .filtro-grupo select:focus {
+            outline: none;
+            border-color: #366092;
+        }
+
+        .filtros .btn {
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            white-space: nowrap;
+            margin-top: 21px;
+        }
+
+        /* LISTADO ULTRA-COMPACTO MINIMALISTA */
+        .equipo-list {
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .equipo-list-item {
+            padding: 8px 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid #000;
+            border-radius: 6px;
+        }
+
+        .equipo-list-item:hover {
+            background: #f8f9fa;
+        }
+
+        .equipo-list-tipo {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: block;
+            transition: color 0.2s ease;
+        }
+
+        .equipo-list-tipo:hover {
+            color: #366092;
+        }
+
+        .equipo-list-info {
+            font-size: 11px;
+            color: #999;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 16px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .paginacion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            flex-wrap: wrap;
+        }
+
+        .paginacion-info {
+            color: #366092;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .info-resultados {
+            text-align: center;
+            color: #366092;
+            margin: 10px 0;
+            font-weight: 600;
+            font-size: 15px;
+            background: #e7f3ff;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        /* ESTILOS DE ALERTAS */
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 767px) {
+            /* Ajustar listado en móvil */
+            .equipo-list-item {
+                padding: 8px 16px;
+            }
+
+            .equipo-list-tipo {
+                font-size: 13px;
+            }
+
+            .equipo-list-info {
+                font-size: 11px;
+            }
+
+            /* Ajustar filtros en móvil */
+            .filtros-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filtros .btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            /* Ajustar buscador en móvil */
+            .buscador-input-container {
+                flex-direction: column;
+            }
+
+            .buscador-input {
+                min-width: 100%;
+            }
+
+            .btn-buscar {
+                width: 100%;
+            }
+
+            .paginacion-info {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Equipos/Ascensores</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="menu">
+            <!-- Mensajes Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <h2 style="margin: 0 0 20px 0; color: #366092; font-size: 20px;">Gestión de Equipos</h2>
+
+            <!-- Buscador -->
+            <form method="GET" action="/equipos_dashboard">
+                <div class="buscador-destacado">
+                    <div class="buscador-label">Buscar Equipo</div>
+                    <div class="buscador-input-container">
+                        <input
+                            type="text"
+                            name="buscar"
+                            class="buscador-input"
+                            value="{{ buscar }}"
+                            placeholder="Identificación, RAE o instalación..."
+                            autofocus
+                        >
+                        <button type="submit" class="btn-buscar">Buscar</button>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filtros">
+                    <div class="filtros-grid">
+                        <div class="filtro-grupo">
+                            <label>Tipo de Equipo:</label>
+                            <select name="tipo_equipo">
+                                <option value="">Todos</option>
+                                <option value="Ascensor" {% if filtro_tipo_equipo == 'Ascensor' %}selected{% endif %}>Ascensor</option>
+                                <option value="Montacargas" {% if filtro_tipo_equipo == 'Montacargas' %}selected{% endif %}>Montacargas</option>
+                                <option value="Elevador" {% if filtro_tipo_equipo == 'Elevador' %}selected{% endif %}>Elevador</option>
+                                <option value="Salvaescaleras" {% if filtro_tipo_equipo == 'Salvaescaleras' %}selected{% endif %}>Salvaescaleras</option>
+                            </select>
+                        </div>
+
+                        <div class="filtro-grupo">
+                            <label>Instalación:</label>
+                            <select name="cliente_id">
+                                <option value="">Todas</option>
+                                {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}" {% if filtro_cliente_id == cliente.id|string %}selected{% endif %}>
+                                    {{ cliente.direccion }} - {{ cliente.localidad }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Filtrar
+                        </button>
+
+                        <a href="/equipos_dashboard" class="btn btn-secondary">
+                            Limpiar
+                        </a>
+                    </div>
+                </div>
+
+                <input type="hidden" name="page" value="1">
+            </form>
+
+            <!-- Listado Ultra-Compacto -->
+            {% if equipos %}
+                <div class="equipo-list">
+                    {% for equipo in equipos %}
+                    <div class="equipo-list-item">
+                        <a href="/ver_equipo/{{ equipo.id }}" class="equipo-list-tipo">
+                            🔧 {{ equipo.tipo_equipo }}{% if equipo.identificacion %} - {{ equipo.identificacion }}{% endif %}
+                        </a>
+                        <span class="equipo-list-info">
+                            RAE: {{ equipo.rae or '-' }} | IPO: {{ equipo.ipo_proxima or '-' }} |
+                            {% if equipo.cliente %}{{ equipo.cliente.direccion }}, {{ equipo.cliente.localidad }}{% else %}Sin instalación{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    No se encontraron equipos con los filtros aplicados
+                </div>
+            {% endif %}
+
+            <div class="info-resultados">
+                Mostrando {{ equipos|length }} registros de {{ total_registros }} totales
+            </div>
+
+            <div class="paginacion">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}&buscar={{ buscar }}&tipo_equipo={{ filtro_tipo_equipo }}&cliente_id={{ filtro_cliente_id }}" class="btn btn-primary btn-sm">Anterior</a>
+                {% else %}
+                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
+                {% endif %}
+
+                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
+
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}&buscar={{ buscar }}&tipo_equipo={{ filtro_tipo_equipo }}&cliente_id={{ filtro_cliente_id }}" class="btn btn-primary btn-sm">Siguiente</a>
+                {% else %}
+                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
+                {% endif %}
+            </div>
+
+            <br>
+            <a href="/home" class="button">Volver al Home</a>
+        </div>
+    </main>
+
+    <script src="/static/sidebar.js"></script>
+</body>
+</html>

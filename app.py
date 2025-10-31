@@ -1549,6 +1549,125 @@ def eliminar_equipo(equipo_id):
     else:
         return f"<h3 style='color:red;'>Error al obtener Equipo</h3><a href='/home'>Volver</a>"
 
+# Dashboard de Equipos
+@app.route("/equipos_dashboard", methods=["GET"])
+def equipos_dashboard():
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Búsqueda y filtros
+    buscar = request.args.get("buscar", "")
+    filtro_tipo_equipo = request.args.get("tipo_equipo", "")
+    filtro_cliente_id = request.args.get("cliente_id", "")
+
+    # Paginación
+    try:
+        page = int(request.args.get("page", 1))
+    except (ValueError, TypeError):
+        page = 1
+
+    limit = 20
+    offset = (page - 1) * limit
+
+    # Construir query base
+    query_params = []
+
+    # Filtro por tipo de equipo
+    if filtro_tipo_equipo:
+        query_params.append(f"tipo_equipo=eq.{filtro_tipo_equipo}")
+
+    # Filtro por cliente
+    if filtro_cliente_id:
+        query_params.append(f"cliente_id=eq.{filtro_cliente_id}")
+
+    # Búsqueda por identificación o RAE
+    if buscar:
+        # Buscar en identificación o RAE
+        query_params.append(f"or=(identificacion.ilike.*{buscar}*,rae.ilike.*{buscar}*)")
+
+    # Construir URL con filtros
+    query_string = "&".join(query_params) if query_params else ""
+    base_url = f"{SUPABASE_URL}/rest/v1/equipos"
+
+    # Obtener equipos con JOIN a clientes
+    if query_string:
+        data_url = f"{base_url}?{query_string}&select=*,cliente:clientes(id,direccion,localidad)&order=tipo_equipo.asc,identificacion.asc&limit={limit}&offset={offset}"
+    else:
+        data_url = f"{base_url}?select=*,cliente:clientes(id,direccion,localidad)&order=tipo_equipo.asc,identificacion.asc&limit={limit}&offset={offset}"
+
+    # Headers para obtener conteo total
+    headers_with_count = HEADERS.copy()
+    headers_with_count["Prefer"] = "count=exact"
+
+    try:
+        response = requests.get(data_url, headers=headers_with_count, timeout=10)
+
+        if response.status_code not in [200, 206]:
+            flash(f"Error al cargar equipos (Código: {response.status_code})", "error")
+            equipos = []
+            total_registros = 0
+        else:
+            equipos = response.json()
+            content_range = response.headers.get("Content-Range", "*/0")
+            total_registros = int(content_range.split("/")[-1])
+
+    except Exception as e:
+        print(f"Error al cargar equipos: {str(e)}")
+        flash("Error de conexión al cargar equipos", "error")
+        equipos = []
+        total_registros = 0
+
+    # Calcular páginas
+    total_pages = max(1, (total_registros + limit - 1) // limit)
+
+    # Obtener lista de clientes para el filtro
+    clientes = []
+    try:
+        clientes_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,localidad&order=direccion.asc",
+            headers=HEADERS,
+            timeout=10
+        )
+        if clientes_response.status_code == 200:
+            clientes = clientes_response.json()
+    except Exception as e:
+        print(f"Error al cargar clientes: {str(e)}")
+
+    return render_template(
+        "equipos_dashboard.html",
+        equipos=equipos,
+        clientes=clientes,
+        buscar=buscar,
+        filtro_tipo_equipo=filtro_tipo_equipo,
+        filtro_cliente_id=filtro_cliente_id,
+        page=page,
+        total_pages=total_pages,
+        total_registros=total_registros
+    )
+
+# Ver detalle de equipo
+@app.route("/ver_equipo/<int:equipo_id>")
+def ver_equipo(equipo_id):
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Obtener equipo con JOIN a cliente
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=*,cliente:clientes(id,direccion,localidad,nombre_cliente)",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Equipo no encontrado", "error")
+        return redirect("/equipos_dashboard")
+
+    equipo = limpiar_none(response.json()[0])
+
+    # El cliente viene como un objeto dentro de equipo
+    cliente = equipo.pop('cliente', None) if 'cliente' in equipo else None
+
+    return render_template("ver_equipo.html", equipo=equipo, cliente=cliente)
+
 # Editar Lead - CON LIMPIEZA DE NONE
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
 def editar_lead(lead_id):
