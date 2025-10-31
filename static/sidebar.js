@@ -199,14 +199,14 @@
                 <a href="/leads_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Instalaciones
                 </a>
-                <a href="/oportunidades_post_ipo" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Oportunidades Post-IPO
-                </a>
                 <a href="/administradores_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Administradores
                 </a>
                 <a href="/oportunidades" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Oportunidades
+                </a>
+                <a href="/oportunidades_post_ipo" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    Oportunidades Post-IPO
                 </a>
 
                 <div class="sidebar-integrated-divider"></div>
