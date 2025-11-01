@@ -122,33 +122,38 @@
             border: none;
         }
 
-        /* GRID MINIMALISTA PARA INFORMACIÓN */
+        /* GRID MINIMALISTA PARA INFORMACIÓN - DOS COLUMNAS */
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px 32px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 40px;
             margin-bottom: 20px;
         }
 
         .info-item {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
+            flex-direction: row;
+            gap: 10px;
+            align-items: baseline;
         }
 
         .info-item label {
-            font-weight: 600;
-            color: #666;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 15px;
+            min-width: 160px;
+            flex-shrink: 0;
+        }
+
+        .info-item label::after {
+            content: ":";
         }
 
         .info-item span,
         .info-item a {
-            color: #1a1a1a;
-            font-size: 16px;
-            font-weight: 500;
+            color: #444;
+            font-size: 15px;
+            font-weight: 400;
         }
 
         .info-item a {
@@ -164,6 +169,12 @@
 
         .info-item.full-width {
             grid-column: 1 / -1;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-item.full-width label::after {
+            content: "";
         }
 
         .observaciones {
@@ -171,6 +182,13 @@
             font-size: 15px;
             line-height: 1.7;
             margin-top: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* TARJETAS DE OPORTUNIDADES */
