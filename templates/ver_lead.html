@@ -130,44 +130,57 @@
             border: none;
         }
 
-        /* OPORTUNIDADES */
+        /* OPORTUNIDADES - TARJETA AÉREA */
         .oportunidad-item {
-            background: transparent;
-            padding: 16px 0;
-            margin-bottom: 24px;
+            background: #fafafa;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: background 0.2s;
+        }
+
+        .oportunidad-item:hover {
+            background: #f0f3f8;
         }
 
         .oportunidad-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .oportunidad-tipo {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
             color: #222;
         }
 
         .oportunidad-estado {
-            padding: 4px 10px;
-            border-radius: 4px;
+            padding: 2px 8px;
+            border-radius: 8px;
             font-size: 12px;
             font-weight: 500;
-            color: #777;
-            background: #f0f0f0;
+            color: #003366;
+            background: #e8eef8;
         }
 
         .oportunidad-detalles {
             font-size: 14px;
-            color: #222;
+            color: #555;
             line-height: 1.5;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .oportunidad-detalles p {
-            margin: 6px 0;
+            margin: 4px 0;
+        }
+
+        .oportunidad-acciones {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
         }
 
         /* VISITAS */
@@ -196,14 +209,21 @@
             margin-top: 8px;
         }
 
-        /* EQUIPOS */
+        /* EQUIPOS - TARJETA AÉREA */
         .equipo-item {
-            background: transparent;
-            padding: 16px 0;
-            margin-bottom: 24px;
+            background: #fafafa;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background 0.2s;
+        }
+
+        .equipo-item:hover {
+            background: #f0f3f8;
         }
 
         .equipo-info {
@@ -213,18 +233,23 @@
         .equipo-nombre {
             font-weight: 600;
             color: #222;
-            font-size: 14px;
+            font-size: 15px;
             margin-bottom: 6px;
         }
 
         .equipo-detalles {
-            color: #777;
-            font-size: 12px;
+            color: #555;
+            font-size: 13px;
         }
 
         .equipo-acciones {
             display: flex;
             gap: 8px;
+        }
+
+        .add-item-button {
+            text-align: center;
+            margin-top: 24px;
         }
 
         /* BOTONES - ESTILO CORPORATIVO LIMPIO */
@@ -445,11 +470,9 @@
                             <span class="oportunidad-estado">{{ op.estado|upper }}</span>
                         </div>
                         <div class="oportunidad-detalles">
-                            {% if op.descripcion %}<p>{{ op.descripcion }}</p>{% endif %}
-                            {% if op.valor_estimado %}<p>Valor estimado: {{ "%.2f"|format(op.valor_estimado) }} EUR</p>{% endif %}
-                            <p class="equipo-detalles">Creada: {{ op.fecha_creacion[:10] }}</p>
+                            {{ op.descripcion or 'Sin descripción' }} • Creada: {{ op.fecha_creacion[:10] }}
                         </div>
-                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <div class="oportunidad-acciones">
                             <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-sm">Ver Detalle</a>
                             <a href="/crear_visita_seguimiento/{{ lead.id }}?oportunidad_id={{ op.id }}" class="btn btn-sm">Registrar Visita</a>
                         </div>
@@ -459,7 +482,7 @@
                     <div class="estado-vacio">No hay oportunidades registradas para esta comunidad</div>
                 {% endif %}
 
-                <div style="margin-top: 20px;">
+                <div class="add-item-button">
                     <a href="/crear_oportunidad/{{ lead.id }}" class="btn">+ Crear Oportunidad</a>
                 </div>
             </div>
@@ -485,7 +508,7 @@
                     {% endfor %}
                 {% endif %}
 
-                <div style="margin-top: 20px;">
+                <div class="add-item-button">
                     <a href="/crear_visita_seguimiento/{{ lead.id }}" class="btn">+ Registrar Nueva Visita</a>
                 </div>
             </div>
@@ -510,7 +533,7 @@
                     <div class="estado-vacio">Esta instalación aún no tiene equipos registrados</div>
                 {% endif %}
 
-                <div style="margin-top: 20px;">
+                <div class="add-item-button">
                     <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn">+ Añadir Equipo</a>
                 </div>
             </div>
