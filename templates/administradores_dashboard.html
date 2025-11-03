@@ -15,7 +15,6 @@
             background: #ffffff;
             line-height: 1.5;
         }
-        }
 
         main {
             max-width: 1400px !important;
@@ -88,12 +87,49 @@
         .info-resultados {
             text-align: center;
             color: #003366;
-            margin: 10px 0;
+            margin: 15px 0;
             font-weight: 600;
-            font-size: 15px;
-            background: #e8eef8;
-            padding: 8px;
-            border-radius: 12px;
+            font-size: 14px;
+            background: #fafafa;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .paginacion {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 12px;
+            margin: 15px 0;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+            border: 1px solid #f0f0f0;
+        }
+
+        .paginacion-info {
+            color: #003366;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* HEADER DE PÁGINA */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            margin: 0;
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
         }
 
         /* TABS */
@@ -333,17 +369,32 @@
         }
 
         /* EMPTY STATE */
-        .empty-state {
+        .empty-state,
+        .no-results {
             text-align: center;
             padding: 40px 20px;
             color: #555555;
             font-size: 15px;
+            background: #fafafa;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid #f0f0f0;
         }
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
             main {
                 padding: 40px 20px !important;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .page-header .btn {
+                width: 100%;
             }
 
             .tabs-container {
@@ -381,6 +432,10 @@
             }
         }
     </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
             <div class="logo-container">
                 <a href="/home">
                     <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
@@ -402,10 +457,10 @@
                 {% endif %}
             {% endwith %}
 
-            <!-- Botón destacado para crear administrador -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2 style="margin: 0; color: #366092; font-size: 20px;">Gestión de Administradores</h2>
-                <a href="/nuevo_administrador" class="btn-nuevo" style="margin: 0;">
+            <!-- Header de página con título y botón -->
+            <div class="page-header">
+                <h2 class="page-title">Gestión de Administradores</h2>
+                <a href="/nuevo_administrador" class="btn btn-primary">
                     ➕ Nuevo Administrador
                 </a>
             </div>
