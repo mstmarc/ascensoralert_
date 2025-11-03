@@ -5,13 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle Equipo</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <link rel="stylesheet" href="/static/styles.css?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
+        /* === ESTILO MINIMALISTA LIMPIO === */
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #fafafa;
+            line-height: 1.5;
+        }
 
         main {
-            max-width: none !important;
-            padding: 30px !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 60px 80px !important;
+            background: #fafafa;
         }
 
         main .menu {
@@ -20,88 +29,49 @@
             margin: 0 !important;
         }
 
-        /* BOTONES ELEGANTES */
-        .btn,
-        .button {
-            display: inline-block;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 5px;
-            min-width: 120px;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .btn-primary, .button {
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
-        }
-
-        .btn-primary:hover, .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
-        }
-
-        /* CONTENEDOR */
-        .detalle-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* SECCIONES */
-        .seccion {
-            background: white;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            border-left: 4px solid #366092;
-            transition: all 0.3s ease;
-        }
-
-        .seccion:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        .seccion h2 {
-            color: #366092;
-            margin: 0 0 20px 0;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e1e5e9;
+        /* TÍTULO PRINCIPAL */
+        .page-title {
+            color: #004b8d;
             font-size: 22px;
-            font-weight: 700;
+            font-weight: 600;
+            margin: 0 0 40px 0;
+        }
+
+        /* SECCIONES - SIN RECUADROS */
+        .seccion {
+            background: transparent;
+            padding: 0;
+            margin-top: 40px;
+            border: none;
+            box-shadow: none;
+        }
+
+        .seccion:first-of-type {
+            margin-top: 0;
+        }
+
+        /* SUBTÍTULOS DE SECCIÓN */
+        .seccion h2 {
+            color: #004b8d;
+            font-size: 17px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 20px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #004b8d;
         }
 
         /* INFO SECTIONS */
         .info-section {
             margin-bottom: 20px;
-            padding: 18px;
-            background: #f8f9fa;
-            border-left: 4px solid #366092;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-
-        .info-section:hover {
-            transform: translateX(3px);
-            box-shadow: 0 2px 6px rgba(54, 96, 146, 0.15);
         }
 
         .section-subtitle {
-            color: #366092;
-            font-size: 16px;
-            font-weight: 700;
+            color: #004b8d;
+            font-size: 15px;
+            font-weight: 600;
             margin: 0 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #d1d5db;
         }
 
         .info-row {
@@ -110,67 +80,90 @@
             gap: 12px;
         }
 
+        .info-item-full,
+        .info-item-inline {
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
         .info-item-full {
             flex: 1 1 100%;
-            padding: 10px 14px;
-            background: white;
-            border-radius: 6px;
-            border: 1px solid #e1e5e9;
         }
 
         .info-item-inline {
             flex: 1 1 calc(50% - 6px);
-            padding: 10px 14px;
-            background: white;
-            border-radius: 6px;
             min-width: 200px;
-            border: 1px solid #e1e5e9;
         }
 
-        .info-item-full label, .info-item-inline label {
+        .info-item-full label,
+        .info-item-inline label {
             font-weight: 600;
-            color: #366092;
+            color: #222;
             display: inline-block;
             margin-right: 8px;
             font-size: 14px;
         }
 
-        .info-item-full span, .info-item-inline span {
-            color: #333;
-            font-size: 15px;
+        .info-item-full span,
+        .info-item-inline span {
+            color: #222;
+            font-size: 14px;
         }
 
         .cliente-link {
-            color: #007bff;
+            color: #004b8d;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            display: inline-block;
-            border: 2px solid transparent;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s;
         }
 
         .cliente-link:hover {
-            background: #007bff;
-            color: white;
-            transform: translateX(5px);
-            border-color: #007bff;
+            text-decoration: underline;
         }
 
         .observaciones-box {
-            background: white;
-            padding: 15px;
-            min-height: 60px;
-            border: 1px solid #e1e5e9;
-            border-radius: 6px;
+            background: transparent;
+            padding: 0;
+            min-height: auto;
+            border: none;
         }
 
         .observaciones-box p {
             margin: 0;
-            color: #555;
-            line-height: 1.6;
+            color: #222;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        /* BOTONES - ESTILO CORPORATIVO LIMPIO */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #004b8d;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            margin: 5px;
+        }
+
+        .btn:hover,
+        .button:hover {
+            background: #00386a;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 12px;
         }
 
         /* ACCIONES */
@@ -185,9 +178,9 @@
         .alert {
             padding: 15px 20px;
             margin-bottom: 20px;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 500;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .alert.success {
@@ -204,12 +197,20 @@
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
+            main {
+                padding: 40px 20px !important;
+            }
+
             .info-item-inline {
                 flex: 1 1 100%;
             }
 
             .btn, .button {
                 width: 100%;
+            }
+
+            .botones-accion {
+                flex-direction: column;
             }
         }
     </style>
