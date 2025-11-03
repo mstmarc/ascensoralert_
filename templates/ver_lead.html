@@ -461,34 +461,31 @@
                 </div>
             </div>
 
-            <!-- OPORTUNIDADES COMERCIALES -->
+            <!-- EQUIPOS/ASCENSORES -->
             <div class="seccion">
-                <h2>Oportunidades Comerciales</h2>
+                <h2>Equipos / Ascensores</h2>
 
-                {% if oportunidades %}
-                    {% for op in oportunidades %}
-                    <div class="oportunidad-item">
-                        <div class="oportunidad-info">
-                            <div class="oportunidad-header">
-                                <div class="oportunidad-tipo">{{ op.tipo }}</div>
-                                <span class="oportunidad-estado">{{ op.estado|upper }}</span>
-                            </div>
-                            <div class="oportunidad-detalles">{{ op.descripcion or 'Sin descripción' }}</div>
+                {% if equipos %}
+                    {% for equipo in equipos %}
+                    <div class="equipo-item">
+                        <div class="equipo-info">
+                            <div class="equipo-nombre">{{ equipo.tipo_equipo }}</div>
+                            <div class="equipo-detalles">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima or '-' }}</div>
                         </div>
-                        <div class="oportunidad-acciones">
-                            <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-sm">Ver detalle</a>
+                        <div class="equipo-acciones">
+                            <a href="/ver_equipo/{{ equipo.id }}" class="btn btn-sm">Ver detalle</a>
                         </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <div class="estado-vacio">No hay oportunidades registradas para esta comunidad</div>
+                    <div class="estado-vacio">Esta instalación aún no tiene equipos registrados</div>
                 {% endif %}
 
                 <div class="add-item-button">
-                    <a href="/crear_oportunidad/{{ lead.id }}" class="btn">+ Crear Oportunidad</a>
+                    <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn">+ Añadir Equipo</a>
                 </div>
             </div>
-                
+
             <!-- HISTORIAL DE VISITAS -->
             <div class="seccion">
                 <h2>Historial de Visitas</h2>
@@ -514,29 +511,32 @@
                     <a href="/crear_visita_seguimiento/{{ lead.id }}" class="btn">+ Registrar Nueva Visita</a>
                 </div>
             </div>
-                
-            <!-- EQUIPOS/ASCENSORES -->
-            <div class="seccion">
-                <h2>Equipos / Ascensores</h2>
 
-                {% if equipos %}
-                    {% for equipo in equipos %}
-                    <div class="equipo-item">
-                        <div class="equipo-info">
-                            <div class="equipo-nombre">{{ equipo.tipo_equipo }}</div>
-                            <div class="equipo-detalles">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima or '-' }}</div>
+            <!-- OPORTUNIDADES COMERCIALES -->
+            <div class="seccion">
+                <h2>Oportunidades Comerciales</h2>
+
+                {% if oportunidades %}
+                    {% for op in oportunidades %}
+                    <div class="oportunidad-item">
+                        <div class="oportunidad-info">
+                            <div class="oportunidad-header">
+                                <div class="oportunidad-tipo">{{ op.tipo }}</div>
+                                <span class="oportunidad-estado">{{ op.estado|upper }}</span>
+                            </div>
+                            <div class="oportunidad-detalles">{{ op.descripcion or 'Sin descripción' }}</div>
                         </div>
-                        <div class="equipo-acciones">
-                            <a href="/ver_equipo/{{ equipo.id }}" class="btn btn-sm">Ver detalle</a>
+                        <div class="oportunidad-acciones">
+                            <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-sm">Ver detalle</a>
                         </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <div class="estado-vacio">Esta instalación aún no tiene equipos registrados</div>
+                    <div class="estado-vacio">No hay oportunidades registradas para esta comunidad</div>
                 {% endif %}
 
                 <div class="add-item-button">
-                    <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn">+ Añadir Equipo</a>
+                    <a href="/crear_oportunidad/{{ lead.id }}" class="btn">+ Crear Oportunidad</a>
                 </div>
             </div>
 
