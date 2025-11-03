@@ -520,7 +520,7 @@
                     {% for equipo in equipos %}
                     <div class="equipo-item">
                         <div class="equipo-info">
-                            <div class="equipo-nombre">{{ equipo.tipo_equipo }}{% if equipo.identificacion %} - {{ equipo.identificacion }}{% endif %}</div>
+                            <div class="equipo-nombre">{{ equipo.tipo_equipo }}</div>
                             <div class="equipo-detalles">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima or '-' }}</div>
                         </div>
                         <div class="equipo-acciones">
