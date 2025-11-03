@@ -42,7 +42,7 @@
             height: 36px;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 0 20px;
             white-space: nowrap;
             margin-top: 21px;
@@ -55,7 +55,7 @@
 
         .filtro-grupo label {
             font-weight: 600;
-            color: #004b8d;
+            color: #003366;
             margin-bottom: 4px;
             font-size: 14px;
         }
@@ -72,12 +72,12 @@
 
         .filtro-grupo select:focus {
             outline: none;
-            border-color: #004b8d;
+            border-color: #003366;
         }
 
         .paginacion {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             gap: 12px;
             margin: 15px 0;
@@ -88,14 +88,14 @@
         }
         
         .paginacion-info {
-            color: #004b8d;
+            color: #003366;
             font-weight: 600;
             font-size: 15px;
         }
 
         .info-resultados {
-            text-align: center;
-            color: #004b8d;
+            text-align: left;
+            color: #003366;
             margin: 10px 0;
             font-weight: 600;
             font-size: 15px;
@@ -118,12 +118,12 @@
         }
         
         th {
-            background: #004b8d;
+            background: #003366;
             color: white;
             padding: 10px 8px;
             text-align: left;
             font-weight: 600;
-            border: 1px solid #00386a;
+            border: 1px solid #002f66;
             position: sticky;
             top: 0;
             font-size: 14px;
@@ -165,14 +165,14 @@
             position: relative;
             background: white;
             border: 1px solid #e1e5e9;
-            border-left: 4px solid #004b8d;
+            border-left: 4px solid #003366;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
         }
 
         .lead-list-item:hover {
             background: #f8f9fa;
-            border-left-color: #00386a;
+            border-left-color: #002f66;
             box-shadow: 0 4px 12px rgba(0, 75, 141, 0.15);
             transform: translateX(3px);
         }
@@ -188,14 +188,14 @@
         }
 
         .lead-list-direccion:hover {
-            color: #004b8d;
+            color: #003366;
         }
 
         .lead-list-info {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: flex-start;
         }
 
         .lead-list-info-item {
@@ -213,7 +213,7 @@
         }
 
         .leyenda h3 {
-            color: #004b8d;
+            color: #003366;
             margin-bottom: 8px;
             font-size: 14px;
             font-weight: 600;
@@ -221,7 +221,7 @@
 
         .leyenda-items {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 15px;
             flex-wrap: wrap;
         }
@@ -392,7 +392,7 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div style="text-align: center; padding: 40px; color: #999; background: white; border-radius: 8px; margin-top: 20px;">
+                <div style="text-align: left; padding: 40px; color: #999; background: white; border-radius: 8px; margin-top: 20px;">
                     No se encontraron comunidades con los filtros aplicados
                 </div>
             {% endif %}

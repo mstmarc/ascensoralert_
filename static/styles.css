@@ -29,7 +29,7 @@ body {
 /* Header fijo con más altura */
 header {
     background: white;
-    border-bottom: 2px solid #004b8d;
+    border-bottom: 2px solid #003366;
     padding: 15px 0; /* 🔼 Padding vertical añadido */
     position: sticky;
     top: 0;
@@ -75,7 +75,7 @@ header {
 }
 
 .title-container h1 {
-    color: #004b8d;
+    color: #003366;
     font-size: 22px;
     font-weight: 600;
     margin: 0;
@@ -192,7 +192,7 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: #004b8d;
+    border-color: #003366;
     box-shadow: 0 0 0 3px rgba(0, 75, 141, 0.1);
 }
 
@@ -214,22 +214,22 @@ select {
    SISTEMA DE BOTONES ESTANDARIZADO
    ========================================== */
 
-/* Base común para todos los botones - ESTILO MINIMALISTA */
+/* Base común para todos los botones - ESTILO PROFESIONAL 2025 */
 .button,
 .btn,
 button[type="submit"],
 a.button,
 a.btn {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 8px 14px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 700;
     font-size: 14px;
     text-align: center;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
     margin: 10px 5px 10px 0;
     min-width: 120px;
     font-family: 'Montserrat', sans-serif;
@@ -237,24 +237,25 @@ a.btn {
     vertical-align: middle;
 }
 
-/* Primary - Azul sólido minimalista */
+/* Primary - Azul botones corporativo */
 .button,
 .btn-primary,
 button[type="submit"] {
-    background: #004b8d;
+    background: #003c80;
     color: white;
 }
 
 .button:hover,
 .btn-primary:hover,
 button[type="submit"]:hover {
-    background: #00386a;
+    background: #002f66;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .button:active,
 .btn-primary:active,
 button[type="submit"]:active {
-    background: #00386a;
+    background: #002f66;
 }
 
 /* Secondary - Borde negro */
@@ -279,16 +280,17 @@ button[type="submit"]:active {
 
 /* Success - Mismo azul corporativo */
 .btn-success {
-    background: #004b8d;
+    background: #003c80;
     color: white;
 }
 
 .btn-success:hover {
-    background: #00386a;
+    background: #002f66;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-success:active {
-    background: #00386a;
+    background: #002f66;
 }
 
 /* Danger - Rojo minimalista */
@@ -313,36 +315,38 @@ button[type="submit"]:active {
 
 /* Info - Mismo azul corporativo */
 .btn-info {
-    background: #004b8d;
+    background: #003c80;
     color: white;
 }
 
 .btn-info:hover {
-    background: #00386a;
+    background: #002f66;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-info:active {
-    background: #00386a;
+    background: #002f66;
 }
 
 /* Warning - Mismo azul corporativo */
 .btn-warning {
-    background: #004b8d;
+    background: #003c80;
     color: white;
 }
 
 .btn-warning:hover {
-    background: #00386a;
+    background: #002f66;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-warning:active {
-    background: #00386a;
+    background: #002f66;
 }
 
 /* Tamaños */
 .btn-sm,
 .button-small {
-    padding: 6px 14px;
+    padding: 6px 12px;
     font-size: 12px;
     min-width: auto;
     margin: 5px;
@@ -404,7 +408,7 @@ tr:hover {
 }
 
 td a {
-    color: #004b8d;
+    color: #003366;
     text-decoration: none;
     font-weight: 500;
 }
@@ -424,11 +428,11 @@ td a:hover {
     padding: 20px;
     margin-bottom: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border-left: 4px solid #004b8d;
+    border-left: 4px solid #003366;
 }
 
 .mobile-card h3 {
-    color: #004b8d;
+    color: #003366;
     margin-bottom: 15px;
     font-size: 16px;
 }
@@ -507,7 +511,7 @@ td a:hover {
 .admin-list-name:hover,
 .oportunidad-direccion:hover,
 .listado-titulo:hover {
-    color: #004b8d;
+    color: #003366;
 }
 
 .lead-list-direccion--static {
@@ -593,7 +597,7 @@ td a:hover {
    ========================================== */
 
 .buscador-destacado {
-    background: #004b8d;
+    background: #003366;
     padding: 12px 15px;
     border-radius: 8px;
     margin-bottom: 15px;
@@ -632,7 +636,7 @@ td a:hover {
 
 button.btn-buscar {
     background: white !important;
-    color: #004b8d !important;
+    color: #003366 !important;
     padding: 0 20px;
     border: 2px solid white;
     border-radius: 8px;
