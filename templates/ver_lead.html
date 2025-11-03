@@ -411,7 +411,11 @@
 
                         <div class="info-item">
                             <label>Empresa Mantenedora</label>
-                            <span>{{ lead.empresa_mantenedora or '-' }}</span>
+                            {% if lead.empresa_mantenedora %}
+                                <a href="/leads_dashboard?empresa={{ lead.empresa_mantenedora|urlencode }}">{{ lead.empresa_mantenedora }}</a>
+                            {% else %}
+                                <span>-</span>
+                            {% endif %}
                         </div>
 
                         <div class="info-item">

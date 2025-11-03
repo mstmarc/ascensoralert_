@@ -33,7 +33,7 @@
         
         .filtros-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto auto;
+            grid-template-columns: 1fr 1fr auto auto auto;
             gap: 10px;
             align-items: start;
         }
@@ -357,23 +357,17 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
-                        <div class="filtro-grupo">
-                            <label>Urgencia IPO:</label>
-                            <select name="ipo_urgencia">
-                                <option value="">Todas</option>
-                                <option value="15_dias" {% if filtro_ipo_urgencia == '15_dias' %}selected{% endif %}>15 dias antes</option>
-                                <option value="ipo_pasada_30" {% if filtro_ipo_urgencia == 'ipo_pasada_30' %}selected{% endif %}>IPO pasada hasta 30 dias</option>
-                                <option value="30_90_dias" {% if filtro_ipo_urgencia == '30_90_dias' %}selected{% endif %}>30-90 dias</option>
-                            </select>
-                        </div>
-                        
+
                         <button type="submit" class="btn btn-primary">
                             Filtrar
                         </button>
 
                         <a href="/leads_dashboard" class="btn btn-secondary">
                             Limpiar
+                        </a>
+
+                        <a href="/exportar_leads?localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-success">
+                            📊 Exportar a Excel
                         </a>
                     </div>
                 </div>
@@ -409,7 +403,7 @@
 
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-primary btn-sm">Anterior</a>
                 {% else %}
                     <button class="btn btn-primary btn-sm" disabled>Anterior</button>
                 {% endif %}
@@ -417,7 +411,7 @@
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}&ipo_urgencia={{ filtro_ipo_urgencia }}" class="btn btn-primary btn-sm">Siguiente</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-primary btn-sm">Siguiente</a>
                 {% else %}
                     <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
                 {% endif %}

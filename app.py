@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, session, Response, url_for, flash
+from flask import Flask, request, render_template, redirect, session, Response, url_for, flash, send_file
 import requests
 import os
 import urllib.parse
@@ -8,6 +8,8 @@ import io
 import resend
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -1258,7 +1260,6 @@ def leads_dashboard():
     filtro_empresa = request.args.get("empresa", "")
     # Aceptar tanto 'search' (desde home) como 'buscar_direccion' (desde dashboard)
     buscar_direccion = request.args.get("search", "") or request.args.get("buscar_direccion", "")
-    filtro_ipo_urgencia = request.args.get("ipo_urgencia", "")
 
     # Si hay búsqueda de texto, usar RPC para búsqueda sin acentos
     if buscar_direccion:
@@ -1400,21 +1401,7 @@ def leads_dashboard():
             "color_contrato": color_contrato
         }
 
-        # Aplicar filtro de IPO si está activo
-        incluir_fila = True
-        if filtro_ipo_urgencia and ipo_proxima:
-            hoy = datetime.now()
-            diferencia_dias = (ipo_proxima - hoy).days
-
-            if filtro_ipo_urgencia == "15_dias" and not (-15 <= diferencia_dias < 0):
-                incluir_fila = False
-            elif filtro_ipo_urgencia == "ipo_pasada_30" and not (0 <= diferencia_dias <= 30):
-                incluir_fila = False
-            elif filtro_ipo_urgencia == "30_90_dias" and not (30 < diferencia_dias <= 90):
-                incluir_fila = False
-
-        if incluir_fila:
-            rows.append(row)
+        rows.append(row)
     
     rows.sort(key=lambda x: x["ipo_fecha_original"] if x["ipo_fecha_original"] else datetime.max)
 
@@ -1428,11 +1415,139 @@ def leads_dashboard():
         filtro_localidad=filtro_localidad,
         filtro_empresa=filtro_empresa,
         buscar_direccion=buscar_direccion,
-        filtro_ipo_urgencia=filtro_ipo_urgencia,
         page=page,
         total_pages=total_pages,
         total_registros=total_registros,
         per_page=per_page
+    )
+
+# Exportar leads a Excel
+@app.route("/exportar_leads")
+def exportar_leads():
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Obtener los mismos filtros que el dashboard
+    filtro_localidad = request.args.get("localidad", "")
+    filtro_empresa = request.args.get("empresa", "")
+    buscar_direccion = request.args.get("buscar_direccion", "")
+
+    # Construir query (sin límite de paginación para exportar todo)
+    if buscar_direccion:
+        # Usar RPC para búsqueda sin acentos (sin límite)
+        rpc_url = f"{SUPABASE_URL}/rest/v1/rpc/buscar_clientes_sin_acentos"
+        rpc_params = {
+            "termino_busqueda": buscar_direccion,
+            "filtro_localidad": filtro_localidad,
+            "filtro_empresa": filtro_empresa,
+            "limite": 10000,  # Límite alto para exportación
+            "desplazamiento": 0
+        }
+        response = requests.post(rpc_url, json=rpc_params, headers=HEADERS)
+        if response.status_code != 200:
+            return f"<h3 style='color:red;'>Error al buscar leads</h3>"
+        leads_base = response.json()
+    else:
+        # Query normal con filtros
+        query_params = []
+        if filtro_localidad:
+            query_params.append(f"localidad=eq.{filtro_localidad}")
+        if filtro_empresa:
+            query_params.append(f"empresa_mantenedora=eq.{filtro_empresa}")
+
+        query_string = "&".join(query_params) if query_params else ""
+        data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,nombre_cliente,localidad,empresa_mantenedora,numero_ascensores,telefono,email,persona_contacto,administrador_fincas"
+        if query_string:
+            data_url += f"&{query_string}"
+
+        response = requests.get(data_url, headers=HEADERS)
+        if response.status_code != 200:
+            return f"<h3 style='color:red;'>Error al obtener leads</h3>"
+        leads_base = response.json()
+
+    # Obtener equipos para calcular IPOs
+    cliente_ids = [lead['id'] for lead in leads_base]
+    equipos_por_cliente = {}
+    if cliente_ids:
+        equipos_url = f"{SUPABASE_URL}/rest/v1/equipos?select=cliente_id,ipo_proxima&cliente_id=in.({','.join(map(str, cliente_ids))})"
+        equipos_response = requests.get(equipos_url, headers=HEADERS)
+        if equipos_response.status_code == 200:
+            equipos_data = equipos_response.json()
+            for equipo in equipos_data:
+                cliente_id = equipo['cliente_id']
+                if cliente_id not in equipos_por_cliente:
+                    equipos_por_cliente[cliente_id] = []
+                equipos_por_cliente[cliente_id].append(equipo)
+
+    # Crear Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Instalaciones"
+
+    # Estilo de cabecera
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+
+    # Cabeceras
+    headers = ["Dirección", "Nombre", "Población", "Teléfono", "Email", "Contacto",
+               "Empresa Mantenedora", "Administrador", "Nº Ascensores", "Próxima IPO"]
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+
+    # Datos
+    row_num = 2
+    for lead in leads_base:
+        equipos = equipos_por_cliente.get(lead['id'], [])
+
+        # Calcular próxima IPO
+        ipo_proxima = None
+        if equipos:
+            for equipo in equipos:
+                ipo_equipo = equipo.get("ipo_proxima")
+                if ipo_equipo:
+                    try:
+                        ipo_date = datetime.strptime(ipo_equipo, "%Y-%m-%d")
+                        if ipo_proxima is None or ipo_date < ipo_proxima:
+                            ipo_proxima = ipo_date
+                    except:
+                        pass
+
+        ipo_str = ipo_proxima.strftime("%d/%m/%Y") if ipo_proxima else "-"
+
+        ws.cell(row=row_num, column=1, value=lead.get('direccion', ''))
+        ws.cell(row=row_num, column=2, value=lead.get('nombre_cliente', ''))
+        ws.cell(row=row_num, column=3, value=lead.get('localidad', ''))
+        ws.cell(row=row_num, column=4, value=lead.get('telefono', ''))
+        ws.cell(row=row_num, column=5, value=lead.get('email', ''))
+        ws.cell(row=row_num, column=6, value=lead.get('persona_contacto', ''))
+        ws.cell(row=row_num, column=7, value=lead.get('empresa_mantenedora', ''))
+        ws.cell(row=row_num, column=8, value=lead.get('administrador_fincas', ''))
+        ws.cell(row=row_num, column=9, value=lead.get('numero_ascensores', 0))
+        ws.cell(row=row_num, column=10, value=ipo_str)
+        row_num += 1
+
+    # Ajustar ancho de columnas
+    for col in range(1, 11):
+        ws.column_dimensions[chr(64 + col)].width = 18
+
+    # Guardar en memoria
+    excel_file = io.BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+
+    # Generar nombre de archivo
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"instalaciones_{timestamp}.xlsx"
+
+    return send_file(
+        excel_file,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=filename
     )
 
 # Ver detalle completo del Lead
