@@ -32,10 +32,15 @@
         }
 
         .filtros-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto auto auto;
+            display: flex;
             gap: 10px;
-            align-items: end;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filtros .filtro-grupo {
+            flex: 1;
+            min-width: 200px;
         }
 
         .filtros .btn {
@@ -47,6 +52,16 @@
             white-space: nowrap;
             font-weight: 700;
             border-radius: 8px;
+            margin-bottom: 0;
+        }
+
+        .filtros .btn-secondary {
+            background: #003c80;
+            color: white;
+        }
+
+        .filtros .btn-secondary:hover {
+            background: #002f66;
         }
 
         .filtro-grupo {
@@ -250,7 +265,12 @@
             }
 
             .filtros-grid {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+
+            .filtros .filtro-grupo {
+                width: 100%;
+                min-width: 100%;
             }
 
             .filtros .btn {
