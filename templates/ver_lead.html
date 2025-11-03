@@ -130,13 +130,16 @@
             border: none;
         }
 
-        /* OPORTUNIDADES - TARJETA AÉREA */
+        /* OPORTUNIDADES - TARJETA AÉREA (MISMO ESTILO QUE EQUIPOS) */
         .oportunidad-item {
             background: #fafafa;
             padding: 16px 20px;
             margin-bottom: 14px;
             border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             transition: background 0.2s;
         }
 
@@ -144,11 +147,15 @@
             background: #f0f3f8;
         }
 
+        .oportunidad-info {
+            flex: 1;
+        }
+
         .oportunidad-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            gap: 10px;
+            margin-bottom: 6px;
         }
 
         .oportunidad-tipo {
@@ -167,20 +174,13 @@
         }
 
         .oportunidad-detalles {
-            font-size: 14px;
+            font-size: 13px;
             color: #555;
-            line-height: 1.5;
-            margin-bottom: 10px;
-        }
-
-        .oportunidad-detalles p {
-            margin: 4px 0;
         }
 
         .oportunidad-acciones {
             display: flex;
             gap: 8px;
-            margin-top: 10px;
         }
 
         /* VISITAS */
@@ -465,16 +465,15 @@
                 {% if oportunidades %}
                     {% for op in oportunidades %}
                     <div class="oportunidad-item">
-                        <div class="oportunidad-header">
-                            <div class="oportunidad-tipo">{{ op.tipo }}</div>
-                            <span class="oportunidad-estado">{{ op.estado|upper }}</span>
-                        </div>
-                        <div class="oportunidad-detalles">
-                            {{ op.descripcion or 'Sin descripción' }} • Creada: {{ op.fecha_creacion[:10] }}
+                        <div class="oportunidad-info">
+                            <div class="oportunidad-header">
+                                <div class="oportunidad-tipo">{{ op.tipo }}</div>
+                                <span class="oportunidad-estado">{{ op.estado|upper }}</span>
+                            </div>
+                            <div class="oportunidad-detalles">{{ op.descripcion or 'Sin descripción' }}</div>
                         </div>
                         <div class="oportunidad-acciones">
-                            <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-sm">Ver Detalle</a>
-                            <a href="/crear_visita_seguimiento/{{ lead.id }}?oportunidad_id={{ op.id }}" class="btn btn-sm">Registrar Visita</a>
+                            <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-sm">Ver detalle</a>
                         </div>
                     </div>
                     {% endfor %}
