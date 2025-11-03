@@ -21,38 +21,7 @@
             margin: 0 !important;
         }
 
-        /* Buscador y filtros alineados horizontalmente */
-        .buscador-destacado {
-            margin-bottom: 20px;
-        }
-
-        .buscador-y-botones {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .buscador-destacado .buscador-input-container {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .botones-filtros {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .botones-filtros .btn {
-            height: 38px;
-            padding: 8px 14px;
-            font-weight: 700;
-            border-radius: 8px;
-            white-space: nowrap;
-        }
-
+        /* Buscador y filtros */
         .filtros {
             background: #fafafa;
             padding: 15px;
@@ -64,9 +33,21 @@
 
         .filtros-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: 1fr 1fr auto auto auto;
+            gap: 10px;
             align-items: start;
+        }
+
+        .filtros .btn {
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 14px;
+            white-space: nowrap;
+            margin-top: 21px;
+            font-weight: 700;
+            border-radius: 8px;
         }
 
         .filtro-grupo {
@@ -265,30 +246,17 @@
         .color-rojo { background-color: #FFCDD2; }
 
         @media (max-width: 768px) {
-            .buscador-y-botones {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .buscador-input-container {
-                min-width: 100%;
-            }
-
-            .botones-filtros {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .botones-filtros .btn {
-                width: 100%;
-            }
-
             .filtros {
                 padding: 10px;
             }
 
             .filtros-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .filtros .btn {
+                width: 100%;
+                margin-top: 0;
             }
 
             /* Ajustar listado compacto en móvil */
@@ -351,29 +319,16 @@
             <form method="GET" action="/leads_dashboard">
                 <div class="buscador-destacado">
                     <div class="buscador-label">Buscar por Direccion</div>
-                    <div class="buscador-y-botones">
-                        <div class="buscador-input-container">
-                            <input
-                                type="text"
-                                name="buscar_direccion"
-                                class="buscador-input"
-                                value="{{ buscar_direccion }}"
-                                placeholder="Ej: Calle Mayor, Avenida..."
-                                autofocus
-                            >
-                            <button type="submit" class="btn-buscar">Buscar</button>
-                        </div>
-                        <div class="botones-filtros">
-                            <button type="submit" class="btn btn-primary">
-                                Filtrar
-                            </button>
-                            <a href="/leads_dashboard" class="btn btn-secondary">
-                                Limpiar
-                            </a>
-                            <a href="/exportar_leads?localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-success">
-                                📊 Excel
-                            </a>
-                        </div>
+                    <div class="buscador-input-container">
+                        <input
+                            type="text"
+                            name="buscar_direccion"
+                            class="buscador-input"
+                            value="{{ buscar_direccion }}"
+                            placeholder="Ej: Calle Mayor, Avenida..."
+                            autofocus
+                        >
+                        <button type="submit" class="btn-buscar">Buscar</button>
                     </div>
                 </div>
 
@@ -398,6 +353,18 @@
                                 {% endfor %}
                             </select>
                         </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Filtrar
+                        </button>
+
+                        <a href="/leads_dashboard" class="btn btn-secondary">
+                            Limpiar
+                        </a>
+
+                        <a href="/exportar_leads?localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-success">
+                            📊 Excel
+                        </a>
                     </div>
                 </div>
 
