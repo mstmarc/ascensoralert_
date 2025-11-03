@@ -6,13 +6,13 @@
     <title>Administradores de Fincas</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="/static/styles.css?v=6">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* === ESTILO MINIMALISTA LIMPIO === */
+        /* === ESTILO PROFESIONAL 2025 === */
 
         body {
             font-family: 'Montserrat', sans-serif;
-            background: #fafafa;
+            background: #ffffff;
             line-height: 1.5;
         }
 
@@ -20,7 +20,7 @@
             max-width: 1400px !important;
             margin: 0 auto !important;
             padding: 60px 80px !important;
-            background: #fafafa;
+            background: #ffffff;
         }
 
         main .menu {
@@ -29,78 +29,30 @@
             margin: 0 !important;
         }
 
-        /* BOTONES - ESTILO MINIMALISTA */
-        .btn,
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #004b8d;
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            text-align: center;
-            cursor: pointer;
-            transition: background 0.2s;
-            border: none;
-            border-radius: 6px;
-            font-family: 'Montserrat', sans-serif;
-            margin: 10px 5px 10px 0;
-        }
-
-        .btn-primary,
-        .btn-success {
-            background: #004b8d;
-            color: white;
-        }
-
-        .btn-primary:hover,
-        .btn-success:hover,
-        .btn:hover,
-        .button:hover {
-            background: #00386a;
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-sm {
-            padding: 6px 14px;
-            font-size: 12px;
-            min-width: auto;
-            margin: 5px;
-        }
-
-        /* LISTADO ELEGANTE DE ADMINISTRADORES */
+        /* LISTADO DE ADMINISTRADORES */
         .admin-list {
-            background: white;
-            border-radius: 8px;
-            padding: 10px;
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
             margin-top: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .admin-list-item {
-            padding: 14px 16px;
-            transition: all 0.3s ease;
+            background: #fafafa;
+            padding: 16px 20px;
+            margin-bottom: 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: background 0.2s;
             cursor: pointer;
-            position: relative;
-            background: white;
-            border: 1px solid #e1e5e9;
-            border-left: 4px solid #004b8d;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            border: none;
         }
 
         .admin-list-item:hover {
-            background: #f8f9fa;
-            border-left-color: #00386a;
-            box-shadow: 0 4px 12px rgba(0, 75, 141, 0.15);
-            transform: translateX(3px);
+            background: #f0f3f8;
         }
 
         .admin-list-name {
@@ -109,36 +61,38 @@
             color: #1a1a1a;
             text-decoration: none;
             display: block;
-            transition: color 0.3s ease;
             margin-bottom: 6px;
+            text-align: left;
         }
 
         .admin-list-name:hover {
-            color: #004b8d;
+            color: #003366;
         }
 
         .admin-list-info {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: flex-start;
+            text-align: left;
         }
 
         .admin-list-info-item {
             font-size: 13px;
-            color: #666;
+            color: #555555;
             font-weight: 500;
+            text-align: left;
         }
 
         .info-resultados {
             text-align: center;
-            color: #004b8d;
+            color: #003366;
             margin: 10px 0;
             font-weight: 600;
             font-size: 15px;
-            background: #e7f3ff;
+            background: #e8eef8;
             padding: 8px;
-            border-radius: 6px;
+            border-radius: 12px;
         }
 
         /* TABS */
@@ -146,7 +100,7 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e1e5e9;
+            border-bottom: 2px solid #f0f0f0;
             padding-bottom: 0;
         }
 
@@ -155,7 +109,7 @@
             background: transparent;
             border: none;
             border-bottom: 3px solid transparent;
-            color: #666;
+            color: #555555;
             font-weight: 500;
             font-size: 15px;
             cursor: pointer;
@@ -165,13 +119,13 @@
         }
 
         .tab-button:hover {
-            color: #004b8d;
+            color: #003366;
         }
 
         .tab-button.active {
-            color: #004b8d;
-            border-bottom-color: #004b8d;
-            font-weight: 600;
+            color: #003366;
+            border-bottom-color: #003366;
+            font-weight: 700;
         }
 
         .tab-content {
@@ -186,28 +140,30 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
+            background: #fafafa;
+            border-radius: 12px;
             overflow: hidden;
         }
 
         th {
-            background: #004b8d;
+            background: #003366;
             color: white;
             padding: 12px;
             text-align: left;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 14px;
         }
 
         td {
             padding: 12px;
-            border-bottom: 1px solid #e1e5e9;
+            border-bottom: 1px solid #f0f0f0;
             font-size: 14px;
+            color: #1a1a1a;
+            text-align: left;
         }
 
         tr:hover {
-            background: #f8f9fa;
+            background: #f0f3f8;
         }
 
         tr:last-child td {
@@ -215,16 +171,17 @@
         }
 
         .estado-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
+            padding: 2px 8px;
+            border-radius: 8px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             display: inline-block;
+            text-transform: uppercase;
         }
 
         .estado-badge.pendiente {
-            background: #fff3cd;
-            color: #856404;
+            background: #e8eef8;
+            color: #003366;
         }
 
         .estado-badge.completada {
@@ -266,10 +223,11 @@
         }
 
         .modal-title {
-            color: #004b8d;
+            color: #003366;
             font-size: 20px;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 20px;
+            text-align: left;
         }
 
         .form-group {
@@ -279,9 +237,10 @@
         .form-group label {
             display: block;
             font-weight: 600;
-            color: #222;
+            color: #1a1a1a;
             margin-bottom: 8px;
             font-size: 14px;
+            text-align: left;
         }
 
         .form-group input,
@@ -289,8 +248,8 @@
         .form-group select {
             width: 100%;
             padding: 10px 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
             font-size: 14px;
             font-family: 'Montserrat', sans-serif;
         }
@@ -299,7 +258,7 @@
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #004b8d;
+            border-color: #003366;
         }
 
         .form-group textarea {
@@ -313,6 +272,49 @@
             margin-top: 20px;
         }
 
+        /* BOTONES - ESTILO CORPORATIVO 2025 */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #003c80;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+        }
+
+        .btn:hover,
+        .button:hover,
+        .btn-primary:hover,
+        .btn-success:hover {
+            background: #002f66;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary,
+        .btn-success {
+            background: #003c80;
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
         .btn-cancel {
             background: #6c757d;
         }
@@ -321,11 +323,19 @@
             background: #5a6268;
         }
 
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
         /* EMPTY STATE */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
-            color: #999;
+            color: #555555;
             font-size: 15px;
         }
 
@@ -344,17 +354,17 @@
                 border-bottom: none;
                 border-left: 3px solid transparent;
                 padding: 10px 15px;
+                text-align: left;
             }
 
             .tab-button.active {
                 border-bottom: none;
-                border-left-color: #004b8d;
+                border-left-color: #003366;
             }
 
             .admin-list-info {
                 flex-direction: column;
                 gap: 4px;
-                align-items: center;
             }
 
             table {
@@ -370,10 +380,6 @@
             }
         }
     </style>
-</head>
-<body>
-    <header>
-        <div class="header-container">
             <div class="logo-container">
                 <a href="/home">
                     <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
