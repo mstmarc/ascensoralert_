@@ -75,7 +75,7 @@ header {
 }
 
 .title-container h1 {
-    color: #366092;
+    color: #004b8d;
     font-size: 22px;
     font-weight: 600;
     margin: 0;
@@ -192,8 +192,8 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: #366092;
-    box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1);
+    border-color: #004b8d;
+    box-shadow: 0 0 0 3px rgba(0, 75, 141, 0.1);
 }
 
 textarea {
@@ -214,22 +214,22 @@ select {
    SISTEMA DE BOTONES ESTANDARIZADO
    ========================================== */
 
-/* Base común para todos los botones */
+/* Base común para todos los botones - ESTILO MINIMALISTA */
 .button,
 .btn,
 button[type="submit"],
 a.button,
 a.btn {
     display: inline-block;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     text-decoration: none;
-    font-weight: 600;
-    font-size: 16px;
+    font-weight: 500;
+    font-size: 14px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.2s;
     margin: 10px 5px 10px 0;
     min-width: 120px;
     font-family: 'Montserrat', sans-serif;
@@ -237,27 +237,24 @@ a.btn {
     vertical-align: middle;
 }
 
-/* Primary - Azul sólido (por defecto) */
+/* Primary - Azul sólido minimalista */
 .button,
 .btn-primary,
 button[type="submit"] {
-    background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+    background: #004b8d;
     color: white;
-    box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
 }
 
 .button:hover,
 .btn-primary:hover,
 button[type="submit"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
-    background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
+    background: #00386a;
 }
 
 .button:active,
 .btn-primary:active,
 button[type="submit"]:active {
-    transform: translateY(0);
+    background: #00386a;
 }
 
 /* Secondary - Borde negro */
@@ -280,85 +277,73 @@ button[type="submit"]:active {
     transform: translateY(0);
 }
 
-/* Success - Verde */
+/* Success - Mismo azul corporativo */
 .btn-success {
-    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    background: #004b8d;
     color: white;
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 
 .btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-    background: linear-gradient(135deg, #218838 0%, #28a745 100%);
+    background: #00386a;
 }
 
 .btn-success:active {
-    transform: translateY(0);
+    background: #00386a;
 }
 
-/* Danger - Rojo */
+/* Danger - Rojo minimalista */
 .btn-danger,
 .btn-eliminar,
 .btn-eliminar-form {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: #dc3545;
     color: white;
-    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
 .btn-danger:hover,
 .btn-eliminar:hover,
 .btn-eliminar-form:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-    background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
+    background: #c82333;
 }
 
 .btn-danger:active,
 .btn-eliminar:active,
 .btn-eliminar-form:active {
-    transform: translateY(0);
+    background: #c82333;
 }
 
-/* Info - Azul claro */
+/* Info - Mismo azul corporativo */
 .btn-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+    background: #004b8d;
     color: white;
-    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
 }
 
 .btn-info:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
-    background: linear-gradient(135deg, #117a8b 0%, #17a2b8 100%);
+    background: #00386a;
 }
 
 .btn-info:active {
-    transform: translateY(0);
+    background: #00386a;
 }
 
-/* Warning - Amarillo */
+/* Warning - Mismo azul corporativo */
 .btn-warning {
-    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-    color: #212529;
-    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    background: #004b8d;
+    color: white;
 }
 
 .btn-warning:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-    background: linear-gradient(135deg, #e0a800 0%, #ffc107 100%);
+    background: #00386a;
 }
 
 .btn-warning:active {
-    transform: translateY(0);
+    background: #00386a;
 }
 
 /* Tamaños */
 .btn-sm,
 .button-small {
-    padding: 8px 16px;
-    font-size: 14px;
+    padding: 6px 14px;
+    font-size: 12px;
     min-width: auto;
     margin: 5px;
 }
@@ -419,7 +404,7 @@ tr:hover {
 }
 
 td a {
-    color: #366092;
+    color: #004b8d;
     text-decoration: none;
     font-weight: 500;
 }
@@ -439,11 +424,11 @@ td a:hover {
     padding: 20px;
     margin-bottom: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border-left: 4px solid #366092;
+    border-left: 4px solid #004b8d;
 }
 
 .mobile-card h3 {
-    color: #366092;
+    color: #004b8d;
     margin-bottom: 15px;
     font-size: 16px;
 }
@@ -522,7 +507,7 @@ td a:hover {
 .admin-list-name:hover,
 .oportunidad-direccion:hover,
 .listado-titulo:hover {
-    color: #366092;
+    color: #004b8d;
 }
 
 .lead-list-direccion--static {
@@ -608,11 +593,11 @@ td a:hover {
    ========================================== */
 
 .buscador-destacado {
-    background: #366092;
+    background: #004b8d;
     padding: 12px 15px;
     border-radius: 8px;
     margin-bottom: 15px;
-    box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 75, 141, 0.2);
 }
 
 .buscador-label {
@@ -647,7 +632,7 @@ td a:hover {
 
 button.btn-buscar {
     background: white !important;
-    color: #366092 !important;
+    color: #004b8d !important;
     padding: 0 20px;
     border: 2px solid white;
     border-radius: 8px;
