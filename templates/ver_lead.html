@@ -6,14 +6,21 @@
     <title>Detalle Lead</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="/static/styles.css?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* === ESTILO MINIMALISTA === */
+        /* === ESTILO MINIMALISTA LIMPIO === */
 
-        /* Ajustar contenedor del dashboard */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #fafafa;
+            line-height: 1.5;
+        }
+
         main {
-            max-width: none !important;
-            padding: 40px !important;
-            background: #fafbfc;
+            max-width: 900px !important;
+            margin: 0 auto !important;
+            padding: 60px 40px !important;
+            background: #fafafa;
         }
 
         main .menu {
@@ -22,126 +29,57 @@
             margin: 0 !important;
         }
 
-        /* ESTILOS DE BOTONES ELEGANTES */
-        .btn,
-        .button {
-            display: inline-block;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
+        /* TÍTULO PRINCIPAL */
+        .page-title {
+            color: #004b8d;
+            font-size: 22px;
             font-weight: 600;
-            font-size: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 5px;
-            min-width: 120px;
-            font-family: 'Montserrat', sans-serif;
+            margin: 0 0 40px 0;
         }
 
-        .btn-primary, .button {
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
-        }
-
-        .btn-primary:hover, .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
-            background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-            background: linear-gradient(135deg, #218838 0%, #28a745 100%);
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
-        }
-
-        .btn-info:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 15px;
-            min-width: auto;
-        }
-
-        /* CONTENEDOR PRINCIPAL */
-        .detalle-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* GRANDES BLOQUES MINIMALISTAS */
+        /* SECCIONES - SIN RECUADROS */
         .seccion {
-            background: white;
-            padding: 40px;
-            margin-bottom: 30px;
-            border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            background: transparent;
+            padding: 0;
+            margin-top: 40px;
             border: none;
+            box-shadow: none;
         }
 
+        .seccion:first-of-type {
+            margin-top: 0;
+        }
+
+        /* SUBTÍTULOS DE SECCIÓN */
         .seccion h2 {
-            color: #1a1a1a;
-            margin: 0 0 30px 0;
-            padding: 0;
-            border: none;
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            color: #004b8d;
+            font-size: 17px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 20px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #004b8d;
         }
 
-        .seccion-header {
+        /* INFORMACIÓN EN UNA COLUMNA VERTICAL */
+        .info-list {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e1e5e9;
-        }
-
-        .seccion-header h2 {
-            margin: 0;
-            padding: 0;
-            border: none;
-        }
-
-        /* GRID MINIMALISTA PARA INFORMACIÓN - DOS COLUMNAS */
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px 40px;
-            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .info-item {
             display: flex;
             flex-direction: row;
-            gap: 10px;
-            align-items: baseline;
+            gap: 12px;
+            font-size: 14px;
         }
 
         .info-item label {
-            font-weight: 700;
-            color: #1a1a1a;
-            font-size: 15px;
-            min-width: 160px;
+            font-weight: 600;
+            color: #222;
+            min-width: 200px;
             flex-shrink: 0;
         }
 
@@ -151,75 +89,57 @@
 
         .info-item span,
         .info-item a {
-            color: #444;
-            font-size: 15px;
+            color: #222;
             font-weight: 400;
         }
 
         .info-item a {
-            color: #366092;
+            color: #004b8d;
             text-decoration: none;
             transition: color 0.2s;
         }
 
         .info-item a:hover {
-            color: #2a4a70;
             text-decoration: underline;
         }
 
-        .info-item.full-width {
-            grid-column: 1 / -1;
-            flex-direction: column;
-            gap: 8px;
+        /* OBSERVACIONES */
+        .observaciones-block {
+            margin-top: 12px;
         }
 
-        .info-item.full-width label::after {
-            content: "";
+        .observaciones-block label {
+            font-weight: 600;
+            color: #222;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 8px;
         }
 
-        .observaciones {
-            color: #444;
-            font-size: 15px;
-            line-height: 1.7;
-            margin-top: 4px;
+        .observaciones-content {
+            color: #222;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
+        /* SEPARADOR */
+        .separator {
+            height: 1px;
+            background: #e6e6e6;
+            margin: 40px 0;
+            border: none;
         }
 
-        /* TARJETAS DE OPORTUNIDADES */
-        .oportunidad-card {
-            background: white;
-            padding: 18px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border-left: 4px solid #366092;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
+        /* OPORTUNIDADES */
+        .oportunidad-item {
+            background: transparent;
+            padding: 16px 0;
+            border-bottom: 1px solid #e6e6e6;
+            margin-bottom: 16px;
         }
 
-        .oportunidad-card:hover {
-            transform: translateX(3px);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-        }
-
-        .oportunidad-card.activa {
-            border-left-color: #28a745;
-            background: #f0fdf4;
-        }
-
-        .oportunidad-card.ganada {
-            border-left-color: #007bff;
-            background: #eff6ff;
-        }
-
-        .oportunidad-card.perdida {
-            border-left-color: #dc3545;
-            background: #fef2f2;
+        .oportunidad-item:last-child {
+            border-bottom: none;
         }
 
         .oportunidad-header {
@@ -230,119 +150,191 @@
         }
 
         .oportunidad-tipo {
-            font-weight: 700;
-            font-size: 17px;
-            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 14px;
+            color: #222;
         }
 
-        /* BADGES ELEGANTES */
         .oportunidad-estado {
-            padding: 6px 14px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 4px;
             font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .oportunidad-estado.activa {
-            background: #28a745;
-            color: white;
-            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
-        }
-
-        .oportunidad-estado.ganada {
-            background: #007bff;
-            color: white;
-            box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
-        }
-
-        .oportunidad-estado.perdida {
-            background: #dc3545;
-            color: white;
-            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+            font-weight: 500;
+            color: #777;
+            background: #f0f0f0;
         }
 
         .oportunidad-detalles {
             font-size: 14px;
-            color: #555;
-            line-height: 1.7;
+            color: #222;
+            line-height: 1.5;
+            margin-bottom: 12px;
         }
 
-        /* ITEMS DE VISITAS */
+        .oportunidad-detalles p {
+            margin: 6px 0;
+        }
+
+        /* VISITAS */
         .visita-item {
-            background: white;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #366092;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-            transition: all 0.3s ease;
+            background: transparent;
+            padding: 16px 0;
+            border-bottom: 1px solid #e6e6e6;
+            margin-bottom: 16px;
         }
 
-        .visita-item:hover {
-            transform: translateX(3px);
-            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.15);
+        .visita-item:last-child {
+            border-bottom: none;
         }
 
         .visita-fecha {
-            font-weight: 700;
-            color: #366092;
+            font-weight: 600;
+            color: #222;
             margin-bottom: 6px;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .visita-observaciones {
-            color: #555;
+            color: #222;
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         .visita-oportunidad {
-            color: #666;
+            color: #777;
             font-size: 12px;
-            font-style: italic;
             margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #e1e5e9;
         }
 
-        /* ESTADOS VACÍOS */
-        .no-equipos {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-            font-style: italic;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 2px dashed #d1d5db;
-        }
-
-        .no-equipos-con-boton {
+        /* EQUIPOS */
+        .equipo-item {
+            background: transparent;
+            padding: 16px 0;
+            border-bottom: 1px solid #e6e6e6;
+            margin-bottom: 16px;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            gap: 15px;
         }
 
-        /* ACCIONES */
+        .equipo-item:last-child {
+            border-bottom: none;
+        }
+
+        .equipo-info {
+            flex: 1;
+        }
+
+        .equipo-nombre {
+            font-weight: 600;
+            color: #222;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .equipo-detalles {
+            color: #777;
+            font-size: 12px;
+        }
+
+        .equipo-acciones {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* BOTONES - ESTILO CORPORATIVO LIMPIO */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #004b8d;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn:hover,
+        .button:hover {
+            background: #00386a;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+
+        .btn-success {
+            background: #004b8d;
+        }
+
+        .btn-success:hover {
+            background: #00386a;
+        }
+
+        .btn-info {
+            background: #004b8d;
+        }
+
+        .btn-info:hover {
+            background: #00386a;
+        }
+
+        .btn-primary {
+            background: #004b8d;
+        }
+
+        .btn-primary:hover {
+            background: #00386a;
+        }
+
+        /* BOTONES DE ACCIÓN FINALES */
         .botones-accion {
             display: flex;
             gap: 12px;
-            margin-top: 25px;
-            flex-wrap: wrap;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid #e6e6e6;
+        }
+
+        /* ESTADO VACÍO */
+        .estado-vacio {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+            font-size: 14px;
+            font-style: italic;
         }
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            .seccion-header {
+            main {
+                padding: 40px 20px !important;
+            }
+
+            .info-item {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .info-item label {
+                min-width: auto;
+            }
+
+            .equipo-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 12px;
             }
 
-            .info-item-inline {
-                flex: 1 1 100%;
+            .botones-accion {
+                flex-direction: column;
             }
 
             .btn, .button {
@@ -366,199 +358,184 @@
     </header>
     <main>
         <div class="menu">
-            <div class="detalle-container">
-                
-                <!-- INFORMACIÓN DE LA COMUNIDAD -->
-                <div class="seccion">
-                    <h2>Información de la Comunidad</h2>
+            <h1 class="page-title">Detalle de la Comunidad</h1>
 
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <label>Nombre</label>
-                            <span>{{ lead.nombre_cliente or '-' }}</span>
-                        </div>
+            <!-- INFORMACIÓN GENERAL -->
+            <div class="seccion">
+                <h2>Información General</h2>
 
-                        <div class="info-item">
-                            <label>Dirección</label>
-                            {% if lead.direccion and lead.localidad %}
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ lead.direccion|urlencode }}+{{ lead.localidad|urlencode }}" target="_blank" rel="noopener noreferrer">
-                                    {{ lead.direccion }}
-                                </a>
-                            {% else %}
-                                <span>{{ lead.direccion or '-' }}</span>
-                            {% endif %}
-                        </div>
+                <div class="info-list">
+                    <div class="info-item">
+                        <label>Nombre</label>
+                        <span>{{ lead.nombre_cliente or '-' }}</span>
+                    </div>
 
-                        <div class="info-item">
-                            <label>Población</label>
-                            <span>{{ lead.localidad or '-' }}</span>
-                        </div>
+                    <div class="info-item">
+                        <label>Dirección</label>
+                        {% if lead.direccion and lead.localidad %}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ lead.direccion|urlencode }}+{{ lead.localidad|urlencode }}" target="_blank" rel="noopener noreferrer">
+                                {{ lead.direccion }}
+                            </a>
+                        {% else %}
+                            <span>{{ lead.direccion or '-' }}</span>
+                        {% endif %}
+                    </div>
 
-                        <div class="info-item">
-                            <label>Código Postal</label>
-                            <span>{{ lead.codigo_postal or '-' }}</span>
-                        </div>
+                    <div class="info-item">
+                        <label>Población</label>
+                        <span>{{ lead.localidad or '-' }}</span>
+                    </div>
 
-                        <div class="info-item">
-                            <label>Tipo</label>
-                            <span>{{ lead.tipo_cliente or '-' }}</span>
-                        </div>
+                    <div class="info-item">
+                        <label>Código Postal</label>
+                        <span>{{ lead.codigo_postal or '-' }}</span>
+                    </div>
 
-                        <div class="info-item">
-                            <label>Nº Ascensores</label>
-                            <span>{{ lead.numero_ascensores or '-' }}</span>
-                        </div>
+                    <div class="info-item">
+                        <label>Tipo</label>
+                        <span>{{ lead.tipo_cliente or '-' }}</span>
+                    </div>
 
-                        <div class="info-item">
-                            <label>Empresa Mantenedora</label>
-                            {% if lead.empresa_mantenedora %}
-                                <a href="/leads_dashboard?empresa={{ lead.empresa_mantenedora|urlencode }}">{{ lead.empresa_mantenedora }}</a>
-                            {% else %}
-                                <span>-</span>
-                            {% endif %}
-                        </div>
+                    <div class="info-item">
+                        <label>Nº Ascensores</label>
+                        <span>{{ lead.numero_ascensores or '-' }}</span>
+                    </div>
 
-                        <div class="info-item">
-                            <label>Administrador de Fincas</label>
-                            {% if administrador %}
-                                <a href="/ver_administrador/{{ administrador.id }}">{{ administrador.nombre_empresa }}</a>
-                            {% elif lead.administrador_fincas %}
-                                <span>{{ lead.administrador_fincas }}</span>
-                            {% else %}
-                                <span>-</span>
-                            {% endif %}
-                        </div>
+                    <div class="info-item">
+                        <label>Empresa Mantenedora</label>
+                        {% if lead.empresa_mantenedora %}
+                            <a href="/leads_dashboard?empresa={{ lead.empresa_mantenedora|urlencode }}">{{ lead.empresa_mantenedora }}</a>
+                        {% else %}
+                            <span>-</span>
+                        {% endif %}
+                    </div>
 
-                        <div class="info-item">
-                            <label>Persona de Contacto</label>
-                            <span>{{ lead.persona_contacto or '-' }}</span>
-                        </div>
+                    <div class="info-item">
+                        <label>Administrador de Fincas</label>
+                        {% if administrador %}
+                            <a href="/ver_administrador/{{ administrador.id }}">{{ administrador.nombre_empresa }}</a>
+                        {% elif lead.administrador_fincas %}
+                            <span>{{ lead.administrador_fincas }}</span>
+                        {% else %}
+                            <span>-</span>
+                        {% endif %}
+                    </div>
 
-                        <div class="info-item">
-                            <label>Teléfono</label>
-                            <span>{{ lead.telefono or '-' }}</span>
-                        </div>
+                    <div class="info-item">
+                        <label>Persona de Contacto</label>
+                        <span>{{ lead.persona_contacto or '-' }}</span>
+                    </div>
 
-                        <div class="info-item">
-                            <label>Email</label>
-                            <span>{{ lead.email or '-' }}</span>
-                        </div>
+                    <div class="info-item">
+                        <label>Teléfono</label>
+                        <span>{{ lead.telefono or '-' }}</span>
+                    </div>
 
-                        <div class="info-item">
-                            <label>Primera Visita</label>
-                            <span>{{ lead.fecha_visita or '-' }}</span>
-                        </div>
+                    <div class="info-item">
+                        <label>Email</label>
+                        <span>{{ lead.email or '-' }}</span>
+                    </div>
 
-                        <div class="info-item full-width">
-                            <label>Observaciones</label>
-                            <div class="observaciones">{{ lead.observaciones or 'Sin observaciones' }}</div>
-                        </div>
+                    <div class="info-item">
+                        <label>Primera Visita</label>
+                        <span>{{ lead.fecha_visita or '-' }}</span>
                     </div>
                 </div>
 
-                <!-- OPORTUNIDADES COMERCIALES -->
-                <div class="seccion">
-                    <h2>Oportunidades Comerciales ({{ oportunidades|length }})</h2>
-                    
-                    {% if oportunidades %}
-                        {% for op in oportunidades %}
-                        <div class="oportunidad-card {{ op.estado }}">
-                            <div class="oportunidad-header">
-                                <div class="oportunidad-tipo">{{ op.tipo }}</div>
-                                <span class="oportunidad-estado {{ op.estado }}">{{ op.estado|upper }}</span>
-                            </div>
-                            <div class="oportunidad-detalles">
-                                {% if op.descripcion %}<p><strong>Descripcion:</strong> {{ op.descripcion }}</p>{% endif %}
-                                {% if op.valor_estimado %}<p><strong>Valor estimado:</strong> {{ "%.2f"|format(op.valor_estimado) }} EUR</p>{% endif %}
-                                <p><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
-                                {% if op.observaciones %}<p><strong>Observaciones:</strong> {{ op.observaciones }}</p>{% endif %}
-                                <div style="margin-top: 10px;">
-                                    <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-info btn-sm">Ver Detalle</a>
-                                    <a href="/editar_oportunidad/{{ op.id }}" class="btn btn-primary btn-sm">Editar</a>
-                                    <a href="/crear_visita_seguimiento/{{ lead.id }}?oportunidad_id={{ op.id }}" class="btn btn-success btn-sm">Registrar Visita</a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="no-equipos">No hay oportunidades registradas para esta comunidad</div>
-                    {% endif %}
-                    
-                    <div style="margin-top: 15px;">
-                        <a href="/crear_oportunidad/{{ lead.id }}" class="btn btn-success">+ Crear Oportunidad</a>
-                    </div>
+                <div class="observaciones-block">
+                    <label>Observaciones:</label>
+                    <div class="observaciones-content">{{ lead.observaciones or 'Sin observaciones' }}</div>
                 </div>
-                
-                <!-- HISTORIAL DE VISITAS -->
-                <div class="seccion">
-                    <h2>Historial de Visitas ({{ (visitas_seguimiento|length) + 1 }})</h2>
-                    
-                    <div class="visita-item" style="border-left-color: #007bff;">
-                        <div class="visita-fecha">{{ lead.fecha_visita }} - Primera visita</div>
-                        <div class="visita-observaciones">{{ lead.observaciones or 'Sin observaciones' }}</div>
-                    </div>
-                    
-                    {% if visitas_seguimiento %}
-                        {% for visita in visitas_seguimiento %}
-                        <div class="visita-item">
-                            <div class="visita-fecha">{{ visita.fecha_visita }} - Seguimiento</div>
-                            <div class="visita-observaciones">{{ visita.observaciones or 'Sin observaciones' }}</div>
-                            {% if visita.oportunidades %}
-                            <div class="visita-oportunidad">Vinculada a: {{ visita.oportunidades.tipo }}</div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    <div style="margin-top: 15px;">
-                        <a href="/crear_visita_seguimiento/{{ lead.id }}" class="button">+ Registrar Nueva Visita</a>
-                    </div>
-                </div>
-                
-                <!-- EQUIPOS/ASCENSORES -->
-                <div class="seccion">
-                    <div class="seccion-header">
-                        <h2>Equipos/Ascensores ({{ equipos|length }})</h2>
-                        <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn btn-success">
-                            🔧 Añadir Nuevo Equipo
-                        </a>
-                    </div>
-
-                    {% if equipos %}
-                    <div class="leads-list listado-equipos">
-                        {% for equipo in equipos %}
-                        <div class="lead-list-item lead-list-item--with-actions">
-                            <div class="lead-list-content">
-                                <div class="lead-list-direccion lead-list-direccion--static">🔧 {{ equipo.tipo_equipo }}{% if equipo.identificacion %} - {{ equipo.identificacion }}{% endif %}</div>
-                                <div class="lead-list-info lead-list-info--left">
-                                    <span class="lead-list-info-item">RAE: {{ equipo.rae or '-' }}</span>
-                                    <span class="lead-list-info-item">Próxima IPO: {{ equipo.ipo_proxima or '-' }}</span>
-                                </div>
-                            </div>
-                            <div class="lead-list-actions">
-                                <a href="/ver_equipo/{{ equipo.id }}" class="btn btn-success btn-sm">Ver detalle</a>
-                                <a href="/editar_equipo/{{ equipo.id }}" class="btn btn-primary btn-sm">Editar</a>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="no-equipos no-equipos-con-boton">
-                        <p style="margin: 0;">🔧 Esta instalación aún no tiene equipos registrados</p>
-                        <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn btn-success">
-                            Añadir Primer Equipo
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
-                
-                <!-- BOTONES DE ACCIÓN -->
-                <div class="botones-accion">
-                    <a href="/editar_lead/{{ lead.id }}" class="button">Editar Comunidad</a>
-                    <a href="/leads_dashboard" class="button">Volver al Dashboard</a>
-                </div>
-                
             </div>
+
+            <!-- OPORTUNIDADES COMERCIALES -->
+            <div class="seccion">
+                <h2>Oportunidades Comerciales</h2>
+
+                {% if oportunidades %}
+                    {% for op in oportunidades %}
+                    <div class="oportunidad-item">
+                        <div class="oportunidad-header">
+                            <div class="oportunidad-tipo">{{ op.tipo }}</div>
+                            <span class="oportunidad-estado">{{ op.estado|upper }}</span>
+                        </div>
+                        <div class="oportunidad-detalles">
+                            {% if op.descripcion %}<p>{{ op.descripcion }}</p>{% endif %}
+                            {% if op.valor_estimado %}<p>Valor estimado: {{ "%.2f"|format(op.valor_estimado) }} EUR</p>{% endif %}
+                            <p class="equipo-detalles">Creada: {{ op.fecha_creacion[:10] }}</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-sm">Ver Detalle</a>
+                            <a href="/crear_visita_seguimiento/{{ lead.id }}?oportunidad_id={{ op.id }}" class="btn btn-sm">Registrar Visita</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="estado-vacio">No hay oportunidades registradas para esta comunidad</div>
+                {% endif %}
+
+                <div style="margin-top: 20px;">
+                    <a href="/crear_oportunidad/{{ lead.id }}" class="btn">+ Crear Oportunidad</a>
+                </div>
+            </div>
+                
+            <!-- HISTORIAL DE VISITAS -->
+            <div class="seccion">
+                <h2>Historial de Visitas</h2>
+
+                <div class="visita-item">
+                    <div class="visita-fecha">{{ lead.fecha_visita }} - Primera visita</div>
+                    <div class="visita-observaciones">{{ lead.observaciones or 'Sin observaciones' }}</div>
+                </div>
+
+                {% if visitas_seguimiento %}
+                    {% for visita in visitas_seguimiento %}
+                    <div class="visita-item">
+                        <div class="visita-fecha">{{ visita.fecha_visita }} - Seguimiento</div>
+                        <div class="visita-observaciones">{{ visita.observaciones or 'Sin observaciones' }}</div>
+                        {% if visita.oportunidades %}
+                        <div class="visita-oportunidad">Vinculada a: {{ visita.oportunidades.tipo }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div style="margin-top: 20px;">
+                    <a href="/crear_visita_seguimiento/{{ lead.id }}" class="btn">+ Registrar Nueva Visita</a>
+                </div>
+            </div>
+                
+            <!-- EQUIPOS/ASCENSORES -->
+            <div class="seccion">
+                <h2>Equipos / Ascensores</h2>
+
+                {% if equipos %}
+                    {% for equipo in equipos %}
+                    <div class="equipo-item">
+                        <div class="equipo-info">
+                            <div class="equipo-nombre">{{ equipo.tipo_equipo }}{% if equipo.identificacion %} - {{ equipo.identificacion }}{% endif %}</div>
+                            <div class="equipo-detalles">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima or '-' }}</div>
+                        </div>
+                        <div class="equipo-acciones">
+                            <a href="/ver_equipo/{{ equipo.id }}" class="btn btn-sm">Ver detalle</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="estado-vacio">Esta instalación aún no tiene equipos registrados</div>
+                {% endif %}
+
+                <div style="margin-top: 20px;">
+                    <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn">+ Añadir Equipo</a>
+                </div>
+            </div>
+
+            <!-- BOTONES DE ACCIÓN -->
+            <div class="botones-accion">
+                <a href="/editar_lead/{{ lead.id }}" class="btn">Editar Comunidad</a>
+                <a href="/leads_dashboard" class="btn">Volver al Dashboard</a>
+            </div>
+
         </div>
     </main>
 
