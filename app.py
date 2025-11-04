@@ -1952,12 +1952,12 @@ def mi_agenda():
         return redirect("/")
 
     try:
-        # Obtener oportunidades activas (no ganadas ni perdidas) con info del cliente
+        # Obtener TODAS las oportunidades que NO estén ganadas ni perdidas
         response = requests.get(
             f"{SUPABASE_URL}/rest/v1/oportunidades?"
             f"select=*,clientes(nombre_cliente,direccion,localidad,telefono,email,persona_contacto)"
-            f"&or=(estado.eq.nueva,estado.eq.en_contacto,estado.eq.presupuesto_preparacion,estado.eq.presupuesto_pendiente,estado.eq.activa)"
-            f"&order=fecha_ultima_actualizacion.desc.nullslast,fecha_creacion.desc",
+            f"&estado=not.in.(ganada,perdida)"
+            f"&order=fecha_creacion.desc",
             headers=HEADERS
         )
 
@@ -1974,11 +1974,11 @@ def mi_agenda():
             }
 
             for opp in oportunidades_list:
-                estado = opp.get('estado', 'nueva')
+                estado = opp.get('estado', 'activa')
                 if estado in por_estado:
                     por_estado[estado].append(opp)
-                elif estado == 'activa':
-                    # Migrar oportunidades antiguas con estado "activa" a "nueva"
+                else:
+                    # Si tiene un estado que no conocemos, lo ponemos en activa
                     por_estado['activa'].append(opp)
 
             # Contadores
@@ -1988,7 +1988,7 @@ def mi_agenda():
                                  por_estado=por_estado,
                                  total_activas=total_activas)
         else:
-            flash("Error al cargar oportunidades", "error")
+            flash(f"Error al cargar oportunidades: {response.status_code} - {response.text}", "error")
             return redirect(url_for("home"))
 
     except Exception as e:
