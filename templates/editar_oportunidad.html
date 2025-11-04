@@ -260,9 +260,14 @@
                     <div class="form-group">
                         <label for="estado">Estado <span class="required">*</span></label>
                         <select id="estado" name="estado" required>
-                            <option value="activa" {% if oportunidad.estado == 'activa' %}selected{% endif %}>Activa</option>
-                            <option value="ganada" {% if oportunidad.estado == 'ganada' %}selected{% endif %}>Ganada</option>
-                            <option value="perdida" {% if oportunidad.estado == 'perdida' %}selected{% endif %}>Perdida</option>
+                            <option value="nueva" {% if oportunidad.estado == 'nueva' %}selected{% endif %}>🆕 Nueva</option>
+                            <option value="en_contacto" {% if oportunidad.estado == 'en_contacto' %}selected{% endif %}>📞 En contacto</option>
+                            <option value="presupuesto_preparacion" {% if oportunidad.estado == 'presupuesto_preparacion' %}selected{% endif %}>✍️ Presupuesto en preparación</option>
+                            <option value="presupuesto_pendiente" {% if oportunidad.estado == 'presupuesto_pendiente' %}selected{% endif %}>⏳ Presupuesto pendiente</option>
+                            <option value="ganada" {% if oportunidad.estado == 'ganada' %}selected{% endif %}>✅ Ganada</option>
+                            <option value="perdida" {% if oportunidad.estado == 'perdida' %}selected{% endif %}>❌ Perdida</option>
+                            <!-- Mantener compatibilidad con estado antiguo -->
+                            <option value="activa" {% if oportunidad.estado == 'activa' %}selected{% endif %} style="display:none;">Activa (legacy)</option>
                         </select>
                         <p class="help-text">Cambiar a "Ganada" o "Perdida" cerrará la oportunidad</p>
                     </div>

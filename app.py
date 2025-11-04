@@ -1945,6 +1945,57 @@ def oportunidades():
         return redirect(url_for("home"))
 
 
+@app.route("/mi_agenda")
+def mi_agenda():
+    """Dashboard personal - Mi Agenda Comercial con pipeline de oportunidades"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    try:
+        # Obtener oportunidades activas (no ganadas ni perdidas) con info del cliente
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?"
+            f"select=*,clientes(nombre_cliente,direccion,localidad,telefono,email,persona_contacto)"
+            f"&or=(estado.eq.nueva,estado.eq.en_contacto,estado.eq.presupuesto_preparacion,estado.eq.presupuesto_pendiente,estado.eq.activa)"
+            f"&order=fecha_ultima_actualizacion.desc.nullslast,fecha_creacion.desc",
+            headers=HEADERS
+        )
+
+        if response.status_code == 200:
+            oportunidades_list = response.json()
+
+            # Agrupar por estado
+            por_estado = {
+                'nueva': [],
+                'en_contacto': [],
+                'presupuesto_preparacion': [],
+                'presupuesto_pendiente': [],
+                'activa': []  # Para compatibilidad con oportunidades antiguas
+            }
+
+            for opp in oportunidades_list:
+                estado = opp.get('estado', 'nueva')
+                if estado in por_estado:
+                    por_estado[estado].append(opp)
+                elif estado == 'activa':
+                    # Migrar oportunidades antiguas con estado "activa" a "nueva"
+                    por_estado['activa'].append(opp)
+
+            # Contadores
+            total_activas = len(oportunidades_list)
+
+            return render_template("mi_agenda.html",
+                                 por_estado=por_estado,
+                                 total_activas=total_activas)
+        else:
+            flash("Error al cargar oportunidades", "error")
+            return redirect(url_for("home"))
+
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+        return redirect(url_for("home"))
+
+
 @app.route("/crear_oportunidad/<int:cliente_id>", methods=["GET", "POST"])
 def crear_oportunidad(cliente_id):
     if "usuario" not in session:
@@ -1958,7 +2009,7 @@ def crear_oportunidad(cliente_id):
                 "descripcion": request.form.get("descripcion", ""),
                 "valor_estimado": request.form.get("valor_estimado") or None,
                 "observaciones": request.form.get("observaciones", ""),
-                "estado": "activa"
+                "estado": "nueva"
             }
             
             response = requests.post(
