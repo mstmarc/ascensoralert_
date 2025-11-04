@@ -97,7 +97,7 @@
         .info-resultados {
             text-align: center;
             color: #003366;
-            margin: 15px 0;
+            margin: 20px 0 15px 0;
             font-weight: 600;
             font-size: 14px;
             background: #fafafa;
@@ -610,25 +610,6 @@
 
             {% elif tab == 'visitas' %}
             <!-- TAB: VISITAS -->
-            <div class="info-resultados">
-                Mostrando {{ visitas|length }} registros de {{ total_registros }} totales
-            </div>
-
-            <div class="paginacion">
-                {% if page > 1 %}
-                    <a href="?tab=visitas&page={{ page - 1 }}" class="btn btn-primary btn-sm">Anterior</a>
-                {% else %}
-                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
-                {% endif %}
-
-                <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
-
-                {% if page < total_pages %}
-                    <a href="?tab=visitas&page={{ page + 1 }}" class="btn btn-primary btn-sm">Siguiente</a>
-                {% else %}
-                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
-                {% endif %}
-            </div>
 
             <div class="tabla-container">
                 <table>
@@ -701,6 +682,10 @@
                     <p style="text-align: center; color: #999;">No se encontraron visitas a administradores</p>
                 </div>
             {% endif %}
+
+            <div class="info-resultados">
+                Mostrando {{ visitas|length }} registros de {{ total_registros }} totales
+            </div>
 
             <div class="paginacion">
                 {% if page > 1 %}
