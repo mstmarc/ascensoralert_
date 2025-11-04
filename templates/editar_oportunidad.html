@@ -5,58 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Oportunidad - Ascensor Alert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: #366092;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 20px;
+        /* === ESTILO PROFESIONAL 2025 === */
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            line-height: 1.5;
         }
 
-        .menu-lateral {
-            display: none;
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 250px;
-            height: 100%;
-            background: #2c3e50;
-            z-index: 999;
-            transition: right 0.3s ease;
-            padding-top: 60px;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-        }
-
-        .menu-lateral.active {
-            right: 0;
-        }
-
-        .menu-lateral a {
-            display: block;
-            color: white;
-            padding: 15px 20px;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            transition: background 0.3s;
-        }
-
-        .menu-lateral a:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        /* Ajustar contenedor del dashboard para ancho completo */
         main {
-            max-width: none !important;
-            padding: 30px !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 60px 80px !important;
+            background: #ffffff;
         }
 
         main .menu {
@@ -66,45 +30,54 @@
         }
 
         .container {
-            max-width: 700px;
-            margin: 20px auto;
-            padding: 0 15px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
         }
 
+        /* INFO COMUNIDAD - MINIMALISTA */
         .info-comunidad {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #366092;
+            background: transparent;
+            padding: 0 0 20px 0;
+            border-radius: 0;
+            margin-bottom: 30px;
+            box-shadow: none;
+            border-left: none;
+            border-bottom: 2px solid #e6e6e6;
         }
 
         .info-comunidad h2 {
             font-size: 18px;
-            color: #366092;
-            margin-bottom: 5px;
+            color: #003366;
+            margin-bottom: 8px;
+            font-weight: 700;
         }
 
         .info-comunidad p {
-            color: #666;
+            color: #555;
             font-size: 14px;
+            margin: 0;
         }
 
+        /* FORM CARD - SIN RECUADRO */
         .form-card {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 1px solid #e1e5e9;
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            border: none;
+            margin-bottom: 40px;
         }
 
         .form-card h3 {
-            font-size: 20px;
-            color: #366092;
+            font-size: 17px;
+            color: #003366;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #366092;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #003366;
         }
 
         .form-group {
@@ -113,8 +86,8 @@
 
         .form-group label {
             display: block;
-            font-weight: 600;
-            color: #555;
+            font-weight: 700;
+            color: #222;
             margin-bottom: 8px;
             font-size: 14px;
         }
@@ -123,20 +96,20 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e5e9;
+            padding: 10px 12px;
+            border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             font-family: 'Montserrat', sans-serif;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #366092;
-            box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1);
+            border-color: #003366;
+            box-shadow: 0 0 0 3px rgba(0,51,102,0.1);
         }
 
         .form-group textarea {
@@ -145,19 +118,24 @@
         }
 
         .required {
-            color: red;
+            color: #dc3545;
         }
 
         .form-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 25px;
+            gap: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e6e6e6;
+            flex-wrap: wrap;
         }
 
+        /* ALERTAS */
         .alert {
             padding: 12px 20px;
             margin-bottom: 20px;
             border-radius: 8px;
+            font-size: 14px;
         }
 
         .alert.success {
@@ -176,14 +154,63 @@
             font-size: 12px;
             color: #666;
             margin-top: 5px;
+            font-style: italic;
         }
 
+        /* BOTONES */
+        .btn,
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #003c80;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn:hover,
+        .button:hover {
+            background: #002f66;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-eliminar-form {
+            background: #dc3545;
+        }
+
+        .btn-eliminar-form:hover {
+            background: #c82333;
+        }
+
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .menu-toggle { display: block; }
-            .menu-lateral { display: block; }
-            .form-card { padding: 20px 15px; }
-            .form-actions { flex-direction: column; }
-            .btn { width: 100%; }
+            main {
+                padding: 40px 20px !important;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn,
+            .button {
+                width: 100%;
+            }
         }
     </style>
 </head>
