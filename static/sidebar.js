@@ -206,7 +206,7 @@
                     Oportunidades
                 </a>
                 <a href="/mi_agenda" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    📅 Mi Agenda
+                    Mi Agenda
                 </a>
                 <a href="/oportunidades_post_ipo" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Seguimiento Comercial
