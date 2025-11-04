@@ -16,6 +16,22 @@ app.secret_key = os.environ.get("SECRET_KEY")
 if not app.secret_key:
     raise RuntimeError("SECRET_KEY environment variable is not set")
 
+# Filtro Jinja2 para formatear fechas a dd/mm/yyyy
+@app.template_filter('format_fecha')
+def format_fecha_filter(fecha_str):
+    """Formatea fechas al formato dd/mm/yyyy para mostrar en templates"""
+    if not fecha_str or fecha_str == "-":
+        return "-"
+    try:
+        # Manejar timestamps ISO con T y timezone
+        fecha_limpia = fecha_str.split('T')[0] if 'T' in str(fecha_str) else str(fecha_str)
+        # Intentar parsear en formato ISO (YYYY-MM-DD)
+        fecha = datetime.strptime(fecha_limpia, '%Y-%m-%d')
+        return fecha.strftime('%d/%m/%Y')
+    except:
+        # Si ya está en formato dd/mm/yyyy o no se puede parsear, retornar como está
+        return str(fecha_str) if fecha_str else "-"
+
 # Datos de Supabase
 SUPABASE_URL = "https://hvkifqguxsgegzaxwcmj.supabase.co"
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")

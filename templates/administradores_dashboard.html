@@ -626,7 +626,7 @@
                         {% if visitas %}
                             {% for visita in visitas %}
                             <tr>
-                                <td>{{ visita.fecha_visita }}</td>
+                                <td>{{ visita.fecha_visita|format_fecha }}</td>
                                 <td>
                                     {% if visita.administradores %}
                                         {{ visita.administradores.nombre_empresa }}
@@ -659,7 +659,7 @@
             {% if visitas %}
                 {% for visita in visitas %}
                 <div class="mobile-card">
-                    <h3>{{ visita.fecha_visita }}</h3>
+                    <h3>{{ visita.fecha_visita|format_fecha }}</h3>
                     <p><strong>Administrador:</strong>
                         {% if visita.administradores %}
                             {{ visita.administradores.nombre_empresa }}
