@@ -549,17 +549,21 @@
                         <span class="field-value">{{ oportunidad.tipo }}</span>
                     </div>
 
+                    <div class="field-group">
+                        <span class="field-label">Importe:</span>
+                        <span class="field-value" style="font-weight: 700; color: #003366; font-size: 16px;">
+                            {% if oportunidad.valor_estimado %}
+                                {{ "{:,.2f}".format(oportunidad.valor_estimado) }} €
+                            {% else %}
+                                -
+                            {% endif %}
+                        </span>
+                    </div>
+
                     {% if oportunidad.descripcion %}
                     <div class="field-group">
                         <span class="field-label">Descripción:</span>
                         <span class="field-value">{{ oportunidad.descripcion }}</span>
-                    </div>
-                    {% endif %}
-
-                    {% if oportunidad.valor_estimado %}
-                    <div class="field-group">
-                        <span class="field-label">Valor Estimado:</span>
-                        <span class="field-value">{{ "%.2f"|format(oportunidad.valor_estimado) }}€</span>
                     </div>
                     {% endif %}
 
