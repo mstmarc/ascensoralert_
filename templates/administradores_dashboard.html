@@ -46,13 +46,15 @@
             margin-bottom: 0;
             border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            transition: background 0.2s;
+            transition: all 0.2s;
             cursor: pointer;
-            border: none;
+            border: 1px solid #f0f0f0;
         }
 
         .admin-list-item:hover {
             background: #f0f3f8;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            border-color: #003366;
         }
 
         .admin-list-name {
@@ -67,6 +69,14 @@
 
         .admin-list-name:hover {
             color: #003366;
+        }
+
+        .admin-list-location {
+            font-size: 13px;
+            color: #555555;
+            font-weight: 500;
+            display: block;
+            text-align: center;
         }
 
         .admin-list-info {
@@ -98,7 +108,7 @@
 
         .paginacion {
             display: flex;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: center;
             gap: 12px;
             margin: 15px 0;
@@ -132,36 +142,37 @@
             font-weight: 700;
         }
 
-        /* TABS */
+        /* TABS - ESTILO BOTÓN */
         .tabs-container {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 0;
         }
 
         .tab-button {
-            padding: 12px 24px;
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
+            padding: 8px 14px;
+            background: #e8eef8;
+            border: 1px solid #d0dae8;
+            border-radius: 8px;
             color: #555555;
-            font-weight: 500;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
             font-family: 'Montserrat', sans-serif;
-            margin-bottom: -2px;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .tab-button:hover {
+            background: #d8e4f5;
             color: #003366;
         }
 
         .tab-button.active {
-            color: #003366;
-            border-bottom-color: #003366;
+            background: #003c80;
+            color: white;
+            border-color: #003c80;
             font-weight: 700;
         }
 
@@ -399,19 +410,12 @@
 
             .tabs-container {
                 flex-direction: column;
-                gap: 0;
+                gap: 10px;
             }
 
             .tab-button {
-                border-bottom: none;
-                border-left: 3px solid transparent;
-                padding: 10px 15px;
-                text-align: left;
-            }
-
-            .tab-button.active {
-                border-bottom: none;
-                border-left-color: #003366;
+                width: 100%;
+                text-align: center;
             }
 
             .admin-list-info {
@@ -469,11 +473,11 @@
             <div class="tabs-container">
                 <a href="/administradores_dashboard?tab=administradores"
                    class="tab-button {% if tab == 'administradores' or not tab %}active{% endif %}">
-                    🏢 Administradores
+                    Administradores
                 </a>
                 <a href="/administradores_dashboard?tab=visitas"
                    class="tab-button {% if tab == 'visitas' %}active{% endif %}">
-                    📅 Visitas
+                    Visitas
                 </a>
             </div>
 
