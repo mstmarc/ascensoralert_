@@ -46,13 +46,15 @@
             margin-bottom: 0;
             border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            transition: background 0.2s;
+            transition: all 0.2s;
             cursor: pointer;
-            border: none;
+            border: 1px solid #f0f0f0;
         }
 
         .admin-list-item:hover {
             background: #f0f3f8;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            border-color: #003366;
         }
 
         .admin-list-name {
@@ -67,6 +69,14 @@
 
         .admin-list-name:hover {
             color: #003366;
+        }
+
+        .admin-list-location {
+            font-size: 13px;
+            color: #555555;
+            font-weight: 500;
+            display: block;
+            text-align: center;
         }
 
         .admin-list-info {
@@ -98,7 +108,7 @@
 
         .paginacion {
             display: flex;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: center;
             gap: 12px;
             margin: 15px 0;
