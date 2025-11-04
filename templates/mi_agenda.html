@@ -339,9 +339,13 @@
                         {% for opp in por_estado.nueva %}
                         <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
+
+                            <!-- Badge de estado actual -->
+                            <span class="oportunidad-estado-badge estado-nueva">🆕 Nueva</span>
+
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
-                                    <strong>Cliente:</strong> <span>{{ opp.clientes.nombre_cliente or '-' }}</span>
+                                    <strong>Dirección:</strong> <span>{{ opp.clientes.direccion }}, {{ opp.clientes.localidad or '' }}</span>
                                 </div>
                                 <div class="oportunidad-info-item">
                                     <strong>Contacto:</strong> <span>{{ opp.clientes.persona_contacto or '-' }}</span>
@@ -387,9 +391,13 @@
                         {% for opp in por_estado.en_contacto %}
                         <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
+
+                            <!-- Badge de estado actual -->
+                            <span class="oportunidad-estado-badge estado-en_contacto">📞 En contacto</span>
+
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
-                                    <strong>Cliente:</strong> <span>{{ opp.clientes.nombre_cliente or '-' }}</span>
+                                    <strong>Dirección:</strong> <span>{{ opp.clientes.direccion }}, {{ opp.clientes.localidad or '' }}</span>
                                 </div>
                                 <div class="oportunidad-info-item">
                                     <strong>Contacto:</strong> <span>{{ opp.clientes.persona_contacto or '-' }}</span>
@@ -434,9 +442,13 @@
                         {% for opp in por_estado.presupuesto_preparacion %}
                         <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
+
+                            <!-- Badge de estado actual -->
+                            <span class="oportunidad-estado-badge estado-presupuesto_preparacion">✍️ Presupuesto en preparación</span>
+
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
-                                    <strong>Cliente:</strong> <span>{{ opp.clientes.nombre_cliente or '-' }}</span>
+                                    <strong>Dirección:</strong> <span>{{ opp.clientes.direccion }}, {{ opp.clientes.localidad or '' }}</span>
                                 </div>
                                 <div class="oportunidad-info-item">
                                     <strong>Contacto:</strong> <span>{{ opp.clientes.persona_contacto or '-' }}</span>
@@ -481,9 +493,13 @@
                         {% for opp in por_estado.presupuesto_pendiente %}
                         <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
+
+                            <!-- Badge de estado actual -->
+                            <span class="oportunidad-estado-badge estado-presupuesto_pendiente">⏳ Presupuesto pendiente</span>
+
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
-                                    <strong>Cliente:</strong> <span>{{ opp.clientes.nombre_cliente or '-' }}</span>
+                                    <strong>Dirección:</strong> <span>{{ opp.clientes.direccion }}, {{ opp.clientes.localidad or '' }}</span>
                                 </div>
                                 <div class="oportunidad-info-item">
                                     <strong>Contacto:</strong> <span>{{ opp.clientes.persona_contacto or '-' }}</span>
@@ -528,9 +544,13 @@
                         {% for opp in por_estado.activa %}
                         <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
+
+                            <!-- Badge de estado actual -->
+                            <span class="oportunidad-estado-badge estado-activa">⚡ Activa (sin clasificar)</span>
+
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
-                                    <strong>Cliente:</strong> <span>{{ opp.clientes.nombre_cliente or '-' }}</span>
+                                    <strong>Dirección:</strong> <span>{{ opp.clientes.direccion }}, {{ opp.clientes.localidad or '' }}</span>
                                 </div>
                                 <div class="oportunidad-info-item">
                                     <strong>Contacto:</strong> <span>{{ opp.clientes.persona_contacto or '-' }}</span>
