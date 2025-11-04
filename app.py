@@ -1996,6 +1996,44 @@ def mi_agenda():
         return redirect(url_for("home"))
 
 
+@app.route("/cambiar_estado_oportunidad/<int:oportunidad_id>", methods=["POST"])
+def cambiar_estado_oportunidad(oportunidad_id):
+    """Endpoint para cambio rápido de estado desde Mi Agenda"""
+    if "usuario" not in session:
+        return {"error": "No autorizado"}, 401
+
+    try:
+        nuevo_estado = request.json.get("estado")
+        if not nuevo_estado:
+            return {"error": "Estado requerido"}, 400
+
+        # Validar estados permitidos
+        estados_validos = ["nueva", "en_contacto", "presupuesto_preparacion",
+                          "presupuesto_pendiente", "ganada", "perdida"]
+        if nuevo_estado not in estados_validos:
+            return {"error": "Estado no válido"}, 400
+
+        data = {"estado": nuevo_estado}
+
+        # Si se marca como ganada o perdida, agregar fecha de cierre
+        if nuevo_estado in ["ganada", "perdida"]:
+            data["fecha_cierre"] = datetime.now().isoformat()
+
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
+            headers=HEADERS,
+            json=data
+        )
+
+        if response.status_code in [200, 204]:
+            return {"success": True, "estado": nuevo_estado}, 200
+        else:
+            return {"error": "Error al actualizar"}, 500
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
 @app.route("/crear_oportunidad/<int:cliente_id>", methods=["GET", "POST"])
 def crear_oportunidad(cliente_id):
     if "usuario" not in session:

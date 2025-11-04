@@ -176,6 +176,53 @@
             text-align: center;
         }
 
+        /* ESTADO ACTUAL */
+        .oportunidad-estado-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .estado-nueva { background: #e3f2fd; color: #1976d2; }
+        .estado-en_contacto { background: #fff3e0; color: #f57c00; }
+        .estado-presupuesto_preparacion { background: #f3e5f5; color: #7b1fa2; }
+        .estado-presupuesto_pendiente { background: #fff9c4; color: #f57f17; }
+        .estado-activa { background: #e0e0e0; color: #616161; }
+
+        /* SELECTOR DE ESTADO */
+        .estado-selector {
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .estado-selector select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background: white;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .estado-selector select:focus {
+            outline: none;
+            border-color: #003366;
+            box-shadow: 0 0 0 3px rgba(0,51,102,0.1);
+        }
+
+        .estado-selector select:hover {
+            border-color: #003366;
+        }
+
         /* BOTONES */
         .btn {
             display: inline-block;
@@ -290,7 +337,7 @@
                     </div>
                     <div class="oportunidades-grid">
                         {% for opp in por_estado.nueva %}
-                        <div class="oportunidad-card">
+                        <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
@@ -306,9 +353,22 @@
                             {% if opp.valor_estimado %}
                             <div class="oportunidad-importe">{{ "%.0f"|format(opp.valor_estimado) }} €</div>
                             {% endif %}
+
+                            <!-- Cambio rápido de estado -->
+                            <div class="estado-selector">
+                                <select class="cambiar-estado" data-opp-id="{{ opp.id }}" data-estado-actual="{{ opp.estado }}">
+                                    <option value="">⚡ Cambiar estado...</option>
+                                    <option value="nueva">🆕 Nueva</option>
+                                    <option value="en_contacto">📞 En contacto</option>
+                                    <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
+                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="ganada">✅ Ganada</option>
+                                    <option value="perdida">❌ Perdida</option>
+                                </select>
+                            </div>
+
                             <div class="oportunidad-acciones">
                                 <a href="/ver_oportunidad/{{ opp.id }}" class="btn btn-sm">Ver detalle</a>
-                                <a href="/editar_oportunidad/{{ opp.id }}" class="btn btn-secondary btn-sm">Cambiar estado</a>
                             </div>
                         </div>
                         {% endfor %}
@@ -325,7 +385,7 @@
                     </div>
                     <div class="oportunidades-grid">
                         {% for opp in por_estado.en_contacto %}
-                        <div class="oportunidad-card">
+                        <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
@@ -341,9 +401,21 @@
                             {% if opp.valor_estimado %}
                             <div class="oportunidad-importe">{{ "%.0f"|format(opp.valor_estimado) }} €</div>
                             {% endif %}
+
+                            <div class="estado-selector">
+                                <select class="cambiar-estado" data-opp-id="{{ opp.id }}" data-estado-actual="{{ opp.estado }}">
+                                    <option value="">⚡ Cambiar estado...</option>
+                                    <option value="nueva">🆕 Nueva</option>
+                                    <option value="en_contacto">📞 En contacto</option>
+                                    <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
+                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="ganada">✅ Ganada</option>
+                                    <option value="perdida">❌ Perdida</option>
+                                </select>
+                            </div>
+
                             <div class="oportunidad-acciones">
                                 <a href="/ver_oportunidad/{{ opp.id }}" class="btn btn-sm">Ver detalle</a>
-                                <a href="/editar_oportunidad/{{ opp.id }}" class="btn btn-secondary btn-sm">Cambiar estado</a>
                             </div>
                         </div>
                         {% endfor %}
@@ -360,7 +432,7 @@
                     </div>
                     <div class="oportunidades-grid">
                         {% for opp in por_estado.presupuesto_preparacion %}
-                        <div class="oportunidad-card">
+                        <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
@@ -376,9 +448,21 @@
                             {% if opp.valor_estimado %}
                             <div class="oportunidad-importe">{{ "%.0f"|format(opp.valor_estimado) }} €</div>
                             {% endif %}
+
+                            <div class="estado-selector">
+                                <select class="cambiar-estado" data-opp-id="{{ opp.id }}" data-estado-actual="{{ opp.estado }}">
+                                    <option value="">⚡ Cambiar estado...</option>
+                                    <option value="nueva">🆕 Nueva</option>
+                                    <option value="en_contacto">📞 En contacto</option>
+                                    <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
+                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="ganada">✅ Ganada</option>
+                                    <option value="perdida">❌ Perdida</option>
+                                </select>
+                            </div>
+
                             <div class="oportunidad-acciones">
                                 <a href="/ver_oportunidad/{{ opp.id }}" class="btn btn-sm">Ver detalle</a>
-                                <a href="/editar_oportunidad/{{ opp.id }}" class="btn btn-secondary btn-sm">Cambiar estado</a>
                             </div>
                         </div>
                         {% endfor %}
@@ -395,7 +479,7 @@
                     </div>
                     <div class="oportunidades-grid">
                         {% for opp in por_estado.presupuesto_pendiente %}
-                        <div class="oportunidad-card">
+                        <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
@@ -411,9 +495,21 @@
                             {% if opp.valor_estimado %}
                             <div class="oportunidad-importe">{{ "%.0f"|format(opp.valor_estimado) }} €</div>
                             {% endif %}
+
+                            <div class="estado-selector">
+                                <select class="cambiar-estado" data-opp-id="{{ opp.id }}" data-estado-actual="{{ opp.estado }}">
+                                    <option value="">⚡ Cambiar estado...</option>
+                                    <option value="nueva">🆕 Nueva</option>
+                                    <option value="en_contacto">📞 En contacto</option>
+                                    <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
+                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="ganada">✅ Ganada</option>
+                                    <option value="perdida">❌ Perdida</option>
+                                </select>
+                            </div>
+
                             <div class="oportunidad-acciones">
                                 <a href="/ver_oportunidad/{{ opp.id }}" class="btn btn-sm">Ver detalle</a>
-                                <a href="/editar_oportunidad/{{ opp.id }}" class="btn btn-secondary btn-sm">Cambiar estado</a>
                             </div>
                         </div>
                         {% endfor %}
@@ -430,7 +526,7 @@
                     </div>
                     <div class="oportunidades-grid">
                         {% for opp in por_estado.activa %}
-                        <div class="oportunidad-card">
+                        <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
@@ -446,9 +542,21 @@
                             {% if opp.valor_estimado %}
                             <div class="oportunidad-importe">{{ "%.0f"|format(opp.valor_estimado) }} €</div>
                             {% endif %}
+
+                            <div class="estado-selector">
+                                <select class="cambiar-estado" data-opp-id="{{ opp.id }}" data-estado-actual="{{ opp.estado }}">
+                                    <option value="">⚡ Clasificar oportunidad...</option>
+                                    <option value="nueva">🆕 Nueva</option>
+                                    <option value="en_contacto">📞 En contacto</option>
+                                    <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
+                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="ganada">✅ Ganada</option>
+                                    <option value="perdida">❌ Perdida</option>
+                                </select>
+                            </div>
+
                             <div class="oportunidad-acciones">
                                 <a href="/ver_oportunidad/{{ opp.id }}" class="btn btn-sm">Ver detalle</a>
-                                <a href="/editar_oportunidad/{{ opp.id }}" class="btn btn-secondary btn-sm">Clasificar</a>
                             </div>
                         </div>
                         {% endfor %}
@@ -464,5 +572,76 @@
     </main>
 
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+    <script>
+        // Manejo de cambio de estado
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectores = document.querySelectorAll('.cambiar-estado');
+
+            selectores.forEach(selector => {
+                selector.addEventListener('change', async function() {
+                    const oppId = this.dataset.oppId;
+                    const nuevoEstado = this.value;
+                    const estadoActual = this.dataset.estadoActual;
+
+                    if (!nuevoEstado) return;
+
+                    // Confirmar si está cerrando la oportunidad
+                    if (nuevoEstado === 'ganada' || nuevoEstado === 'perdida') {
+                        const estadoNombre = nuevoEstado === 'ganada' ? 'GANADA ✅' : 'PERDIDA ❌';
+                        if (!confirm(`¿Estás seguro de marcar esta oportunidad como ${estadoNombre}?\n\nEsto la cerrará y desaparecerá de tu agenda.`)) {
+                            this.value = ''; // Resetear selector
+                            return;
+                        }
+                    }
+
+                    // Deshabilitar selector mientras se procesa
+                    this.disabled = true;
+                    const card = this.closest('.oportunidad-card');
+                    card.style.opacity = '0.6';
+
+                    try {
+                        const response = await fetch(`/cambiar_estado_oportunidad/${oppId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ estado: nuevoEstado })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Si se cerró (ganada/perdida), quitar la card con animación
+                            if (nuevoEstado === 'ganada' || nuevoEstado === 'perdida') {
+                                card.style.transition = 'all 0.3s ease';
+                                card.style.transform = 'scale(0.9)';
+                                card.style.opacity = '0';
+
+                                setTimeout(() => {
+                                    // Mostrar mensaje y recargar página
+                                    alert(`✅ Oportunidad marcada como ${nuevoEstado === 'ganada' ? 'GANADA' : 'PERDIDA'}`);
+                                    window.location.reload();
+                                }, 300);
+                            } else {
+                                // Estado cambiado exitosamente - recargar página
+                                window.location.reload();
+                            }
+                        } else {
+                            alert('Error al cambiar estado: ' + (data.error || 'Error desconocido'));
+                            this.disabled = false;
+                            card.style.opacity = '1';
+                            this.value = ''; // Resetear selector
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error al cambiar estado. Por favor, intenta de nuevo.');
+                        this.disabled = false;
+                        card.style.opacity = '1';
+                        this.value = ''; // Resetear selector
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
