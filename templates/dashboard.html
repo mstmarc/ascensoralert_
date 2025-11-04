@@ -32,15 +32,15 @@
         }
 
         .filtros-grid {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto auto auto;
             gap: 10px;
-            align-items: flex-end;
-            flex-wrap: wrap;
+            align-items: end;
         }
 
-        .filtros .filtro-grupo {
-            flex: 1;
-            min-width: 200px;
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
         }
 
         .filtros .btn {
@@ -52,7 +52,7 @@
             white-space: nowrap;
             font-weight: 700;
             border-radius: 8px;
-            margin-top: 25px;
+            margin-top: 0;
             margin-bottom: 0;
         }
 
@@ -63,11 +63,6 @@
 
         .filtros .btn-secondary:hover {
             background: #002f66;
-        }
-
-        .filtro-grupo {
-            display: flex;
-            flex-direction: column;
         }
 
         .filtro-grupo label {
@@ -266,17 +261,11 @@
             }
 
             .filtros-grid {
-                flex-direction: column;
-            }
-
-            .filtros .filtro-grupo {
-                width: 100%;
-                min-width: 100%;
+                grid-template-columns: 1fr;
             }
 
             .filtros .btn {
                 width: 100%;
-                margin-top: 0;
             }
 
             /* Ajustar listado compacto en móvil */
