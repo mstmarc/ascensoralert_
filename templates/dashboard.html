@@ -35,7 +35,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr auto auto auto;
             gap: 10px;
-            align-items: end;
+            align-items: start;
         }
 
         .filtro-grupo {
@@ -52,8 +52,9 @@
             white-space: nowrap;
             font-weight: 700;
             border-radius: 8px;
-            margin-top: 0;
-            margin-bottom: 0;
+            margin: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .filtros .btn-secondary {
@@ -363,17 +364,26 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
-                            Filtrar
-                        </button>
+                        <div class="filtro-grupo">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary">
+                                Filtrar
+                            </button>
+                        </div>
 
-                        <a href="/leads_dashboard" class="btn btn-secondary">
-                            Limpiar
-                        </a>
+                        <div class="filtro-grupo">
+                            <label>&nbsp;</label>
+                            <a href="/leads_dashboard" class="btn btn-secondary">
+                                Limpiar
+                            </a>
+                        </div>
 
-                        <a href="/exportar_leads?localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-success">
-                            📊 Excel
-                        </a>
+                        <div class="filtro-grupo">
+                            <label>&nbsp;</label>
+                            <a href="/exportar_leads?localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-success">
+                                📊 Excel
+                            </a>
+                        </div>
                     </div>
                 </div>
 
