@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ver Visita Administrador</title>
+    <title>Detalle Visita Administrador - AscensorAlert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
+        /* === ESTILO PROFESIONAL 2025 === */
 
-        /* Ajustar contenedor del dashboard para ancho completo */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            line-height: 1.5;
+        }
+
         main {
-            max-width: none !important;
-            padding: 30px !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 60px 80px !important;
+            background: #ffffff;
         }
 
         main .menu {
@@ -21,46 +29,157 @@
             margin: 0 !important;
         }
 
-        .detalle-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
+        .container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
         }
-        
+
+        /* HEADER DE PÁGINA */
+        .page-header {
+            background: transparent;
+            padding: 0 0 20px 0;
+            border-radius: 0;
+            margin-bottom: 30px;
+            box-shadow: none;
+            border-left: none;
+            border-bottom: 2px solid #003366;
+        }
+
+        .page-header h2 {
+            font-size: 22px;
+            color: #003366;
+            margin: 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* SECCIONES - ESTILO MINIMALISTA */
+        .detalle-card {
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            margin-bottom: 40px;
+            overflow: visible;
+            border: none;
+            padding: 0;
+        }
+
+        .section-title {
+            background: transparent;
+            padding: 0 0 8px 0;
+            border-bottom: 2px solid #003366;
+            font-size: 17px;
+            font-weight: 700;
+            color: #003366;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        /* INFORMACIÓN EN FILAS */
         .info-row {
             display: grid;
             grid-template-columns: 200px 1fr;
-            gap: 10px;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #e6e6e6;
         }
-        
+
         .info-row:last-child {
             border-bottom: none;
         }
-        
+
         .info-label {
-            font-weight: bold;
-            color: #366092;
+            font-weight: 700;
+            color: #222;
+            font-size: 14px;
         }
-        
+
         .info-value {
-            color: #333;
+            color: #222;
+            font-size: 14px;
         }
-        
+
+        .info-value a {
+            color: #003366;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .info-value a:hover {
+            color: #002f66;
+            text-decoration: underline;
+        }
+
+        .info-value strong {
+            color: #003366;
+            font-weight: 700;
+        }
+
+        /* BOTONES */
         .botones-accion {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 30px;
             flex-wrap: wrap;
         }
-        
+
+        .button,
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #003c80;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .button:hover,
+        .btn:hover {
+            background: #002f66;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .button.btn-secondary {
+            background: #6c757d;
+        }
+
+        .button.btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* RESPONSIVE */
         @media (max-width: 768px) {
+            main {
+                padding: 40px 20px !important;
+            }
+
             .info-row {
                 grid-template-columns: 1fr;
                 gap: 5px;
+            }
+
+            .info-label {
+                font-weight: 700;
+            }
+
+            .botones-accion {
+                flex-direction: column;
+            }
+
+            .button,
+            .btn {
+                width: 100%;
             }
         }
     </style>
@@ -70,65 +189,75 @@
         <div class="header-container">
             <div class="logo-container">
                 <a href="/home">
-                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="FEDES Logo" class="logo">
                 </a>
             </div>
             <div class="title-container">
-                <h1>Detalle Visita Administrador</h1>
+                <h1>Detalle de Visita a Administrador</h1>
             </div>
         </div>
     </header>
+
     <main>
         <div class="menu">
-            <div class="detalle-card">
-                <h2>Informacion de la Visita</h2>
-                
-                <div class="info-row">
-                    <div class="info-label">Fecha:</div>
-                    <div class="info-value">{{ visita.fecha_visita }}</div>
+            <div class="container">
+                <!-- HEADER DE PÁGINA -->
+                <div class="page-header">
+                    <h2>Visita a Administrador</h2>
                 </div>
-                
-                <div class="info-row">
-                    <div class="info-label">Administrador (BD):</div>
-                    <div class="info-value">
-                        {% if visita.administradores %}
-                            <strong>{{ visita.administradores.nombre_empresa }}</strong>
-                            {% if visita.administrador_id %}
-                            <a href="/ver_administrador/{{ visita.administrador_id }}" style="margin-left: 10px; color: #366092; text-decoration: underline;">Ver ficha</a>
+
+                <!-- INFORMACIÓN DE LA VISITA -->
+                <div class="detalle-card">
+                    <div class="section-title">Información de la Visita</div>
+
+                    <div class="info-row">
+                        <div class="info-label">Fecha de Visita:</div>
+                        <div class="info-value">{{ visita.fecha_visita|format_fecha }}</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">Administrador (BD):</div>
+                        <div class="info-value">
+                            {% if visita.administradores %}
+                                <strong>{{ visita.administradores.nombre_empresa }}</strong>
+                                {% if visita.administrador_id %}
+                                <a href="/ver_administrador/{{ visita.administrador_id }}">(Ver ficha completa)</a>
+                                {% endif %}
+                            {% else %}
+                                -
                             {% endif %}
-                        {% else %}
-                            -
-                        {% endif %}
+                        </div>
+                    </div>
+
+                    {% if visita.administrador_fincas %}
+                    <div class="info-row">
+                        <div class="info-label">Administrador (texto):</div>
+                        <div class="info-value">{{ visita.administrador_fincas }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if visita.persona_contacto %}
+                    <div class="info-row">
+                        <div class="info-label">Persona de Contacto:</div>
+                        <div class="info-value">{{ visita.persona_contacto }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="info-row">
+                        <div class="info-label">Observaciones:</div>
+                        <div class="info-value">{{ visita.observaciones or '-' }}</div>
                     </div>
                 </div>
 
-                {% if visita.administrador_fincas %}
-                <div class="info-row">
-                    <div class="info-label">Administrador (texto):</div>
-                    <div class="info-value">{{ visita.administrador_fincas }}</div>
-                </div>
-                {% endif %}
-
-                {% if visita.persona_contacto %}
-                <div class="info-row">
-                    <div class="info-label">Persona de Contacto:</div>
-                    <div class="info-value">{{ visita.persona_contacto }}</div>
-                </div>
-                {% endif %}
-                
-                <div class="info-row">
-                    <div class="info-label">Observaciones:</div>
-                    <div class="info-value">{{ visita.observaciones or '-' }}</div>
-                </div>
-                
+                <!-- BOTONES DE ACCIÓN -->
                 <div class="botones-accion">
-                    <a href="/editar_visita_admin/{{ visita.id }}" class="button">Editar</a>
-                    <a href="/visitas_administradores_dashboard" class="button">Volver</a>
+                    <a href="/editar_visita_admin/{{ visita.id }}" class="button">Editar Visita</a>
+                    <a href="/visitas_administradores_dashboard" class="button btn-secondary">Volver al Listado</a>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="/static/sidebar.js"></script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
 </html>

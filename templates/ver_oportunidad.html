@@ -113,13 +113,16 @@
         }
 
         .badge.activa {
-            background: #d4edda;
-            color: #155724;
+            background: #e0e0e0;
+            color: #616161;
             box-shadow: none;
             font-weight: 700;
             padding: 4px 12px;
             border-radius: 8px;
             letter-spacing: 0;
+            display: inline-flex;
+            align-items: center;
+            height: 38px;
         }
 
         .badge.ganada {
@@ -130,6 +133,9 @@
             padding: 4px 12px;
             border-radius: 8px;
             letter-spacing: 0;
+            display: inline-flex;
+            align-items: center;
+            height: 38px;
         }
 
         .badge.perdida {
@@ -140,27 +146,42 @@
             padding: 4px 12px;
             border-radius: 8px;
             letter-spacing: 0;
+            display: inline-flex;
+            align-items: center;
+            height: 38px;
         }
 
         /* BADGES PARA NUEVOS ESTADOS */
         .badge.nueva {
             background: #e3f2fd;
             color: #1976d2;
+            display: inline-flex;
+            align-items: center;
+            height: 38px;
         }
 
         .badge.en_contacto {
             background: #fff3e0;
             color: #f57c00;
+            display: inline-flex;
+            align-items: center;
+            height: 38px;
         }
 
         .badge.presupuesto_preparacion {
             background: #f3e5f5;
             color: #7b1fa2;
+            display: inline-flex;
+            align-items: center;
+            height: 38px;
         }
 
         .badge.presupuesto_pendiente {
             background: #fff9c4;
             color: #f57f17;
+            display: inline-flex;
+            align-items: center;
+            height: 38px;
         }
 
         /* SELECTOR DE ESTADO */
@@ -169,10 +190,12 @@
             align-items: center;
             gap: 15px;
             flex-wrap: wrap;
+            margin-top: 5px;
         }
 
         .estado-dropdown {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
         }
 
         .estado-dropdown select {
@@ -185,6 +208,7 @@
             cursor: pointer;
             font-family: 'Montserrat', sans-serif;
             transition: all 0.2s;
+            height: 38px;
         }
 
         .estado-dropdown select:focus {
