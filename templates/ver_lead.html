@@ -454,7 +454,7 @@
 
                     <div class="info-item">
                         <label>Primera Visita</label>
-                        <span>{{ lead.fecha_visita or '-' }}</span>
+                        <span>{{ lead.fecha_visita|format_fecha }}</span>
                     </div>
                 </div>
 
@@ -473,7 +473,7 @@
                     <div class="equipo-item">
                         <div class="equipo-info">
                             <div class="equipo-nombre">{{ equipo.tipo_equipo }}</div>
-                            <div class="equipo-detalles">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima or '-' }}</div>
+                            <div class="equipo-detalles">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima|format_fecha }}</div>
                         </div>
                         <div class="equipo-acciones">
                             <a href="/ver_equipo/{{ equipo.id }}" class="btn btn-sm">Ver detalle</a>
@@ -494,14 +494,14 @@
                 <h2>Historial de Visitas</h2>
 
                 <div class="visita-item">
-                    <div class="visita-fecha">{{ lead.fecha_visita }} - Primera visita</div>
+                    <div class="visita-fecha">{{ lead.fecha_visita|format_fecha }} - Primera visita</div>
                     <div class="visita-observaciones">{{ lead.observaciones or 'Sin observaciones' }}</div>
                 </div>
 
                 {% if visitas_seguimiento %}
                     {% for visita in visitas_seguimiento %}
                     <div class="visita-item">
-                        <div class="visita-fecha">{{ visita.fecha_visita }} - Seguimiento</div>
+                        <div class="visita-fecha">{{ visita.fecha_visita|format_fecha }} - Seguimiento</div>
                         <div class="visita-observaciones">{{ visita.observaciones or 'Sin observaciones' }}</div>
                         {% if visita.oportunidades %}
                         <div class="visita-oportunidad">Vinculada a: {{ visita.oportunidades.tipo }}</div>
