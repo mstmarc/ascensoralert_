@@ -5,60 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oportunidades - AscensorAlert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="/static/styles.css?v=6">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
+        /* === ESTILO PROFESIONAL 2025 === */
 
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: #003366;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 20px;
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            line-height: 1.5;
         }
 
-        .menu-lateral {
-            display: none;
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 250px;
-            height: 100%;
-            background: #2c3e50;
-            z-index: 999;
-            transition: right 0.3s ease;
-            padding-top: 60px;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-        }
-
-        .menu-lateral.active {
-            right: 0;
-        }
-
-        .menu-lateral a {
-            display: block;
-            color: white;
-            padding: 15px 20px;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            transition: background 0.3s;
-        }
-
-        .menu-lateral a:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        /* Ajustar contenedor del dashboard para ancho completo */
         main {
-            max-width: none !important;
-            padding: 30px !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 60px 80px !important;
+            background: #ffffff;
         }
 
         main .menu {
@@ -67,110 +29,133 @@
             margin: 0 !important;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
 
-        /* STATS CARDS - Indicadores en recuadros */
+        /* HEADER DE PÁGINA */
+        .page-header {
+            background: transparent;
+            padding: 0 0 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #003366;
+        }
+
+        .page-header h2 {
+            font-size: 22px;
+            color: #003366;
+            margin: 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* STATS CARDS - MINIMALISTA */
         .stats {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
 
         .stat-card {
-            background: #fafafa;
-            padding: 20px;
-            border-radius: 12px;
-            flex: 1;
-            min-width: 150px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            background: transparent;
+            padding: 0 0 20px 0;
+            border-bottom: 2px solid #e6e6e6;
             transition: all 0.2s;
-            border: 1px solid #f0f0f0;
         }
 
         .stat-card:hover {
-            background: #f0f3f8;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            border-bottom-color: #003366;
         }
 
         .stat-card h3 {
-            font-size: 14px;
+            font-size: 13px;
             color: #555555;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .stat-card .number {
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 700;
+            line-height: 1;
         }
 
         .stat-card.activas .number { color: #27ae60; }
         .stat-card.ganadas .number { color: #003366; }
         .stat-card.perdidas .number { color: #dc3545; }
         
-        /* LISTADO ELEGANTE DE OPORTUNIDADES */
+        /* SECTION TITLE PARA LISTA */
+        .section-title {
+            background: transparent;
+            padding: 0 0 8px 0;
+            border-bottom: 2px solid #003366;
+            font-size: 17px;
+            font-weight: 700;
+            color: #003366;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        /* LISTADO MINIMALISTA DE OPORTUNIDADES */
         .oportunidades-list {
-            background: white;
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0;
         }
 
         .oportunidad-item {
-            padding: 14px 16px;
-            transition: all 0.3s ease;
+            padding: 18px 0;
+            border-bottom: 1px solid #e6e6e6;
+            transition: all 0.2s ease;
             cursor: pointer;
-            position: relative;
-            background: white;
-            border: 1px solid #e1e5e9;
-            border-left: 4px solid #003366;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
+        }
+
+        .oportunidad-item:last-child {
+            border-bottom: none;
         }
 
         .oportunidad-item:hover {
             background: #f8f9fa;
-            border-left-color: #002f66;
-            box-shadow: 0 4px 12px rgba(0, 75, 141, 0.15);
-            transform: translateX(3px);
+            padding-left: 12px;
+            padding-right: 12px;
+            margin-left: -12px;
+            margin-right: -12px;
         }
 
         .oportunidad-info {
             flex: 1;
             min-width: 0;
-            text-align: left;
         }
 
         .oportunidad-direccion {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
-            color: #1a1a1a;
+            color: #003366;
             text-decoration: none;
             display: block;
             transition: color 0.2s ease;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .oportunidad-direccion:hover {
-            color: #003366;
+            color: #002f66;
         }
 
         .oportunidad-tipo {
-            font-size: 12px;
-            color: #1a1a1a;
+            font-size: 13px;
+            color: #555555;
             display: block;
-            margin-top: 2px;
-            text-align: left;
         }
 
         .badge {
@@ -191,53 +176,96 @@
         .badge.presupuesto_preparacion { background: #f3e5f5; color: #7b1fa2; }
         .badge.presupuesto_pendiente { background: #fff9c4; color: #f57f17; }
         
-        .empty-state { padding: 60px 20px; text-align: left; color: #666; }
-        .empty-state p { margin-top: 10px; }
-        
-        .alert { padding: 12px 20px; margin-bottom: 20px; border-radius: 4px; }
-        .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        
-        @media (max-width: 768px) {
-            .menu-toggle { display: block; }
-            .menu-lateral { display: block; }
+        /* EMPTY STATE */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #999999;
+        }
 
-            .stats { flex-direction: column; }
-            .stat-card { min-width: 100%; }
+        .empty-state h3 {
+            color: #003366;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            margin-top: 10px;
+            color: #666666;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* BOTONES */
+        .button,
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #003c80;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .button:hover,
+        .btn:hover {
+            background: #002f66;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            main {
+                padding: 40px 20px !important;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
 
             .oportunidad-item {
-                padding: 8px 10px;
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 8px;
             }
 
-            .oportunidad-direccion {
-                font-size: 13px;
-            }
-
-            .oportunidad-tipo {
-                font-size: 12px;
+            .badge {
+                align-self: flex-start;
             }
         }
     </style>
 </head>
 <body>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <nav class="menu-lateral" id="menuLateral">
-        <a href="/home">Inicio</a>
-        <a href="/_dashboard">Ver Comunidades</a>
-        <a href="/administradores_dashboard">Administradores de Fincas</a>
-        <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
-        <a href="/oportunidades">Oportunidades</a>
-        <a href="/reporte_mensual">Descargo Comercial</a>
-        <a href="/logout">Cerrar Sesión</a>
-    </nav>
-
     <header>
         <div class="header-container">
             <div class="logo-container">
                 <a href="/home">
-                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="FEDES Logo" class="logo">
                 </a>
             </div>
             <div class="title-container">
@@ -245,10 +273,16 @@
             </div>
         </div>
     </header>
-    
+
     <main>
         <div class="menu">
             <div class="container">
+                <!-- HEADER DE PÁGINA -->
+                <div class="page-header">
+                    <h2>Todas las Oportunidades</h2>
+                </div>
+
+                <!-- ALERTS -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         {% for category, message in messages %}
@@ -256,7 +290,8 @@
                         {% endfor %}
                     {% endif %}
                 {% endwith %}
-                
+
+                <!-- ESTADÍSTICAS -->
                 <div class="stats">
                     <div class="stat-card activas">
                         <h3>Activas</h3>
@@ -271,7 +306,9 @@
                         <div class="number">{{ perdidas }}</div>
                     </div>
                 </div>
-                
+
+                <!-- LISTADO DE OPORTUNIDADES -->
+                <div class="section-title">Listado de Oportunidades</div>
                 <div class="oportunidades-list">
                     {% if oportunidades %}
                         {% for op in oportunidades %}
@@ -299,31 +336,20 @@
                         {% endfor %}
                     {% else %}
                         <div class="empty-state">
-                            <h2>No hay oportunidades todavia</h2>
-                            <p>Las oportunidades apareceran aqui cuando las crees desde la vista de comunidades</p>
+                            <h3>No hay oportunidades todavía</h3>
+                            <p>Las oportunidades aparecerán aquí cuando las crees desde la vista de comunidades</p>
                         </div>
                     {% endif %}
                 </div>
-                
-                <br>
-                <a href="/home" class="button">Volver al Home</a>
+
+                <!-- BOTÓN VOLVER -->
+                <div style="margin-top: 30px;">
+                    <a href="/home" class="button">Volver al Inicio</a>
+                </div>
             </div>
         </div>
     </main>
 
-    <script>
-        function toggleMenu() {
-            document.getElementById('menuLateral').classList.toggle('active');
-        }
-
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('menuLateral');
-            const toggle = document.querySelector('.menu-toggle');
-            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
-                menu.classList.remove('active');
-            }
-        });
-    </script>
-    <script src="/static/sidebar.js"></script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
 </html>
