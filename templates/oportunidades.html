@@ -175,15 +175,21 @@
 
         .badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
             flex-shrink: 0;
+            text-transform: none;
+            letter-spacing: 0.3px;
         }
-        .badge.activa { background: #d4edda; color: #155724; }
+        .badge.activa { background: #e0e0e0; color: #616161; }
         .badge.ganada { background: #d1ecf1; color: #0c5460; }
         .badge.perdida { background: #f8d7da; color: #721c24; }
+        .badge.nueva { background: #e3f2fd; color: #1976d2; }
+        .badge.en_contacto { background: #fff3e0; color: #f57c00; }
+        .badge.presupuesto_preparacion { background: #f3e5f5; color: #7b1fa2; }
+        .badge.presupuesto_pendiente { background: #fff9c4; color: #f57f17; }
         
         .empty-state { padding: 60px 20px; text-align: left; color: #666; }
         .empty-state p { margin-top: 10px; }
@@ -278,7 +284,17 @@
                                     {{ op.tipo }}
                                 </span>
                             </div>
-                            <span class="badge {{ op.estado }}">{{ op.estado|upper }}</span>
+                            <span class="badge {{ op.estado }}">
+                                {% if op.estado == 'nueva' %}🆕 Nueva
+                                {% elif op.estado == 'en_contacto' %}📞 En contacto
+                                {% elif op.estado == 'presupuesto_preparacion' %}✍️ Presupuesto en preparación
+                                {% elif op.estado == 'presupuesto_pendiente' %}⏳ Presupuesto pendiente
+                                {% elif op.estado == 'ganada' %}✅ Ganada
+                                {% elif op.estado == 'perdida' %}❌ Perdida
+                                {% elif op.estado == 'activa' %}⚡ Activa
+                                {% else %}{{ op.estado|upper }}
+                                {% endif %}
+                            </span>
                         </div>
                         {% endfor %}
                     {% else %}

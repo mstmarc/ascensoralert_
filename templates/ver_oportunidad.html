@@ -142,6 +142,61 @@
             letter-spacing: 0;
         }
 
+        /* BADGES PARA NUEVOS ESTADOS */
+        .badge.nueva {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge.en_contacto {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge.presupuesto_preparacion {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .badge.presupuesto_pendiente {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        /* SELECTOR DE ESTADO */
+        .estado-selector-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .estado-dropdown {
+            display: inline-block;
+        }
+
+        .estado-dropdown select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            background: white;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .estado-dropdown select:focus {
+            outline: none;
+            border-color: #003366;
+            box-shadow: 0 0 0 3px rgba(0,51,102,0.1);
+        }
+
+        .estado-dropdown select:hover {
+            border-color: #003366;
+        }
+
         /* DROPDOWN */
         .presupuesto-dropdown select {
             padding: 8px 12px;
@@ -438,8 +493,31 @@
                 <div class="section-title">Detalles de la Oportunidad</div>
                 <div class="section-content">
                     <div class="field-group">
-                        <span class="field-label">Estado:</span>
-                        <span class="badge {{ oportunidad.estado }}">{{ oportunidad.estado|upper }}</span>
+                        <span class="field-label">Estado del Pipeline:</span>
+                        <div class="estado-selector-container">
+                            <span class="badge {{ oportunidad.estado }}" id="estado-badge-actual">
+                                {% if oportunidad.estado == 'nueva' %}🆕 Nueva
+                                {% elif oportunidad.estado == 'en_contacto' %}📞 En contacto
+                                {% elif oportunidad.estado == 'presupuesto_preparacion' %}✍️ Presupuesto en preparación
+                                {% elif oportunidad.estado == 'presupuesto_pendiente' %}⏳ Presupuesto pendiente
+                                {% elif oportunidad.estado == 'ganada' %}✅ Ganada
+                                {% elif oportunidad.estado == 'perdida' %}❌ Perdida
+                                {% elif oportunidad.estado == 'activa' %}⚡ Activa (sin clasificar)
+                                {% else %}{{ oportunidad.estado|upper }}
+                                {% endif %}
+                            </span>
+                            <div class="estado-dropdown">
+                                <select id="cambiar-estado-opp" data-opp-id="{{ oportunidad.id }}">
+                                    <option value="">⚡ Cambiar estado...</option>
+                                    <option value="nueva">🆕 Nueva</option>
+                                    <option value="en_contacto">📞 En contacto</option>
+                                    <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
+                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="ganada">✅ Ganada</option>
+                                    <option value="perdida">❌ Perdida</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="field-group">
@@ -596,5 +674,84 @@
     </main>
 
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+    <script>
+        // Manejo de cambio de estado desde ficha de oportunidad
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('cambiar-estado-opp');
+
+            if (selector) {
+                selector.addEventListener('change', async function() {
+                    const oppId = this.dataset.oppId;
+                    const nuevoEstado = this.value;
+
+                    if (!nuevoEstado) return;
+
+                    // Confirmar si está cerrando la oportunidad
+                    if (nuevoEstado === 'ganada' || nuevoEstado === 'perdida') {
+                        const estadoNombre = nuevoEstado === 'ganada' ? 'GANADA ✅' : 'PERDIDA ❌';
+                        if (!confirm(`¿Estás seguro de marcar esta oportunidad como ${estadoNombre}?`)) {
+                            this.value = ''; // Resetear selector
+                            return;
+                        }
+                    }
+
+                    // Deshabilitar selector mientras se procesa
+                    this.disabled = true;
+
+                    try {
+                        const response = await fetch(`/cambiar_estado_oportunidad/${oppId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ estado: nuevoEstado })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Actualizar badge con emoji
+                            const badge = document.getElementById('estado-badge-actual');
+                            const estadosMap = {
+                                'nueva': '🆕 Nueva',
+                                'en_contacto': '📞 En contacto',
+                                'presupuesto_preparacion': '✍️ Presupuesto en preparación',
+                                'presupuesto_pendiente': '⏳ Presupuesto pendiente',
+                                'ganada': '✅ Ganada',
+                                'perdida': '❌ Perdida'
+                            };
+
+                            // Actualizar clases del badge
+                            badge.className = 'badge ' + nuevoEstado;
+                            badge.textContent = estadosMap[nuevoEstado] || nuevoEstado.toUpperCase();
+
+                            // Resetear selector
+                            this.value = '';
+                            this.disabled = false;
+
+                            // Mostrar mensaje de éxito
+                            alert('✅ Estado actualizado correctamente');
+
+                            // Si se cerró, ofrecer ir a Mi Agenda
+                            if (nuevoEstado === 'ganada' || nuevoEstado === 'perdida') {
+                                if (confirm('Esta oportunidad ha sido cerrada.\n\n¿Quieres ir a Mi Agenda para ver tus oportunidades activas?')) {
+                                    window.location.href = '/mi_agenda';
+                                }
+                            }
+                        } else {
+                            alert('Error al cambiar estado: ' + (data.error || 'Error desconocido'));
+                            this.disabled = false;
+                            this.value = '';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error al cambiar estado. Por favor, intenta de nuevo.');
+                        this.disabled = false;
+                        this.value = '';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
