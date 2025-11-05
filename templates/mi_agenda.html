@@ -191,7 +191,7 @@
         .estado-nueva { background: #e3f2fd; color: #1976d2; }
         .estado-en_contacto { background: #fff3e0; color: #f57c00; }
         .estado-presupuesto_preparacion { background: #f3e5f5; color: #7b1fa2; }
-        .estado-presupuesto_pendiente { background: #fff9c4; color: #f57f17; }
+        .estado-presupuesto_enviado { background: #fff9c4; color: #f57f17; }
         .estado-activa { background: #e0e0e0; color: #616161; }
 
         /* SELECTOR DE ESTADO */
@@ -365,7 +365,7 @@
                                     <option value="nueva">🆕 Nueva</option>
                                     <option value="en_contacto">📞 En contacto</option>
                                     <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
-                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="presupuesto_enviado">📤 Presupuesto enviado</option>
                                     <option value="ganada">✅ Ganada</option>
                                     <option value="perdida">❌ Perdida</option>
                                 </select>
@@ -416,7 +416,7 @@
                                     <option value="nueva">🆕 Nueva</option>
                                     <option value="en_contacto">📞 En contacto</option>
                                     <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
-                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="presupuesto_enviado">📤 Presupuesto enviado</option>
                                     <option value="ganada">✅ Ganada</option>
                                     <option value="perdida">❌ Perdida</option>
                                 </select>
@@ -467,7 +467,7 @@
                                     <option value="nueva">🆕 Nueva</option>
                                     <option value="en_contacto">📞 En contacto</option>
                                     <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
-                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="presupuesto_enviado">📤 Presupuesto enviado</option>
                                     <option value="ganada">✅ Ganada</option>
                                     <option value="perdida">❌ Perdida</option>
                                 </select>
@@ -482,20 +482,20 @@
                 </div>
                 {% endif %}
 
-                <!-- PRESUPUESTO PENDIENTE -->
-                {% if por_estado.presupuesto_pendiente|length > 0 %}
+                <!-- PRESUPUESTO ENVIADO -->
+                {% if por_estado.presupuesto_enviado|length > 0 %}
                 <div class="estado-section">
                     <div class="estado-header">
-                        <h3 class="estado-titulo">⏳ Presupuesto pendiente</h3>
-                        <span class="estado-contador">{{ por_estado.presupuesto_pendiente|length }}</span>
+                        <h3 class="estado-titulo">📤 Presupuesto enviado</h3>
+                        <span class="estado-contador">{{ por_estado.presupuesto_enviado|length }}</span>
                     </div>
                     <div class="oportunidades-grid">
-                        {% for opp in por_estado.presupuesto_pendiente %}
+                        {% for opp in por_estado.presupuesto_enviado %}
                         <div class="oportunidad-card" data-opp-id="{{ opp.id }}">
                             <div class="oportunidad-direccion">{{ opp.clientes.direccion }}</div>
 
                             <!-- Badge de estado actual -->
-                            <span class="oportunidad-estado-badge estado-presupuesto_pendiente">⏳ Presupuesto pendiente</span>
+                            <span class="oportunidad-estado-badge estado-presupuesto_enviado">📤 Presupuesto enviado</span>
 
                             <div class="oportunidad-info">
                                 <div class="oportunidad-info-item">
@@ -518,7 +518,7 @@
                                     <option value="nueva">🆕 Nueva</option>
                                     <option value="en_contacto">📞 En contacto</option>
                                     <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
-                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="presupuesto_enviado">📤 Presupuesto enviado</option>
                                     <option value="ganada">✅ Ganada</option>
                                     <option value="perdida">❌ Perdida</option>
                                 </select>
@@ -569,7 +569,7 @@
                                     <option value="nueva">🆕 Nueva</option>
                                     <option value="en_contacto">📞 En contacto</option>
                                     <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
-                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="presupuesto_enviado">📤 Presupuesto enviado</option>
                                     <option value="ganada">✅ Ganada</option>
                                     <option value="perdida">❌ Perdida</option>
                                 </select>
