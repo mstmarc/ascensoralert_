@@ -400,7 +400,17 @@
                                         </a>
                                         <span class="oportunidad-tipo">{{ oportunidad.tipo }}</span>
                                     </div>
-                                    <span class="badge {{ oportunidad.estado }}">{{ oportunidad.estado|upper }}</span>
+                                    <span class="badge {{ oportunidad.estado }}">
+                                        {% if oportunidad.estado == 'nueva' %}🆕 Nueva
+                                        {% elif oportunidad.estado == 'en_contacto' %}📞 En contacto
+                                        {% elif oportunidad.estado == 'presupuesto_preparacion' %}✍️ Presupuesto en preparación
+                                        {% elif oportunidad.estado == 'presupuesto_enviado' %}📤 Presupuesto enviado
+                                        {% elif oportunidad.estado == 'ganada' %}✅ Ganada
+                                        {% elif oportunidad.estado == 'perdida' %}❌ Perdida
+                                        {% elif oportunidad.estado == 'activa' %}⚡ Activa
+                                        {% else %}{{ oportunidad.estado|upper }}
+                                        {% endif %}
+                                    </span>
                                 </div>
                             {% endfor %}
                         {% else %}
