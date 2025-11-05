@@ -633,7 +633,16 @@
                         <div class="info-item"><label>Teléfono</label><span>{{ administrador.telefono or '-' }}</span></div>
                         <div class="info-item"><label>Email</label><span>{{ administrador.email or '-' }}</span></div>
                         <div class="info-item"><label>Localidad</label><span>{{ administrador.localidad or '-' }}</span></div>
-                        <div class="info-item"><label>Dirección</label><span>{{ administrador.direccion or '-' }}</span></div>
+                        <div class="info-item">
+                            <label>Dirección</label>
+                            {% if administrador.direccion and administrador.localidad %}
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ administrador.direccion|urlencode }}+{{ administrador.localidad|urlencode }}" target="_blank" rel="noopener noreferrer">
+                                    {{ administrador.direccion }}
+                                </a>
+                            {% else %}
+                                <span>{{ administrador.direccion or '-' }}</span>
+                            {% endif %}
+                        </div>
                         {% if administrador.observaciones %}
                         <div class="info-item"><label>Observaciones</label><span>{{ administrador.observaciones }}</span></div>
                         {% endif %}
