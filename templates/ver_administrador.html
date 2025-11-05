@@ -77,7 +77,7 @@
             border-bottom: 2px solid #003366;
         }
 
-        /* METRICS GRID - NUMERADORES EN RECUADROS */
+        /* METRICS GRID - MINIMALISTA SIN RECUADROS */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -86,18 +86,19 @@
         }
 
         .metric-card {
-            background: #ffffff;
-            border: 2px solid #e6e6e6;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #e6e6e6;
+            border-radius: 0;
+            padding: 0 0 20px 0;
+            text-align: left;
             transition: all 0.2s;
         }
 
         .metric-card:hover {
-            border-color: #003366;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,51,102,0.1);
+            border-bottom-color: #003366;
+            transform: none;
+            box-shadow: none;
         }
 
         .metric-label {
@@ -368,6 +369,10 @@
             padding: 18px 0;
             border-bottom: 1px solid #e6e6e6;
             transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
         }
 
         .oportunidad-item:last-child {
@@ -382,25 +387,31 @@
             margin-right: -12px;
         }
 
-        .oportunidad-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-            gap: 15px;
+        .oportunidad-content {
+            flex: 1;
+            min-width: 0;
         }
 
-        .oportunidad-tipo {
+        .oportunidad-link {
+            text-decoration: none;
+            display: block;
+        }
+
+        .oportunidad-direccion {
             font-weight: 600;
             color: #003366;
             font-size: 15px;
             margin-bottom: 4px;
+            transition: color 0.2s;
         }
 
-        .oportunidad-badges {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+        .oportunidad-link:hover .oportunidad-direccion {
+            color: #002f66;
+        }
+
+        .oportunidad-subtitulo {
+            font-size: 13px;
+            color: #555;
         }
 
         .badge {
@@ -452,24 +463,6 @@
         .badge.PRESUPUESTO_ENVIADO {
             background: #fff9c4;
             color: #f57f17;
-        }
-
-        .oportunidad-info {
-            margin: 12px 0;
-            color: #555;
-            font-size: 14px;
-        }
-
-        .oportunidad-info p {
-            margin: 8px 0;
-            line-height: 1.5;
-        }
-
-        .oportunidad-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
         }
 
         /* LISTADOS DE CLIENTES - MINIMALISTA SIN CONTORNOS */
@@ -591,22 +584,14 @@
                 padding: 8px 0;
             }
 
-            .oportunidad-header {
+            .oportunidad-item {
                 flex-direction: column;
+                align-items: flex-start;
                 gap: 10px;
             }
 
-            .oportunidad-badges {
+            .badge {
                 align-self: flex-start;
-            }
-
-            .oportunidad-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .oportunidad-actions .btn {
-                width: 100%;
             }
 
             .lead-list-item {
@@ -725,46 +710,23 @@
 
                         {% for op in oportunidades %}
                         <div class="oportunidad-item {{ op.estado }}" data-estado="{{ op.estado }}">
-                            <div class="oportunidad-header">
-                                <div>
-                                    <div class="oportunidad-tipo">{{ op.tipo }}</div>
-                                    <div style="font-size: 13px; color: #888; margin-top: 4px;">
-                                        📍 {{ op.clientes.direccion }}, {{ op.clientes.localidad }}
-                                    </div>
-                                </div>
-                                <div class="oportunidad-badges">
-                                    <span class="badge {{ op.estado }}">{{ op.estado|upper }}</span>
-                                    {% if op.estado_presupuesto and op.estado_presupuesto != 'No' %}
-                                    <span class="badge" style="background: #ffc107; color: #000;">PRESUP: {{ op.estado_presupuesto }}</span>
-                                    {% endif %}
-                                </div>
+                            <div class="oportunidad-content">
+                                <a href="/ver_oportunidad/{{ op.id }}" class="oportunidad-link">
+                                    <div class="oportunidad-direccion">{{ op.clientes.direccion }}</div>
+                                    <div class="oportunidad-subtitulo">{{ op.tipo }}</div>
+                                </a>
                             </div>
-
-                            <div class="oportunidad-info">
-                                {% if op.descripcion %}
-                                <p style="margin: 5px 0;"><strong>Descripción:</strong> {{ op.descripcion }}</p>
+                            <span class="badge {{ op.estado }}">
+                                {% if op.estado == 'nueva' %}🆕 Nueva
+                                {% elif op.estado == 'en_contacto' %}📞 En contacto
+                                {% elif op.estado == 'presupuesto_preparacion' %}✍️ Presupuesto en preparación
+                                {% elif op.estado == 'presupuesto_enviado' %}📤 Presupuesto enviado
+                                {% elif op.estado == 'ganada' %}✅ Ganada
+                                {% elif op.estado == 'perdida' %}❌ Perdida
+                                {% elif op.estado == 'activa' %}⚡ Activa
+                                {% else %}{{ op.estado|upper }}
                                 {% endif %}
-
-                                {% if op.valor_estimado %}
-                                <p style="margin: 5px 0;"><strong>Valor estimado:</strong> {{ "{:,.2f}".format(op.valor_estimado) }} €</p>
-                                {% endif %}
-
-                                <p style="margin: 5px 0;"><strong>Creada:</strong> {{ op.fecha_creacion[:10] }}</p>
-
-                                {% if op.fecha_cierre %}
-                                <p style="margin: 5px 0;"><strong>Cerrada:</strong> {{ op.fecha_cierre[:10] }}</p>
-                                {% endif %}
-
-                                {% if op.observaciones %}
-                                <p style="margin: 5px 0;"><strong>Observaciones:</strong> {{ op.observaciones }}</p>
-                                {% endif %}
-                            </div>
-
-                            <div class="oportunidad-actions">
-                                <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-success btn-sm">Ver Detalle</a>
-                                <a href="/editar_oportunidad/{{ op.id }}" class="btn btn-primary btn-sm">Editar</a>
-                                <a href="/ver_lead/{{ op.cliente_id }}" class="btn btn-info btn-sm">Ver Comunidad</a>
-                            </div>
+                            </span>
                         </div>
                         {% endfor %}
                     {% else %}
