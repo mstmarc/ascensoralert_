@@ -78,12 +78,9 @@
             margin-bottom: 20px;
         }
 
-        /* INFORMACIÓN EN FILAS */
+        /* INFORMACIÓN EN LISTA SIMPLE */
         .info-row {
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 15px;
-            padding: 15px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #e6e6e6;
         }
 
@@ -93,13 +90,16 @@
 
         .info-label {
             font-weight: 700;
-            color: #222;
+            color: #555;
             font-size: 14px;
+            display: inline;
+            margin-right: 8px;
         }
 
         .info-value {
             color: #222;
             font-size: 14px;
+            display: inline;
         }
 
         .info-value a {
@@ -162,15 +162,6 @@
         @media (max-width: 768px) {
             main {
                 padding: 40px 20px !important;
-            }
-
-            .info-row {
-                grid-template-columns: 1fr;
-                gap: 5px;
-            }
-
-            .info-label {
-                font-weight: 700;
             }
 
             .botones-accion {
