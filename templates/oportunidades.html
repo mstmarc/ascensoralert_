@@ -103,7 +103,7 @@
             margin-bottom: 20px;
         }
 
-        /* LISTADO MINIMALISTA DE OPORTUNIDADES */
+        /* LISTADO CON RECUADROS - ESTILO LEAD_DASHBOARD */
         .oportunidades-list {
             display: flex;
             flex-direction: column;
@@ -111,26 +111,22 @@
         }
 
         .oportunidad-item {
-            padding: 18px 0;
-            border-bottom: 1px solid #e6e6e6;
-            transition: all 0.2s ease;
+            background: #ffffff;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: background 0.2s;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 15px;
-        }
-
-        .oportunidad-item:last-child {
-            border-bottom: none;
+            border: none;
         }
 
         .oportunidad-item:hover {
-            background: #f8f9fa;
-            padding-left: 12px;
-            padding-right: 12px;
-            margin-left: -12px;
-            margin-right: -12px;
+            background: #f0f3f8;
         }
 
         .oportunidad-info {
@@ -140,8 +136,8 @@
 
         .oportunidad-direccion {
             font-size: 15px;
-            font-weight: 600;
-            color: #003366;
+            font-weight: 700;
+            color: #222;
             text-decoration: none;
             display: block;
             transition: color 0.2s ease;
@@ -149,7 +145,7 @@
         }
 
         .oportunidad-direccion:hover {
-            color: #002f66;
+            color: #003366;
         }
 
         .oportunidad-tipo {
