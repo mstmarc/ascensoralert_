@@ -91,7 +91,7 @@
             border-bottom: 2px solid #e6e6e6;
             border-radius: 0;
             padding: 0 0 20px 0;
-            text-align: left;
+            text-align: center;
             transition: all 0.2s;
         }
 
@@ -373,6 +373,7 @@
             padding: 18px 0;
             border-bottom: 1px solid #e6e6e6;
             transition: all 0.2s;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -391,31 +392,29 @@
             margin-right: -12px;
         }
 
-        .oportunidad-content {
+        .oportunidad-info {
             flex: 1;
             min-width: 0;
         }
 
-        .oportunidad-link {
-            text-decoration: none;
-            display: block;
-        }
-
         .oportunidad-direccion {
+            font-size: 15px;
             font-weight: 600;
             color: #003366;
-            font-size: 15px;
+            text-decoration: none;
+            display: block;
+            transition: color 0.2s ease;
             margin-bottom: 4px;
-            transition: color 0.2s;
         }
 
-        .oportunidad-link:hover .oportunidad-direccion {
+        .oportunidad-direccion:hover {
             color: #002f66;
         }
 
-        .oportunidad-subtitulo {
+        .oportunidad-tipo {
             font-size: 13px;
-            color: #555;
+            color: #555555;
+            display: block;
         }
 
         .badge {
@@ -587,7 +586,7 @@
             .oportunidad-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 8px;
             }
 
             .badge {
@@ -699,12 +698,14 @@
                         </div>
 
                         {% for op in oportunidades %}
-                        <div class="oportunidad-item {{ op.estado }}" data-estado="{{ op.estado }}">
-                            <div class="oportunidad-content">
-                                <a href="/ver_oportunidad/{{ op.id }}" class="oportunidad-link">
-                                    <div class="oportunidad-direccion">{{ op.clientes.direccion }}</div>
-                                    <div class="oportunidad-subtitulo">{{ op.tipo }}</div>
+                        <div class="oportunidad-item" data-estado="{{ op.estado }}">
+                            <div class="oportunidad-info">
+                                <a href="/ver_oportunidad/{{ op.id }}" class="oportunidad-direccion">
+                                    {{ op.clientes.direccion }}
                                 </a>
+                                <span class="oportunidad-tipo">
+                                    {{ op.tipo }}
+                                </span>
                             </div>
                             <span class="badge {{ op.estado }}">
                                 {% if op.estado == 'nueva' %}🆕 Nueva
