@@ -479,28 +479,31 @@ td a:hover {
 .admin-list-item,
 .oportunidad-item,
 .listado-item {
-    padding: 8px 12px;
+    padding: 16px 20px;
     transition: all 0.2s ease;
     cursor: pointer;
     position: relative;
-    border: 1px solid #000;
-    border-radius: 6px;
-    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    background: #fafafa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
 }
 
 .lead-list-item:hover,
 .admin-list-item:hover,
 .oportunidad-item:hover,
 .listado-item:hover {
-    background: #f8f9fa;
+    background: #f0f3f8;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    border-color: #003366;
 }
 
 .lead-list-direccion,
 .admin-list-name,
 .oportunidad-direccion,
 .listado-titulo {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     color: #1a1a1a;
     text-decoration: none;
     display: block;
