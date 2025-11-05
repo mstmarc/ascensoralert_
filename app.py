@@ -1969,7 +1969,7 @@ def mi_agenda():
                 'nueva': [],
                 'en_contacto': [],
                 'presupuesto_preparacion': [],
-                'presupuesto_pendiente': [],
+                'presupuesto_enviado': [],
                 'activa': []  # Para compatibilidad con oportunidades antiguas
             }
 
@@ -2009,7 +2009,7 @@ def cambiar_estado_oportunidad(oportunidad_id):
 
         # Validar estados permitidos
         estados_validos = ["nueva", "en_contacto", "presupuesto_preparacion",
-                          "presupuesto_pendiente", "ganada", "perdida"]
+                          "presupuesto_enviado", "ganada", "perdida"]
         if nuevo_estado not in estados_validos:
             return {"error": "Estado no válido"}, 400
 

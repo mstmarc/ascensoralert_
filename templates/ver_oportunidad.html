@@ -175,7 +175,7 @@
             height: 38px;
         }
 
-        .badge.presupuesto_pendiente {
+        .badge.presupuesto_enviado {
             background: #fff9c4;
             color: #f57f17;
             display: inline-flex;
@@ -522,7 +522,7 @@
                                 {% if oportunidad.estado == 'nueva' %}🆕 Nueva
                                 {% elif oportunidad.estado == 'en_contacto' %}📞 En contacto
                                 {% elif oportunidad.estado == 'presupuesto_preparacion' %}✍️ Presupuesto en preparación
-                                {% elif oportunidad.estado == 'presupuesto_pendiente' %}⏳ Presupuesto pendiente
+                                {% elif oportunidad.estado == 'presupuesto_enviado' %}📤 Presupuesto enviado
                                 {% elif oportunidad.estado == 'ganada' %}✅ Ganada
                                 {% elif oportunidad.estado == 'perdida' %}❌ Perdida
                                 {% elif oportunidad.estado == 'activa' %}⚡ Activa (sin clasificar)
@@ -535,7 +535,7 @@
                                     <option value="nueva">🆕 Nueva</option>
                                     <option value="en_contacto">📞 En contacto</option>
                                     <option value="presupuesto_preparacion">✍️ Presupuesto en preparación</option>
-                                    <option value="presupuesto_pendiente">⏳ Presupuesto pendiente</option>
+                                    <option value="presupuesto_enviado">📤 Presupuesto enviado</option>
                                     <option value="ganada">✅ Ganada</option>
                                     <option value="perdida">❌ Perdida</option>
                                 </select>
@@ -743,7 +743,7 @@
                                 'nueva': '🆕 Nueva',
                                 'en_contacto': '📞 En contacto',
                                 'presupuesto_preparacion': '✍️ Presupuesto en preparación',
-                                'presupuesto_pendiente': '⏳ Presupuesto pendiente',
+                                'presupuesto_enviado': '📤 Presupuesto enviado',
                                 'ganada': '✅ Ganada',
                                 'perdida': '❌ Perdida'
                             };

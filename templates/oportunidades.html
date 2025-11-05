@@ -174,7 +174,7 @@
         .badge.nueva { background: #e3f2fd; color: #1976d2; }
         .badge.en_contacto { background: #fff3e0; color: #f57c00; }
         .badge.presupuesto_preparacion { background: #f3e5f5; color: #7b1fa2; }
-        .badge.presupuesto_pendiente { background: #fff9c4; color: #f57f17; }
+        .badge.presupuesto_enviado { background: #fff9c4; color: #f57f17; }
         
         /* EMPTY STATE */
         .empty-state {
@@ -325,7 +325,7 @@
                                 {% if op.estado == 'nueva' %}🆕 Nueva
                                 {% elif op.estado == 'en_contacto' %}📞 En contacto
                                 {% elif op.estado == 'presupuesto_preparacion' %}✍️ Presupuesto en preparación
-                                {% elif op.estado == 'presupuesto_pendiente' %}⏳ Presupuesto pendiente
+                                {% elif op.estado == 'presupuesto_enviado' %}📤 Presupuesto enviado
                                 {% elif op.estado == 'ganada' %}✅ Ganada
                                 {% elif op.estado == 'perdida' %}❌ Perdida
                                 {% elif op.estado == 'activa' %}⚡ Activa
