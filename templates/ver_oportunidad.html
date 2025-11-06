@@ -104,83 +104,51 @@
 
         /* BADGES */
         .badge {
-            display: inline-block;
-            padding: 4px 12px;
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
             border-radius: 8px;
             font-size: 13px;
             font-weight: 700;
+            height: 38px;
+            box-sizing: border-box;
+            line-height: 1.5;
         }
 
         .badge.activa {
             background: #e0e0e0;
             color: #616161;
-            box-shadow: none;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 8px;
-            letter-spacing: 0;
-            display: inline-flex;
-            align-items: center;
-            height: 38px;
         }
 
         .badge.ganada {
             background: #d1ecf1;
             color: #0c5460;
-            box-shadow: none;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 8px;
-            letter-spacing: 0;
-            display: inline-flex;
-            align-items: center;
-            height: 38px;
         }
 
         .badge.perdida {
             background: #f8d7da;
             color: #721c24;
-            box-shadow: none;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 8px;
-            letter-spacing: 0;
-            display: inline-flex;
-            align-items: center;
-            height: 38px;
         }
 
         /* BADGES PARA NUEVOS ESTADOS */
         .badge.nueva {
             background: #e3f2fd;
             color: #1976d2;
-            display: inline-flex;
-            align-items: center;
-            height: 38px;
         }
 
         .badge.en_contacto {
             background: #fff3e0;
             color: #f57c00;
-            display: inline-flex;
-            align-items: center;
-            height: 38px;
         }
 
         .badge.presupuesto_preparacion {
             background: #f3e5f5;
             color: #7b1fa2;
-            display: inline-flex;
-            align-items: center;
-            height: 38px;
         }
 
         .badge.presupuesto_enviado {
             background: #fff9c4;
             color: #f57f17;
-            display: inline-flex;
-            align-items: center;
-            height: 38px;
         }
 
         /* SELECTOR DE ESTADO */
@@ -189,7 +157,6 @@
             align-items: center;
             gap: 15px;
             flex-wrap: wrap;
-            margin-top: 5px;
         }
 
         .estado-dropdown {
@@ -208,6 +175,8 @@
             font-family: 'Montserrat', sans-serif;
             transition: all 0.2s;
             height: 38px;
+            box-sizing: border-box;
+            line-height: 1.5;
         }
 
         .estado-dropdown select:focus {
