@@ -1125,7 +1125,12 @@ def reporte_mensual():
         visitas_seguimiento_mes = response_seguimiento.json() if response_seguimiento.status_code == 200 else []
         visitas_admin_mes = response_admin.json() if response_admin.status_code == 200 else []
         oportunidades_activas = response_oportunidades.json() if response_oportunidades.status_code == 200 else []
-        
+
+        # Ordenar todas las visitas por fecha
+        clientes_mes = sorted(clientes_mes, key=lambda x: x.get('fecha_visita', ''))
+        visitas_seguimiento_mes = sorted(visitas_seguimiento_mes, key=lambda x: x.get('fecha_visita', ''))
+        visitas_admin_mes = sorted(visitas_admin_mes, key=lambda x: x.get('fecha_visita', ''))
+
         from openpyxl import Workbook
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
         from datetime import datetime
