@@ -92,7 +92,7 @@
         .field-label {
             font-weight: 700;
             color: #222;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             display: block;
             font-size: 14px;
         }
@@ -106,14 +106,15 @@
         .badge {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             padding: 8px 12px;
             border-radius: 8px;
             font-size: 13px;
             font-weight: 700;
-            height: 38px;
+            min-height: 38px;
+            height: auto;
             box-sizing: border-box;
-            line-height: 1;
-            vertical-align: middle;
+            line-height: 1.2;
         }
 
         .badge.activa {
@@ -161,8 +162,7 @@
         }
 
         .estado-dropdown {
-            display: flex;
-            align-items: center;
+            display: inline-block;
         }
 
         .estado-dropdown select {
@@ -175,10 +175,10 @@
             cursor: pointer;
             font-family: 'Montserrat', sans-serif;
             transition: all 0.2s;
-            height: 38px;
+            min-height: 38px;
+            height: auto;
             box-sizing: border-box;
-            line-height: 1;
-            vertical-align: middle;
+            line-height: 1.2;
         }
 
         .estado-dropdown select:focus {
