@@ -1232,7 +1232,7 @@ def reporte_mensual():
         # Tercera pestaña: OPORTUNIDADES ACTIVAS
         ws3 = wb.create_sheet(title="OPORTUNIDADES ACTIVAS")
 
-        headers_oportunidades = ['DIRECCION', 'LOCALIDAD', 'TIPO DE OPORTUNIDAD', 'DESCRIPCION', 'ESTADO']
+        headers_oportunidades = ['DIRECCION', 'LOCALIDAD', 'TIPO DE OPORTUNIDAD', 'ESTADO', 'DESCRIPCION']
 
         for col, header in enumerate(headers_oportunidades, 1):
             cell = ws3.cell(row=1, column=col)
@@ -1266,8 +1266,8 @@ def reporte_mensual():
             ws3.cell(row=row, column=1, value=direccion)
             ws3.cell(row=row, column=2, value=localidad)
             ws3.cell(row=row, column=3, value=oportunidad.get('tipo', ''))
-            ws3.cell(row=row, column=4, value=oportunidad.get('descripcion', ''))
-            ws3.cell(row=row, column=5, value=estado_label)
+            ws3.cell(row=row, column=4, value=estado_label)
+            ws3.cell(row=row, column=5, value=oportunidad.get('descripcion', ''))
 
             for col in range(1, 6):
                 ws3.cell(row=row, column=col).border = thin_border
@@ -1277,8 +1277,8 @@ def reporte_mensual():
         ws3.column_dimensions['A'].width = 50
         ws3.column_dimensions['B'].width = 20
         ws3.column_dimensions['C'].width = 30
-        ws3.column_dimensions['D'].width = 70
-        ws3.column_dimensions['E'].width = 30
+        ws3.column_dimensions['D'].width = 30
+        ws3.column_dimensions['E'].width = 70
 
         output = io.BytesIO()
         wb.save(output)
