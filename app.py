@@ -1112,9 +1112,9 @@ def reporte_mensual():
         
         response_admin = requests.get(f"{SUPABASE_URL}/rest/v1/visitas_administradores?{query_clientes}&select=*", headers=HEADERS)
 
-        # Obtener oportunidades activas (no filtradas por mes)
+        # Obtener oportunidades activas (no cerradas: que no estén ganadas ni perdidas)
         response_oportunidades = requests.get(
-            f"{SUPABASE_URL}/rest/v1/oportunidades?estado=eq.activa&select=*,clientes(direccion)",
+            f"{SUPABASE_URL}/rest/v1/oportunidades?estado=neq.ganada&estado=neq.perdida&select=*,clientes(direccion,localidad)",
             headers=HEADERS
         )
 
@@ -1128,7 +1128,19 @@ def reporte_mensual():
         
         from openpyxl import Workbook
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-        
+        from datetime import datetime
+
+        # Función helper para formatear fechas a dd/mm/aaaa
+        def formatear_fecha(fecha_str):
+            if not fecha_str:
+                return ''
+            try:
+                # Convertir desde formato ISO (YYYY-MM-DD) a dd/mm/aaaa
+                fecha = datetime.strptime(fecha_str[:10], '%Y-%m-%d')
+                return fecha.strftime('%d/%m/%Y')
+            except:
+                return fecha_str
+
         wb = Workbook()
         
         ws1 = wb.active
@@ -1152,29 +1164,29 @@ def reporte_mensual():
             cell.border = thin_border
         
         row = 2
-        
+
         for cliente in clientes_mes:
-            ws1.cell(row=row, column=1, value=cliente.get('fecha_visita', ''))
+            ws1.cell(row=row, column=1, value=formatear_fecha(cliente.get('fecha_visita', '')))
             ws1.cell(row=row, column=2, value=cliente.get('nombre_cliente', ''))
             ws1.cell(row=row, column=3, value=cliente.get('direccion', ''))
             ws1.cell(row=row, column=4, value=cliente.get('localidad', ''))
             ws1.cell(row=row, column=5, value=cliente.get('observaciones', ''))
-            
+
             for col in range(1, 6):
                 ws1.cell(row=row, column=col).border = thin_border
-            
+
             row += 1
-        
+
         for visita in visitas_seguimiento_mes:
-            ws1.cell(row=row, column=1, value=visita.get('fecha_visita', ''))
+            ws1.cell(row=row, column=1, value=formatear_fecha(visita.get('fecha_visita', '')))
             ws1.cell(row=row, column=2, value=visita.get('clientes', {}).get('nombre_cliente', ''))
             ws1.cell(row=row, column=3, value=visita.get('clientes', {}).get('direccion', ''))
             ws1.cell(row=row, column=4, value=visita.get('clientes', {}).get('localidad', ''))
             ws1.cell(row=row, column=5, value=visita.get('observaciones', ''))
-            
+
             for col in range(1, 6):
                 ws1.cell(row=row, column=col).border = thin_border
-            
+
             row += 1
         
         ws1.column_dimensions['A'].width = 12
@@ -1197,14 +1209,14 @@ def reporte_mensual():
         
         row = 2
         for visita in visitas_admin_mes:
-            ws2.cell(row=row, column=1, value=visita.get('fecha_visita', ''))
+            ws2.cell(row=row, column=1, value=formatear_fecha(visita.get('fecha_visita', '')))
             ws2.cell(row=row, column=2, value=visita.get('administrador_fincas', ''))
             ws2.cell(row=row, column=3, value=visita.get('persona_contacto', ''))
             ws2.cell(row=row, column=4, value=visita.get('observaciones', ''))
-            
+
             for col in range(1, 5):
                 ws2.cell(row=row, column=col).border = thin_border
-            
+
             row += 1
         
         ws2.column_dimensions['A'].width = 12
@@ -1215,7 +1227,7 @@ def reporte_mensual():
         # Tercera pestaña: OPORTUNIDADES ACTIVAS
         ws3 = wb.create_sheet(title="OPORTUNIDADES ACTIVAS")
 
-        headers_oportunidades = ['DIRECCION', 'TIPO DE OPORTUNIDAD', 'DESCRIPCION']
+        headers_oportunidades = ['DIRECCION', 'LOCALIDAD', 'TIPO DE OPORTUNIDAD', 'DESCRIPCION', 'ESTADO']
 
         for col, header in enumerate(headers_oportunidades, 1):
             cell = ws3.cell(row=1, column=col)
@@ -1226,22 +1238,42 @@ def reporte_mensual():
             cell.border = thin_border
 
         row = 2
+        # Mapeo de estados a etiquetas legibles
+        estados_map = {
+            'nueva': '🆕 Nueva',
+            'en_contacto': '📞 En contacto',
+            'presupuesto_preparacion': '✍️ Presupuesto en preparación',
+            'presupuesto_enviado': '📤 Presupuesto enviado',
+            'ganada': '✅ Ganada',
+            'perdida': '❌ Perdida',
+            'activa': '⚡ Activa'
+        }
+
         for oportunidad in oportunidades_activas:
-            # Obtener dirección del cliente relacionado
+            # Obtener dirección y localidad del cliente relacionado
             direccion = oportunidad.get('clientes', {}).get('direccion', '') if oportunidad.get('clientes') else ''
+            localidad = oportunidad.get('clientes', {}).get('localidad', '') if oportunidad.get('clientes') else ''
+
+            # Obtener etiqueta del estado
+            estado = oportunidad.get('estado', '')
+            estado_label = estados_map.get(estado, estado)
 
             ws3.cell(row=row, column=1, value=direccion)
-            ws3.cell(row=row, column=2, value=oportunidad.get('tipo', ''))
-            ws3.cell(row=row, column=3, value=oportunidad.get('descripcion', ''))
+            ws3.cell(row=row, column=2, value=localidad)
+            ws3.cell(row=row, column=3, value=oportunidad.get('tipo', ''))
+            ws3.cell(row=row, column=4, value=oportunidad.get('descripcion', ''))
+            ws3.cell(row=row, column=5, value=estado_label)
 
-            for col in range(1, 4):
+            for col in range(1, 6):
                 ws3.cell(row=row, column=col).border = thin_border
 
             row += 1
 
         ws3.column_dimensions['A'].width = 50
-        ws3.column_dimensions['B'].width = 30
-        ws3.column_dimensions['C'].width = 70
+        ws3.column_dimensions['B'].width = 20
+        ws3.column_dimensions['C'].width = 30
+        ws3.column_dimensions['D'].width = 70
+        ws3.column_dimensions['E'].width = 30
 
         output = io.BytesIO()
         wb.save(output)
