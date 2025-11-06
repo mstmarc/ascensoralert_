@@ -189,22 +189,6 @@
             border-color: #003366;
         }
 
-        /* DROPDOWN */
-        .presupuesto-dropdown select {
-            padding: 8px 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .presupuesto-dropdown select:focus {
-            outline: none;
-            border-color: #003366;
-        }
-
         /* ACCIONES LIST */
         .acciones-list {
             list-style: none;
@@ -534,28 +518,6 @@
                         <span class="field-value">{{ oportunidad.descripcion }}</span>
                     </div>
                     {% endif %}
-
-                    <div class="field-group">
-                        <span class="field-label">Presupuesto:</span>
-                        <form method="POST" action="{{ url_for('editar_oportunidad', oportunidad_id=oportunidad.id) }}" style="display: inline;">
-                            <input type="hidden" name="tipo" value="{{ oportunidad.tipo }}">
-                            <input type="hidden" name="descripcion" value="{{ oportunidad.descripcion or '' }}">
-                            <input type="hidden" name="estado" value="{{ oportunidad.estado }}">
-                            <input type="hidden" name="notas" value="{{ oportunidad.notas or '' }}">
-                            {% if oportunidad.valor_estimado %}
-                            <input type="hidden" name="valor_estimado" value="{{ oportunidad.valor_estimado }}">
-                            {% endif %}
-                            <div class="presupuesto-dropdown">
-                                <select name="estado_presupuesto" onchange="this.form.submit()">
-                                    <option value="No" {% if oportunidad.estado_presupuesto == 'No' %}selected{% endif %}>No</option>
-                                    <option value="Pendiente" {% if oportunidad.estado_presupuesto == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                                    <option value="Enviado" {% if oportunidad.estado_presupuesto == 'Enviado' %}selected{% endif %}>Enviado</option>
-                                    <option value="Aceptado" {% if oportunidad.estado_presupuesto == 'Aceptado' %}selected{% endif %}>Aceptado</option>
-                                    <option value="Rechazado" {% if oportunidad.estado_presupuesto == 'Rechazado' %}selected{% endif %}>Rechazado</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
                 </div>
             </div>
 
