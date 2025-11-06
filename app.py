@@ -1128,7 +1128,19 @@ def reporte_mensual():
         
         from openpyxl import Workbook
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-        
+        from datetime import datetime
+
+        # Función helper para formatear fechas a dd/mm/aaaa
+        def formatear_fecha(fecha_str):
+            if not fecha_str:
+                return ''
+            try:
+                # Convertir desde formato ISO (YYYY-MM-DD) a dd/mm/aaaa
+                fecha = datetime.strptime(fecha_str[:10], '%Y-%m-%d')
+                return fecha.strftime('%d/%m/%Y')
+            except:
+                return fecha_str
+
         wb = Workbook()
         
         ws1 = wb.active
@@ -1152,29 +1164,29 @@ def reporte_mensual():
             cell.border = thin_border
         
         row = 2
-        
+
         for cliente in clientes_mes:
-            ws1.cell(row=row, column=1, value=cliente.get('fecha_visita', ''))
+            ws1.cell(row=row, column=1, value=formatear_fecha(cliente.get('fecha_visita', '')))
             ws1.cell(row=row, column=2, value=cliente.get('nombre_cliente', ''))
             ws1.cell(row=row, column=3, value=cliente.get('direccion', ''))
             ws1.cell(row=row, column=4, value=cliente.get('localidad', ''))
             ws1.cell(row=row, column=5, value=cliente.get('observaciones', ''))
-            
+
             for col in range(1, 6):
                 ws1.cell(row=row, column=col).border = thin_border
-            
+
             row += 1
-        
+
         for visita in visitas_seguimiento_mes:
-            ws1.cell(row=row, column=1, value=visita.get('fecha_visita', ''))
+            ws1.cell(row=row, column=1, value=formatear_fecha(visita.get('fecha_visita', '')))
             ws1.cell(row=row, column=2, value=visita.get('clientes', {}).get('nombre_cliente', ''))
             ws1.cell(row=row, column=3, value=visita.get('clientes', {}).get('direccion', ''))
             ws1.cell(row=row, column=4, value=visita.get('clientes', {}).get('localidad', ''))
             ws1.cell(row=row, column=5, value=visita.get('observaciones', ''))
-            
+
             for col in range(1, 6):
                 ws1.cell(row=row, column=col).border = thin_border
-            
+
             row += 1
         
         ws1.column_dimensions['A'].width = 12
@@ -1197,14 +1209,14 @@ def reporte_mensual():
         
         row = 2
         for visita in visitas_admin_mes:
-            ws2.cell(row=row, column=1, value=visita.get('fecha_visita', ''))
+            ws2.cell(row=row, column=1, value=formatear_fecha(visita.get('fecha_visita', '')))
             ws2.cell(row=row, column=2, value=visita.get('administrador_fincas', ''))
             ws2.cell(row=row, column=3, value=visita.get('persona_contacto', ''))
             ws2.cell(row=row, column=4, value=visita.get('observaciones', ''))
-            
+
             for col in range(1, 5):
                 ws2.cell(row=row, column=col).border = thin_border
-            
+
             row += 1
         
         ws2.column_dimensions['A'].width = 12
