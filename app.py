@@ -1775,10 +1775,11 @@ def oportunidades_post_ipo():
         equipos_data = []
 
     # Procesar y clasificar equipos por categorías
-    contactar_ahora = []
-    proximamente = []
-    esta_semana = []
-    oportunidad_pasada = []
+    # Usar diccionarios para eliminar duplicados por cliente_id
+    contactar_ahora_dict = {}
+    proximamente_dict = {}
+    esta_semana_dict = {}
+    oportunidad_pasada_dict = {}
 
     for equipo in equipos_data:
         if not equipo.get('ipo_proxima'):
@@ -1795,9 +1796,10 @@ def oportunidades_post_ipo():
 
         # Extraer datos del cliente
         cliente = equipo.get('clientes', {}) if equipo.get('clientes') else {}
+        cliente_id = equipo['cliente_id']
 
         item = {
-            'cliente_id': equipo['cliente_id'],
+            'cliente_id': cliente_id,
             'direccion': cliente.get('direccion', 'Sin dirección'),
             'localidad': cliente.get('localidad', 'Sin localidad'),
             'telefono': cliente.get('telefono'),
@@ -1806,18 +1808,31 @@ def oportunidades_post_ipo():
             'ipo_proxima': equipo['ipo_proxima'],
             'rae': equipo.get('rae'),
             'dias_desde_ipo': abs(dias_diff) if dias_diff > 0 else 0,
-            'dias_hasta_ipo': abs(dias_diff) if dias_diff < 0 else 0
+            'dias_hasta_ipo': abs(dias_diff) if dias_diff < 0 else 0,
+            'ipo_date': ipo_date  # Guardar fecha para comparación
         }
 
-        # Clasificar según timing
-        if 10 <= dias_diff <= 30:  # IPO hace 10-30 días - CONTACTAR AHORA
-            contactar_ahora.append(item)
-        elif 0 <= dias_diff < 10:  # IPO hace 0-10 días - PRÓXIMAMENTE
-            proximamente.append(item)
-        elif -7 <= dias_diff < 0:  # IPO en próximos 7 días - ESTA SEMANA
-            esta_semana.append(item)
-        elif 30 < dias_diff <= 90:  # IPO hace 30-90 días - OPORTUNIDAD PASADA
-            oportunidad_pasada.append(item)
+        # Clasificar según timing y eliminar duplicados por cliente
+        # Solo mantener el equipo con la IPO más próxima para cada cliente
+        # PLAZOS CORREGIDOS PROFESIONAL 2025:
+        if 10 <= dias_diff <= 30:  # 🔥 IPO hace 10-30 días - CONTACTAR AHORA (ventana crítica)
+            if cliente_id not in contactar_ahora_dict or contactar_ahora_dict[cliente_id]['dias_desde_ipo'] > item['dias_desde_ipo']:
+                contactar_ahora_dict[cliente_id] = item
+        elif 0 <= dias_diff < 10:  # ⏰ IPO hace 0-9 días - PRÓXIMAMENTE (esperar informe OCA)
+            if cliente_id not in proximamente_dict or proximamente_dict[cliente_id]['dias_desde_ipo'] > item['dias_desde_ipo']:
+                proximamente_dict[cliente_id] = item
+        elif -7 <= dias_diff < 0:  # 🔔 IPO en próximos 0-7 días - ESTA SEMANA (informativo)
+            if cliente_id not in esta_semana_dict or esta_semana_dict[cliente_id]['dias_hasta_ipo'] > item['dias_hasta_ipo']:
+                esta_semana_dict[cliente_id] = item
+        elif 30 < dias_diff <= 90:  # ⏸️ IPO hace 31-90 días - OPORTUNIDAD PASADA (baja prioridad)
+            if cliente_id not in oportunidad_pasada_dict or oportunidad_pasada_dict[cliente_id]['dias_desde_ipo'] > item['dias_desde_ipo']:
+                oportunidad_pasada_dict[cliente_id] = item
+
+    # Convertir diccionarios a listas
+    contactar_ahora = list(contactar_ahora_dict.values())
+    proximamente = list(proximamente_dict.values())
+    esta_semana = list(esta_semana_dict.values())
+    oportunidad_pasada = list(oportunidad_pasada_dict.values())
 
     # Ordenar listas
     contactar_ahora.sort(key=lambda x: x['dias_desde_ipo'])
