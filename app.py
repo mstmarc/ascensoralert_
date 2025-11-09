@@ -1862,29 +1862,44 @@ def oportunidades_post_ipo():
             else:
                 tareas_abiertas.append(tarea_enriched)
 
-        # === 6. FUTURAS - PRÓXIMAS AUTOMÁTICAS (IPO próximos 30 días) ===
+        # === 6. FUTURAS - PRÓXIMAS AUTOMÁTICAS (IPO próximos 30 días + hace 0-14 días) ===
         proximas_automaticas = []
         for cliente_id, data in clientes_con_ipo.items():
-            # IPO en próximos 30 días (fechas futuras) Y no tiene tarea abierta
-            if -30 <= data['dias_desde_ipo'] < 0:
+            # IPO en próximos 30 días O ya ocurrió hace 0-14 días (antes de crear tarea)
+            if -30 <= data['dias_desde_ipo'] < 15:
                 # Verificar que no tenga tarea
                 tiene_tarea = any(t['cliente_id'] == cliente_id for t in tareas_abiertas + tareas_aplazadas)
                 if not tiene_tarea:
-                    dias_hasta_ipo = abs(data['dias_desde_ipo'])  # Convertir a positivo para mostrar
+                    # Determinar si es futura o pasada
+                    es_futura = data['dias_desde_ipo'] < 0
+
+                    if es_futura:
+                        # IPO aún no ocurrió
+                        dias_hasta_ipo = abs(data['dias_desde_ipo'])
+                        dias_para_activar = dias_hasta_ipo + 15
+                    else:
+                        # IPO ya ocurrió, esperando llegar a 15 días
+                        dias_desde_ipo = data['dias_desde_ipo']
+                        dias_hasta_ipo = None  # No aplica
+                        dias_para_activar = 15 - dias_desde_ipo
+
                     proximas_automaticas.append({
                         'cliente_id': cliente_id,
                         'direccion': data['cliente'].get('direccion', 'Sin dirección'),
                         'localidad': data['cliente'].get('localidad', ''),
                         'telefono': data['cliente'].get('telefono'),
-                        'dias_hasta_ipo': dias_hasta_ipo,
-                        'dias_para_activar': dias_hasta_ipo + 15,  # Días hasta que se active como tarea
+                        'es_futura': es_futura,
+                        'dias_hasta_ipo': dias_hasta_ipo,  # Solo para futuras
+                        'dias_desde_ipo': dias_desde_ipo if not es_futura else None,  # Solo para pasadas
+                        'dias_para_activar': dias_para_activar,
                         'rae': data['rae']
                     })
 
         # Ordenar
         tareas_abiertas.sort(key=lambda x: x['dias_desde_ipo'], reverse=True)  # Más urgente primero
         tareas_aplazadas.sort(key=lambda x: x['aplazada_hasta'])
-        proximas_automaticas.sort(key=lambda x: x['dias_hasta_ipo'])  # Más próximas primero
+        # Ordenar próximas: primero las que ya pasaron (más urgentes), luego las futuras
+        proximas_automaticas.sort(key=lambda x: x['dias_para_activar'])
 
         return render_template(
             "oportunidades_post_ipo.html",
