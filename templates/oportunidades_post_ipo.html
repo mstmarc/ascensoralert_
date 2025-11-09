@@ -572,11 +572,15 @@
                                 📍 {{ item.direccion }}
                             </div>
 
-                            <span class="tarea-badge badge-proxima">🔔 IPO EN {{ item.dias_desde_ipo }} DÍAS</span>
+                            {% if item.es_futura %}
+                                <span class="tarea-badge badge-proxima">🔔 IPO EN {{ item.dias_hasta_ipo }} DÍAS</span>
+                            {% else %}
+                                <span class="tarea-badge badge-activo">⏳ IPO HACE {{ item.dias_desde_ipo }} DÍAS</span>
+                            {% endif %}
 
                             <div class="tarea-info">
                                 <div class="tarea-info-item">
-                                    <strong>Se activará en:</strong> {{ item.dias_para_activar }} días
+                                    <strong>Se activará como tarea en:</strong> {{ item.dias_para_activar }} días
                                 </div>
                                 {% if item.localidad %}
                                 <div class="tarea-info-item">
