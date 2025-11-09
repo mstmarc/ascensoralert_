@@ -1862,28 +1862,29 @@ def oportunidades_post_ipo():
             else:
                 tareas_abiertas.append(tarea_enriched)
 
-        # === 6. FUTURAS - PRÓXIMAS AUTOMÁTICAS (IPO 0-14 días sin tarea) ===
+        # === 6. FUTURAS - PRÓXIMAS AUTOMÁTICAS (IPO próximos 30 días) ===
         proximas_automaticas = []
         for cliente_id, data in clientes_con_ipo.items():
-            # IPO entre 0-14 días Y no tiene tarea abierta
-            if 0 <= data['dias_desde_ipo'] < 15:
+            # IPO en próximos 30 días (fechas futuras) Y no tiene tarea abierta
+            if -30 <= data['dias_desde_ipo'] < 0:
                 # Verificar que no tenga tarea
                 tiene_tarea = any(t['cliente_id'] == cliente_id for t in tareas_abiertas + tareas_aplazadas)
                 if not tiene_tarea:
+                    dias_hasta_ipo = abs(data['dias_desde_ipo'])  # Convertir a positivo para mostrar
                     proximas_automaticas.append({
                         'cliente_id': cliente_id,
                         'direccion': data['cliente'].get('direccion', 'Sin dirección'),
                         'localidad': data['cliente'].get('localidad', ''),
                         'telefono': data['cliente'].get('telefono'),
-                        'dias_desde_ipo': data['dias_desde_ipo'],
-                        'dias_para_activar': 15 - data['dias_desde_ipo'],
+                        'dias_hasta_ipo': dias_hasta_ipo,
+                        'dias_para_activar': dias_hasta_ipo + 15,  # Días hasta que se active como tarea
                         'rae': data['rae']
                     })
 
         # Ordenar
         tareas_abiertas.sort(key=lambda x: x['dias_desde_ipo'], reverse=True)  # Más urgente primero
         tareas_aplazadas.sort(key=lambda x: x['aplazada_hasta'])
-        proximas_automaticas.sort(key=lambda x: x['dias_para_activar'])
+        proximas_automaticas.sort(key=lambda x: x['dias_hasta_ipo'])  # Más próximas primero
 
         return render_template(
             "oportunidades_post_ipo.html",
