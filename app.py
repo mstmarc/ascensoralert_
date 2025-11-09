@@ -1743,115 +1743,307 @@ def ver_equipo(equipo_id):
 # Dashboard de Oportunidades Post-IPO
 @app.route("/oportunidades_post_ipo", methods=["GET"])
 def oportunidades_post_ipo():
+    """Seguimiento Comercial - Sistema de tareas automáticas"""
     if "usuario" not in session:
         return redirect("/")
 
-    # Determinar pestaña activa
-    tab = request.args.get("tab", "contactar_ahora")
-
-    # Calcular fechas
+    # Determinar pestaña activa (abiertas o futuras)
+    tab = request.args.get("tab", "abiertas")
     hoy = datetime.now().date()
-    hace_10_dias = hoy - timedelta(days=10)
-    hace_30_dias = hoy - timedelta(days=30)
-    hace_90_dias = hoy - timedelta(days=90)
-    en_7_dias = hoy + timedelta(days=7)
 
-    # Obtener todos los equipos con IPO y datos del cliente
     try:
+        # === 1. OBTENER EQUIPOS CON IPO ===
         equipos_response = requests.get(
             f"{SUPABASE_URL}/rest/v1/equipos?select=id,ipo_proxima,rae,cliente_id,clientes(direccion,localidad,telefono,persona_contacto,empresa_mantenedora)&ipo_proxima=not.is.null",
             headers=HEADERS,
             timeout=10
         )
+        equipos_data = equipos_response.json() if equipos_response.status_code == 200 else []
 
-        if equipos_response.status_code != 200:
-            flash("Error al cargar datos de IPOs", "error")
-            equipos_data = []
-        else:
-            equipos_data = equipos_response.json()
+        # === 2. PROCESAR IPOs Y CREAR TAREAS AUTOMÁTICAS ===
+        # Agrupar equipos por cliente (solo el más próximo)
+        clientes_con_ipo = {}
+        for equipo in equipos_data:
+            if not equipo.get('ipo_proxima'):
+                continue
+
+            try:
+                ipo_date = datetime.strptime(equipo['ipo_proxima'], '%Y-%m-%d').date()
+            except:
+                continue
+
+            dias_desde_ipo = (hoy - ipo_date).days
+            cliente_id = equipo['cliente_id']
+
+            # Solo guardar el equipo con IPO más reciente por cliente
+            if cliente_id not in clientes_con_ipo or dias_desde_ipo < clientes_con_ipo[cliente_id]['dias_desde_ipo']:
+                clientes_con_ipo[cliente_id] = {
+                    'cliente_id': cliente_id,
+                    'equipo_id': equipo['id'],
+                    'ipo_date': ipo_date,
+                    'dias_desde_ipo': dias_desde_ipo,
+                    'dias_hasta_ipo': abs(dias_desde_ipo) if dias_desde_ipo < 0 else 0,
+                    'rae': equipo.get('rae'),
+                    'cliente': equipo.get('clientes', {})
+                }
+
+        # === 3. CREAR TAREAS AUTOMÁTICAS (IPO >= 15 días) ===
+        for cliente_id, data in clientes_con_ipo.items():
+            if data['dias_desde_ipo'] >= 15:
+                # Verificar si ya existe tarea abierta para este cliente
+                tarea_existe = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?cliente_id=eq.{cliente_id}&estado=eq.abierta",
+                    headers=HEADERS
+                ).json()
+
+                if not tarea_existe:
+                    # Crear tarea automáticamente
+                    nueva_tarea = {
+                        'cliente_id': cliente_id,
+                        'equipo_id': data['equipo_id'],
+                        'estado': 'abierta',
+                        'motivo_creacion': 'ipo_15_dias',
+                        'dias_desde_ipo': data['dias_desde_ipo'],
+                        'creado_por': 'sistema'
+                    }
+                    requests.post(
+                        f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas",
+                        headers=HEADERS,
+                        json=nueva_tarea
+                    )
+
+        # === 4. OBTENER TAREAS EXISTENTES CON DATOS DEL CLIENTE ===
+        tareas_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?select=*,clientes(direccion,localidad,telefono,persona_contacto,empresa_mantenedora)&estado=eq.abierta&order=fecha_creacion.asc",
+            headers=HEADERS
+        )
+        tareas_data = tareas_response.json() if tareas_response.status_code == 200 else []
+
+        # === 5. CLASIFICAR TAREAS ===
+        tareas_abiertas = []
+        tareas_aplazadas = []
+
+        for tarea in tareas_data:
+            # Obtener datos del cliente
+            cliente_info = tarea.get('clientes', {})
+            cliente_id = tarea['cliente_id']
+
+            # Buscar días desde IPO actualizado
+            dias_desde_ipo = clientes_con_ipo.get(cliente_id, {}).get('dias_desde_ipo', tarea.get('dias_desde_ipo', 0))
+
+            tarea_enriched = {
+                'id': tarea['id'],
+                'cliente_id': cliente_id,
+                'direccion': cliente_info.get('direccion', 'Sin dirección'),
+                'localidad': cliente_info.get('localidad', ''),
+                'telefono': cliente_info.get('telefono'),
+                'persona_contacto': cliente_info.get('persona_contacto'),
+                'empresa_mantenedora': cliente_info.get('empresa_mantenedora'),
+                'dias_desde_ipo': dias_desde_ipo,
+                'fecha_creacion': tarea['fecha_creacion'],
+                'aplazada_hasta': tarea.get('aplazada_hasta'),
+                'motivo_aplazamiento': tarea.get('motivo_aplazamiento'),
+                'notas': tarea.get('notas', [])
+            }
+
+            # Clasificar: ABIERTAS vs FUTURAS (aplazadas)
+            if tarea.get('aplazada_hasta'):
+                try:
+                    fecha_aplazada = datetime.strptime(tarea['aplazada_hasta'], '%Y-%m-%d').date()
+                    if fecha_aplazada > hoy:
+                        # Aún aplazada
+                        tarea_enriched['dias_para_reabrir'] = (fecha_aplazada - hoy).days
+                        tareas_aplazadas.append(tarea_enriched)
+                    else:
+                        # Aplazamiento venció, pasa a abiertas
+                        tareas_abiertas.append(tarea_enriched)
+                except:
+                    tareas_abiertas.append(tarea_enriched)
+            else:
+                tareas_abiertas.append(tarea_enriched)
+
+        # === 6. FUTURAS - PRÓXIMAS AUTOMÁTICAS (IPO 0-14 días sin tarea) ===
+        proximas_automaticas = []
+        for cliente_id, data in clientes_con_ipo.items():
+            # IPO entre 0-14 días Y no tiene tarea abierta
+            if 0 <= data['dias_desde_ipo'] < 15:
+                # Verificar que no tenga tarea
+                tiene_tarea = any(t['cliente_id'] == cliente_id for t in tareas_abiertas + tareas_aplazadas)
+                if not tiene_tarea:
+                    proximas_automaticas.append({
+                        'cliente_id': cliente_id,
+                        'direccion': data['cliente'].get('direccion', 'Sin dirección'),
+                        'localidad': data['cliente'].get('localidad', ''),
+                        'telefono': data['cliente'].get('telefono'),
+                        'dias_desde_ipo': data['dias_desde_ipo'],
+                        'dias_para_activar': 15 - data['dias_desde_ipo'],
+                        'rae': data['rae']
+                    })
+
+        # Ordenar
+        tareas_abiertas.sort(key=lambda x: x['dias_desde_ipo'], reverse=True)  # Más urgente primero
+        tareas_aplazadas.sort(key=lambda x: x['aplazada_hasta'])
+        proximas_automaticas.sort(key=lambda x: x['dias_para_activar'])
+
+        return render_template(
+            "oportunidades_post_ipo.html",
+            tab=tab,
+            tareas_abiertas=tareas_abiertas,
+            tareas_aplazadas=tareas_aplazadas,
+            proximas_automaticas=proximas_automaticas,
+            abiertas_count=len(tareas_abiertas),
+            aplazadas_count=len(tareas_aplazadas),
+            proximas_count=len(proximas_automaticas)
+        )
+
     except Exception as e:
-        print(f"Error al cargar equipos: {str(e)}")
-        flash("Error de conexión al cargar datos", "error")
-        equipos_data = []
+        print(f"Error en seguimiento comercial: {str(e)}")
+        flash(f"Error al cargar seguimiento comercial: {str(e)}", "error")
+        return redirect("/home")
 
-    # Procesar y clasificar equipos por categorías
-    # Usar diccionarios para eliminar duplicados por cliente_id
-    contactar_ahora_dict = {}
-    proximamente_dict = {}
-    esta_semana_dict = {}
-    oportunidad_pasada_dict = {}
 
-    for equipo in equipos_data:
-        if not equipo.get('ipo_proxima'):
-            continue
+# === RUTAS DE GESTIÓN DE TAREAS COMERCIALES ===
 
-        # Parsear fecha IPO
-        try:
-            ipo_date = datetime.strptime(equipo['ipo_proxima'], '%Y-%m-%d').date()
-        except:
-            continue
+@app.route("/tarea_comercial_aplazar/<int:tarea_id>", methods=["POST"])
+def tarea_comercial_aplazar(tarea_id):
+    """Aplazar una tarea comercial"""
+    if "usuario" not in session:
+        return {"error": "No autorizado"}, 401
 
-        # Calcular días desde/hasta IPO
-        dias_diff = (hoy - ipo_date).days
+    try:
+        dias_aplazar = int(request.json.get("dias", 7))
+        motivo = request.json.get("motivo", "")
 
-        # Extraer datos del cliente
-        cliente = equipo.get('clientes', {}) if equipo.get('clientes') else {}
-        cliente_id = equipo['cliente_id']
+        fecha_aplazada = (datetime.now().date() + timedelta(days=dias_aplazar)).isoformat()
 
-        item = {
-            'cliente_id': cliente_id,
-            'direccion': cliente.get('direccion', 'Sin dirección'),
-            'localidad': cliente.get('localidad', 'Sin localidad'),
-            'telefono': cliente.get('telefono'),
-            'persona_contacto': cliente.get('persona_contacto'),
-            'empresa_mantenedora': cliente.get('empresa_mantenedora'),
-            'ipo_proxima': equipo['ipo_proxima'],
-            'rae': equipo.get('rae'),
-            'dias_desde_ipo': abs(dias_diff) if dias_diff > 0 else 0,
-            'dias_hasta_ipo': abs(dias_diff) if dias_diff < 0 else 0,
-            'ipo_date': ipo_date  # Guardar fecha para comparación
+        data = {
+            "aplazada_hasta": fecha_aplazada,
+            "motivo_aplazamiento": motivo,
+            "motivo_creacion": "aplazada_vuelve"
         }
 
-        # Clasificar según timing y eliminar duplicados por cliente
-        # Solo mantener el equipo con la IPO más próxima para cada cliente
-        # PLAZOS CORREGIDOS PROFESIONAL 2025:
-        if 10 <= dias_diff <= 30:  # 🔥 IPO hace 10-30 días - CONTACTAR AHORA (ventana crítica)
-            if cliente_id not in contactar_ahora_dict or contactar_ahora_dict[cliente_id]['dias_desde_ipo'] > item['dias_desde_ipo']:
-                contactar_ahora_dict[cliente_id] = item
-        elif 0 <= dias_diff < 10:  # ⏰ IPO hace 0-9 días - PRÓXIMAMENTE (esperar informe OCA)
-            if cliente_id not in proximamente_dict or proximamente_dict[cliente_id]['dias_desde_ipo'] > item['dias_desde_ipo']:
-                proximamente_dict[cliente_id] = item
-        elif -7 <= dias_diff < 0:  # 🔔 IPO en próximos 0-7 días - ESTA SEMANA (informativo)
-            if cliente_id not in esta_semana_dict or esta_semana_dict[cliente_id]['dias_hasta_ipo'] > item['dias_hasta_ipo']:
-                esta_semana_dict[cliente_id] = item
-        elif 30 < dias_diff <= 90:  # ⏸️ IPO hace 31-90 días - OPORTUNIDAD PASADA (baja prioridad)
-            if cliente_id not in oportunidad_pasada_dict or oportunidad_pasada_dict[cliente_id]['dias_desde_ipo'] > item['dias_desde_ipo']:
-                oportunidad_pasada_dict[cliente_id] = item
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS,
+            json=data
+        )
 
-    # Convertir diccionarios a listas
-    contactar_ahora = list(contactar_ahora_dict.values())
-    proximamente = list(proximamente_dict.values())
-    esta_semana = list(esta_semana_dict.values())
-    oportunidad_pasada = list(oportunidad_pasada_dict.values())
+        if response.status_code in [200, 204]:
+            return {"success": True, "fecha_aplazada": fecha_aplazada}, 200
+        else:
+            return {"error": "Error al aplazar tarea"}, 500
 
-    # Ordenar listas
-    contactar_ahora.sort(key=lambda x: x['dias_desde_ipo'])
-    proximamente.sort(key=lambda x: x['dias_desde_ipo'], reverse=True)
-    esta_semana.sort(key=lambda x: x['dias_hasta_ipo'])
-    oportunidad_pasada.sort(key=lambda x: x['dias_desde_ipo'])
+    except Exception as e:
+        return {"error": str(e)}, 500
 
-    return render_template(
-        "oportunidades_post_ipo.html",
-        tab=tab,
-        contactar_ahora=contactar_ahora,
-        proximamente=proximamente,
-        esta_semana=esta_semana,
-        oportunidad_pasada=oportunidad_pasada,
-        contactar_ahora_count=len(contactar_ahora),
-        proximamente_count=len(proximamente),
-        esta_semana_count=len(esta_semana),
-        oportunidad_pasada_count=len(oportunidad_pasada)
-    )
+
+@app.route("/tarea_comercial_descartar/<int:tarea_id>", methods=["POST"])
+def tarea_comercial_descartar(tarea_id):
+    """Descartar una tarea comercial (cerrarla sin crear oportunidad)"""
+    if "usuario" not in session:
+        return {"error": "No autorizado"}, 401
+
+    try:
+        tipo_descarte = request.json.get("tipo", "descartada_sin_interes")
+        motivo = request.json.get("motivo", "")
+
+        data = {
+            "estado": "cerrada",
+            "tipo_cierre": tipo_descarte,
+            "motivo_cierre": motivo,
+            "fecha_cierre": datetime.now().isoformat()
+        }
+
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS,
+            json=data
+        )
+
+        if response.status_code in [200, 204]:
+            return {"success": True}, 200
+        else:
+            return {"error": "Error al descartar tarea"}, 500
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+@app.route("/tarea_comercial_convertir/<int:tarea_id>", methods=["POST"])
+def tarea_comercial_convertir(tarea_id):
+    """Marcar tarea como convertida (redirecciona a crear oportunidad)"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    try:
+        # Obtener datos de la tarea
+        tarea_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS
+        )
+
+        if tarea_response.status_code == 200:
+            tarea = tarea_response.json()[0]
+            cliente_id = tarea['cliente_id']
+
+            # Redirigir a crear oportunidad
+            # La tarea se cerrará cuando se cree la oportunidad exitosamente
+            return redirect(url_for("crear_oportunidad", cliente_id=cliente_id, tarea_id=tarea_id))
+        else:
+            flash("Error al obtener datos de la tarea", "error")
+            return redirect("/oportunidades_post_ipo")
+
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+        return redirect("/oportunidades_post_ipo")
+
+
+@app.route("/tarea_comercial_agregar_nota/<int:tarea_id>", methods=["POST"])
+def tarea_comercial_agregar_nota(tarea_id):
+    """Agregar una nota a la tarea"""
+    if "usuario" not in session:
+        return {"error": "No autorizado"}, 401
+
+    try:
+        texto_nota = request.json.get("nota", "")
+        if not texto_nota:
+            return {"error": "Nota vacía"}, 400
+
+        # Obtener notas actuales
+        tarea_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS
+        )
+
+        if tarea_response.status_code == 200:
+            tarea = tarea_response.json()[0]
+            notas = tarea.get('notas', [])
+
+            # Agregar nueva nota
+            nueva_nota = {
+                "fecha": datetime.now().isoformat(),
+                "usuario": session.get("usuario", "Usuario"),
+                "texto": texto_nota
+            }
+            notas.append(nueva_nota)
+
+            # Actualizar
+            response = requests.patch(
+                f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+                headers=HEADERS,
+                json={"notas": notas}
+            )
+
+            if response.status_code in [200, 204]:
+                return {"success": True, "nota": nueva_nota}, 200
+            else:
+                return {"error": "Error al guardar nota"}, 500
+        else:
+            return {"error": "Tarea no encontrada"}, 404
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
 
 # Editar Lead - CON LIMPIEZA DE NONE
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])

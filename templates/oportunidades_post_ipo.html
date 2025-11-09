@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento Comercial</title>
+    <title>Seguimiento Comercial - AscensorAlert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="/static/styles.css?v=7">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=8">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* === ESTILO PROFESIONAL 2025 === */
+        /* === ESTILO PROFESIONAL 2025 - MI AGENDA === */
 
-        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            line-height: 1.5;
+        }
 
-        /* Ajustar contenedor del dashboard para ancho completo */
         main {
-            max-width: none !important;
-            padding: 30px !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 30px 20px !important;
+            background: #ffffff;
         }
 
         main .menu {
@@ -24,63 +29,32 @@
             margin: 0 !important;
         }
 
-        /* ESTILOS CRÍTICOS DE BOTONES */
-        .btn,
-        .button {
-            display: inline-block;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px 5px 10px 0;
-            min-width: 120px;
-            font-family: 'Montserrat', sans-serif;
-            line-height: 1.5;
-            vertical-align: middle;
+        /* HEADER */
+        .comercial-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
+        .comercial-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #003366;
+            margin-bottom: 10px;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
-            background: linear-gradient(135deg, #2a4a70 0%, #366092 100%);
+        .comercial-subtitle {
+            font-size: 14px;
+            color: #555555;
+            font-weight: 500;
         }
 
-        .btn-success {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-            background: linear-gradient(135deg, #218838 0%, #28a745 100%);
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 15px;
-            min-width: auto;
-            margin: 5px;
-        }
-
-        /* Pestañas elegantes */
+        /* PESTAÑAS */
         .tabs-container {
             display: flex;
             gap: 5px;
             margin-bottom: 25px;
-            border-bottom: 3px solid #366092;
+            border-bottom: 3px solid #003c80;
             padding-bottom: 0;
             flex-wrap: wrap;
         }
@@ -109,21 +83,16 @@
 
         .tab-button:hover {
             background: #e9ecef;
-            color: #366092;
+            color: #003366;
             transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 51, 102, 0.2);
         }
 
         .tab-button.active {
-            background: linear-gradient(135deg, #366092 0%, #2a4a70 100%);
+            background: linear-gradient(135deg, #003c80 0%, #002f66 100%);
             color: white;
-            border-color: #366092;
-            box-shadow: 0 4px 15px rgba(54, 96, 146, 0.3);
-        }
-
-        .tab-button.active:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(54, 96, 146, 0.4);
+            border-color: #003c80;
+            box-shadow: 0 4px 15px rgba(0, 60, 128, 0.3);
         }
 
         .tab-count {
@@ -138,123 +107,80 @@
             background: rgba(255, 255, 255, 0.4);
         }
 
-        /* Métricas destacadas */
-        .metricas-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .metrica-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #366092;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        .metrica-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        .metrica-card.urgente {
-            border-left-color: #dc3545;
-        }
-
-        .metrica-card.proximo {
-            border-left-color: #ffc107;
-        }
-
-        .metrica-card.futuro {
-            border-left-color: #17a2b8;
-        }
-
-        .metrica-numero {
-            font-size: 36px;
+        /* SECCIONES */
+        .section-title {
+            font-size: 18px;
             font-weight: 700;
-            color: #366092;
-            margin-bottom: 5px;
-        }
-
-        .metrica-card.urgente .metrica-numero {
-            color: #dc3545;
-        }
-
-        .metrica-card.proximo .metrica-numero {
-            color: #ffc107;
-        }
-
-        .metrica-label {
-            font-size: 14px;
-            color: #666;
-            font-weight: 500;
-        }
-
-        /* Listado elegante */
-        .ipo-list {
-            background: white;
-            border-radius: 8px;
-            padding: 8px;
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .ipo-list-item {
-            padding: 16px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: 1px solid #e1e5e9;
-            border-radius: 8px;
-            background: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .ipo-list-item:hover {
-            background: #f8f9fa;
-            border-color: #366092;
-            box-shadow: 0 2px 8px rgba(54, 96, 146, 0.15);
-            transform: translateX(3px);
-        }
-
-        .ipo-item-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .ipo-item-header {
+            color: #003366;
+            margin: 30px 0 15px 0;
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
         }
 
-        .ipo-direccion {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1a1a1a;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .ipo-direccion:hover {
-            color: #366092;
-        }
-
-        .badge {
+        .section-count {
+            background: #003c80;
+            color: white;
             padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* GRID DE CARDS (estilo Mi Agenda) */
+        .tareas-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .tareas-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .tareas-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* CARD DE TAREA */
+        .tarea-card {
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
             border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
+            padding: 16px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        .tarea-card:hover {
+            background: #f0f3f8;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            border-color: #003366;
+        }
+
+        /* DIRECCIÓN */
+        .tarea-direccion {
+            font-size: 16px;
+            font-weight: 700;
+            color: #003366;
+            margin-bottom: 8px;
+        }
+
+        /* BADGES DE ESTADO */
+        .tarea-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .badge-urgente {
@@ -262,76 +188,121 @@
             color: white;
         }
 
-        .badge-proximo {
+        .badge-activo {
             background: #ffc107;
             color: #000;
         }
 
-        .badge-futuro {
+        .badge-aplazada {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge-proxima {
             background: #17a2b8;
             color: white;
         }
 
-        .badge-pasado {
-            background: #6c757d;
-            color: white;
+        /* INFO DE LA TAREA */
+        .tarea-info {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
         }
 
-        .ipo-item-details {
+        .tarea-info-item {
+            font-size: 14px;
+            color: #1a1a1a;
             display: flex;
-            gap: 20px;
-            font-size: 13px;
-            color: #666;
-            flex-wrap: wrap;
-        }
-
-        .ipo-detail-item {
-            display: flex;
-            align-items: center;
+            align-items: start;
             gap: 5px;
         }
 
-        .ipo-detail-item strong {
-            color: #333;
+        .tarea-info-item strong {
+            color: #003366;
+            font-weight: 600;
         }
 
-        .ipo-item-actions {
+        /* ACCIONES */
+        .tarea-acciones {
             display: flex;
+            flex-direction: column;
             gap: 8px;
-            flex-shrink: 0;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
         }
 
-        .info-box {
-            background: #e7f3ff;
-            padding: 15px 20px;
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #003c80;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
             border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #366092;
-            font-size: 14px;
-            color: #0066cc;
-            line-height: 1.6;
+            font-family: 'Montserrat', sans-serif;
         }
 
-        .info-box strong {
-            color: #004080;
+        .btn:hover {
+            background: #002f66;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .no-results {
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #999;
+            color: #999999;
             font-size: 16px;
-            background: white;
-            border-radius: 8px;
+            background: #fafafa;
+            border-radius: 12px;
+            border: 1px solid #f0f0f0;
         }
 
-        .no-results-icon {
+        .empty-icon {
             font-size: 48px;
             margin-bottom: 15px;
             opacity: 0.5;
         }
 
-        /* ESTILOS DE ALERTAS */
+        /* ALERTAS */
         .alert {
             padding: 15px 20px;
             margin-bottom: 20px;
@@ -352,33 +323,81 @@
             border: 1px solid #f5c6cb;
         }
 
-        @media (max-width: 767px) {
-            .metricas-container {
-                grid-template-columns: 1fr;
-            }
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
 
-            .ipo-list-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
 
-            .ipo-item-actions {
-                width: 100%;
-            }
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            color: #003366;
+            margin-bottom: 20px;
+        }
 
-            .ipo-item-actions .btn-sm {
-                flex: 1;
-            }
+        .modal-body {
+            margin-bottom: 20px;
+        }
 
-            .tabs-container {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-            }
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
 
-            .tab-button {
-                padding: 12px 16px;
-                font-size: 14px;
-            }
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #003366;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #333;
         }
     </style>
 </head>
@@ -387,7 +406,7 @@
         <div class="header-container">
             <div class="logo-container">
                 <a href="/home">
-                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="FEDES Logo" class="logo">
                 </a>
             </div>
             <div class="title-container">
@@ -395,8 +414,15 @@
             </div>
         </div>
     </header>
+
     <main>
         <div class="menu">
+            <!-- HEADER -->
+            <div class="comercial-header">
+                <h2 class="comercial-title">🎯 Gestión de Tareas Comerciales</h2>
+                <p class="comercial-subtitle">Sistema automático de seguimiento post-IPO</p>
+            </div>
+
             <!-- Mensajes Flash -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -406,222 +432,350 @@
                 {% endif %}
             {% endwith %}
 
-            <!-- Métricas destacadas -->
-            <div class="metricas-container">
-                <div class="metrica-card urgente">
-                    <div class="metrica-numero">{{ contactar_ahora_count }}</div>
-                    <div class="metrica-label">🔥 Contactar AHORA</div>
-                </div>
-                <div class="metrica-card proximo">
-                    <div class="metrica-numero">{{ proximamente_count }}</div>
-                    <div class="metrica-label">⏰ Próximamente</div>
-                </div>
-                <div class="metrica-card futuro">
-                    <div class="metrica-numero">{{ esta_semana_count }}</div>
-                    <div class="metrica-label">🔔 IPOs Esta Semana</div>
-                </div>
-            </div>
-
-            <!-- Pestañas -->
+            <!-- PESTAÑAS -->
             <div class="tabs-container">
-                <a href="/oportunidades_post_ipo?tab=contactar_ahora"
-                   class="tab-button {% if tab == 'contactar_ahora' or not tab %}active{% endif %}">
-                    🔥 Contactar AHORA
-                    <span class="tab-count">{{ contactar_ahora_count }}</span>
+                <a href="/oportunidades_post_ipo?tab=abiertas"
+                   class="tab-button {% if tab == 'abiertas' or not tab %}active{% endif %}">
+                    📋 ABIERTAS
+                    <span class="tab-count">{{ abiertas_count }}</span>
                 </a>
-                <a href="/oportunidades_post_ipo?tab=proximamente"
-                   class="tab-button {% if tab == 'proximamente' %}active{% endif %}">
-                    ⏰ Próximamente
-                    <span class="tab-count">{{ proximamente_count }}</span>
-                </a>
-                <a href="/oportunidades_post_ipo?tab=esta_semana"
-                   class="tab-button {% if tab == 'esta_semana' %}active{% endif %}">
-                    🔔 IPOs Esta Semana
-                    <span class="tab-count">{{ esta_semana_count }}</span>
-                </a>
-                <a href="/oportunidades_post_ipo?tab=oportunidad_pasada"
-                   class="tab-button {% if tab == 'oportunidad_pasada' %}active{% endif %}">
-                    ⏸️ Oportunidad Pasada
-                    <span class="tab-count">{{ oportunidad_pasada_count }}</span>
+                <a href="/oportunidades_post_ipo?tab=futuras"
+                   class="tab-button {% if tab == 'futuras' %}active{% endif %}">
+                    📅 FUTURAS
+                    <span class="tab-count">{{ aplazadas_count + proximas_count }}</span>
                 </a>
             </div>
 
-            <!-- Contenido según pestaña activa -->
-            {% if tab == 'contactar_ahora' or not tab %}
-            <!-- TAB: CONTACTAR AHORA (IPO hace 10-30 días) -->
-            <h3 style="color: #dc3545; margin-bottom: 15px;">🔥 Ventana de oportunidad activa - Contactar inmediatamente</h3>
-            {% if contactar_ahora %}
-                <div class="ipo-list">
-                    {% for item in contactar_ahora %}
-                    <div class="ipo-list-item">
-                        <div class="ipo-item-content">
-                            <div class="ipo-item-header">
-                                <a href="/ver_lead/{{ item.cliente_id }}" class="ipo-direccion">
-                                    📍 {{ item.direccion }}, {{ item.localidad }}
-                                </a>
-                                <span class="badge badge-urgente">IPO hace {{ item.dias_desde_ipo }} días</span>
+            <!-- CONTENIDO SEGÚN PESTAÑA -->
+            {% if tab == 'abiertas' or not tab %}
+                <!-- === PESTAÑA ABIERTAS === -->
+                <h3 class="section-title">
+                    📋 Tareas Abiertas
+                    <span class="section-count">{{ abiertas_count }}</span>
+                </h3>
+
+                {% if tareas_abiertas %}
+                    <div class="tareas-grid">
+                        {% for tarea in tareas_abiertas %}
+                        <div class="tarea-card" data-tarea-id="{{ tarea.id }}">
+                            <div class="tarea-direccion">
+                                📍 {{ tarea.direccion }}
                             </div>
-                            <div class="ipo-item-details">
-                                {% if item.telefono %}
-                                <div class="ipo-detail-item">
-                                    📞 <strong>{{ item.telefono }}</strong>
+
+                            <!-- Badge según urgencia -->
+                            {% if tarea.dias_desde_ipo >= 25 %}
+                                <span class="tarea-badge badge-urgente">🔥 IPO HACE {{ tarea.dias_desde_ipo }} DÍAS</span>
+                            {% else %}
+                                <span class="tarea-badge badge-activo">⚡ IPO HACE {{ tarea.dias_desde_ipo }} DÍAS</span>
+                            {% endif %}
+
+                            <div class="tarea-info">
+                                {% if tarea.localidad %}
+                                <div class="tarea-info-item">
+                                    <strong>Localidad:</strong> {{ tarea.localidad }}
                                 </div>
                                 {% endif %}
-                                {% if item.persona_contacto %}
-                                <div class="ipo-detail-item">
-                                    👤 {{ item.persona_contacto }}
+                                {% if tarea.telefono %}
+                                <div class="tarea-info-item">
+                                    <strong>📞 Teléfono:</strong> {{ tarea.telefono }}
                                 </div>
                                 {% endif %}
-                                <div class="ipo-detail-item">
-                                    📅 IPO: <strong>{{ item.ipo_proxima }}</strong>
+                                {% if tarea.persona_contacto %}
+                                <div class="tarea-info-item">
+                                    <strong>👤 Contacto:</strong> {{ tarea.persona_contacto }}
                                 </div>
+                                {% endif %}
+                                {% if tarea.motivo_aplazamiento %}
+                                <div class="tarea-info-item" style="color: #ff9800;">
+                                    <strong>📝 Nota:</strong> {{ tarea.motivo_aplazamiento }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="tarea-acciones">
+                                <a href="/ver_lead/{{ tarea.cliente_id }}" class="btn btn-sm">Ver detalle</a>
+                                <button onclick="convertirTarea({{ tarea.id }}, {{ tarea.cliente_id }})" class="btn btn-success btn-sm">✅ Crear Oportunidad</button>
+                                <button onclick="mostrarAplazar({{ tarea.id }})" class="btn btn-warning btn-sm">⏰ Aplazar</button>
+                                <button onclick="mostrarDescartar({{ tarea.id }})" class="btn btn-danger btn-sm">❌ Descartar</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">✅</div>
+                        <p><strong>¡Excelente!</strong></p>
+                        <p>No hay tareas abiertas pendientes</p>
+                    </div>
+                {% endif %}
+
+            {% elif tab == 'futuras' %}
+                <!-- === PESTAÑA FUTURAS === -->
+
+                <!-- SECCIÓN: APLAZADAS -->
+                <h3 class="section-title">
+                    ⏰ Aplazadas
+                    <span class="section-count">{{ aplazadas_count }}</span>
+                </h3>
+
+                {% if tareas_aplazadas %}
+                    <div class="tareas-grid">
+                        {% for tarea in tareas_aplazadas %}
+                        <div class="tarea-card" data-tarea-id="{{ tarea.id }}">
+                            <div class="tarea-direccion">
+                                📍 {{ tarea.direccion }}
+                            </div>
+
+                            <span class="tarea-badge badge-aplazada">⏰ APLAZADA HASTA {{ tarea.aplazada_hasta }}</span>
+
+                            <div class="tarea-info">
+                                <div class="tarea-info-item">
+                                    <strong>Vuelve en:</strong> {{ tarea.dias_para_reabrir }} días
+                                </div>
+                                {% if tarea.motivo_aplazamiento %}
+                                <div class="tarea-info-item">
+                                    <strong>Motivo:</strong> {{ tarea.motivo_aplazamiento }}
+                                </div>
+                                {% endif %}
+                                {% if tarea.telefono %}
+                                <div class="tarea-info-item">
+                                    <strong>📞</strong> {{ tarea.telefono }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="tarea-acciones">
+                                <a href="/ver_lead/{{ tarea.cliente_id }}" class="btn btn-sm">Ver detalle</a>
+                                <button onclick="reabrirTarea({{ tarea.id }})" class="btn btn-success btn-sm">🔓 Reabrir ya</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No hay tareas aplazadas</p>
+                    </div>
+                {% endif %}
+
+                <!-- SECCIÓN: PRÓXIMAS AUTOMÁTICAS -->
+                <h3 class="section-title" style="margin-top: 40px;">
+                    🔔 Próximas Automáticas
+                    <span class="section-count">{{ proximas_count }}</span>
+                </h3>
+
+                {% if proximas_automaticas %}
+                    <div class="tareas-grid">
+                        {% for item in proximas_automaticas %}
+                        <div class="tarea-card">
+                            <div class="tarea-direccion">
+                                📍 {{ item.direccion }}
+                            </div>
+
+                            <span class="tarea-badge badge-proxima">🔔 IPO EN {{ item.dias_desde_ipo }} DÍAS</span>
+
+                            <div class="tarea-info">
+                                <div class="tarea-info-item">
+                                    <strong>Se activará en:</strong> {{ item.dias_para_activar }} días
+                                </div>
+                                {% if item.localidad %}
+                                <div class="tarea-info-item">
+                                    <strong>Localidad:</strong> {{ item.localidad }}
+                                </div>
+                                {% endif %}
                                 {% if item.rae %}
-                                <div class="ipo-detail-item">
-                                    🔧 RAE: {{ item.rae }}
+                                <div class="tarea-info-item">
+                                    <strong>RAE:</strong> {{ item.rae }}
                                 </div>
                                 {% endif %}
                             </div>
-                        </div>
-                        <div class="ipo-item-actions">
-                            <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-success btn-sm">Ver detalle</a>
-                            <a href="/crear_oportunidad/{{ item.cliente_id }}" class="btn btn-primary btn-sm">Crear oportunidad</a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="no-results">
-                    <div class="no-results-icon">✓</div>
-                    No hay comunidades en ventana crítica ahora mismo
-                </div>
-            {% endif %}
 
-            {% elif tab == 'proximamente' %}
-            <!-- TAB: PRÓXIMAMENTE (IPO hace 0-10 días) -->
-            <h3 style="color: #ffc107; margin-bottom: 15px;">⏰ Esperando informe OCA - Planificar contacto próxima semana</h3>
-            {% if proximamente %}
-                <div class="ipo-list">
-                    {% for item in proximamente %}
-                    <div class="ipo-list-item">
-                        <div class="ipo-item-content">
-                            <div class="ipo-item-header">
-                                <a href="/ver_lead/{{ item.cliente_id }}" class="ipo-direccion">
-                                    📍 {{ item.direccion }}, {{ item.localidad }}
-                                </a>
-                                <span class="badge badge-proximo">IPO hace {{ item.dias_desde_ipo }} días</span>
-                            </div>
-                            <div class="ipo-item-details">
-                                {% if item.telefono %}
-                                <div class="ipo-detail-item">
-                                    📞 <strong>{{ item.telefono }}</strong>
-                                </div>
-                                {% endif %}
-                                <div class="ipo-detail-item">
-                                    📅 IPO: <strong>{{ item.ipo_proxima }}</strong>
-                                </div>
-                                <div class="ipo-detail-item">
-                                    ⏰ Contactar en: <strong>{{ 10 - item.dias_desde_ipo }} días aprox.</strong>
-                                </div>
+                            <div class="tarea-acciones">
+                                <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-sm">Ver detalle</a>
                             </div>
                         </div>
-                        <div class="ipo-item-actions">
-                            <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-success btn-sm">Ver detalle</a>
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="no-results">
-                    <div class="no-results-icon">📭</div>
-                    No hay IPOs recientes esperando
-                </div>
-            {% endif %}
-
-            {% elif tab == 'esta_semana' %}
-            <!-- TAB: IPOs ESTA SEMANA (próximos 7 días) -->
-            <h3 style="color: #17a2b8; margin-bottom: 15px;">🔔 Inspecciones programadas - Para tu información</h3>
-            {% if esta_semana %}
-                <div class="ipo-list">
-                    {% for item in esta_semana %}
-                    <div class="ipo-list-item">
-                        <div class="ipo-item-content">
-                            <div class="ipo-item-header">
-                                <a href="/ver_lead/{{ item.cliente_id }}" class="ipo-direccion">
-                                    📍 {{ item.direccion }}, {{ item.localidad }}
-                                </a>
-                                <span class="badge badge-futuro">En {{ item.dias_hasta_ipo }} días</span>
-                            </div>
-                            <div class="ipo-item-details">
-                                <div class="ipo-detail-item">
-                                    📅 IPO programada: <strong>{{ item.ipo_proxima }}</strong>
-                                </div>
-                                {% if item.empresa_mantenedora %}
-                                <div class="ipo-detail-item">
-                                    🏢 Empresa actual: {{ item.empresa_mantenedora }}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="ipo-item-actions">
-                            <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-success btn-sm">Ver detalle</a>
-                        </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <p>No hay IPOs próximas pendientes</p>
                     </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="no-results">
-                    <div class="no-results-icon">📅</div>
-                    No hay IPOs programadas esta semana
-                </div>
-            {% endif %}
-
-            {% elif tab == 'oportunidad_pasada' %}
-            <!-- TAB: OPORTUNIDAD PASADA (IPO hace 30-90 días) -->
-            <h3 style="color: #6c757d; margin-bottom: 15px;">⏸️ Ventana pasada - Intentar por si acaso (baja prioridad)</h3>
-            {% if oportunidad_pasada %}
-                <div class="ipo-list">
-                    {% for item in oportunidad_pasada %}
-                    <div class="ipo-list-item">
-                        <div class="ipo-item-content">
-                            <div class="ipo-item-header">
-                                <a href="/ver_lead/{{ item.cliente_id }}" class="ipo-direccion">
-                                    📍 {{ item.direccion }}, {{ item.localidad }}
-                                </a>
-                                <span class="badge badge-pasado">IPO hace {{ item.dias_desde_ipo }} días</span>
-                            </div>
-                            <div class="ipo-item-details">
-                                {% if item.telefono %}
-                                <div class="ipo-detail-item">
-                                    📞 {{ item.telefono }}
-                                </div>
-                                {% endif %}
-                                <div class="ipo-detail-item">
-                                    📅 IPO: {{ item.ipo_proxima }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ipo-item-actions">
-                            <a href="/ver_lead/{{ item.cliente_id }}" class="btn btn-success btn-sm">Ver detalle</a>
-                            <a href="/crear_oportunidad/{{ item.cliente_id }}" class="btn btn-primary btn-sm">Crear oportunidad</a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="no-results">
-                    <div class="no-results-icon">✓</div>
-                    No hay oportunidades pasadas registradas
-                </div>
-            {% endif %}
+                {% endif %}
 
             {% endif %}
-            <!-- Fin pestañas -->
 
             <br>
-            <a href="/home" class="button">Volver al Home</a>
+            <a href="/home" class="btn">Volver al Home</a>
         </div>
     </main>
 
-    <script src="/static/sidebar.js"></script>
+    <!-- MODAL APLAZAR -->
+    <div id="modalAplazar" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="cerrarModal('modalAplazar')">&times;</span>
+            <div class="modal-header">⏰ Aplazar Tarea</div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Aplazar por:</label>
+                    <select id="diasAplazar">
+                        <option value="7">7 días</option>
+                        <option value="15">15 días</option>
+                        <option value="30">30 días</option>
+                        <option value="60">60 días</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Motivo (opcional):</label>
+                    <textarea id="motivoAplazar" placeholder="Ej: Esperar respuesta del administrador"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="cerrarModal('modalAplazar')" class="btn btn-sm">Cancelar</button>
+                <button onclick="confirmarAplazar()" class="btn btn-warning btn-sm">⏰ Aplazar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DESCARTAR -->
+    <div id="modalDescartar" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="cerrarModal('modalDescartar')">&times;</span>
+            <div class="modal-header">❌ Descartar Tarea</div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Motivo del descarte:</label>
+                    <select id="tipoDescarte">
+                        <option value="descartada_sin_interes">Sin interés</option>
+                        <option value="descartada_tiene_contrato">Ya tienen contrato con otra empresa</option>
+                        <option value="descartada_otro">Otro motivo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Detalles (opcional):</label>
+                    <textarea id="motivoDescartar" placeholder="Información adicional..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="cerrarModal('modalDescartar')" class="btn btn-sm">Cancelar</button>
+                <button onclick="confirmarDescartar()" class="btn btn-danger btn-sm">❌ Descartar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+    <script>
+        let tareaActual = null;
+
+        function mostrarAplazar(tareaId) {
+            tareaActual = tareaId;
+            document.getElementById('modalAplazar').style.display = 'block';
+        }
+
+        function mostrarDescartar(tareaId) {
+            tareaActual = tareaId;
+            document.getElementById('modalDescartar').style.display = 'block';
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            tareaActual = null;
+        }
+
+        async function confirmarAplazar() {
+            if (!tareaActual) return;
+
+            const dias = document.getElementById('diasAplazar').value;
+            const motivo = document.getElementById('motivoAplazar').value;
+
+            try {
+                const response = await fetch(`/tarea_comercial_aplazar/${tareaActual}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ dias: parseInt(dias), motivo: motivo })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`✅ Tarea aplazada exitosamente hasta ${data.fecha_aplazada}`);
+                    window.location.reload();
+                } else {
+                    alert('❌ Error al aplazar tarea');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+
+        async function confirmarDescartar() {
+            if (!tareaActual) return;
+
+            const tipo = document.getElementById('tipoDescarte').value;
+            const motivo = document.getElementById('motivoDescartar').value;
+
+            if (!confirm('¿Estás seguro de descartar esta tarea? No podrás revertir esta acción.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/tarea_comercial_descartar/${tareaActual}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ tipo: tipo, motivo: motivo })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Tarea descartada exitosamente');
+                    window.location.reload();
+                } else {
+                    alert('❌ Error al descartar tarea');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+
+        function convertirTarea(tareaId, clienteId) {
+            if (confirm('¿Crear oportunidad para este cliente?')) {
+                window.location.href = `/crear_oportunidad/${clienteId}?tarea_id=${tareaId}`;
+            }
+        }
+
+        async function reabrirTarea(tareaId) {
+            if (!confirm('¿Reabrir esta tarea ahora?')) return;
+
+            try {
+                const response = await fetch(`/tarea_comercial_aplazar/${tareaId}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ dias: 0, motivo: 'Reabierta manualmente' })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Tarea reabierta exitosamente');
+                    window.location.href = '/oportunidades_post_ipo?tab=abiertas';
+                } else {
+                    alert('❌ Error al reabrir tarea');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
