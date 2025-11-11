@@ -493,21 +493,21 @@
             <div class="seccion">
                 <h2>Historial de Visitas</h2>
 
-                <div class="visita-item">
-                    <div class="visita-fecha">{{ lead.fecha_visita|format_fecha }} - Primera visita</div>
-                    <div class="visita-observaciones">{{ lead.observaciones or 'Sin observaciones' }}</div>
-                </div>
-
-                {% if visitas_seguimiento %}
-                    {% for visita in visitas_seguimiento %}
+                {% if todas_visitas %}
+                    {% for visita in todas_visitas %}
                     <div class="visita-item">
-                        <div class="visita-fecha">{{ visita.fecha_visita|format_fecha }} - Seguimiento</div>
+                        <div class="visita-fecha">
+                            {{ visita.fecha_visita|format_fecha }} -
+                            {% if visita.tipo == 'inicial' %}Primera visita{% else %}Seguimiento{% endif %}
+                        </div>
                         <div class="visita-observaciones">{{ visita.observaciones or 'Sin observaciones' }}</div>
                         {% if visita.oportunidades %}
                         <div class="visita-oportunidad">Vinculada a: {{ visita.oportunidades.tipo }}</div>
                         {% endif %}
                     </div>
                     {% endfor %}
+                {% else %}
+                    <div class="estado-vacio">No hay visitas registradas</div>
                 {% endif %}
 
                 <div class="add-item-button">

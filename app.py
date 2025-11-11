@@ -1657,12 +1657,36 @@ def ver_lead(lead_id):
         oportunidades = oportunidades_response.json()
     
     visitas_response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/visitas_seguimiento?cliente_id=eq.{lead_id}&select=*,oportunidades(tipo)&order=fecha_visita.desc",
+        f"{SUPABASE_URL}/rest/v1/visitas_seguimiento?cliente_id=eq.{lead_id}&select=*,oportunidades(tipo)",
         headers=HEADERS
     )
     visitas_seguimiento = []
     if visitas_response.status_code == 200:
         visitas_seguimiento = visitas_response.json()
+
+    # Combinar todas las visitas (inicial + seguimiento) y ordenar por fecha descendente
+    todas_visitas = []
+
+    # Agregar la visita inicial del lead
+    if lead.get('fecha_visita'):
+        todas_visitas.append({
+            'fecha_visita': lead.get('fecha_visita'),
+            'observaciones': lead.get('observaciones'),
+            'tipo': 'inicial',
+            'oportunidades': None
+        })
+
+    # Agregar las visitas de seguimiento
+    for visita in visitas_seguimiento:
+        todas_visitas.append({
+            'fecha_visita': visita.get('fecha_visita'),
+            'observaciones': visita.get('observaciones'),
+            'tipo': 'seguimiento',
+            'oportunidades': visita.get('oportunidades')
+        })
+
+    # Ordenar todas las visitas por fecha descendente (más reciente primero)
+    todas_visitas.sort(key=lambda x: x.get('fecha_visita', ''), reverse=True)
 
     # Obtener datos del administrador si existe relación
     administrador = None
@@ -1678,7 +1702,7 @@ def ver_lead(lead_id):
         lead=lead,
         equipos=equipos,
         oportunidades=oportunidades,
-        visitas_seguimiento=visitas_seguimiento,
+        todas_visitas=todas_visitas,
         administrador=administrador
     )
 
