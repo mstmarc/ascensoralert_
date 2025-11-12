@@ -735,6 +735,9 @@ def formulario_lead():
             "administrador_id": administrador_id,
             "empresa_mantenedora": request.form.get("empresa_mantenedora") or None,
             "numero_ascensores": request.form.get("numero_ascensores") or None,
+            "fecha_fin_contrato": request.form.get("fecha_fin_contrato") or None,
+            "paradas": request.form.get("paradas") or None,
+            "viviendas_por_planta": request.form.get("viviendas_por_planta") or None,
             "observaciones": request.form.get("observaciones") or None
         }
 
@@ -1836,6 +1839,58 @@ def oportunidades_post_ipo():
                         json=nueva_tarea
                     )
 
+        # === 3B. OBTENER CLIENTES CON FECHA_FIN_CONTRATO Y CREAR TAREAS AUTOMÁTICAS ===
+        clientes_fin_contrato_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/clientes?select=id,fecha_fin_contrato,direccion,localidad,telefono,persona_contacto,empresa_mantenedora&fecha_fin_contrato=not.is.null",
+            headers=HEADERS,
+            timeout=10
+        )
+        clientes_fin_contrato_data = clientes_fin_contrato_response.json() if clientes_fin_contrato_response.status_code == 200 else []
+
+        clientes_con_fin_contrato = {}
+        for cliente in clientes_fin_contrato_data:
+            if not cliente.get('fecha_fin_contrato'):
+                continue
+
+            try:
+                fecha_fin = datetime.strptime(cliente['fecha_fin_contrato'], '%Y-%m-%d').date()
+            except:
+                continue
+
+            dias_hasta_fin = (fecha_fin - hoy).days
+            cliente_id = cliente['id']
+
+            clientes_con_fin_contrato[cliente_id] = {
+                'cliente_id': cliente_id,
+                'fecha_fin_contrato': fecha_fin,
+                'dias_hasta_fin': dias_hasta_fin,
+                'cliente': cliente
+            }
+
+            # Crear tarea automática si faltan 120 días o menos
+            if dias_hasta_fin <= 120 and dias_hasta_fin >= 0:
+                # Verificar si ya existe tarea abierta para este cliente
+                tarea_existe = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?cliente_id=eq.{cliente_id}&estado=eq.abierta",
+                    headers=HEADERS
+                ).json()
+
+                if not tarea_existe:
+                    # Crear tarea automáticamente
+                    nueva_tarea = {
+                        'cliente_id': cliente_id,
+                        'equipo_id': None,
+                        'estado': 'abierta',
+                        'motivo_creacion': 'fin_contrato_120_dias',
+                        'dias_desde_ipo': None,
+                        'creado_por': 'sistema'
+                    }
+                    requests.post(
+                        f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas",
+                        headers=HEADERS,
+                        json=nueva_tarea
+                    )
+
         # === 4. OBTENER TAREAS EXISTENTES CON DATOS DEL CLIENTE ===
         tareas_response = requests.get(
             f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?select=*,clientes(direccion,localidad,telefono,persona_contacto,empresa_mantenedora)&estado=eq.abierta&order=fecha_creacion.asc",
@@ -1916,7 +1971,27 @@ def oportunidades_post_ipo():
                         'dias_hasta_ipo': dias_hasta_ipo,  # Solo para futuras
                         'dias_desde_ipo': dias_desde_ipo if not es_futura else None,  # Solo para pasadas
                         'dias_para_activar': dias_para_activar,
-                        'rae': data['rae']
+                        'rae': data['rae'],
+                        'motivo': 'IPO'
+                    })
+
+        # === 6B. FUTURAS - PRÓXIMAS POR FIN DE CONTRATO (121-150 días) ===
+        for cliente_id, data in clientes_con_fin_contrato.items():
+            # Fin de contrato entre 121 y 150 días
+            if 121 <= data['dias_hasta_fin'] <= 150:
+                # Verificar que no tenga tarea
+                tiene_tarea = any(t['cliente_id'] == cliente_id for t in tareas_abiertas + tareas_aplazadas)
+                if not tiene_tarea:
+                    proximas_automaticas.append({
+                        'cliente_id': cliente_id,
+                        'direccion': data['cliente'].get('direccion', 'Sin dirección'),
+                        'localidad': data['cliente'].get('localidad', ''),
+                        'telefono': data['cliente'].get('telefono'),
+                        'es_futura': True,
+                        'dias_hasta_fin_contrato': data['dias_hasta_fin'],
+                        'dias_para_activar': data['dias_hasta_fin'] - 120,  # Días hasta que se active (120 días antes)
+                        'fecha_fin_contrato': data['fecha_fin_contrato'].strftime('%d/%m/%Y'),
+                        'motivo': 'Fin de Contrato'
                     })
 
         # Ordenar
@@ -2117,6 +2192,9 @@ def editar_lead(lead_id):
             "administrador_id": administrador_id,
             "empresa_mantenedora": request.form.get("empresa_mantenedora") or None,
             "numero_ascensores": request.form.get("numero_ascensores") or None,
+            "fecha_fin_contrato": request.form.get("fecha_fin_contrato") or None,
+            "paradas": request.form.get("paradas") or None,
+            "viviendas_por_planta": request.form.get("viviendas_por_planta") or None,
             "observaciones": request.form.get("observaciones") or None
         }
 
