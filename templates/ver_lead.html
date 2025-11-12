@@ -382,8 +382,13 @@
 
                 <div class="info-list">
                     <div class="info-item">
-                        <label>Nombre</label>
-                        <span>{{ lead.nombre_cliente or '-' }}</span>
+                        <label>Primera Visita</label>
+                        <span>{{ lead.fecha_visita|format_fecha }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <label>Tipo</label>
+                        <span>{{ lead.tipo_cliente or '-' }}</span>
                     </div>
 
                     <div class="info-item">
@@ -398,8 +403,8 @@
                     </div>
 
                     <div class="info-item">
-                        <label>Población</label>
-                        <span>{{ lead.localidad or '-' }}</span>
+                        <label>Nombre</label>
+                        <span>{{ lead.nombre_cliente or '-' }}</span>
                     </div>
 
                     <div class="info-item">
@@ -408,8 +413,19 @@
                     </div>
 
                     <div class="info-item">
-                        <label>Tipo</label>
-                        <span>{{ lead.tipo_cliente or '-' }}</span>
+                        <label>Población</label>
+                        <span>{{ lead.localidad or '-' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <label>Administrador de Fincas</label>
+                        {% if administrador %}
+                            <a href="/ver_administrador/{{ administrador.id }}">{{ administrador.nombre_empresa }}</a>
+                        {% elif lead.administrador_fincas %}
+                            <span>{{ lead.administrador_fincas }}</span>
+                        {% else %}
+                            <span>-</span>
+                        {% endif %}
                     </div>
 
                     <div class="info-item">
@@ -427,14 +443,18 @@
                     </div>
 
                     <div class="info-item">
-                        <label>Administrador de Fincas</label>
-                        {% if administrador %}
-                            <a href="/ver_administrador/{{ administrador.id }}">{{ administrador.nombre_empresa }}</a>
-                        {% elif lead.administrador_fincas %}
-                            <span>{{ lead.administrador_fincas }}</span>
-                        {% else %}
-                            <span>-</span>
-                        {% endif %}
+                        <label>Fecha Fin de Contrato</label>
+                        <span>{{ lead.fecha_fin_contrato|format_fecha }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <label>Paradas</label>
+                        <span>{{ lead.paradas or '-' }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <label>Viviendas por Planta</label>
+                        <span>{{ lead.viviendas_por_planta or '-' }}</span>
                     </div>
 
                     <div class="info-item">
@@ -450,11 +470,6 @@
                     <div class="info-item">
                         <label>Email</label>
                         <span>{{ lead.email or '-' }}</span>
-                    </div>
-
-                    <div class="info-item">
-                        <label>Primera Visita</label>
-                        <span>{{ lead.fecha_visita|format_fecha }}</span>
                     </div>
                 </div>
 

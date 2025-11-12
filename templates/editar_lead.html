@@ -59,43 +59,31 @@
     <main>
         <div class="menu">
             <form method="POST">
-                <label>Fecha:</label><br>
+                <label>Fecha de Visita:</label><br>
                 <input type="date" name="fecha_visita" value="{{ lead.fecha_visita }}"><br><br>
-                
-                <label>Tipo:</label><br>
+
+                <label>Tipo de Lead:</label><br>
                 <select name="tipo_lead">
-                    <option value="">-- Tipo --</option>
+                    <option value="">-- Selecciona un tipo --</option>
                     <option value="Comunidad" {% if lead.tipo_cliente == 'Comunidad' %}selected{% endif %}>Comunidad</option>
                     <option value="Hotel/Apartamentos" {% if lead.tipo_cliente == 'Hotel/Apartamentos' %}selected{% endif %}>Hotel/Apartamentos</option>
                     <option value="Empresa" {% if lead.tipo_cliente == 'Empresa' %}selected{% endif %}>Empresa</option>
                     <option value="Otro" {% if lead.tipo_cliente == 'Otro' %}selected{% endif %}>Otro</option>
                 </select><br><br>
-                
+
                 <label>Dirección: *</label><br>
                 <input type="text" name="direccion" value="{{ lead.direccion }}" required><br><br>
-                
-                <label>Nombre:</label><br>
+
+                <label>Nombre de la Instalación:</label><br>
                 <input type="text" name="nombre_lead" value="{{ lead.nombre_cliente }}"><br><br>
-                
-                <label>CP:</label><br>
+
+                <label>Código Postal:</label><br>
                 <input type="text" name="codigo_postal" value="{{ lead.codigo_postal }}"><br><br>
-                
+
                 <label>Localidad: *</label><br>
                 <input type="text" name="localidad" value="{{ lead.localidad }}" required><br><br>
-                
-                <label>Zona:</label><br>
-                <input type="text" name="zona" value="{{ lead.zona }}"><br><br>
-                
-                <label>Contacto:</label><br>
-                <input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br>
-                
-                <label>Teléfono:</label><br>
-                <input type="text" name="telefono" value="{{ lead.telefono }}"><br><br>
-                
-                <label>Email:</label><br>
-                <input type="email" name="email" value="{{ lead.email }}"><br><br>
 
-                <label>Admin Fincas (de la base de datos):</label><br>
+                <label>Administrador de Fincas (de la base de datos):</label><br>
                 <input
                     type="text"
                     id="administrador_search"
@@ -116,9 +104,35 @@
                 </small>
                 <br><br>
 
-                <label>Empresa Mantenedora:</label><br>
+                <label>Número de Ascensores:</label><br>
+                <select name="numero_ascensores">
+                    <option value="">-- Cuantos ascensores hay? --</option>
+                    <option value="1" {% if lead.numero_ascensores == '1' %}selected{% endif %}>1 ascensor</option>
+                    <option value="2" {% if lead.numero_ascensores == '2' %}selected{% endif %}>2 ascensores</option>
+                    <option value="3" {% if lead.numero_ascensores == '3' %}selected{% endif %}>3 ascensores</option>
+                    <option value="4" {% if lead.numero_ascensores == '4' %}selected{% endif %}>4 ascensores</option>
+                    <option value="5" {% if lead.numero_ascensores == '5' %}selected{% endif %}>5 ascensores</option>
+                    <option value="6" {% if lead.numero_ascensores == '6' %}selected{% endif %}>6 ascensores</option>
+                    <option value="7" {% if lead.numero_ascensores == '7' %}selected{% endif %}>7 ascensores</option>
+                    <option value="8" {% if lead.numero_ascensores == '8' %}selected{% endif %}>8 ascensores</option>
+                    <option value="9" {% if lead.numero_ascensores == '9' %}selected{% endif %}>9 ascensores</option>
+                    <option value="10" {% if lead.numero_ascensores == '10' %}selected{% endif %}>10 ascensores</option>
+                    <option value="11" {% if lead.numero_ascensores == '11' %}selected{% endif %}>11 ascensores</option>
+                    <option value="12" {% if lead.numero_ascensores == '12' %}selected{% endif %}>12 ascensores</option>
+                    <option value="13" {% if lead.numero_ascensores == '13' %}selected{% endif %}>13 ascensores</option>
+                    <option value="14" {% if lead.numero_ascensores == '14' %}selected{% endif %}>14 ascensores</option>
+                    <option value="15" {% if lead.numero_ascensores == '15' %}selected{% endif %}>15 ascensores</option>
+                    <option value="16" {% if lead.numero_ascensores == '16' %}selected{% endif %}>16 ascensores</option>
+                    <option value="17" {% if lead.numero_ascensores == '17' %}selected{% endif %}>17 ascensores</option>
+                    <option value="18" {% if lead.numero_ascensores == '18' %}selected{% endif %}>18 ascensores</option>
+                    <option value="19" {% if lead.numero_ascensores == '19' %}selected{% endif %}>19 ascensores</option>
+                    <option value="20" {% if lead.numero_ascensores == '20' %}selected{% endif %}>20 ascensores</option>
+                    <option value="20+" {% if lead.numero_ascensores == '20+' %}selected{% endif %}>Más de 20 ascensores</option>
+                </select><br><br>
+
+                <label>Empresa Mantenedora Actual:</label><br>
                 <select name="empresa_mantenedora">
-                    <option value="">-- Selecciona --</option>
+                    <option value="">-- Selecciona una empresa --</option>
                     <option value="FAIN Ascensores" {% if lead.empresa_mantenedora == 'FAIN Ascensores' %}selected{% endif %}>FAIN Ascensores</option>
                     <option value="KONE" {% if lead.empresa_mantenedora == 'KONE' %}selected{% endif %}>KONE</option>
                     <option value="Otis" {% if lead.empresa_mantenedora == 'Otis' %}selected{% endif %}>Otis</option>
@@ -136,10 +150,26 @@
                     <option value="Omega Elevadores" {% if lead.empresa_mantenedora == 'Omega Elevadores' %}selected{% endif %}>Omega Elevadores</option>
                     <option value="Q Ascensores" {% if lead.empresa_mantenedora == 'Q Ascensores' %}selected{% endif %}>Q Ascensores</option>
                 </select><br><br>
-                
-                <label>Num Ascensores:</label><br>
-                <input type="text" name="numero_ascensores" value="{{ lead.numero_ascensores }}"><br><br>
-                
+
+                <label>Fecha de Fin de Contrato:</label><br>
+                <input type="date" name="fecha_fin_contrato" value="{{ lead.fecha_fin_contrato }}"><br>
+                <small style="color: #666; font-size: 12px;">📅 Dato muy valioso para seguimiento comercial (120 días antes se crea tarea abierta)</small><br><br>
+
+                <label>Paradas:</label><br>
+                <input type="number" name="paradas" min="0" placeholder="Número de paradas" value="{{ lead.paradas }}"><br><br>
+
+                <label>Viviendas por Planta:</label><br>
+                <input type="number" name="viviendas_por_planta" min="0" placeholder="Número de viviendas por planta" value="{{ lead.viviendas_por_planta }}"><br><br>
+
+                <label>Persona de Contacto:</label><br>
+                <input type="text" name="persona_contacto" value="{{ lead.persona_contacto }}"><br><br>
+
+                <label>Teléfono:</label><br>
+                <input type="text" name="telefono" value="{{ lead.telefono }}"><br><br>
+
+                <label>Email:</label><br>
+                <input type="email" name="email" value="{{ lead.email }}"><br><br>
+
                 <label>Observaciones:</label><br>
                 <textarea name="observaciones">{{ lead.observaciones }}</textarea><br><br>
                 

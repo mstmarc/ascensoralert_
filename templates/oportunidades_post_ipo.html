@@ -462,11 +462,15 @@
                                 📍 {{ tarea.direccion }}
                             </div>
 
-                            <!-- Badge según urgencia -->
-                            {% if tarea.dias_desde_ipo >= 25 %}
-                                <span class="tarea-badge badge-urgente">🔥 IPO HACE {{ tarea.dias_desde_ipo }} DÍAS</span>
+                            <!-- Badge según urgencia y motivo -->
+                            {% if tarea.dias_desde_ipo %}
+                                {% if tarea.dias_desde_ipo >= 25 %}
+                                    <span class="tarea-badge badge-urgente">🔥 IPO HACE {{ tarea.dias_desde_ipo }} DÍAS</span>
+                                {% else %}
+                                    <span class="tarea-badge badge-activo">⚡ IPO HACE {{ tarea.dias_desde_ipo }} DÍAS</span>
+                                {% endif %}
                             {% else %}
-                                <span class="tarea-badge badge-activo">⚡ IPO HACE {{ tarea.dias_desde_ipo }} DÍAS</span>
+                                <span class="tarea-badge badge-urgente">📅 FIN DE CONTRATO PRÓXIMO</span>
                             {% endif %}
 
                             <div class="tarea-info">
@@ -572,7 +576,9 @@
                                 📍 {{ item.direccion }}
                             </div>
 
-                            {% if item.es_futura %}
+                            {% if item.motivo == 'Fin de Contrato' %}
+                                <span class="tarea-badge badge-proxima">📅 FIN CONTRATO EN {{ item.dias_hasta_fin_contrato }} DÍAS</span>
+                            {% elif item.es_futura %}
                                 <span class="tarea-badge badge-proxima">🔔 IPO EN {{ item.dias_hasta_ipo }} DÍAS</span>
                             {% else %}
                                 <span class="tarea-badge badge-activo">⏳ IPO HACE {{ item.dias_desde_ipo }} DÍAS</span>
@@ -580,8 +586,16 @@
 
                             <div class="tarea-info">
                                 <div class="tarea-info-item">
+                                    <strong>Motivo:</strong> {{ item.motivo }}
+                                </div>
+                                <div class="tarea-info-item">
                                     <strong>Se activará como tarea en:</strong> {{ item.dias_para_activar }} días
                                 </div>
+                                {% if item.fecha_fin_contrato %}
+                                <div class="tarea-info-item">
+                                    <strong>Fecha fin contrato:</strong> {{ item.fecha_fin_contrato }}
+                                </div>
+                                {% endif %}
                                 {% if item.localidad %}
                                 <div class="tarea-info-item">
                                     <strong>Localidad:</strong> {{ item.localidad }}
