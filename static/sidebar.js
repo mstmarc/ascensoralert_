@@ -17,9 +17,9 @@
         .sidebar-integrated {
             position: fixed;
             left: 0;
-            top: 90px; /* 🔼 Ajustado al header espacioso de 90px */
+            top: 95px; /* 🔼 Ajustado al header espacioso de 95px */
             width: 240px;
-            height: calc(100vh - 90px);
+            height: calc(100vh - 95px);
             background: white;
             z-index: 800;
             overflow-y: auto;
@@ -82,8 +82,8 @@
                 transform: translateX(-240px);
                 transition: transform 0.3s;
                 box-shadow: none;
-                top: 70px; /* 🔼 Header móvil es 70px */
-                height: calc(100vh - 70px);
+                top: 75px; /* 🔼 Header móvil es 75px */
+                height: calc(100vh - 75px);
             }
 
             .sidebar-integrated.mobile-open {

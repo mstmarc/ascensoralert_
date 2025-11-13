@@ -29,11 +29,11 @@ body {
 /* Header fijo con más altura */
 header {
     background: white;
-    padding: 15px 0; /* 🔼 Padding vertical añadido */
+    padding: 20px 0 15px 0; /* 🔼 Más padding superior para dar aire al logo */
     position: sticky;
     top: 0;
     z-index: 100;
-    height: 90px; /* 🔼 Aumentado de 60px a 90px */
+    height: 95px; /* 🔼 Aumentado para acomodar el padding extra */
 }
 
 .header-container {
@@ -678,8 +678,8 @@ button.btn-buscar:hover {
 @media (max-width: 767px) {
     /* Header móvil */
     header {
-        height: 70px; /* 🔼 También más alto en móvil */
-        padding: 10px 0;
+        height: 75px; /* 🔼 También más alto en móvil */
+        padding: 15px 0 10px 0;
     }
     
     .header-container {
