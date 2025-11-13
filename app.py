@@ -1363,7 +1363,7 @@ def leads_dashboard():
         total_pages = max(1, (total_registros + per_page - 1) // per_page)
 
         # OPTIMIZACIÓN: Usar join de Supabase + selección específica de campos
-        data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,nombre_cliente,localidad,empresa_mantenedora,numero_ascensores&limit={per_page}&offset={offset}"
+        data_url = f"{SUPABASE_URL}/rest/v1/clientes?select=id,direccion,nombre_cliente,localidad,empresa_mantenedora,numero_ascensores,created_at&limit={per_page}&offset={offset}"
         if query_string:
             data_url += f"&{query_string}"
 
@@ -1410,6 +1410,7 @@ def leads_dashboard():
         localidad = lead.get("localidad", "-")
         empresa_mantenedora = lead.get("empresa_mantenedora", "-")
         total_equipos = len(equipos) if equipos else lead.get("numero_ascensores", 0)
+        created_at = lead.get("created_at")
 
         ipo_proxima = None
         contrato_vence = None
@@ -1454,12 +1455,14 @@ def leads_dashboard():
             "contrato_vence": contrato_vence_str,
             "contrato_fecha_original": contrato_vence,
             "color_ipo": color_ipo,
-            "color_contrato": color_contrato
+            "color_contrato": color_contrato,
+            "created_at": created_at
         }
 
         rows.append(row)
     
-    rows.sort(key=lambda x: x["ipo_fecha_original"] if x["ipo_fecha_original"] else datetime.max)
+    # Ordenar por fecha de creación: más reciente primero
+    rows.sort(key=lambda x: x.get("created_at") or "", reverse=True)
 
     # Los filtros ya vienen ordenados del caché, no es necesario volver a ordenar
     # localidades_disponibles y empresas_disponibles ya están ordenados
