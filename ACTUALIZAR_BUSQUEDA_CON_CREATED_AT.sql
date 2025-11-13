@@ -4,6 +4,10 @@
 -- Esta actualización modifica la función buscar_clientes_sin_acentos
 -- para incluir el campo created_at y ordenar por fecha de creación
 
+-- Primero eliminar la función existente
+DROP FUNCTION IF EXISTS buscar_clientes_sin_acentos(text,text,text,integer,integer);
+
+-- Crear la función con el nuevo esquema
 CREATE OR REPLACE FUNCTION buscar_clientes_sin_acentos(
     termino_busqueda text DEFAULT '',
     filtro_localidad text DEFAULT '',
