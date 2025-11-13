@@ -8,6 +8,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* HEADER CENTRADO */
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         /* === ESTILO PROFESIONAL 2025 === */
 
         body {
@@ -232,9 +245,6 @@
                 <a href="/home">
                     <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="FEDES Logo" class="logo">
                 </a>
-            </div>
-            <div class="title-container">
-                <h1>✏️ Editar Oportunidad</h1>
             </div>
         </div>
     </header>

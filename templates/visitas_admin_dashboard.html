@@ -7,6 +7,19 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="/static/styles.css?v=5">
     <style>
+        /* HEADER CENTRADO */
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
 
         /* Ajustar contenedor del dashboard para ancho completo */
@@ -80,9 +93,6 @@
                 <a href="/home">
                     <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
                 </a>
-            </div>
-            <div class="title-container">
-                <h1>Visitas a Administradores</h1>
             </div>
         </div>
     </header>
