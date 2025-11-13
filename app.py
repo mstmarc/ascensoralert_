@@ -2881,7 +2881,57 @@ def administradores_dashboard():
                 total_pages = max(1, (total_registros + limit - 1) // limit)
 
                 # Remover total_count de cada registro (no es parte del modelo)
-                administradores = [{k: v for k, v in admin.items() if k != 'total_count'} for admin in administradores_data]
+                administradores_base = [{k: v for k, v in admin.items() if k != 'total_count'} for admin in administradores_data]
+
+                # Obtener IDs de los administradores encontrados
+                admin_ids = [admin['id'] for admin in administradores_base]
+
+                if admin_ids:
+                    # Obtener conteos de clientes para estos administradores
+                    clientes_response = requests.get(
+                        f"{SUPABASE_URL}/rest/v1/clientes?select=administrador_id&administrador_id=in.({','.join(map(str, admin_ids))})",
+                        headers=HEADERS,
+                        timeout=10
+                    )
+                    clientes_data = clientes_response.json() if clientes_response.status_code == 200 else []
+
+                    # Obtener conteos de oportunidades (a través de clientes)
+                    oportunidades_response = requests.get(
+                        f"{SUPABASE_URL}/rest/v1/oportunidades?select=cliente_id,clientes!inner(administrador_id)&clientes.administrador_id=in.({','.join(map(str, admin_ids))})",
+                        headers=HEADERS,
+                        timeout=10
+                    )
+                    oportunidades_data = oportunidades_response.json() if oportunidades_response.status_code == 200 else []
+
+                    # Contar clientes por administrador
+                    clientes_por_admin = {}
+                    for cliente in clientes_data:
+                        admin_id = cliente.get('administrador_id')
+                        if admin_id:
+                            clientes_por_admin[admin_id] = clientes_por_admin.get(admin_id, 0) + 1
+
+                    # Contar oportunidades por administrador
+                    oportunidades_por_admin = {}
+                    for oportunidad in oportunidades_data:
+                        cliente_info = oportunidad.get('clientes')
+                        if cliente_info:
+                            admin_id = cliente_info.get('administrador_id')
+                            if admin_id:
+                                oportunidades_por_admin[admin_id] = oportunidades_por_admin.get(admin_id, 0) + 1
+
+                    # Agregar conteos a cada administrador
+                    for admin in administradores_base:
+                        admin_id = admin['id']
+                        admin['num_oportunidades'] = oportunidades_por_admin.get(admin_id, 0)
+                        admin['num_instalaciones'] = clientes_por_admin.get(admin_id, 0)
+
+                    # Ordenar por: 1) num_oportunidades DESC, 2) num_instalaciones DESC
+                    administradores_base.sort(
+                        key=lambda x: (x.get('num_oportunidades', 0), x.get('num_instalaciones', 0)),
+                        reverse=True
+                    )
+
+                administradores = administradores_base
 
             except Exception as e:
                 print(f"Excepción al buscar administradores: {str(e)}")
@@ -2892,14 +2942,13 @@ def administradores_dashboard():
 
         else:
             # Búsqueda normal sin filtro de texto
-            url = f"{SUPABASE_URL}/rest/v1/administradores?select=*&order=nombre_empresa.asc&limit={limit}&offset={offset}"
-
-            # Headers para obtener el conteo total
+            # Primero obtener todos los administradores con conteo
+            url_count = f"{SUPABASE_URL}/rest/v1/administradores?select=*"
             headers_with_count = HEADERS.copy()
             headers_with_count["Prefer"] = "count=exact"
 
             try:
-                response = requests.get(url, headers=headers_with_count, timeout=10)
+                response = requests.get(url_count, headers=headers_with_count, timeout=10)
 
                 # 200 = OK, 206 = Partial Content (respuesta válida con paginación)
                 if response.status_code not in [200, 206]:
@@ -2921,7 +2970,56 @@ def administradores_dashboard():
                 total_registros = int(content_range.split("/")[-1])
 
                 # Parsear respuesta JSON
-                administradores = response.json()
+                administradores_base = response.json()
+
+                # Obtener conteos de clientes por administrador
+                clientes_response = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/clientes?select=administrador_id",
+                    headers=HEADERS,
+                    timeout=10
+                )
+                clientes_data = clientes_response.json() if clientes_response.status_code == 200 else []
+
+                # Obtener conteos de oportunidades (a través de clientes)
+                oportunidades_response = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/oportunidades?select=cliente_id,clientes!inner(administrador_id)",
+                    headers=HEADERS,
+                    timeout=10
+                )
+                oportunidades_data = oportunidades_response.json() if oportunidades_response.status_code == 200 else []
+
+                # Contar clientes por administrador
+                clientes_por_admin = {}
+                for cliente in clientes_data:
+                    admin_id = cliente.get('administrador_id')
+                    if admin_id:
+                        clientes_por_admin[admin_id] = clientes_por_admin.get(admin_id, 0) + 1
+
+                # Contar oportunidades por administrador
+                oportunidades_por_admin = {}
+                for oportunidad in oportunidades_data:
+                    cliente_info = oportunidad.get('clientes')
+                    if cliente_info:
+                        admin_id = cliente_info.get('administrador_id')
+                        if admin_id:
+                            oportunidades_por_admin[admin_id] = oportunidades_por_admin.get(admin_id, 0) + 1
+
+                # Agregar conteos a cada administrador
+                for admin in administradores_base:
+                    admin_id = admin['id']
+                    admin['num_oportunidades'] = oportunidades_por_admin.get(admin_id, 0)
+                    admin['num_instalaciones'] = clientes_por_admin.get(admin_id, 0)
+
+                # Ordenar por: 1) num_oportunidades DESC, 2) num_instalaciones DESC
+                administradores_base.sort(
+                    key=lambda x: (x.get('num_oportunidades', 0), x.get('num_instalaciones', 0)),
+                    reverse=True
+                )
+
+                # Aplicar paginación después del ordenamiento
+                start_idx = offset
+                end_idx = offset + limit
+                administradores = administradores_base[start_idx:end_idx]
 
             except Exception as e:
                 print(f"Excepción al cargar administradores: {str(e)}")

@@ -589,6 +589,14 @@
                         <span class="admin-list-location">
                             {{ admin.localidad or 'Sin localidad' }}
                         </span>
+                        <div class="admin-list-info">
+                            <span class="admin-list-info-item">
+                                <strong>{{ admin.num_oportunidades or 0 }}</strong> oportunidad{{ 'es' if (admin.num_oportunidades or 0) != 1 else '' }}
+                            </span>
+                            <span class="admin-list-info-item">
+                                <strong>{{ admin.num_instalaciones or 0 }}</strong> instalación{{ 'es' if (admin.num_instalaciones or 0) != 1 else '' }}
+                            </span>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
