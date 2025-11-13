@@ -7,6 +7,19 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=5">
     <style>
+        /* HEADER CENTRADO */
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         .menu-toggle {
             display: none;
             position: fixed;
@@ -223,9 +236,6 @@
                 <a href="/home">
                     <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="FEDES Logo" class="logo">
                 </a>
-            </div>
-            <div class="title-container">
-                <h1> Introducir datos</h1>
             </div>
         </div>
     </header>
