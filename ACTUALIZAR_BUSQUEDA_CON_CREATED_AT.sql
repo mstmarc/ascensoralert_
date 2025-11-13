@@ -21,7 +21,7 @@ RETURNS TABLE (
     nombre_cliente text,
     localidad text,
     empresa_mantenedora text,
-    numero_ascensores int,
+    numero_ascensores text,
     created_at timestamp with time zone,
     total_count bigint
 )
