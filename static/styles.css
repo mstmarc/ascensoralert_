@@ -29,12 +29,10 @@ body {
 /* Header fijo con más altura */
 header {
     background: white;
-    border-bottom: 2px solid #003366;
     padding: 15px 0; /* 🔼 Padding vertical añadido */
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     height: 90px; /* 🔼 Aumentado de 60px a 90px */
 }
 
@@ -49,10 +47,8 @@ header {
     height: 100%;
 }
 
-/* Logo fijo a la izquierda - MÁS GRANDE */
+/* Logo container - Centrado por defecto */
 .logo-container {
-    position: absolute;
-    left: 20px;
     display: flex;
     align-items: center;
     height: 100%;
@@ -689,11 +685,7 @@ button.btn-buscar:hover {
     .header-container {
         padding: 0 15px;
     }
-    
-    .logo-container {
-        left: 15px;
-    }
-    
+
     .logo {
         height: 40px; /* 🔼 Más grande en móvil */
     }
@@ -803,11 +795,7 @@ button.btn-buscar:hover {
     .header-container {
         padding: 0 25px;
     }
-    
-    .logo-container {
-        left: 25px;
-    }
-    
+
     .logo {
         height: 50px;
     }
@@ -834,11 +822,7 @@ button.btn-buscar:hover {
     .header-container {
         padding: 0 30px;
     }
-    
-    .logo-container {
-        left: 30px;
-    }
-    
+
     .logo {
         height: 58px; /* 🔼 Aún más grande en desktop */
     }

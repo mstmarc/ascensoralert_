@@ -21,7 +21,6 @@
             width: 240px;
             height: calc(100vh - 90px);
             background: white;
-            border-right: 1px solid #ddd;
             z-index: 800;
             overflow-y: auto;
             font-family: 'Montserrat', sans-serif;
@@ -108,21 +107,20 @@
         /* Botón toggle móvil */
         .sidebar-mobile-btn {
             position: fixed;
-            top: 80px; /* 🔼 Justo debajo del header móvil de 70px */
+            top: 20px;
             left: 15px;
             z-index: 801;
-            background: white;
+            background: transparent;
             color: #333;
-            border: 1px solid #ddd;
+            border: none;
             width: 42px;
             height: 42px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 22px;
             display: none;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .sidebar-mobile-btn:hover {
