@@ -28,25 +28,6 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* Estilos específicos del buscador en homepage */
-        .search-section {
-            padding: 40px;
-            margin-bottom: 30px;
-        }
-
-        .search-section h2 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 24px;
-            text-align: center;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .search-box {
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
         /* Cards de métricas */
         .metrics-grid {
             display: grid;
@@ -338,9 +319,9 @@
     <main>
         <div class="homepage-container">
             <!-- Buscador destacado -->
-            <div class="buscador-destacado search-section">
-                <h2>🔍 Buscar Comunidad</h2>
-                <form action="/leads_dashboard" method="GET" class="buscador-input-container search-box">
+            <div class="buscador-destacado">
+                <div class="buscador-label">Buscar Comunidad</div>
+                <form action="/leads_dashboard" method="GET" class="buscador-input-container">
                     <input
                         type="text"
                         name="search"
