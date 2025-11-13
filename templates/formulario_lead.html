@@ -39,6 +39,12 @@
             margin: 0 !important;
         }
 
+        .container {
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
         @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } }
     </style>
 </head>
@@ -65,7 +71,8 @@
 </header>
     <main>
         <div class="menu">
-            <form method="POST">
+            <div class="container">
+                <form method="POST">
                 <label>Fecha de Visita:</label><br>
                 <input type="date" name="fecha_visita" value="{{ fecha_hoy }}"><br><br>
 
@@ -133,7 +140,7 @@
                     <option value="Vecindario">Vecindario</option>
                 </select><br><br>
 
-                <label>Administrador de Fincas (de la base de datos):</label><br>
+                <label>Administrador de Fincas:</label><br>
                 <input
                     type="text"
                     id="administrador_search"
@@ -227,6 +234,7 @@
                     <a href="/home" class="button">Volver</a>
                 </div>
             </form>
+            </div>
         </div>
     </main>
     
