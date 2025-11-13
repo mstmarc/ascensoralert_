@@ -6,19 +6,45 @@
     <title>Dashboard Leads - AscensorAlert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="/static/styles.css?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
 
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            line-height: 1.5;
+        }
+
         /* Ajustar contenedor del dashboard para ancho completo */
         main {
-            max-width: none !important;
-            padding: 30px !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 60px 80px !important;
+            background: #ffffff;
         }
 
         main .menu {
             max-width: none !important;
             width: 100% !important;
             margin: 0 !important;
+        }
+
+        /* HEADER DE PÁGINA */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            margin: 0;
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
         }
 
         /* Filtros con botones alineados horizontalmente */
@@ -257,6 +283,20 @@
         .color-rojo { background-color: #FFCDD2; }
 
         @media (max-width: 768px) {
+            main {
+                padding: 40px 20px !important;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .page-header .btn {
+                width: 100%;
+            }
+
             .filtros {
                 padding: 10px;
             }
@@ -326,6 +366,14 @@
     </header>
     <main>
         <div class="menu">
+            <!-- Header de página con título y botón -->
+            <div class="page-header">
+                <h2 class="page-title">Gestión de Instalaciones</h2>
+                <a href="/nuevo_lead" class="btn btn-primary">
+                    ➕ Nueva Instalación
+                </a>
+            </div>
+
             <form method="GET" action="/leads_dashboard">
                 <div class="buscador-destacado">
                     <div class="buscador-label">Buscar por Direccion</div>
