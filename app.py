@@ -2291,14 +2291,19 @@ def oportunidades():
         
         if response.status_code == 200:
             oportunidades_list = response.json()
-            
-            activas = sum(1 for o in oportunidades_list if o['estado'] == 'activa')
+
+            # Contar por estado
+            nuevas = sum(1 for o in oportunidades_list if o['estado'] == 'nueva')
+            presupuesto_preparacion = sum(1 for o in oportunidades_list if o['estado'] == 'presupuesto_preparacion')
+            presupuesto_enviado = sum(1 for o in oportunidades_list if o['estado'] == 'presupuesto_enviado')
             ganadas = sum(1 for o in oportunidades_list if o['estado'] == 'ganada')
             perdidas = sum(1 for o in oportunidades_list if o['estado'] == 'perdida')
-            
+
             return render_template("oportunidades.html",
                                         oportunidades=oportunidades_list,
-                                        activas=activas,
+                                        nuevas=nuevas,
+                                        presupuesto_preparacion=presupuesto_preparacion,
+                                        presupuesto_enviado=presupuesto_enviado,
                                         ganadas=ganadas,
                                         perdidas=perdidas)
         else:

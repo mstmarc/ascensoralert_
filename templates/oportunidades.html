@@ -99,8 +99,10 @@
             line-height: 1;
         }
 
-        .stat-card.activas .number { color: #27ae60; }
-        .stat-card.ganadas .number { color: #003366; }
+        .stat-card.nuevas .number { color: #1976d2; }
+        .stat-card.presupuesto-preparacion .number { color: #7b1fa2; }
+        .stat-card.presupuesto-enviado .number { color: #f57f17; }
+        .stat-card.ganadas .number { color: #27ae60; }
         .stat-card.perdidas .number { color: #dc3545; }
         
         /* SECTION TITLE PARA LISTA */
@@ -287,8 +289,20 @@
 
                 <!-- ESTADÍSTICAS -->
                 <div class="stats">
+                    <div class="stat-card nuevas">
+                        <h3>Nuevas</h3>
+                        <div class="number">{{ nuevas }}</div>
+                    </div>
+                    <div class="stat-card presupuesto-preparacion">
+                        <h3>Presupuesto en Preparación</h3>
+                        <div class="number">{{ presupuesto_preparacion }}</div>
+                    </div>
+                    <div class="stat-card presupuesto-enviado">
+                        <h3>Presupuesto Enviado</h3>
+                        <div class="number">{{ presupuesto_enviado }}</div>
+                    </div>
                     <div class="stat-card ganadas">
-                        <h3>Ganadas (Total)</h3>
+                        <h3>Ganadas</h3>
                         <div class="number">{{ ganadas }}</div>
                     </div>
                     <div class="stat-card perdidas">
