@@ -117,14 +117,11 @@ main {
 }
 
 .menu {
-    background: white;
-    border-radius: 15px;
+    background: transparent;
     padding: 40px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
     max-width: 800px;
     width: calc(100% - 40px);
-    border: 1px solid #e1e5e9;
     text-align: center;
 }
 
