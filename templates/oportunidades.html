@@ -50,19 +50,19 @@
 
         /* HEADER DE PÁGINA */
         .page-header {
-            background: transparent;
-            padding: 0 0 20px 0;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #003366;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .page-header h2 {
-            font-size: 22px;
-            color: #003366;
+        .page-title {
             margin: 0;
+            color: #003366;
+            font-size: 22px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         /* STATS CARDS - MINIMALISTA */
@@ -231,6 +231,16 @@
                 padding: 40px 20px !important;
             }
 
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .page-header .btn {
+                width: 100%;
+            }
+
             .stats {
                 grid-template-columns: 1fr;
             }
@@ -263,7 +273,7 @@
             <div class="container">
                 <!-- HEADER DE PÁGINA -->
                 <div class="page-header">
-                    <h2>Todas las Oportunidades</h2>
+                    <h2 class="page-title">Todas las Oportunidades</h2>
                 </div>
 
                 <!-- ALERTS -->
@@ -277,10 +287,6 @@
 
                 <!-- ESTADÍSTICAS -->
                 <div class="stats">
-                    <div class="stat-card activas">
-                        <h3>Activas</h3>
-                        <div class="number">{{ activas }}</div>
-                    </div>
                     <div class="stat-card ganadas">
                         <h3>Ganadas (Total)</h3>
                         <div class="number">{{ ganadas }}</div>
