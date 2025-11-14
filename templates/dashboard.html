@@ -65,7 +65,6 @@
             background: transparent;
             padding: 15px 0;
             margin-bottom: 15px;
-            border-bottom: 2px solid #e6e6e6;
         }
 
         .filtros-grid {
@@ -134,7 +133,6 @@
             padding: 12px 0;
             background: transparent;
             flex-wrap: wrap;
-            border-bottom: 2px solid #e6e6e6;
         }
 
         .paginacion-info {
@@ -151,7 +149,6 @@
             font-size: 14px;
             background: transparent;
             padding: 12px 0;
-            border-bottom: 2px solid #e6e6e6;
         }
         
         .tabla-container {
@@ -206,17 +203,20 @@
         }
 
         .lead-list-item {
-            background: transparent;
-            padding: 16px 0;
+            background: #fafafa;
+            padding: 16px;
+            border-radius: 12px;
             transition: all 0.2s ease;
             cursor: pointer;
             position: relative;
-            border: none;
-            border-bottom: 2px solid #e6e6e6;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
         }
 
         .lead-list-item:hover {
-            border-bottom-color: #003366;
+            background: #f0f3f8;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            border-color: #003366;
         }
 
         .lead-list-direccion {
@@ -252,7 +252,6 @@
             background: transparent;
             padding: 10px 0;
             margin: 15px 0;
-            border-bottom: 2px solid #e6e6e6;
         }
 
         .leyenda h3 {
@@ -316,7 +315,7 @@
 
             /* Ajustar listado compacto en móvil */
             .lead-list-item {
-                padding: 12px 0;
+                padding: 12px;
             }
 
             .lead-list-direccion {
@@ -457,7 +456,7 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div style="text-align: left; padding: 40px 0; color: #999; background: transparent; margin-top: 20px; border-bottom: 2px solid #e6e6e6;">
+                <div style="text-align: left; padding: 40px 0; color: #999; background: transparent; margin-top: 20px;">
                     No se encontraron comunidades con los filtros aplicados
                 </div>
             {% endif %}
