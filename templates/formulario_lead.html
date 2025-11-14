@@ -45,15 +45,7 @@
             padding: 0 15px;
         }
 
-        .form-card {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 1px solid #e1e5e9;
-        }
-
-        .form-card h2 {
+        h2 {
             font-size: 20px;
             color: #366092;
             margin-bottom: 20px;
@@ -166,10 +158,9 @@
 </header>
     <main>
         <div class="container">
-            <div class="form-card">
-                <h2>Datos de la Visita a Instalación</h2>
+            <h2>Datos de la Visita a Instalación</h2>
 
-                <form method="POST">
+            <form method="POST">
                     <div class="form-group">
                         <label for="fecha_visita">Fecha de Visita <span class="required">*</span></label>
                         <input type="date" id="fecha_visita" name="fecha_visita" value="{{ fecha_hoy }}" required>
@@ -358,12 +349,11 @@
                         <textarea id="observaciones" name="observaciones"></textarea>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Registrar Lead</button>
-                        <a href="/home" class="btn btn-secondary">Volver</a>
-                    </div>
-                </form>
-            </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Registrar Lead</button>
+                    <a href="/home" class="btn btn-secondary">Volver</a>
+                </div>
+            </form>
         </div>
     </main>
     
