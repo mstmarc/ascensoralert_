@@ -62,12 +62,10 @@
 
         /* Filtros con botones alineados horizontalmente */
         .filtros {
-            background: #fafafa;
-            padding: 15px;
-            border-radius: 12px;
+            background: transparent;
+            padding: 15px 0;
             margin-bottom: 15px;
-            border: 1px solid #f0f0f0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border-bottom: 2px solid #e6e6e6;
         }
 
         .filtros-grid {
@@ -133,11 +131,10 @@
             align-items: center;
             gap: 12px;
             margin: 15px 0;
-            padding: 12px;
-            background: #fafafa;
-            border-radius: 8px;
+            padding: 12px 0;
+            background: transparent;
             flex-wrap: wrap;
-            border: 1px solid #f0f0f0;
+            border-bottom: 2px solid #e6e6e6;
         }
 
         .paginacion-info {
@@ -152,10 +149,9 @@
             margin: 15px 0;
             font-weight: 600;
             font-size: 14px;
-            background: #fafafa;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #f0f0f0;
+            background: transparent;
+            padding: 12px 0;
+            border-bottom: 2px solid #e6e6e6;
         }
         
         .tabla-container {
@@ -210,16 +206,17 @@
         }
 
         .lead-list-item {
-            background: #fafafa;
-            padding: 16px;
-            border-radius: 12px;
+            background: transparent;
+            padding: 16px 0;
             transition: all 0.2s ease;
             cursor: pointer;
             position: relative;
+            border: none;
+            border-bottom: 2px solid #e6e6e6;
         }
 
         .lead-list-item:hover {
-            background: #f0f3f8;
+            border-bottom-color: #003366;
         }
 
         .lead-list-direccion {
@@ -252,11 +249,10 @@
         }
 
         .leyenda {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
+            background: transparent;
+            padding: 10px 0;
             margin: 15px 0;
-            border: 1px solid #ddd;
+            border-bottom: 2px solid #e6e6e6;
         }
 
         .leyenda h3 {
@@ -307,7 +303,7 @@
             }
 
             .filtros {
-                padding: 10px;
+                padding: 10px 0;
             }
 
             .filtros-grid {
@@ -320,7 +316,7 @@
 
             /* Ajustar listado compacto en móvil */
             .lead-list-item {
-                padding: 12px;
+                padding: 12px 0;
             }
 
             .lead-list-direccion {
@@ -461,7 +457,7 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div style="text-align: left; padding: 40px; color: #999; background: white; border-radius: 8px; margin-top: 20px;">
+                <div style="text-align: left; padding: 40px 0; color: #999; background: transparent; margin-top: 20px; border-bottom: 2px solid #e6e6e6;">
                     No se encontraron comunidades con los filtros aplicados
                 </div>
             {% endif %}
