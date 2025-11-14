@@ -85,12 +85,10 @@
         }
 
         .info-oportunidad {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
+            background: transparent;
+            padding: 15px 0;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #366092;
+            border-bottom: 2px solid #e1e5e9;
         }
 
         .info-oportunidad h3 {
@@ -104,15 +102,7 @@
             font-size: 14px;
         }
 
-        .form-card {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 1px solid #e1e5e9;
-        }
-
-        .form-card h2 {
+        h2 {
             font-size: 20px;
             color: #366092;
             margin-bottom: 20px;
@@ -212,7 +202,6 @@
         @media (max-width: 768px) {
             .menu-toggle { display: block; }
             .menu-lateral { display: block; }
-            .form-card { padding: 20px 15px; }
             .form-actions { flex-direction: column; }
             .btn { width: 100%; }
         }
@@ -250,10 +239,9 @@
             </div>
             {% endif %}
 
-            <div class="form-card">
-                <h2>Datos de la Visita</h2>
+            <h2>Datos de la Visita</h2>
 
-                <form method="POST">
+            <form method="POST">
                     {% if oportunidad %}
                     <input type="hidden" name="oportunidad_id" value="{{ oportunidad.id }}">
                     {% endif %}
@@ -307,7 +295,6 @@
                         {% endif %}
                     </div>
                 </form>
-            </div>
         </div>
     </main>
 
