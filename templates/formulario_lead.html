@@ -45,6 +45,101 @@
             padding: 0 15px;
         }
 
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .form-card h2 {
+            font-size: 20px;
+            color: #366092;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #366092;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #366092;
+            box-shadow: 0 0 0 3px rgba(54, 96, 146, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .required {
+            color: red;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #366092;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2a4d73;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
         @media (max-width: 768px) { .menu-toggle { display: block; } .menu-lateral { display: block; } }
     </style>
 </head>
@@ -70,32 +165,45 @@
         </div>
 </header>
     <main>
-        <div class="menu">
-            <div class="container">
+        <div class="container">
+            <div class="form-card">
+                <h2>Datos de la Visita a Instalación</h2>
+
                 <form method="POST">
-                <label>Fecha de Visita:</label><br>
-                <input type="date" name="fecha_visita" value="{{ fecha_hoy }}"><br><br>
+                    <div class="form-group">
+                        <label for="fecha_visita">Fecha de Visita <span class="required">*</span></label>
+                        <input type="date" id="fecha_visita" name="fecha_visita" value="{{ fecha_hoy }}" required>
+                    </div>
 
-                <label>Tipo de Lead:</label><br>
-                <select name="tipo_lead">
-                    <option value="">-- Selecciona un tipo --</option>
-                    <option value="Comunidad">Comunidad</option>
-                    <option value="Hotel/Apartamentos">Hotel/Apartamentos</option>
-                    <option value="Empresa">Empresa</option>
-                    <option value="Otro">Otro</option>
-                </select><br><br>
+                    <div class="form-group">
+                        <label for="tipo_lead">Tipo de Lead</label>
+                        <select id="tipo_lead" name="tipo_lead">
+                            <option value="">-- Selecciona un tipo --</option>
+                            <option value="Comunidad">Comunidad</option>
+                            <option value="Hotel/Apartamentos">Hotel/Apartamentos</option>
+                            <option value="Empresa">Empresa</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
 
-                <label>Dirección: *</label><br>
-                <input type="text" name="direccion" required><br><br>
+                    <div class="form-group">
+                        <label for="direccion">Dirección <span class="required">*</span></label>
+                        <input type="text" id="direccion" name="direccion" required>
+                    </div>
 
-                <label>Nombre de la Instalación:</label><br>
-                <input type="text" name="nombre_lead"><br><br>
+                    <div class="form-group">
+                        <label for="nombre_lead">Nombre de la Instalación</label>
+                        <input type="text" id="nombre_lead" name="nombre_lead">
+                    </div>
 
-                <label>Código Postal:</label><br>
-                <input type="text" name="codigo_postal"><br><br>
+                    <div class="form-group">
+                        <label for="codigo_postal">Código Postal</label>
+                        <input type="text" id="codigo_postal" name="codigo_postal">
+                    </div>
 
-                <label>Localidad: *</label><br>
-                <select name="localidad" required>
+                    <div class="form-group">
+                        <label for="localidad">Localidad <span class="required">*</span></label>
+                        <select id="localidad" name="localidad" required>
                     <option value="">-- Selecciona una localidad --</option>
                     <option value="Agaete">Agaete</option>
                     <option value="Agüimes">Agüimes</option>
@@ -137,31 +245,33 @@
                     <option value="Teror">Teror</option>
                     <option value="Valleseco">Valleseco</option>
                     <option value="Valsequillo">Valsequillo</option>
-                    <option value="Vecindario">Vecindario</option>
-                </select><br><br>
+                            <option value="Vecindario">Vecindario</option>
+                        </select>
+                    </div>
 
-                <label>Administrador de Fincas:</label><br>
-                <input
-                    type="text"
-                    id="administrador_search"
-                    list="administradores-list"
-                    placeholder="🔍 Buscar administrador..."
-                    autocomplete="off"
-                    style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
-                >
-                <datalist id="administradores-list">
-                    {% for admin in administradores %}
-                    <option value="{{ admin.nombre_empresa }}" data-id="{{ admin.id }}">
-                    {% endfor %}
-                </datalist>
-                <input type="hidden" id="administrador_id" name="administrador_id">
-                <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                    💡 Escribe para buscar o selecciona de la lista
-                </small>
-                <br><br>
+                    <div class="form-group">
+                        <label for="administrador_search">Administrador de Fincas</label>
+                        <input
+                            type="text"
+                            id="administrador_search"
+                            list="administradores-list"
+                            placeholder="🔍 Buscar administrador..."
+                            autocomplete="off"
+                        >
+                        <datalist id="administradores-list">
+                            {% for admin in administradores %}
+                            <option value="{{ admin.nombre_empresa }}" data-id="{{ admin.id }}">
+                            {% endfor %}
+                        </datalist>
+                        <input type="hidden" id="administrador_id" name="administrador_id">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            💡 Escribe para buscar o selecciona de la lista
+                        </small>
+                    </div>
 
-                <label>Número de Ascensores:</label><br>
-                <select name="numero_ascensores">
+                    <div class="form-group">
+                        <label for="numero_ascensores">Número de Ascensores</label>
+                        <select id="numero_ascensores" name="numero_ascensores">
                     <option value="">-- Cuantos ascensores hay? --</option>
                     <option value="1">1 ascensor</option>
                     <option value="2">2 ascensores</option>
@@ -182,12 +292,14 @@
                     <option value="17">17 ascensores</option>
                     <option value="18">18 ascensores</option>
                     <option value="19">19 ascensores</option>
-                    <option value="20">20 ascensores</option>
-                    <option value="20+">Más de 20 ascensores</option>
-                </select><br><br>
+                            <option value="20">20 ascensores</option>
+                            <option value="20+">Más de 20 ascensores</option>
+                        </select>
+                    </div>
 
-                <label>Empresa Mantenedora Actual:</label><br>
-                <select name="empresa_mantenedora">
+                    <div class="form-group">
+                        <label for="empresa_mantenedora">Empresa Mantenedora Actual</label>
+                        <select id="empresa_mantenedora" name="empresa_mantenedora">
                     <option value="">-- Selecciona una empresa --</option>
                     <option value="FAIN Ascensores">FAIN Ascensores</option>
                     <option value="KONE">KONE</option>
@@ -204,36 +316,53 @@
                     <option value="Gratecsa">Gratecsa</option>
                     <option value="Lift Technology">Lift Technology</option>
                     <option value="Omega Elevadores">Omega Elevadores</option>
-                    <option value="Q Ascensores">Q Ascensores</option>
-                </select><br><br>
+                            <option value="Q Ascensores">Q Ascensores</option>
+                        </select>
+                    </div>
 
-                <label>Fecha de Fin de Contrato:</label><br>
-                <input type="date" name="fecha_fin_contrato"><br>
-                <small style="color: #666; font-size: 12px;">📅 Dato muy valioso para seguimiento comercial (120 días antes se crea tarea abierta)</small><br><br>
+                    <div class="form-group">
+                        <label for="fecha_fin_contrato">Fecha de Fin de Contrato</label>
+                        <input type="date" id="fecha_fin_contrato" name="fecha_fin_contrato">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            📅 Dato muy valioso para seguimiento comercial (120 días antes se crea tarea abierta)
+                        </small>
+                    </div>
 
-                <label>Paradas:</label><br>
-                <input type="number" name="paradas" min="0" placeholder="Número de paradas"><br><br>
+                    <div class="form-group">
+                        <label for="paradas">Paradas</label>
+                        <input type="number" id="paradas" name="paradas" min="0" placeholder="Número de paradas">
+                    </div>
 
-                <label>Viviendas por Planta:</label><br>
-                <input type="number" name="viviendas_por_planta" min="0" placeholder="Número de viviendas por planta"><br><br>
+                    <div class="form-group">
+                        <label for="viviendas_por_planta">Viviendas por Planta</label>
+                        <input type="number" id="viviendas_por_planta" name="viviendas_por_planta" min="0" placeholder="Número de viviendas por planta">
+                    </div>
 
-                <label>Persona de Contacto:</label><br>
-                <input type="text" name="persona_contacto"><br><br>
+                    <div class="form-group">
+                        <label for="persona_contacto">Persona de Contacto</label>
+                        <input type="text" id="persona_contacto" name="persona_contacto">
+                    </div>
 
-                <label>Teléfono:</label><br>
-                <input type="text" name="telefono"><br><br>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="text" id="telefono" name="telefono">
+                    </div>
 
-                <label>Email:</label><br>
-                <input type="email" name="email"><br><br>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email">
+                    </div>
 
-                <label>Observaciones:</label><br>
-                <textarea name="observaciones"></textarea><br><br>
+                    <div class="form-group">
+                        <label for="observaciones">Observaciones</label>
+                        <textarea id="observaciones" name="observaciones"></textarea>
+                    </div>
 
-                <div class="botones-form">
-                    <button type="submit" class="button">Registrar Lead</button>
-                    <a href="/home" class="button">Volver</a>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Registrar Lead</button>
+                        <a href="/home" class="btn btn-secondary">Volver</a>
+                    </div>
+                </form>
             </div>
         </div>
     </main>
