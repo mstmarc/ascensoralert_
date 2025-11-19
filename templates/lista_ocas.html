@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de OCAs - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        header .header-container { display: flex; justify-content: center; align-items: center; }
+        header .logo-container { display: flex; justify-content: center; align-items: center; }
+
+        body { font-family: 'Montserrat', sans-serif; background: #ffffff; }
+        main { max-width: 1200px !important; margin: 0 auto !important; padding: 60px 80px !important; }
+        main .menu { max-width: none !important; width: 100% !important; margin: 0 !important; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .leads-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .lead-list-item {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 18px 22px;
+            transition: all 0.2s;
+        }
+
+        .lead-list-item:hover {
+            border-color: #003366;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+        }
+
+        .lead-list-direccion {
+            color: #003366;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .lead-list-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .lead-list-info-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-inactivo {
+            background: #f0f0f0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="menu">
+            <div class="page-header">
+                <h2 class="page-title">Gestión de OCAs (Organismos de Control)</h2>
+                <div>
+                    <a href="/inspecciones" class="btn btn-secondary" style="margin-right: 10px;">Volver a Inspecciones</a>
+                    <a href="/ocas/nuevo" class="btn btn-primary">+ Nuevo OCA</a>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div style="background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                              color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                              padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            {% if ocas %}
+                <div class="leads-list">
+                    {% for oca in ocas %}
+                    <div class="lead-list-item">
+                        <a href="/ocas/editar/{{ oca.id }}" class="lead-list-direccion">
+                            {{ oca.nombre }}
+                        </a>
+                        <div class="lead-list-info">
+                            {% if oca.contacto_nombre %}
+                            <span class="lead-list-info-item">
+                                Contacto: <strong>{{ oca.contacto_nombre }}</strong>
+                            </span>
+                            {% endif %}
+                            {% if oca.contacto_telefono %}
+                            <span class="lead-list-info-item">
+                                Tel: {{ oca.contacto_telefono }}
+                            </span>
+                            {% endif %}
+                            {% if oca.contacto_email %}
+                            <span class="lead-list-info-item">
+                                Email: {{ oca.contacto_email }}
+                            </span>
+                            {% endif %}
+                            <span class="lead-list-info-item">
+                                Inspecciones: <strong>{{ oca.total_inspecciones }}</strong>
+                            </span>
+                            <span class="lead-list-info-item">
+                                <span class="badge {% if not oca.activo %}badge-inactivo{% endif %}">
+                                    {{ 'ACTIVO' if oca.activo else 'INACTIVO' }}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: #999; font-size: 15px;">
+                    No hay OCAs registrados
+                </div>
+            {% endif %}
+
+            <br><br>
+            <a href="/inspecciones" class="button">Volver a Inspecciones</a>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>

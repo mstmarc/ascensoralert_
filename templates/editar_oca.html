@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar OCA - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        header .header-container { display: flex; justify-content: center; align-items: center; }
+        header .logo-container { display: flex; justify-content: center; align-items: center; }
+
+        body { font-family: 'Montserrat', sans-serif; background: #ffffff; }
+        main { max-width: 800px !important; margin: 0 auto !important; padding: 40px !important; }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 30px 0;
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        form input, form textarea, form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .button {
+            background: #003c80;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1a1a1a;
+            border: 1px solid #000;
+            padding: 12px 24px;
+            margin-left: 10px;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 12px 24px;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="page-title">Editar OCA</h2>
+
+        <form method="POST">
+            <label>Nombre del OCA: *</label>
+            <input type="text" name="nombre" value="{{ oca.nombre }}" required>
+
+            <div class="form-grid">
+                <div>
+                    <label>Nombre de Contacto:</label>
+                    <input type="text" name="contacto_nombre" value="{{ oca.contacto_nombre }}">
+                </div>
+                <div>
+                    <label>Teléfono:</label>
+                    <input type="text" name="contacto_telefono" value="{{ oca.contacto_telefono }}">
+                </div>
+            </div>
+
+            <label>Email:</label>
+            <input type="email" name="contacto_email" value="{{ oca.contacto_email }}">
+
+            <label>Dirección:</label>
+            <input type="text" name="direccion" value="{{ oca.direccion }}">
+
+            <label>Estado:</label>
+            <select name="activo">
+                <option value="true" {% if oca.activo %}selected{% endif %}>ACTIVO</option>
+                <option value="false" {% if not oca.activo %}selected{% endif %}>INACTIVO</option>
+            </select>
+
+            <label>Observaciones:</label>
+            <textarea name="observaciones" rows="4">{{ oca.observaciones }}</textarea>
+
+            <div style="margin-top: 30px; display: flex; align-items: center;">
+                <button type="submit" class="button">Guardar Cambios</button>
+                <a href="/ocas" class="btn-secondary">Cancelar</a>
+                <a href="/ocas/eliminar/{{ oca.id }}" class="btn-danger" onclick="return confirm('¿Eliminar este OCA?')">Eliminar</a>
+            </div>
+        </form>
+    </main>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>

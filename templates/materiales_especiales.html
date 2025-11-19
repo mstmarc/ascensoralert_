@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materiales Especiales - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        header .header-container { display: flex; justify-content: center; align-items: center; }
+        header .logo-container { display: flex; justify-content: center; align-items: center; }
+
+        body { font-family: 'Montserrat', sans-serif; background: #ffffff; }
+        main { max-width: 1400px !important; margin: 0 auto !important; padding: 60px 80px !important; }
+        main .menu { max-width: none !important; width: 100% !important; margin: 0 !important; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 2px solid #e6e6e6;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: #003366;
+            transform: translateY(-2px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #003366;
+        }
+
+        .filtros {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filtro-grupo label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .filtro-grupo select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .materiales-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .materiales-table th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 700;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .materiales-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .materiales-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pendiente { background: #f0f0f0; color: #666; }
+        .badge-pedido { background: #e3f2fd; color: #1565c0; }
+        .badge-recibido { background: #fff8e1; color: #f57c00; }
+        .badge-instalado { background: #e8f5e9; color: #2e7d32; }
+
+        .badge-vencido { background: #fee; color: #c62828; }
+        .badge-urgente { background: #fff8e1; color: #856404; }
+        .badge-proximo { background: #fff8e1; color: #f57c00; }
+        .badge-normal { background: #e8f5e9; color: #2e7d32; }
+        .badge-completado { background: #e8f5e9; color: #2e7d32; }
+
+        .badge-cortina { background: #e3f2fd; color: #1565c0; }
+        .badge-pesacarga { background: #fff8e1; color: #f57c00; }
+
+        .cambio-estado-form {
+            display: inline-flex;
+            gap: 5px;
+        }
+
+        .cambio-estado-form select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .cambio-estado-form button {
+            padding: 6px 12px;
+            background: #003c80;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="menu">
+            <div class="page-header">
+                <h2 class="page-title">Cortinas Fotoeléctricas y Pesacargas</h2>
+                <div>
+                    <a href="/inspecciones" class="btn btn-secondary" style="margin-right: 10px;">Volver a Inspecciones</a>
+                    <a href="/materiales_especiales/nuevo" class="btn btn-primary">+ Nuevo Material</a>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div style="background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                              color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                              padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <!-- Estadísticas -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Materiales</h3>
+                    <div class="number">{{ total_materiales }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pendientes</h3>
+                    <div class="number">{{ pendientes }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pedidos</h3>
+                    <div class="number">{{ pedidos }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Recibidos</h3>
+                    <div class="number">{{ recibidos }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Instalados</h3>
+                    <div class="number">{{ instalados }}</div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filtros">
+                <form method="GET">
+                    <div class="filtros-grid">
+                        <div class="filtro-grupo">
+                            <label>Tipo:</label>
+                            <select name="tipo">
+                                <option value="">Todos</option>
+                                <option value="CORTINA" {% if filtro_tipo == 'CORTINA' %}selected{% endif %}>CORTINA</option>
+                                <option value="PESACARGA" {% if filtro_tipo == 'PESACARGA' %}selected{% endif %}>PESACARGA</option>
+                            </select>
+                        </div>
+                        <div class="filtro-grupo">
+                            <label>Estado:</label>
+                            <select name="estado">
+                                <option value="">Todos</option>
+                                <option value="PENDIENTE" {% if filtro_estado == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                                <option value="PEDIDO" {% if filtro_estado == 'PEDIDO' %}selected{% endif %}>PEDIDO</option>
+                                <option value="RECIBIDO" {% if filtro_estado == 'RECIBIDO' %}selected{% endif %}>RECIBIDO</option>
+                                <option value="INSTALADO" {% if filtro_estado == 'INSTALADO' %}selected{% endif %}>INSTALADO</option>
+                            </select>
+                        </div>
+                        <div class="filtro-grupo">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Filtrar</button>
+                        </div>
+                        <div class="filtro-grupo">
+                            <label>&nbsp;</label>
+                            <a href="/materiales_especiales" class="btn btn-secondary" style="width: 100%; text-align: center; display: block; padding: 8px;">Limpiar</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabla de Materiales -->
+            {% if materiales %}
+                <table class="materiales-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Tipo</th>
+                            <th>Cliente</th>
+                            <th>Dirección</th>
+                            <th style="width: 80px;">Cantidad</th>
+                            <th style="width: 110px;">Fecha Límite</th>
+                            <th style="width: 100px;">Urgencia</th>
+                            <th style="width: 100px;">Estado</th>
+                            <th style="width: 220px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for material in materiales %}
+                        <tr>
+                            <td>
+                                <span class="badge badge-{{ material.tipo|lower }}">
+                                    {{ material.tipo }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong>{{ material.cliente_nombre }}</strong>
+                                {% if material.inspeccion %}
+                                    <br><small style="color: #999;">RAE: {{ material.inspeccion.rae }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ material.direccion or '-' }}</td>
+                            <td style="text-align: center;">{{ material.cantidad }}</td>
+                            <td>{{ material.fecha_limite|format_fecha }}</td>
+                            <td>
+                                <span class="badge badge-{{ material.urgencia|lower }}">
+                                    {{ material.urgencia }}
+                                </span>
+                                {% if material.dias_restantes is defined %}
+                                    <br><small style="color: #999;">
+                                        {{ material.dias_restantes if material.dias_restantes >= 0 else material.dias_restantes|abs }} días
+                                    </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ material.estado|lower }}">
+                                    {{ material.estado }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if material.estado != 'INSTALADO' %}
+                                <form method="POST" action="/materiales_especiales/{{ material.id }}/estado" class="cambio-estado-form">
+                                    <select name="estado">
+                                        <option value="PENDIENTE" {% if material.estado == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                                        <option value="PEDIDO" {% if material.estado == 'PEDIDO' %}selected{% endif %}>PEDIDO</option>
+                                        <option value="RECIBIDO" {% if material.estado == 'RECIBIDO' %}selected{% endif %}>RECIBIDO</option>
+                                        <option value="INSTALADO" {% if material.estado == 'INSTALADO' %}selected{% endif %}>INSTALADO</option>
+                                    </select>
+                                    <button type="submit">Cambiar</button>
+                                </form>
+                                {% else %}
+                                    <span style="color: #2e7d32; font-weight: 700;">✓ COMPLETADO</span>
+                                {% endif %}
+                                <a href="/materiales_especiales/{{ material.id }}/eliminar" class="btn-danger" onclick="return confirm('¿Eliminar este material?')">Eliminar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: #999; font-size: 15px;">
+                    No hay materiales especiales registrados
+                </div>
+            {% endif %}
+
+            <br><br>
+            <a href="/inspecciones" class="button">Volver a Inspecciones</a>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>

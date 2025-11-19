@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspección {{ inspeccion.rae }} - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        header .header-container { display: flex; justify-content: center; align-items: center; }
+        header .logo-container { display: flex; justify-content: center; align-items: center; }
+
+        body { font-family: 'Montserrat', sans-serif; background: #ffffff; }
+        main { max-width: 1200px !important; margin: 0 auto !important; padding: 40px 60px !important; }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 25px 0;
+        }
+
+        .seccion {
+            background: transparent;
+            padding: 0;
+            margin-top: 40px;
+        }
+
+        .seccion h2 {
+            color: #003366;
+            font-size: 17px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 20px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #003366;
+        }
+
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .info-item label {
+            font-weight: 700;
+            color: #222;
+            min-width: 220px;
+        }
+
+        .info-item label::after {
+            content: ":";
+        }
+
+        .info-item span {
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pendiente { background: #f0f0f0; color: #666; }
+        .badge-preparando { background: #fff8e1; color: #856404; }
+        .badge-enviado { background: #e3f2fd; color: #1565c0; }
+        .badge-aceptado { background: #e8f5e9; color: #2e7d32; }
+        .badge-rechazado { background: #fee; color: #c62828; }
+        .badge-en-ejecucion { background: #fff8e1; color: #f57c00; }
+        .badge-completado { background: #e8f5e9; color: #2e7d32; }
+
+        .badge-vencido { background: #fee; color: #c62828; }
+        .badge-urgente { background: #fff8e1; color: #856404; }
+        .badge-proximo { background: #fff8e1; color: #f57c00; }
+        .badge-normal { background: #e8f5e9; color: #2e7d32; }
+        .badge-subsanado { background: #e8f5e9; color: #2e7d32; }
+
+        .badge-dl { background: #e3f2fd; color: #1565c0; }
+        .badge-dg { background: #fff8e1; color: #f57c00; }
+        .badge-dmg { background: #fee; color: #c62828; }
+
+        .defectos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .defectos-table th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 700;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .defectos-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        .defectos-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 30px;
+        }
+
+        .btn-primary {
+            background: #003c80;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1a1a1a;
+            border: 1px solid #ccc;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        .cambio-estado-form {
+            display: inline-block;
+            margin-left: 15px;
+        }
+
+        .cambio-estado-form select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 13px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .cambio-estado-form button {
+            padding: 6px 12px;
+            background: #003c80;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .materiales-list {
+            margin-top: 20px;
+        }
+
+        .material-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .material-item strong {
+            color: #003366;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">Inspección: {{ inspeccion.titular_nombre }}</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div style="background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                          color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                          padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Sección: Identificación -->
+        <div class="seccion">
+            <h2>Identificación del Ascensor</h2>
+            <div class="info-list">
+                <div class="info-item">
+                    <label>RAE</label>
+                    <span>{{ inspeccion.rae }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Número de Certificado</label>
+                    <span>{{ inspeccion.numero_certificado or '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Fecha de Inspección</label>
+                    <span>{{ inspeccion.fecha_inspeccion|format_fecha }}</span>
+                </div>
+                <div class="info-item">
+                    <label>OCA</label>
+                    <span>{{ inspeccion.oca.nombre if inspeccion.oca else '-' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Titular -->
+        <div class="seccion">
+            <h2>Titular (Cliente Propietario)</h2>
+            <div class="info-list">
+                <div class="info-item">
+                    <label>Nombre del Titular</label>
+                    <span>{{ inspeccion.titular_nombre }}</span>
+                </div>
+                <div class="info-item">
+                    <label>NIF/CIF</label>
+                    <span>{{ inspeccion.titular_nif or '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Dirección de la Instalación</label>
+                    <span>{{ inspeccion.direccion_instalacion }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Municipio</label>
+                    <span>{{ inspeccion.municipio or '-' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Características Técnicas -->
+        <div class="seccion">
+            <h2>Características Técnicas del Ascensor</h2>
+            <div class="info-list">
+                <div class="info-item">
+                    <label>Tipo de Ascensor</label>
+                    <span>{{ inspeccion.tipo_ascensor or '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Capacidad</label>
+                    <span>{{ inspeccion.capacidad or '-' }} personas</span>
+                </div>
+                <div class="info-item">
+                    <label>Carga</label>
+                    <span>{{ inspeccion.carga or '-' }} kg</span>
+                </div>
+                <div class="info-item">
+                    <label>Número de Paradas</label>
+                    <span>{{ inspeccion.paradas or '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Recorrido</label>
+                    <span>{{ inspeccion.recorrido or '-' }} m</span>
+                </div>
+                <div class="info-item">
+                    <label>Velocidad</label>
+                    <span>{{ inspeccion.velocidad or '-' }} m/s</span>
+                </div>
+                <div class="info-item">
+                    <label>Fecha Puesta en Servicio</label>
+                    <span>{{ inspeccion.fecha_puesta_servicio|format_fecha }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Fecha Última Inspección Anterior</label>
+                    <span>{{ inspeccion.fecha_ultima_inspeccion|format_fecha }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Empresa Conservadora</label>
+                    <span>{{ inspeccion.empresa_conservadora or '-' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Resultado y Estados -->
+        <div class="seccion">
+            <h2>Resultado y Estados de Gestión</h2>
+            <div class="info-list">
+                <div class="info-item">
+                    <label>Resultado de la Inspección</label>
+                    <span>{{ inspeccion.resultado }}</span>
+                </div>
+                <div class="info-item">
+                    <label>¿Tiene defectos?</label>
+                    <span>{{ 'Sí' if inspeccion.tiene_defectos else 'No' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Estado del Presupuesto</label>
+                    <span>
+                        <span class="badge badge-{{ inspeccion.estado_presupuesto|lower }}">
+                            {{ inspeccion.estado_presupuesto }}
+                        </span>
+                        <form method="POST" action="/inspecciones/estado_presupuesto/{{ inspeccion.id }}" class="cambio-estado-form">
+                            <select name="estado_presupuesto">
+                                <option value="PENDIENTE" {% if inspeccion.estado_presupuesto == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                                <option value="PREPARANDO" {% if inspeccion.estado_presupuesto == 'PREPARANDO' %}selected{% endif %}>PREPARANDO</option>
+                                <option value="ENVIADO" {% if inspeccion.estado_presupuesto == 'ENVIADO' %}selected{% endif %}>ENVIADO</option>
+                                <option value="ACEPTADO" {% if inspeccion.estado_presupuesto == 'ACEPTADO' %}selected{% endif %}>ACEPTADO</option>
+                                <option value="RECHAZADO" {% if inspeccion.estado_presupuesto == 'RECHAZADO' %}selected{% endif %}>RECHAZADO</option>
+                            </select>
+                            <button type="submit">Cambiar</button>
+                        </form>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <label>Estado del Trabajo</label>
+                    <span>
+                        <span class="badge badge-{{ inspeccion.estado_trabajo|lower|replace('_', '-') }}">
+                            {{ inspeccion.estado_trabajo|replace('_', ' ') }}
+                        </span>
+                        <form method="POST" action="/inspecciones/estado_trabajo/{{ inspeccion.id }}" class="cambio-estado-form">
+                            <select name="estado_trabajo">
+                                <option value="PENDIENTE" {% if inspeccion.estado_trabajo == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                                <option value="EN_EJECUCION" {% if inspeccion.estado_trabajo == 'EN_EJECUCION' %}selected{% endif %}>EN EJECUCIÓN</option>
+                                <option value="COMPLETADO" {% if inspeccion.estado_trabajo == 'COMPLETADO' %}selected{% endif %}>COMPLETADO</option>
+                            </select>
+                            <button type="submit">Cambiar</button>
+                        </form>
+                    </span>
+                </div>
+                {% if inspeccion.fecha_envio_presupuesto %}
+                <div class="info-item">
+                    <label>Fecha Envío Presupuesto</label>
+                    <span>{{ inspeccion.fecha_envio_presupuesto|format_fecha }}</span>
+                </div>
+                {% endif %}
+                {% if inspeccion.fecha_respuesta_presupuesto %}
+                <div class="info-item">
+                    <label>Fecha Respuesta Presupuesto</label>
+                    <span>{{ inspeccion.fecha_respuesta_presupuesto|format_fecha }}</span>
+                </div>
+                {% endif %}
+                {% if inspeccion.fecha_inicio_trabajo %}
+                <div class="info-item">
+                    <label>Fecha Inicio Trabajo</label>
+                    <span>{{ inspeccion.fecha_inicio_trabajo|format_fecha }}</span>
+                </div>
+                {% endif %}
+                {% if inspeccion.fecha_fin_trabajo %}
+                <div class="info-item">
+                    <label>Fecha Fin Trabajo</label>
+                    <span>{{ inspeccion.fecha_fin_trabajo|format_fecha }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sección: Defectos Detectados -->
+        <div class="seccion">
+            <h2>Defectos Detectados
+                <a href="/inspecciones/{{ inspeccion.id }}/defectos/nuevo" class="btn-primary btn-sm" style="margin-left: 15px;">+ Añadir Defecto</a>
+            </h2>
+
+            {% if defectos %}
+                <table class="defectos-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Código</th>
+                            <th>Descripción</th>
+                            <th style="width: 80px;">Calificación</th>
+                            <th style="width: 110px;">Fecha Límite</th>
+                            <th style="width: 100px;">Urgencia</th>
+                            <th style="width: 90px;">Estado</th>
+                            <th style="width: 120px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for defecto in defectos %}
+                        <tr>
+                            <td><strong>{{ defecto.codigo or '-' }}</strong></td>
+                            <td>
+                                {{ defecto.descripcion }}
+                                {% if defecto.es_cortina %}
+                                    <span class="badge" style="background: #e3f2fd; color: #1565c0; margin-left: 8px;">CORTINA</span>
+                                {% endif %}
+                                {% if defecto.es_pesacarga %}
+                                    <span class="badge" style="background: #e3f2fd; color: #1565c0; margin-left: 8px;">PESACARGA</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
+                            </td>
+                            <td>{{ defecto.fecha_limite|format_fecha }}</td>
+                            <td>
+                                {% if defecto.estado == 'SUBSANADO' %}
+                                    <span class="badge badge-subsanado">SUBSANADO</span>
+                                {% else %}
+                                    <span class="badge badge-{{ defecto.urgencia|lower }}">{{ defecto.urgencia }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ defecto.estado }}</td>
+                            <td>
+                                {% if defecto.estado == 'PENDIENTE' %}
+                                <form method="POST" action="/defectos/{{ defecto.id }}/subsanar" style="display: inline;">
+                                    <button type="submit" class="btn-primary btn-sm">Subsanar</button>
+                                </form>
+                                {% endif %}
+                                <a href="/defectos/{{ defecto.id }}/eliminar" class="btn-danger btn-sm" onclick="return confirm('¿Eliminar este defecto?')">Eliminar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="color: #999; text-align: center; padding: 30px;">No hay defectos registrados</p>
+            {% endif %}
+        </div>
+
+        <!-- Sección: Materiales Especiales Relacionados -->
+        {% if materiales %}
+        <div class="seccion">
+            <h2>Materiales Especiales (Cortinas/Pesacargas) Relacionados</h2>
+            <div class="materiales-list">
+                {% for material in materiales %}
+                <div class="material-item">
+                    <strong>{{ material.tipo }}</strong> -
+                    Cantidad: {{ material.cantidad }} -
+                    Fecha Límite: {{ material.fecha_limite|format_fecha }} -
+                    Estado: <span class="badge badge-{{ material.estado|lower }}">{{ material.estado }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Sección: Observaciones -->
+        {% if inspeccion.observaciones %}
+        <div class="seccion">
+            <h2>Observaciones</h2>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; color: #666;">
+                {{ inspeccion.observaciones }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Acciones -->
+        <div class="btn-actions">
+            <a href="/inspecciones/editar/{{ inspeccion.id }}" class="btn-primary">Editar Inspección</a>
+            <a href="/inspecciones" class="btn-secondary">Volver a Inspecciones</a>
+            <a href="/inspecciones/eliminar/{{ inspeccion.id }}" class="btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta inspección?')" style="margin-left: auto;">Eliminar Inspección</a>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>

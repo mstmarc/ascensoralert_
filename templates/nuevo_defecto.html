@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Defecto - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        header .header-container { display: flex; justify-content: center; align-items: center; }
+        header .logo-container { display: flex; justify-content: center; align-items: center; }
+
+        body { font-family: 'Montserrat', sans-serif; background: #ffffff; }
+        main { max-width: 800px !important; margin: 0 auto !important; padding: 40px !important; }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 30px 0;
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .button {
+            background: #003c80;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1a1a1a;
+            border: 1px solid #000;
+            padding: 12px 24px;
+            margin-left: 10px;
+        }
+
+        .checkbox-group {
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 20px;
+            font-weight: 600;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="page-title">Añadir Defecto a la Inspección</h2>
+
+        <form method="POST">
+            <label>Código del Defecto:</label>
+            <input type="text" name="codigo" placeholder="Ej: 3.04.1">
+
+            <label>Descripción del Defecto: *</label>
+            <textarea name="descripcion" rows="4" required placeholder="Describe el defecto detectado..."></textarea>
+
+            <div class="form-grid">
+                <div>
+                    <label>Calificación: *</label>
+                    <select name="calificacion" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="DL">DL - Defecto Leve</option>
+                        <option value="DG">DG - Defecto Grave</option>
+                        <option value="DMG">DMG - Defecto Muy Grave</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Plazo para Corregir (meses):</label>
+                    <input type="number" name="plazo_meses" value="6" min="1">
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" name="es_cortina" value="true">
+                    Es Cortina Fotoeléctrica (ITC-AEM1)
+                </label>
+                <label>
+                    <input type="checkbox" name="es_pesacarga" value="true">
+                    Es Pesacarga (ITC-AEM1)
+                </label>
+            </div>
+
+            <label>Observaciones:</label>
+            <textarea name="observaciones" rows="3" placeholder="Notas adicionales sobre este defecto..."></textarea>
+
+            <div style="margin-top: 30px;">
+                <button type="submit" class="button">Añadir Defecto</button>
+                <a href="/inspecciones/ver/{{ inspeccion_id }}" class="btn-secondary">Cancelar</a>
+            </div>
+        </form>
+
+        <p style="font-size: 12px; color: #999; margin-top: 20px;">
+            <strong>Nota:</strong> Si marcas el defecto como "Cortina" o "Pesacarga", se creará automáticamente un registro en Materiales Especiales para seguimiento específico.
+        </p>
+    </main>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>

@@ -3543,6 +3543,901 @@ def clear_cache():
     """
 
 # ============================================
+# MÓDULO: GESTIÓN DE INSPECCIONES (IPOs)
+# ============================================
+
+# Dashboard de Inspecciones (vista principal)
+@app.route("/inspecciones")
+def inspecciones_dashboard():
+    """Dashboard principal de inspecciones con alertas y estados"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Obtener todas las inspecciones con información del OCA
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?select=*,oca:ocas(nombre)&order=fecha_inspeccion.desc",
+        headers=HEADERS
+    )
+
+    inspecciones = []
+    if response.status_code == 200:
+        inspecciones = response.json()
+
+    # Obtener defectos para calcular urgencias
+    response_defectos = requests.get(
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?select=*&estado=eq.PENDIENTE&order=fecha_limite.asc",
+        headers=HEADERS
+    )
+
+    defectos_pendientes = []
+    if response_defectos.status_code == 200:
+        defectos_pendientes = response_defectos.json()
+
+    # Obtener materiales especiales pendientes
+    response_materiales = requests.get(
+        f"{SUPABASE_URL}/rest/v1/materiales_especiales?select=*&estado=neq.INSTALADO&order=fecha_limite.asc",
+        headers=HEADERS
+    )
+
+    materiales_pendientes = []
+    if response_materiales.status_code == 200:
+        materiales_pendientes = response_materiales.json()
+
+    # Calcular alertas y estadísticas
+    hoy = date.today()
+    alertas_criticas = []
+    alertas_urgentes = []
+    alertas_proximas = []
+
+    # Procesar defectos
+    for defecto in defectos_pendientes:
+        if defecto.get('fecha_limite'):
+            try:
+                fecha_limite = datetime.strptime(defecto['fecha_limite'].split('T')[0], '%Y-%m-%d').date()
+                dias_restantes = (fecha_limite - hoy).days
+
+                defecto['dias_restantes'] = dias_restantes
+
+                if dias_restantes < 0:
+                    alertas_criticas.append(('defecto', defecto))
+                elif dias_restantes <= 15:
+                    alertas_urgentes.append(('defecto', defecto))
+                elif dias_restantes <= 30:
+                    alertas_proximas.append(('defecto', defecto))
+            except:
+                pass
+
+    # Procesar materiales
+    for material in materiales_pendientes:
+        if material.get('fecha_limite'):
+            try:
+                fecha_limite = datetime.strptime(material['fecha_limite'].split('T')[0], '%Y-%m-%d').date()
+                dias_restantes = (fecha_limite - hoy).days
+
+                material['dias_restantes'] = dias_restantes
+
+                if dias_restantes < 0:
+                    alertas_criticas.append(('material', material))
+                elif dias_restantes <= 15:
+                    alertas_urgentes.append(('material', material))
+                elif dias_restantes <= 30:
+                    alertas_proximas.append(('material', material))
+            except:
+                pass
+
+    # Calcular estadísticas
+    total_inspecciones = len(inspecciones)
+    pendiente_presupuesto = len([i for i in inspecciones if i.get('estado_presupuesto') in ['PENDIENTE', 'PREPARANDO']])
+    enviados_sin_respuesta = len([i for i in inspecciones if i.get('estado_presupuesto') == 'ENVIADO'])
+    trabajos_en_ejecucion = len([i for i in inspecciones if i.get('estado_trabajo') == 'EN_EJECUCION'])
+    completados = len([i for i in inspecciones if i.get('estado_trabajo') == 'COMPLETADO'])
+
+    # Obtener lista de OCAs para filtros
+    response_ocas = requests.get(
+        f"{SUPABASE_URL}/rest/v1/ocas?select=id,nombre&activo=eq.true&order=nombre.asc",
+        headers=HEADERS
+    )
+    ocas = []
+    if response_ocas.status_code == 200:
+        ocas = response_ocas.json()
+
+    return render_template(
+        "inspecciones_dashboard.html",
+        inspecciones=inspecciones,
+        total_inspecciones=total_inspecciones,
+        pendiente_presupuesto=pendiente_presupuesto,
+        enviados_sin_respuesta=enviados_sin_respuesta,
+        trabajos_en_ejecucion=trabajos_en_ejecucion,
+        completados=completados,
+        alertas_criticas=alertas_criticas,
+        alertas_urgentes=alertas_urgentes,
+        alertas_proximas=alertas_proximas,
+        ocas=ocas
+    )
+
+# Nueva Inspección - Formulario
+@app.route("/inspecciones/nueva", methods=["GET", "POST"])
+def nueva_inspeccion():
+    """Crear una nueva inspección"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        # Recoger datos del formulario
+        data = {
+            # Identificación
+            "rae": request.form.get("rae"),
+            "numero_certificado": request.form.get("numero_certificado") or None,
+            "fecha_inspeccion": request.form.get("fecha_inspeccion"),
+
+            # Titular
+            "titular_nombre": request.form.get("titular_nombre"),
+            "titular_nif": request.form.get("titular_nif") or None,
+            "direccion_instalacion": request.form.get("direccion_instalacion"),
+            "municipio": request.form.get("municipio") or None,
+
+            # OCA
+            "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None,
+
+            # Características técnicas
+            "tipo_ascensor": request.form.get("tipo_ascensor") or None,
+            "capacidad": int(request.form.get("capacidad")) if request.form.get("capacidad") else None,
+            "carga": int(request.form.get("carga")) if request.form.get("carga") else None,
+            "paradas": int(request.form.get("paradas")) if request.form.get("paradas") else None,
+            "recorrido": float(request.form.get("recorrido")) if request.form.get("recorrido") else None,
+            "velocidad": float(request.form.get("velocidad")) if request.form.get("velocidad") else None,
+            "fecha_puesta_servicio": request.form.get("fecha_puesta_servicio") or None,
+            "fecha_ultima_inspeccion": request.form.get("fecha_ultima_inspeccion") or None,
+            "empresa_conservadora": request.form.get("empresa_conservadora") or "FEDES ASCENSORES",
+
+            # Resultado
+            "resultado": request.form.get("resultado") or "Desfavorable",
+            "tiene_defectos": request.form.get("tiene_defectos") == "true",
+
+            # Estados
+            "estado_presupuesto": request.form.get("estado_presupuesto") or "PENDIENTE",
+            "estado_trabajo": "PENDIENTE",
+
+            # Observaciones
+            "observaciones": request.form.get("observaciones") or None,
+
+            # Usuario que crea
+            "created_by": session.get("usuario")
+        }
+
+        # Validaciones
+        if not data["rae"] or not data["fecha_inspeccion"] or not data["titular_nombre"] or not data["direccion_instalacion"]:
+            flash("Los campos RAE, Fecha de Inspección, Titular y Dirección son obligatorios", "error")
+            return redirect(request.referrer)
+
+        # Crear inspección
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?select=id",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 201]:
+            nueva_id = response.json()[0]["id"]
+            flash("Inspección registrada correctamente", "success")
+            return redirect(f"/inspecciones/ver/{nueva_id}")
+        else:
+            flash(f"Error al crear inspección: {response.text}", "error")
+            return redirect(request.referrer)
+
+    # GET - Mostrar formulario
+    # Obtener lista de OCAs
+    response_ocas = requests.get(
+        f"{SUPABASE_URL}/rest/v1/ocas?select=id,nombre&activo=eq.true&order=nombre.asc",
+        headers=HEADERS
+    )
+    ocas = []
+    if response_ocas.status_code == 200:
+        ocas = response_ocas.json()
+
+    return render_template("nueva_inspeccion.html", ocas=ocas)
+
+# Ver Detalle de Inspección
+@app.route("/inspecciones/ver/<int:inspeccion_id>")
+def ver_inspeccion(inspeccion_id):
+    """Ver detalle completo de una inspección"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Obtener inspección con información del OCA
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=*,oca:ocas(id,nombre)",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Inspección no encontrada", "error")
+        return redirect("/inspecciones")
+
+    inspeccion = response.json()[0]
+
+    # Obtener defectos de esta inspección
+    response_defectos = requests.get(
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?inspeccion_id=eq.{inspeccion_id}&order=calificacion.desc,fecha_limite.asc",
+        headers=HEADERS
+    )
+
+    defectos = []
+    if response_defectos.status_code == 200:
+        defectos = response_defectos.json()
+
+    # Calcular urgencia de cada defecto
+    hoy = date.today()
+    for defecto in defectos:
+        if defecto.get('fecha_limite') and defecto.get('estado') == 'PENDIENTE':
+            try:
+                fecha_limite = datetime.strptime(defecto['fecha_limite'].split('T')[0], '%Y-%m-%d').date()
+                dias_restantes = (fecha_limite - hoy).days
+                defecto['dias_restantes'] = dias_restantes
+
+                if dias_restantes < 0:
+                    defecto['urgencia'] = 'VENCIDO'
+                elif dias_restantes <= 15:
+                    defecto['urgencia'] = 'URGENTE'
+                elif dias_restantes <= 30:
+                    defecto['urgencia'] = 'PROXIMO'
+                else:
+                    defecto['urgencia'] = 'NORMAL'
+            except:
+                defecto['urgencia'] = 'NORMAL'
+        else:
+            defecto['urgencia'] = 'COMPLETADO'
+
+    # Obtener materiales especiales relacionados
+    response_materiales = requests.get(
+        f"{SUPABASE_URL}/rest/v1/materiales_especiales?inspeccion_id=eq.{inspeccion_id}&order=tipo.asc",
+        headers=HEADERS
+    )
+
+    materiales = []
+    if response_materiales.status_code == 200:
+        materiales = response_materiales.json()
+
+    return render_template(
+        "ver_inspeccion.html",
+        inspeccion=inspeccion,
+        defectos=defectos,
+        materiales=materiales
+    )
+
+# Editar Inspección
+@app.route("/inspecciones/editar/<int:inspeccion_id>", methods=["GET", "POST"])
+def editar_inspeccion(inspeccion_id):
+    """Editar una inspección existente"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        # Recoger datos del formulario
+        data = {
+            # Identificación
+            "rae": request.form.get("rae"),
+            "numero_certificado": request.form.get("numero_certificado") or None,
+            "fecha_inspeccion": request.form.get("fecha_inspeccion"),
+
+            # Titular
+            "titular_nombre": request.form.get("titular_nombre"),
+            "titular_nif": request.form.get("titular_nif") or None,
+            "direccion_instalacion": request.form.get("direccion_instalacion"),
+            "municipio": request.form.get("municipio") or None,
+
+            # OCA
+            "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None,
+
+            # Características técnicas
+            "tipo_ascensor": request.form.get("tipo_ascensor") or None,
+            "capacidad": int(request.form.get("capacidad")) if request.form.get("capacidad") else None,
+            "carga": int(request.form.get("carga")) if request.form.get("carga") else None,
+            "paradas": int(request.form.get("paradas")) if request.form.get("paradas") else None,
+            "recorrido": float(request.form.get("recorrido")) if request.form.get("recorrido") else None,
+            "velocidad": float(request.form.get("velocidad")) if request.form.get("velocidad") else None,
+            "fecha_puesta_servicio": request.form.get("fecha_puesta_servicio") or None,
+            "fecha_ultima_inspeccion": request.form.get("fecha_ultima_inspeccion") or None,
+            "empresa_conservadora": request.form.get("empresa_conservadora") or "FEDES ASCENSORES",
+
+            # Resultado
+            "resultado": request.form.get("resultado") or "Desfavorable",
+            "tiene_defectos": request.form.get("tiene_defectos") == "true",
+
+            # Observaciones
+            "observaciones": request.form.get("observaciones") or None
+        }
+
+        # Actualizar inspección
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 204]:
+            flash("Inspección actualizada correctamente", "success")
+            return redirect(f"/inspecciones/ver/{inspeccion_id}")
+        else:
+            flash(f"Error al actualizar inspección: {response.text}", "error")
+            return redirect(request.referrer)
+
+    # GET - Cargar datos para editar
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=*",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Inspección no encontrada", "error")
+        return redirect("/inspecciones")
+
+    inspeccion = response.json()[0]
+
+    # Limpiar None para formulario
+    def limpiar_none(data):
+        if isinstance(data, dict):
+            return {k: (v if v is not None else '') for k, v in data.items()}
+        return data
+
+    inspeccion = limpiar_none(inspeccion)
+
+    # Obtener lista de OCAs
+    response_ocas = requests.get(
+        f"{SUPABASE_URL}/rest/v1/ocas?select=id,nombre&activo=eq.true&order=nombre.asc",
+        headers=HEADERS
+    )
+    ocas = []
+    if response_ocas.status_code == 200:
+        ocas = response_ocas.json()
+
+    return render_template("editar_inspeccion.html", inspeccion=inspeccion, ocas=ocas)
+
+# Cambiar Estado de Presupuesto
+@app.route("/inspecciones/estado_presupuesto/<int:inspeccion_id>", methods=["POST"])
+def cambiar_estado_presupuesto(inspeccion_id):
+    """Cambiar el estado del presupuesto de una inspección"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    nuevo_estado = request.form.get("estado_presupuesto")
+
+    data = {
+        "estado_presupuesto": nuevo_estado
+    }
+
+    # Si se marca como ENVIADO, guardar fecha de envío
+    if nuevo_estado == "ENVIADO":
+        data["fecha_envio_presupuesto"] = date.today().isoformat()
+
+    # Si se marca como ACEPTADO o RECHAZADO, guardar fecha de respuesta
+    if nuevo_estado in ["ACEPTADO", "RECHAZADO"]:
+        data["fecha_respuesta_presupuesto"] = date.today().isoformat()
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash(f"Estado del presupuesto cambiado a {nuevo_estado}", "success")
+    else:
+        flash("Error al cambiar estado", "error")
+
+    return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+# Cambiar Estado de Trabajo
+@app.route("/inspecciones/estado_trabajo/<int:inspeccion_id>", methods=["POST"])
+def cambiar_estado_trabajo(inspeccion_id):
+    """Cambiar el estado del trabajo de una inspección"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    nuevo_estado = request.form.get("estado_trabajo")
+
+    data = {
+        "estado_trabajo": nuevo_estado
+    }
+
+    # Si se marca como EN_EJECUCION, guardar fecha de inicio
+    if nuevo_estado == "EN_EJECUCION":
+        data["fecha_inicio_trabajo"] = date.today().isoformat()
+
+    # Si se marca como COMPLETADO, guardar fecha de fin
+    if nuevo_estado == "COMPLETADO":
+        data["fecha_fin_trabajo"] = date.today().isoformat()
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash(f"Estado del trabajo cambiado a {nuevo_estado}", "success")
+    else:
+        flash("Error al cambiar estado", "error")
+
+    return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+# Eliminar Inspección
+@app.route("/inspecciones/eliminar/<int:inspeccion_id>")
+def eliminar_inspeccion(inspeccion_id):
+    """Eliminar una inspección (y sus defectos en cascada)"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    response = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Inspección eliminada correctamente", "success")
+        return redirect("/inspecciones")
+    else:
+        flash("Error al eliminar inspección", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+# ============================================
+# DEFECTOS DE INSPECCIÓN
+# ============================================
+
+# Añadir Defecto a Inspección
+@app.route("/inspecciones/<int:inspeccion_id>/defectos/nuevo", methods=["GET", "POST"])
+def nuevo_defecto(inspeccion_id):
+    """Añadir un nuevo defecto a una inspección"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        # Obtener fecha de inspección para calcular fecha límite
+        response_insp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=fecha_inspeccion",
+            headers=HEADERS
+        )
+
+        if response_insp.status_code != 200 or not response_insp.json():
+            flash("Inspección no encontrada", "error")
+            return redirect("/inspecciones")
+
+        fecha_inspeccion = response_insp.json()[0].get('fecha_inspeccion')
+        plazo_meses = int(request.form.get("plazo_meses", 6))
+
+        # Calcular fecha límite
+        fecha_limite = None
+        if fecha_inspeccion:
+            try:
+                fecha_insp_dt = datetime.strptime(fecha_inspeccion.split('T')[0], '%Y-%m-%d')
+                # Sumar plazo en meses
+                mes_limite = fecha_insp_dt.month + plazo_meses
+                anio_limite = fecha_insp_dt.year + (mes_limite - 1) // 12
+                mes_limite = ((mes_limite - 1) % 12) + 1
+
+                fecha_limite_dt = fecha_insp_dt.replace(year=anio_limite, month=mes_limite)
+                fecha_limite = fecha_limite_dt.strftime('%Y-%m-%d')
+            except:
+                flash("Error al calcular fecha límite", "error")
+                return redirect(request.referrer)
+
+        # Crear defecto
+        data = {
+            "inspeccion_id": inspeccion_id,
+            "codigo": request.form.get("codigo") or None,
+            "descripcion": request.form.get("descripcion"),
+            "calificacion": request.form.get("calificacion"),
+            "plazo_meses": plazo_meses,
+            "fecha_limite": fecha_limite,
+            "estado": "PENDIENTE",
+            "es_cortina": request.form.get("es_cortina") == "true",
+            "es_pesacarga": request.form.get("es_pesacarga") == "true",
+            "observaciones": request.form.get("observaciones") or None
+        }
+
+        # Validar
+        if not data["descripcion"] or not data["calificacion"]:
+            flash("Descripción y Calificación son obligatorios", "error")
+            return redirect(request.referrer)
+
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/defectos_inspeccion",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 201]:
+            flash("Defecto añadido correctamente", "success")
+
+            # Si es cortina o pesacarga, crear material especial automáticamente
+            if data["es_cortina"] or data["es_pesacarga"]:
+                # Obtener info de la inspección para el material
+                response_insp_full = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=titular_nombre,direccion_instalacion,municipio",
+                    headers=HEADERS
+                )
+
+                if response_insp_full.status_code == 200 and response_insp_full.json():
+                    insp_data = response_insp_full.json()[0]
+
+                    tipo_material = "CORTINA" if data["es_cortina"] else "PESACARGA"
+
+                    material_data = {
+                        "tipo": tipo_material,
+                        "inspeccion_id": inspeccion_id,
+                        "cliente_nombre": insp_data.get('titular_nombre'),
+                        "direccion": insp_data.get('direccion_instalacion'),
+                        "municipio": insp_data.get('municipio'),
+                        "cantidad": 1,
+                        "fecha_limite": fecha_limite,
+                        "estado": "PENDIENTE"
+                    }
+
+                    requests.post(
+                        f"{SUPABASE_URL}/rest/v1/materiales_especiales",
+                        json=material_data,
+                        headers=HEADERS
+                    )
+
+            return redirect(f"/inspecciones/ver/{inspeccion_id}")
+        else:
+            flash(f"Error al añadir defecto: {response.text}", "error")
+            return redirect(request.referrer)
+
+    # GET - Mostrar formulario
+    return render_template("nuevo_defecto.html", inspeccion_id=inspeccion_id)
+
+# Marcar Defecto como Subsanado
+@app.route("/defectos/<int:defecto_id>/subsanar", methods=["POST"])
+def subsanar_defecto(defecto_id):
+    """Marcar un defecto como subsanado"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    data = {
+        "estado": "SUBSANADO",
+        "fecha_subsanacion": date.today().isoformat()
+    }
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Defecto marcado como subsanado", "success")
+    else:
+        flash("Error al actualizar defecto", "error")
+
+    return redirect(request.referrer)
+
+# Eliminar Defecto
+@app.route("/defectos/<int:defecto_id>/eliminar")
+def eliminar_defecto(defecto_id):
+    """Eliminar un defecto"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    response = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Defecto eliminado correctamente", "success")
+    else:
+        flash("Error al eliminar defecto", "error")
+
+    return redirect(request.referrer)
+
+# ============================================
+# MATERIALES ESPECIALES (Cortinas y Pesacargas)
+# ============================================
+
+# Dashboard de Materiales Especiales
+@app.route("/materiales_especiales")
+def materiales_especiales():
+    """Vista de todos los materiales especiales (cortinas y pesacargas)"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    # Filtros
+    filtro_tipo = request.args.get("tipo", "")
+    filtro_estado = request.args.get("estado", "")
+
+    # Construir query
+    query = f"{SUPABASE_URL}/rest/v1/materiales_especiales?select=*,inspeccion:inspecciones(rae,titular_nombre)&order=fecha_limite.asc"
+
+    if filtro_tipo:
+        query += f"&tipo=eq.{filtro_tipo}"
+
+    if filtro_estado:
+        query += f"&estado=eq.{filtro_estado}"
+
+    response = requests.get(query, headers=HEADERS)
+
+    materiales = []
+    if response.status_code == 200:
+        materiales = response.json()
+
+    # Calcular urgencia
+    hoy = date.today()
+    for material in materiales:
+        if material.get('fecha_limite') and material.get('estado') != 'INSTALADO':
+            try:
+                fecha_limite = datetime.strptime(material['fecha_limite'].split('T')[0], '%Y-%m-%d').date()
+                dias_restantes = (fecha_limite - hoy).days
+                material['dias_restantes'] = dias_restantes
+
+                if dias_restantes < 0:
+                    material['urgencia'] = 'VENCIDO'
+                elif dias_restantes <= 15:
+                    material['urgencia'] = 'URGENTE'
+                elif dias_restantes <= 30:
+                    material['urgencia'] = 'PROXIMO'
+                else:
+                    material['urgencia'] = 'NORMAL'
+            except:
+                material['urgencia'] = 'NORMAL'
+        else:
+            material['urgencia'] = 'COMPLETADO'
+
+    # Estadísticas
+    total_materiales = len(materiales)
+    pendientes = len([m for m in materiales if m.get('estado') == 'PENDIENTE'])
+    pedidos = len([m for m in materiales if m.get('estado') == 'PEDIDO'])
+    recibidos = len([m for m in materiales if m.get('estado') == 'RECIBIDO'])
+    instalados = len([m for m in materiales if m.get('estado') == 'INSTALADO'])
+
+    return render_template(
+        "materiales_especiales.html",
+        materiales=materiales,
+        total_materiales=total_materiales,
+        pendientes=pendientes,
+        pedidos=pedidos,
+        recibidos=recibidos,
+        instalados=instalados,
+        filtro_tipo=filtro_tipo,
+        filtro_estado=filtro_estado
+    )
+
+# Nuevo Material Especial (Manual)
+@app.route("/materiales_especiales/nuevo", methods=["GET", "POST"])
+def nuevo_material_especial():
+    """Crear un material especial manualmente (sin inspección)"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        data = {
+            "tipo": request.form.get("tipo"),
+            "cliente_nombre": request.form.get("cliente_nombre"),
+            "direccion": request.form.get("direccion") or None,
+            "municipio": request.form.get("municipio") or None,
+            "cantidad": int(request.form.get("cantidad", 1)),
+            "fecha_limite": request.form.get("fecha_limite"),
+            "estado": "PENDIENTE",
+            "observaciones": request.form.get("observaciones") or None
+        }
+
+        # Validar
+        if not data["tipo"] or not data["cliente_nombre"] or not data["fecha_limite"]:
+            flash("Tipo, Cliente y Fecha Límite son obligatorios", "error")
+            return redirect(request.referrer)
+
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/materiales_especiales",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 201]:
+            flash("Material especial añadido correctamente", "success")
+            return redirect("/materiales_especiales")
+        else:
+            flash(f"Error al añadir material: {response.text}", "error")
+            return redirect(request.referrer)
+
+    # GET
+    return render_template("nuevo_material_especial.html")
+
+# Cambiar Estado de Material
+@app.route("/materiales_especiales/<int:material_id>/estado", methods=["POST"])
+def cambiar_estado_material(material_id):
+    """Cambiar el estado de un material especial"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    nuevo_estado = request.form.get("estado")
+
+    data = {
+        "estado": nuevo_estado
+    }
+
+    # Guardar fecha según estado
+    if nuevo_estado == "PEDIDO":
+        data["fecha_pedido"] = date.today().isoformat()
+    elif nuevo_estado == "RECIBIDO":
+        data["fecha_recepcion"] = date.today().isoformat()
+    elif nuevo_estado == "INSTALADO":
+        data["fecha_instalacion"] = date.today().isoformat()
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/materiales_especiales?id=eq.{material_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash(f"Material marcado como {nuevo_estado}", "success")
+    else:
+        flash("Error al cambiar estado", "error")
+
+    return redirect(request.referrer)
+
+# Eliminar Material Especial
+@app.route("/materiales_especiales/<int:material_id>/eliminar")
+def eliminar_material_especial(material_id):
+    """Eliminar un material especial"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    response = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/materiales_especiales?id=eq.{material_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Material eliminado correctamente", "success")
+    else:
+        flash("Error al eliminar material", "error")
+
+    return redirect("/materiales_especiales")
+
+# ============================================
+# GESTIÓN DE OCAs (Organismos de Control)
+# ============================================
+
+# Listado de OCAs
+@app.route("/ocas")
+def lista_ocas():
+    """Listado de todos los OCAs"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/ocas?select=*&order=nombre.asc",
+        headers=HEADERS
+    )
+
+    ocas = []
+    if response.status_code == 200:
+        ocas = response.json()
+
+    # Contar inspecciones por OCA
+    for oca in ocas:
+        response_count = requests.get(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?oca_id=eq.{oca['id']}&select=id",
+            headers=HEADERS
+        )
+        if response_count.status_code == 200:
+            oca['total_inspecciones'] = len(response_count.json())
+        else:
+            oca['total_inspecciones'] = 0
+
+    return render_template("lista_ocas.html", ocas=ocas)
+
+# Nuevo OCA
+@app.route("/ocas/nuevo", methods=["GET", "POST"])
+def nuevo_oca():
+    """Crear un nuevo OCA"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        data = {
+            "nombre": request.form.get("nombre"),
+            "contacto_nombre": request.form.get("contacto_nombre") or None,
+            "contacto_email": request.form.get("contacto_email") or None,
+            "contacto_telefono": request.form.get("contacto_telefono") or None,
+            "direccion": request.form.get("direccion") or None,
+            "observaciones": request.form.get("observaciones") or None,
+            "activo": True
+        }
+
+        if not data["nombre"]:
+            flash("El nombre del OCA es obligatorio", "error")
+            return redirect(request.referrer)
+
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/ocas",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 201]:
+            flash("OCA creado correctamente", "success")
+            return redirect("/ocas")
+        else:
+            flash(f"Error al crear OCA: {response.text}", "error")
+            return redirect(request.referrer)
+
+    return render_template("nuevo_oca.html")
+
+# Editar OCA
+@app.route("/ocas/editar/<int:oca_id>", methods=["GET", "POST"])
+def editar_oca(oca_id):
+    """Editar un OCA existente"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        data = {
+            "nombre": request.form.get("nombre"),
+            "contacto_nombre": request.form.get("contacto_nombre") or None,
+            "contacto_email": request.form.get("contacto_email") or None,
+            "contacto_telefono": request.form.get("contacto_telefono") or None,
+            "direccion": request.form.get("direccion") or None,
+            "observaciones": request.form.get("observaciones") or None,
+            "activo": request.form.get("activo") == "true"
+        }
+
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/ocas?id=eq.{oca_id}",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 204]:
+            flash("OCA actualizado correctamente", "success")
+            return redirect("/ocas")
+        else:
+            flash(f"Error al actualizar OCA: {response.text}", "error")
+            return redirect(request.referrer)
+
+    # GET
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/ocas?id=eq.{oca_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("OCA no encontrado", "error")
+        return redirect("/ocas")
+
+    oca = response.json()[0]
+
+    # Limpiar None
+    def limpiar_none(data):
+        if isinstance(data, dict):
+            return {k: (v if v is not None else '') for k, v in data.items()}
+        return data
+
+    oca = limpiar_none(oca)
+
+    return render_template("editar_oca.html", oca=oca)
+
+# Eliminar OCA
+@app.route("/ocas/eliminar/<int:oca_id>")
+def eliminar_oca(oca_id):
+    """Eliminar un OCA"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    response = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/ocas?id=eq.{oca_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("OCA eliminado correctamente", "success")
+    else:
+        flash("Error al eliminar OCA", "error")
+
+    return redirect("/ocas")
+
+# ============================================
 # CIERRE
 # ============================================
 
