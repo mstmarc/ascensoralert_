@@ -165,14 +165,25 @@ CREATE INDEX idx_materiales_fecha_limite ON materiales_especiales(fecha_limite);
 CREATE INDEX idx_materiales_inspeccion ON materiales_especiales(inspeccion_id);
 
 -- ============================================
--- DATOS INICIALES: OCAs Comunes
+-- DATOS INICIALES: OCAs Reales de Fedes Ascensores
 -- ============================================
-INSERT INTO ocas (nombre, activo) VALUES
-    ('Eurocontrol', true),
-    ('Applus', true),
-    ('OCA Global', true),
-    ('ABC Inspección', true),
-    ('Abaco', true)
+INSERT INTO ocas (nombre, contacto_email, activo) VALUES
+    ('ABC INSPECCIONES, S.L.', 'abcinspeccion@gmail.com', true),
+    ('APPLUS ORGANISMO DE CONTROL, S.L.U.', 'info@applus.com', true),
+    ('TÜV SÜD ATISAE, S.A.', 'tenerife@tuvsud.com', true),
+    ('ECA BUREAU VERITAS', 'tqr.dirtec@es.bureauveritas.com', true),
+    ('EUROCONTROL, S.A.', 'tenerife@eurocontrol.es', true),
+    ('INGENIERÍA DE GESTIÓN INDUSTRIAL, S.A. (INGEIN)', 'ingein@ingein.es', true),
+    ('INSP. Y VERIFICACIONES REGLAMENTARIAS (IVR)', 'gestion@ocaivr.com', true),
+    ('MARSAN INGENIEROS S.L.', 'marsaningenieros@marsaningenieros.es', true),
+    ('OCA INSPECCIÓN, CONTROL Y PREVENCIÓN, S.A. (OCA IPC)', 'canarias@ocaicp.com', true),
+    ('LABORAT. DE CERTIFIC. VEGA BAJA, S.L. (LABCER)', 'lanzarote@labcer.es', true),
+    ('QUALICONSULT', 'madrid.qce@qualiconsult.es', true),
+    ('SGS', 'jose_luis_lucena@sgs.com', true),
+    ('SERVICIOS DE CONTROL E INSPECCIÓN', 'tenerife@scisa.es', true),
+    ('VERIFICÁLITAS', 'leandro.capece@verificalitasoca.es', true),
+    ('ÁBACO INSPECCIONES', 'fherrera@abacoinspecciones.es', true),
+    ('OCA GLOBAL INSPECCIONES REGLAMENTARIAS', 'jiten.dadlani@ocaglobal.com', true)
 ON CONFLICT DO NOTHING;
 
 -- ============================================
