@@ -359,7 +359,12 @@
                 console.log('DEBUG: Campo administrador_fincas llenado automáticamente con:', matchingOption.value);
             }
         }
+    </script>    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
     </script>
-    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+
+    <script src="{{ url_for(\'static\', filename=\'sidebar.js\') }}"></script>
 </body>
 </html>
