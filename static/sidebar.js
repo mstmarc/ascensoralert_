@@ -212,6 +212,20 @@
 
                 <div class="sidebar-integrated-divider"></div>
 
+                <!-- BLOQUE 3: INSPECCIONES -->
+                <a href="/inspecciones" class="sidebar-integrated-link">
+                    <span class="sidebar-integrated-icon">📋</span>
+                    Inspecciones (IPOs)
+                </a>
+                <a href="/materiales_especiales" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    Cortinas y Pesacargas
+                </a>
+                <a href="/ocas" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    OCAs
+                </a>
+
+                <div class="sidebar-integrated-divider"></div>
+
                 <!-- Reportes y Configuración -->
                 <a href="/reporte_mensual" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Reporte Mensual

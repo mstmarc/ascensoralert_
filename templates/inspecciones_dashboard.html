@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inspecciones - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* HEADER CENTRADO */
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+        }
+
+        main {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 60px 80px !important;
+        }
+
+        main .menu {
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Estadísticas */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 2px solid #e6e6e6;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: #003366;
+            transform: translateY(-2px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #003366;
+        }
+
+        /* Alertas */
+        .alertas-section {
+            margin-bottom: 40px;
+        }
+
+        .alertas-section h2 {
+            color: #003366;
+            font-size: 17px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 20px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #003366;
+        }
+
+        .alerta-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .alerta-critica {
+            background: #fee;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+
+        .alerta-urgente {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+
+        .alerta-proxima {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .alerta-tipo {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-right: 8px;
+        }
+
+        /* Lista de inspecciones */
+        .leads-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .lead-list-item {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 18px 22px;
+            transition: all 0.2s;
+        }
+
+        .lead-list-item:hover {
+            border-color: #003366;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1);
+        }
+
+        .lead-list-direccion {
+            color: #003366;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .lead-list-direccion:hover {
+            text-decoration: underline;
+        }
+
+        .lead-list-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .lead-list-info-item {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Badges de estado */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pendiente {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .badge-preparando {
+            background: #fff8e1;
+            color: #856404;
+        }
+
+        .badge-enviado {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-aceptado {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-rechazado {
+            background: #fee;
+            color: #c62828;
+        }
+
+        .badge-en-ejecucion {
+            background: #fff8e1;
+            color: #f57c00;
+        }
+
+        .badge-completado {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        /* No hay registros */
+        .no-registros {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="menu">
+            <div class="page-header">
+                <h2 class="page-title">Gestión de Inspecciones (IPOs)</h2>
+                <div>
+                    <a href="/materiales_especiales" class="btn btn-secondary" style="margin-right: 10px;">Cortinas y Pesacargas</a>
+                    <a href="/ocas" class="btn btn-secondary" style="margin-right: 10px;">Gestión de OCAs</a>
+                    <a href="/inspecciones/nueva" class="btn btn-primary">+ Nueva Inspección</a>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div style="background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                              color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                              padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <!-- Estadísticas -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Inspecciones</h3>
+                    <div class="number">{{ total_inspecciones }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pendiente Presupuesto</h3>
+                    <div class="number">{{ pendiente_presupuesto }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Presup. Enviados</h3>
+                    <div class="number">{{ enviados_sin_respuesta }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>En Ejecución</h3>
+                    <div class="number">{{ trabajos_en_ejecucion }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Completados</h3>
+                    <div class="number">{{ completados }}</div>
+                </div>
+            </div>
+
+            <!-- Alertas Críticas -->
+            {% if alertas_criticas %}
+            <div class="alertas-section">
+                <h2>⚠️ Alertas Críticas (Plazos Vencidos)</h2>
+                {% for tipo, item in alertas_criticas %}
+                    <div class="alerta-box alerta-critica">
+                        <span class="alerta-tipo">[{{ 'DEFECTO' if tipo == 'defecto' else 'MATERIAL' }}]</span>
+                        {% if tipo == 'defecto' %}
+                            <strong>{{ item.descripcion }}</strong> -
+                            Vencido hace {{ item.dias_restantes|abs }} días
+                        {% else %}
+                            <strong>{{ item.tipo }}: {{ item.cliente_nombre }}</strong> -
+                            Vencido hace {{ item.dias_restantes|abs }} días
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Alertas Urgentes -->
+            {% if alertas_urgentes %}
+            <div class="alertas-section">
+                <h2>🔔 Alertas Urgentes (Próximos 15 días)</h2>
+                {% for tipo, item in alertas_urgentes %}
+                    <div class="alerta-box alerta-urgente">
+                        <span class="alerta-tipo">[{{ 'DEFECTO' if tipo == 'defecto' else 'MATERIAL' }}]</span>
+                        {% if tipo == 'defecto' %}
+                            <strong>{{ item.descripcion }}</strong> -
+                            Quedan {{ item.dias_restantes }} días
+                        {% else %}
+                            <strong>{{ item.tipo }}: {{ item.cliente_nombre }}</strong> -
+                            Quedan {{ item.dias_restantes }} días
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Alertas Próximas -->
+            {% if alertas_proximas %}
+            <div class="alertas-section">
+                <h2>📋 Próximos Vencimientos (15-30 días)</h2>
+                {% for tipo, item in alertas_proximas %}
+                    <div class="alerta-box alerta-proxima">
+                        <span class="alerta-tipo">[{{ 'DEFECTO' if tipo == 'defecto' else 'MATERIAL' }}]</span>
+                        {% if tipo == 'defecto' %}
+                            <strong>{{ item.descripcion }}</strong> -
+                            Quedan {{ item.dias_restantes }} días
+                        {% else %}
+                            <strong>{{ item.tipo }}: {{ item.cliente_nombre }}</strong> -
+                            Quedan {{ item.dias_restantes }} días
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Lista de Inspecciones -->
+            <div style="margin-top: 40px;">
+                <h2 style="color: #003366; font-size: 17px; font-weight: 700; text-transform: uppercase; margin: 0 0 20px 0; padding-bottom: 8px; border-bottom: 2px solid #003366;">
+                    Todas las Inspecciones
+                </h2>
+
+                {% if inspecciones %}
+                    <div class="leads-list">
+                        {% for inspeccion in inspecciones %}
+                        <div class="lead-list-item">
+                            <a href="/inspecciones/ver/{{ inspeccion.id }}" class="lead-list-direccion">
+                                {{ inspeccion.direccion_instalacion }} - {{ inspeccion.titular_nombre }}
+                            </a>
+                            <div class="lead-list-info">
+                                <span class="lead-list-info-item">
+                                    RAE: <strong>{{ inspeccion.rae }}</strong>
+                                </span>
+                                <span class="lead-list-info-item">
+                                    Fecha: {{ inspeccion.fecha_inspeccion|format_fecha }}
+                                </span>
+                                <span class="lead-list-info-item">
+                                    OCA: {{ inspeccion.oca.nombre if inspeccion.oca else '-' }}
+                                </span>
+                                <span class="lead-list-info-item">
+                                    Presupuesto:
+                                    <span class="badge badge-{{ inspeccion.estado_presupuesto|lower }}">
+                                        {{ inspeccion.estado_presupuesto }}
+                                    </span>
+                                </span>
+                                <span class="lead-list-info-item">
+                                    Trabajo:
+                                    <span class="badge badge-{{ inspeccion.estado_trabajo|lower|replace('_', '-') }}">
+                                        {{ inspeccion.estado_trabajo|replace('_', ' ') }}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-registros">
+                        No hay inspecciones registradas
+                    </div>
+                {% endif %}
+            </div>
+
+            <br><br>
+            <a href="/home" class="button">Volver al Home</a>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>

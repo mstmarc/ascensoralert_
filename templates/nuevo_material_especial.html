@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Material Especial - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        header .header-container { display: flex; justify-content: center; align-items: center; }
+        header .logo-container { display: flex; justify-content: center; align-items: center; }
+
+        body { font-family: 'Montserrat', sans-serif; background: #ffffff; }
+        main { max-width: 800px !important; margin: 0 auto !important; padding: 40px !important; }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 30px 0;
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .button {
+            background: #003c80;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1a1a1a;
+            border: 1px solid #000;
+            padding: 12px 24px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="page-title">Nuevo Material Especial</h2>
+
+        <p style="color: #666; margin-bottom: 30px; font-size: 14px;">
+            Añade manualmente una cortina fotoeléctrica o un pesacarga que no esté relacionado con una inspección específica.
+        </p>
+
+        <form method="POST">
+            <label>Tipo de Material: *</label>
+            <select name="tipo" required>
+                <option value="">-- Seleccionar --</option>
+                <option value="CORTINA">Cortina Fotoeléctrica</option>
+                <option value="PESACARGA">Pesacarga (Limitador de Carga)</option>
+            </select>
+
+            <label>Cliente: *</label>
+            <input type="text" name="cliente_nombre" required placeholder="Nombre de la comunidad o empresa">
+
+            <label>Dirección de la Instalación:</label>
+            <input type="text" name="direccion" placeholder="Calle, número...">
+
+            <label>Municipio:</label>
+            <input type="text" name="municipio" placeholder="Ej: Barcelona">
+
+            <div class="form-grid">
+                <div>
+                    <label>Cantidad: *</label>
+                    <input type="number" name="cantidad" value="1" min="1" required>
+                </div>
+                <div>
+                    <label>Fecha Límite de Instalación: *</label>
+                    <input type="date" name="fecha_limite" required>
+                </div>
+            </div>
+
+            <label>Observaciones:</label>
+            <textarea name="observaciones" rows="4" placeholder="Notas sobre este material..."></textarea>
+
+            <div style="margin-top: 30px;">
+                <button type="submit" class="button">Guardar Material</button>
+                <a href="/materiales_especiales" class="btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </main>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>
