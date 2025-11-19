@@ -10,6 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
+import helpers
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -50,6 +51,35 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "onboarding@resend.dev")
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
+
+# ============================================
+# FUNCIONES DE CONTEXTO PARA TEMPLATES
+# ============================================
+# Registra funciones de permisos para que estén disponibles en Jinja2
+
+@app.context_processor
+def inject_permisos():
+    """Inyecta funciones de control de acceso en todos los templates"""
+    import json
+
+    # Obtener perfil del usuario actual
+    perfil_actual = helpers.obtener_perfil_usuario()
+
+    # Construir diccionario de permisos para JavaScript
+    permisos_js = {}
+    if perfil_actual in helpers.PERMISOS_POR_PERFIL:
+        for modulo, permisos in helpers.PERMISOS_POR_PERFIL[perfil_actual].items():
+            permisos_js[modulo] = permisos
+
+    return {
+        'tiene_permiso': helpers.tiene_permiso,
+        'puede_escribir': helpers.puede_escribir,
+        'puede_eliminar': helpers.puede_eliminar,
+        'obtener_perfil_usuario': helpers.obtener_perfil_usuario,
+        'obtener_modulos_permitidos': helpers.obtener_modulos_permitidos,
+        'perfil_usuario': perfil_actual,
+        'permisos_usuario_json': json.dumps(permisos_js)
+    }
 
 # ============================================
 # SISTEMA DE CACHÉ OPTIMIZADO
@@ -589,6 +619,8 @@ def login():
                 session["usuario"] = usuario
                 session["usuario_id"] = user.get("id")
                 session["email"] = user.get("email", "")
+                # Cargar perfil del usuario (por defecto 'visualizador' si no existe)
+                session["perfil"] = user.get("perfil", "visualizador")
                 return redirect("/home")
         return render_template("login.html", error="Usuario o contraseña incorrectos")
     return render_template("login.html", error=None)
@@ -923,9 +955,9 @@ def ver_visita_admin(visita_id):
     return render_template("ver_visita_admin.html", visita=visita)
 
 @app.route("/editar_visita_admin/<int:visita_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('visitas', 'write')
 def editar_visita_admin(visita_id):
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         # Obtener administrador_id y convertir a int o None
@@ -971,9 +1003,9 @@ def editar_visita_admin(visita_id):
     return render_template("editar_visita_admin.html", visita=visita, administradores=administradores)
 
 @app.route("/eliminar_visita_admin/<int:visita_id>")
+@helpers.login_required
+@helpers.requiere_permiso('visitas', 'delete')
 def eliminar_visita_admin(visita_id):
-    if "usuario" not in session:
-        return redirect("/")
     
     response = requests.delete(f"{SUPABASE_URL}/rest/v1/visitas_administradores?id=eq.{visita_id}", headers=HEADERS)
     
@@ -986,9 +1018,9 @@ def eliminar_visita_admin(visita_id):
 
 # Alta de Equipo (ahora requiere lead_id)
 @app.route("/nuevo_equipo", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('equipos', 'write')
 def nuevo_equipo():
-    if "usuario" not in session:
-        return redirect("/")
     
     # VALIDAR que viene con lead_id
     lead_id = request.args.get("lead_id")
@@ -1039,9 +1071,9 @@ def nuevo_equipo():
 
 # Crear visita de seguimiento
 @app.route("/crear_visita_seguimiento/<int:cliente_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('visitas', 'write')
 def crear_visita_seguimiento(cliente_id):
-    if "usuario" not in session:
-        return redirect("/")
     
     oportunidad_id = request.args.get("oportunidad_id")
     
@@ -1714,9 +1746,9 @@ def ver_lead(lead_id):
 
 # Eliminar Lead
 @app.route("/eliminar_lead/<int:lead_id>")
+@helpers.login_required
+@helpers.requiere_permiso('clientes', 'delete')
 def eliminar_lead(lead_id):
-    if "usuario" not in session:
-        return redirect("/")
     
     requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
     requests.delete(f"{SUPABASE_URL}/rest/v1/visitas_seguimiento?cliente_id=eq.{lead_id}", headers=HEADERS)
@@ -1730,9 +1762,9 @@ def eliminar_lead(lead_id):
 
 # Eliminar Equipo
 @app.route("/eliminar_equipo/<int:equipo_id>")
+@helpers.login_required
+@helpers.requiere_permiso('equipos', 'delete')
 def eliminar_equipo(equipo_id):
-    if "usuario" not in session:
-        return redirect("/")
     
     equipo_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
     if equipo_response.status_code == 200 and equipo_response.json():
@@ -2165,9 +2197,9 @@ def tarea_comercial_agregar_nota(tarea_id):
 
 # Editar Lead - CON LIMPIEZA DE NONE
 @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('clientes', 'write')
 def editar_lead(lead_id):
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         # Obtener administrador_id y convertir a int o None
@@ -2234,9 +2266,9 @@ def editar_lead(lead_id):
 
 # Editar Equipo - CON LIMPIEZA DE NONE
 @app.route("/editar_equipo/<int:equipo_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('equipos', 'write')
 def editar_equipo(equipo_id):
-    if "usuario" not in session:
-        return redirect("/")
 
     response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
     if response.status_code != 200 or not response.json():
@@ -2405,9 +2437,9 @@ def cambiar_estado_oportunidad(oportunidad_id):
 
 
 @app.route("/crear_oportunidad/<int:cliente_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('oportunidades', 'write')
 def crear_oportunidad(cliente_id):
-    if "usuario" not in session:
-        return redirect("/")
     
     if request.method == "POST":
         try:
@@ -2450,9 +2482,9 @@ def crear_oportunidad(cliente_id):
 
 # ACTUALIZADO: editar_oportunidad con nuevos campos
 @app.route("/editar_oportunidad/<int:oportunidad_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('oportunidades', 'write')
 def editar_oportunidad(oportunidad_id):
-    if "usuario" not in session:
-        return redirect("/")
     
     if request.method == "POST":
         try:
@@ -2568,9 +2600,9 @@ def ver_oportunidad(oportunidad_id):
 
 
 @app.route("/eliminar_oportunidad/<int:oportunidad_id>")
+@helpers.login_required
+@helpers.requiere_permiso('oportunidades', 'delete')
 def eliminar_oportunidad(oportunidad_id):
-    if "usuario" not in session:
-        return redirect("/")
     
     try:
         response_get = requests.get(
@@ -3176,9 +3208,9 @@ def administradores_dashboard():
 
 # Alta de Administrador
 @app.route("/nuevo_administrador", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('administradores', 'write')
 def nuevo_administrador():
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         data = {
@@ -3290,9 +3322,9 @@ def ver_administrador(admin_id):
 
 # Editar Administrador
 @app.route("/editar_administrador/<int:admin_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('administradores', 'write')
 def editar_administrador(admin_id):
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         data = {
@@ -3338,9 +3370,9 @@ def editar_administrador(admin_id):
 
 # Eliminar Administrador
 @app.route("/eliminar_administrador/<int:admin_id>", methods=["GET"])
+@helpers.login_required
+@helpers.requiere_permiso('administradores', 'delete')
 def eliminar_administrador(admin_id):
-    if "usuario" not in session:
-        return redirect("/")
 
     # Verificar si tiene clientes asociados
     clientes_check = requests.get(
@@ -3548,10 +3580,10 @@ def clear_cache():
 
 # Dashboard de Inspecciones (vista principal)
 @app.route("/inspecciones")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'read')
 def inspecciones_dashboard():
     """Dashboard principal de inspecciones con alertas y estados"""
-    if "usuario" not in session:
-        return redirect("/")
 
     # Obtener todas las inspecciones con información del OCA
     response = requests.get(
@@ -3657,10 +3689,10 @@ def inspecciones_dashboard():
 
 # Nueva Inspección - Formulario
 @app.route("/inspecciones/nueva", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def nueva_inspeccion():
     """Crear una nueva inspección"""
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         # Recoger datos del formulario
@@ -3739,10 +3771,10 @@ def nueva_inspeccion():
 
 # Ver Detalle de Inspección
 @app.route("/inspecciones/ver/<int:inspeccion_id>")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'read')
 def ver_inspeccion(inspeccion_id):
     """Ver detalle completo de una inspección"""
-    if "usuario" not in session:
-        return redirect("/")
 
     # Obtener inspección con información del OCA
     response = requests.get(
@@ -3807,10 +3839,10 @@ def ver_inspeccion(inspeccion_id):
 
 # Editar Inspección
 @app.route("/inspecciones/editar/<int:inspeccion_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def editar_inspeccion(inspeccion_id):
     """Editar una inspección existente"""
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         # Recoger datos del formulario
@@ -3895,10 +3927,10 @@ def editar_inspeccion(inspeccion_id):
 
 # Cambiar Estado de Presupuesto
 @app.route("/inspecciones/estado_presupuesto/<int:inspeccion_id>", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def cambiar_estado_presupuesto(inspeccion_id):
     """Cambiar el estado del presupuesto de una inspección"""
-    if "usuario" not in session:
-        return redirect("/")
 
     nuevo_estado = request.form.get("estado_presupuesto")
 
@@ -3929,10 +3961,10 @@ def cambiar_estado_presupuesto(inspeccion_id):
 
 # Cambiar Estado de Trabajo
 @app.route("/inspecciones/estado_trabajo/<int:inspeccion_id>", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def cambiar_estado_trabajo(inspeccion_id):
     """Cambiar el estado del trabajo de una inspección"""
-    if "usuario" not in session:
-        return redirect("/")
 
     nuevo_estado = request.form.get("estado_trabajo")
 
@@ -3963,10 +3995,10 @@ def cambiar_estado_trabajo(inspeccion_id):
 
 # Eliminar Inspección
 @app.route("/inspecciones/eliminar/<int:inspeccion_id>")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'delete')
 def eliminar_inspeccion(inspeccion_id):
     """Eliminar una inspección (y sus defectos en cascada)"""
-    if "usuario" not in session:
-        return redirect("/")
 
     response = requests.delete(
         f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
@@ -3986,10 +4018,10 @@ def eliminar_inspeccion(inspeccion_id):
 
 # Añadir Defecto a Inspección
 @app.route("/inspecciones/<int:inspeccion_id>/defectos/nuevo", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def nuevo_defecto(inspeccion_id):
     """Añadir un nuevo defecto a una inspección"""
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         # Obtener fecha de inspección para calcular fecha límite
@@ -4089,10 +4121,10 @@ def nuevo_defecto(inspeccion_id):
 
 # Marcar Defecto como Subsanado
 @app.route("/defectos/<int:defecto_id>/subsanar", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def subsanar_defecto(defecto_id):
     """Marcar un defecto como subsanado"""
-    if "usuario" not in session:
-        return redirect("/")
 
     data = {
         "estado": "SUBSANADO",
@@ -4114,10 +4146,10 @@ def subsanar_defecto(defecto_id):
 
 # Eliminar Defecto
 @app.route("/defectos/<int:defecto_id>/eliminar")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'delete')
 def eliminar_defecto(defecto_id):
     """Eliminar un defecto"""
-    if "usuario" not in session:
-        return redirect("/")
 
     response = requests.delete(
         f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}",
@@ -4137,10 +4169,10 @@ def eliminar_defecto(defecto_id):
 
 # Dashboard de Materiales Especiales
 @app.route("/materiales_especiales")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'read')
 def materiales_especiales():
     """Vista de todos los materiales especiales (cortinas y pesacargas)"""
-    if "usuario" not in session:
-        return redirect("/")
 
     # Filtros
     filtro_tipo = request.args.get("tipo", "")
@@ -4204,10 +4236,10 @@ def materiales_especiales():
 
 # Nuevo Material Especial (Manual)
 @app.route("/materiales_especiales/nuevo", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def nuevo_material_especial():
     """Crear un material especial manualmente (sin inspección)"""
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         data = {
@@ -4244,10 +4276,10 @@ def nuevo_material_especial():
 
 # Cambiar Estado de Material
 @app.route("/materiales_especiales/<int:material_id>/estado", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def cambiar_estado_material(material_id):
     """Cambiar el estado de un material especial"""
-    if "usuario" not in session:
-        return redirect("/")
 
     nuevo_estado = request.form.get("estado")
 
@@ -4278,10 +4310,10 @@ def cambiar_estado_material(material_id):
 
 # Eliminar Material Especial
 @app.route("/materiales_especiales/<int:material_id>/eliminar")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'delete')
 def eliminar_material_especial(material_id):
     """Eliminar un material especial"""
-    if "usuario" not in session:
-        return redirect("/")
 
     response = requests.delete(
         f"{SUPABASE_URL}/rest/v1/materiales_especiales?id=eq.{material_id}",
@@ -4330,10 +4362,10 @@ def lista_ocas():
 
 # Nuevo OCA
 @app.route("/ocas/nuevo", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def nuevo_oca():
     """Crear un nuevo OCA"""
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         data = {
@@ -4367,10 +4399,10 @@ def nuevo_oca():
 
 # Editar OCA
 @app.route("/ocas/editar/<int:oca_id>", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
 def editar_oca(oca_id):
     """Editar un OCA existente"""
-    if "usuario" not in session:
-        return redirect("/")
 
     if request.method == "POST":
         data = {
@@ -4420,10 +4452,10 @@ def editar_oca(oca_id):
 
 # Eliminar OCA
 @app.route("/ocas/eliminar/<int:oca_id>")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'delete')
 def eliminar_oca(oca_id):
     """Eliminar un OCA"""
-    if "usuario" not in session:
-        return redirect("/")
 
     response = requests.delete(
         f"{SUPABASE_URL}/rest/v1/ocas?id=eq.{oca_id}",
@@ -4436,6 +4468,124 @@ def eliminar_oca(oca_id):
         flash("Error al eliminar OCA", "error")
 
     return redirect("/ocas")
+
+# ============================================
+# ADMINISTRACIÓN DE USUARIOS (Solo Admin)
+# ============================================
+
+@app.route("/admin/usuarios")
+@helpers.login_required
+@helpers.solo_admin
+def admin_usuarios():
+    """Panel de administración de usuarios - Solo para admin"""
+
+    # Obtener todos los usuarios
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/usuarios?select=*&order=id",
+        headers=HEADERS
+    )
+
+    usuarios = []
+    if response.status_code == 200:
+        usuarios = response.json()
+
+    return render_template("admin_usuarios.html", usuarios=usuarios)
+
+
+@app.route("/admin/usuarios/crear", methods=["POST"])
+@helpers.login_required
+@helpers.solo_admin
+def admin_crear_usuario():
+    """Crear un nuevo usuario"""
+
+    nombre_usuario = request.form.get("nombre_usuario", "").strip()
+    email = request.form.get("email", "").strip()
+    contrasena = request.form.get("contrasena", "").strip()
+    perfil = request.form.get("perfil", "visualizador")
+
+    # Validaciones
+    if not nombre_usuario or not contrasena:
+        flash("Nombre de usuario y contraseña son obligatorios", "error")
+        return redirect("/admin/usuarios")
+
+    if perfil not in ['admin', 'gestor', 'visualizador']:
+        flash("Perfil inválido", "error")
+        return redirect("/admin/usuarios")
+
+    # Crear usuario
+    data = {
+        "nombre_usuario": nombre_usuario,
+        "email": email or None,
+        "contrasena": contrasena,  # NOTA: En producción deberías usar hash
+        "perfil": perfil
+    }
+
+    response = requests.post(
+        f"{SUPABASE_URL}/rest/v1/usuarios",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 201]:
+        flash(f"Usuario '{nombre_usuario}' creado exitosamente con perfil '{perfil}'", "success")
+    else:
+        flash(f"Error al crear usuario: {response.text}", "error")
+
+    return redirect("/admin/usuarios")
+
+
+@app.route("/admin/usuarios/editar/<int:usuario_id>", methods=["POST"])
+@helpers.login_required
+@helpers.solo_admin
+def admin_editar_usuario(usuario_id):
+    """Editar perfil de un usuario"""
+
+    perfil = request.form.get("perfil", "visualizador")
+
+    if perfil not in ['admin', 'gestor', 'visualizador']:
+        flash("Perfil inválido", "error")
+        return redirect("/admin/usuarios")
+
+    # Actualizar perfil
+    data = {"perfil": perfil}
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/usuarios?id=eq.{usuario_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code == 200:
+        flash("Perfil actualizado correctamente", "success")
+    else:
+        flash(f"Error al actualizar perfil: {response.text}", "error")
+
+    return redirect("/admin/usuarios")
+
+
+@app.route("/admin/usuarios/eliminar/<int:usuario_id>")
+@helpers.login_required
+@helpers.solo_admin
+def admin_eliminar_usuario(usuario_id):
+    """Eliminar un usuario"""
+
+    # Evitar que el admin se elimine a sí mismo
+    if usuario_id == session.get("usuario_id"):
+        flash("No puedes eliminar tu propio usuario", "error")
+        return redirect("/admin/usuarios")
+
+    response = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/usuarios?id=eq.{usuario_id}",
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Usuario eliminado correctamente", "success")
+    else:
+        flash(f"Error al eliminar usuario: {response.text}", "error")
+
+    return redirect("/admin/usuarios")
+
 
 # ============================================
 # CIERRE
