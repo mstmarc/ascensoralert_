@@ -168,7 +168,12 @@
                 menu.classList.remove('active');
             }
         });
+    </script>    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
     </script>
+
 <script src="/static/sidebar.js"></script>
 </body>
 </html>

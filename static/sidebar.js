@@ -162,44 +162,64 @@
         }
     `;
 
-    // HTML del sidebar
-    const sidebarHTML = `
-        <!-- Toggle móvil -->
-        <button class="sidebar-mobile-btn" onclick="toggleSidebarInt()">☰</button>
-        
-        <!-- Overlay móvil -->
-        <div class="sidebar-mobile-overlay" id="sidebarIntOverlay" onclick="closeSidebarInt()"></div>
+    // Obtener permisos del usuario (inyectados desde el backend)
+    const permisos = window.userPermissions || {};
 
-        <!-- Sidebar integrado -->
-        <aside class="sidebar-integrated" id="sidebarIntegrated">
-            <nav class="sidebar-integrated-nav">
+    // Función auxiliar para verificar permisos
+    function tienePermiso(modulo, accion = 'read') {
+        return permisos[modulo] && permisos[modulo][accion] === true;
+    }
+
+    // Construir menú dinámicamente según permisos
+    let menuHTML = `
                 <!-- Inicio -->
                 <a href="/home" class="sidebar-integrated-link">
                     <span class="sidebar-integrated-icon">🏠</span>
                     Inicio
                 </a>
 
-                <div class="sidebar-integrated-divider"></div>
+                <div class="sidebar-integrated-divider"></div>`;
 
-                <!-- BLOQUE 1: CREAR/AÑADIR -->
+    // BLOQUE 1: CREAR/AÑADIR (solo si tiene permisos de escritura)
+    let crearBloque = '';
+    if (tienePermiso('clientes', 'write')) {
+        crearBloque += `
                 <a href="/formulario_lead" class="sidebar-integrated-link">
                     <span class="sidebar-integrated-icon" style="color: #366092;">➕</span>
                     Visita a Instalación
-                </a>
+                </a>`;
+    }
+    if (tienePermiso('administradores', 'write')) {
+        crearBloque += `
                 <a href="/visita_administrador" class="sidebar-integrated-link">
                     <span class="sidebar-integrated-icon" style="color: #366092;">➕</span>
                     Visita a Administrador
-                </a>
+                </a>`;
+    }
 
-                <div class="sidebar-integrated-divider"></div>
+    if (crearBloque) {
+        menuHTML += crearBloque + `
+                <div class="sidebar-integrated-divider"></div>`;
+    }
 
-                <!-- BLOQUE 2: VER/LISTAR -->
+    // BLOQUE 2: VER/LISTAR
+    menuHTML += `
+                <!-- BLOQUE 2: VER/LISTAR -->`;
+
+    if (tienePermiso('clientes', 'read')) {
+        menuHTML += `
                 <a href="/leads_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Instalaciones
-                </a>
+                </a>`;
+    }
+    if (tienePermiso('administradores', 'read')) {
+        menuHTML += `
                 <a href="/administradores_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Administradores
-                </a>
+                </a>`;
+    }
+    if (tienePermiso('oportunidades', 'read')) {
+        menuHTML += `
                 <a href="/oportunidades" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Oportunidades
                 </a>
@@ -208,10 +228,15 @@
                 </a>
                 <a href="/oportunidades_post_ipo" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Seguimiento Comercial
-                </a>
+                </a>`;
+    }
 
-                <div class="sidebar-integrated-divider"></div>
+    menuHTML += `
+                <div class="sidebar-integrated-divider"></div>`;
 
+    // BLOQUE 3: INSPECCIONES (solo para admin)
+    if (tienePermiso('inspecciones', 'read')) {
+        menuHTML += `
                 <!-- BLOQUE 3: INSPECCIONES -->
                 <a href="/inspecciones" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Inspecciones (IPOs)
@@ -223,22 +248,48 @@
                     OCAs
                 </a>
 
-                <div class="sidebar-integrated-divider"></div>
+                <div class="sidebar-integrated-divider"></div>`;
+    }
 
+    // Reportes y Configuración (siempre visible)
+    menuHTML += `
                 <!-- Reportes y Configuración -->
                 <a href="/reporte_mensual" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Reporte Mensual
                 </a>
                 <a href="/configuracion_avisos" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Configuración de Avisos
-                </a>
+                </a>`;
 
+    // Administración de Usuarios (solo para admin)
+    const perfilActual = window.perfilUsuario || 'visualizador';
+    if (perfilActual === 'admin') {
+        menuHTML += `
+                <a href="/admin/usuarios" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    👥 Gestión de Usuarios
+                </a>`;
+    }
+
+    menuHTML += `
                 <div class="sidebar-integrated-divider"></div>
 
                 <!-- Cerrar Sesión al final -->
                 <a href="/logout" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Cerrar Sesión
-                </a>
+                </a>`;
+
+    // HTML del sidebar
+    const sidebarHTML = `
+        <!-- Toggle móvil -->
+        <button class="sidebar-mobile-btn" onclick="toggleSidebarInt()">☰</button>
+
+        <!-- Overlay móvil -->
+        <div class="sidebar-mobile-overlay" id="sidebarIntOverlay" onclick="closeSidebarInt()"></div>
+
+        <!-- Sidebar integrado -->
+        <aside class="sidebar-integrated" id="sidebarIntegrated">
+            <nav class="sidebar-integrated-nav">
+                ${menuHTML}
             </nav>
         </aside>
     `;

@@ -144,8 +144,13 @@
         <p style="font-size: 12px; color: #999; margin-top: 20px;">
             <strong>Nota:</strong> Si marcas el defecto como "Cortina" o "Pesacarga", se creará automáticamente un registro en Materiales Especiales para seguimiento específico.
         </p>
-    </main>
+    </main>    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
 
-    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+
+    <script src="{{ url_for(\'static\', filename=\'sidebar.js\') }}"></script>
 </body>
 </html>

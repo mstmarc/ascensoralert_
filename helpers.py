@@ -37,6 +37,160 @@ def login_required(f):
 
 
 # ============================================
+# SISTEMA DE PERFILES Y PERMISOS
+# ============================================
+
+# Definición de módulos del sistema
+MODULOS = {
+    'inspecciones': 'Inspecciones (IPOs)',
+    'clientes': 'Clientes/Comunidades',
+    'equipos': 'Equipos/Ascensores',
+    'oportunidades': 'Oportunidades Comerciales',
+    'administradores': 'Administradores de Fincas',
+    'visitas': 'Visitas',
+    'home': 'Dashboard'
+}
+
+# Definición de permisos por perfil
+# 'read': puede ver | 'write': puede crear/editar | 'delete': puede eliminar
+PERMISOS_POR_PERFIL = {
+    'admin': {
+        # Admin tiene acceso total a todo
+        'inspecciones': {'read': True, 'write': True, 'delete': True},
+        'clientes': {'read': True, 'write': True, 'delete': True},
+        'equipos': {'read': True, 'write': True, 'delete': True},
+        'oportunidades': {'read': True, 'write': True, 'delete': True},
+        'administradores': {'read': True, 'write': True, 'delete': True},
+        'visitas': {'read': True, 'write': True, 'delete': True},
+        'home': {'read': True, 'write': True, 'delete': True}
+    },
+    'gestor': {
+        # Gestor: todo EXCEPTO inspecciones
+        'inspecciones': {'read': False, 'write': False, 'delete': False},
+        'clientes': {'read': True, 'write': True, 'delete': True},
+        'equipos': {'read': True, 'write': True, 'delete': True},
+        'oportunidades': {'read': True, 'write': True, 'delete': True},
+        'administradores': {'read': True, 'write': True, 'delete': True},
+        'visitas': {'read': True, 'write': True, 'delete': True},
+        'home': {'read': True, 'write': True, 'delete': True}
+    },
+    'visualizador': {
+        # Visualizador: solo lectura, sin inspecciones
+        'inspecciones': {'read': False, 'write': False, 'delete': False},
+        'clientes': {'read': True, 'write': False, 'delete': False},
+        'equipos': {'read': True, 'write': False, 'delete': False},
+        'oportunidades': {'read': True, 'write': False, 'delete': False},
+        'administradores': {'read': True, 'write': False, 'delete': False},
+        'visitas': {'read': True, 'write': False, 'delete': False},
+        'home': {'read': True, 'write': False, 'delete': False}
+    }
+}
+
+
+def obtener_perfil_usuario():
+    """Obtiene el perfil del usuario actual desde la sesión"""
+    return session.get("perfil", "visualizador")
+
+
+def tiene_permiso(modulo, accion='read'):
+    """
+    Verifica si el usuario actual tiene permiso para una acción en un módulo
+
+    Args:
+        modulo: nombre del módulo ('inspecciones', 'clientes', etc.)
+        accion: tipo de acción ('read', 'write', 'delete')
+
+    Returns:
+        bool: True si tiene permiso, False en caso contrario
+    """
+    perfil = obtener_perfil_usuario()
+
+    # Si el perfil no existe en la configuración, denegar acceso
+    if perfil not in PERMISOS_POR_PERFIL:
+        return False
+
+    # Si el módulo no existe, denegar acceso
+    if modulo not in PERMISOS_POR_PERFIL[perfil]:
+        return False
+
+    # Retornar el permiso específico
+    return PERMISOS_POR_PERFIL[perfil][modulo].get(accion, False)
+
+
+def requiere_permiso(modulo, accion='read'):
+    """
+    Decorador que verifica permisos antes de ejecutar una ruta
+
+    Uso:
+        @app.route('/inspecciones')
+        @login_required
+        @requiere_permiso('inspecciones', 'read')
+        def listar_inspecciones():
+            ...
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not tiene_permiso(modulo, accion):
+                flash(f"No tienes permiso para acceder a este módulo", "error")
+                return redirect("/home")
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
+def solo_admin(f):
+    """Decorador que solo permite acceso a usuarios con perfil admin"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if obtener_perfil_usuario() != 'admin':
+            flash("Esta funcionalidad solo está disponible para administradores", "error")
+            return redirect("/home")
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def puede_escribir(modulo):
+    """
+    Función auxiliar para templates: verifica si el usuario puede crear/editar en un módulo
+
+    Uso en Jinja2:
+        {% if puede_escribir('clientes') %}
+            <button>Crear Cliente</button>
+        {% endif %}
+    """
+    return tiene_permiso(modulo, 'write')
+
+
+def puede_eliminar(modulo):
+    """
+    Función auxiliar para templates: verifica si el usuario puede eliminar en un módulo
+
+    Uso en Jinja2:
+        {% if puede_eliminar('clientes') %}
+            <button>Eliminar</button>
+        {% endif %}
+    """
+    return tiene_permiso(modulo, 'delete')
+
+
+def obtener_modulos_permitidos():
+    """
+    Retorna lista de módulos a los que el usuario tiene acceso (al menos lectura)
+    Útil para generar menús dinámicos
+    """
+    perfil = obtener_perfil_usuario()
+    modulos_permitidos = []
+
+    if perfil in PERMISOS_POR_PERFIL:
+        for modulo, permisos in PERMISOS_POR_PERFIL[perfil].items():
+            if permisos.get('read', False):
+                modulos_permitidos.append(modulo)
+
+    return modulos_permitidos
+
+
+# ============================================
 # CLIENTE SUPABASE SIMPLIFICADO
 # ============================================
 

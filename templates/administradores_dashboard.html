@@ -716,7 +716,12 @@
             <br>
             <a href="/home" class="button">Volver al Home</a>
         </div>
-    </main>
+    </main>    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+
 
     <script src="/static/sidebar.js"></script>
 </body>
