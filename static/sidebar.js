@@ -213,8 +213,7 @@
                 <div class="sidebar-integrated-divider"></div>
 
                 <!-- BLOQUE 3: INSPECCIONES -->
-                <a href="/inspecciones" class="sidebar-integrated-link">
-                    <span class="sidebar-integrated-icon">📋</span>
+                <a href="/inspecciones" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Inspecciones (IPOs)
                 </a>
                 <a href="/materiales_especiales" class="sidebar-integrated-link" style="padding-left: 54px;">
