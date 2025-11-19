@@ -65,7 +65,7 @@
             font-weight: 700;
         }
 
-        /* STATS CARDS - MINIMALISTA */
+        /* STATS CARDS - RECUADROS CON BORDE */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -74,14 +74,18 @@
         }
 
         .stat-card {
-            background: transparent;
-            padding: 0 0 20px 0;
-            border-bottom: 2px solid #e6e6e6;
+            background: #ffffff;
+            border: 2px solid #e6e6e6;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
             transition: all 0.2s;
         }
 
         .stat-card:hover {
-            border-bottom-color: #003366;
+            border-color: #003366;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,51,102,0.1);
         }
 
         .stat-card h3 {
