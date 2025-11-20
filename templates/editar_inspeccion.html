@@ -76,14 +76,25 @@
         <h2 class="page-title">Editar Inspección</h2>
 
         <form method="POST">
-            <label>Fecha de Inspección: *</label>
+            <label>MAQUINA: *</label>
+            <input type="text" name="maquina" value="{{ inspeccion.maquina }}" required>
+
+            <label>FECHA INSPECCION: *</label>
             <input type="date" name="fecha_inspeccion" value="{{ inspeccion.fecha_inspeccion }}" required>
 
-            <label>Instalación: *</label>
-            <input type="text" name="direccion_instalacion" value="{{ inspeccion.direccion_instalacion }}" required>
+            <label>PRESUPUESTO:</label>
+            <select name="presupuesto">
+                <option value="PENDIENTE" {% if inspeccion.presupuesto == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                <option value="EN_PREPARACION" {% if inspeccion.presupuesto == 'EN_PREPARACION' %}selected{% endif %}>EN PREPARACION</option>
+                <option value="ENVIADO" {% if inspeccion.presupuesto == 'ENVIADO' %}selected{% endif %}>ENVIADO</option>
+                <option value="ACEPTADO" {% if inspeccion.presupuesto == 'ACEPTADO' %}selected{% endif %}>ACEPTADO</option>
+            </select>
 
-            <label>Máquina: *</label>
-            <input type="text" name="rae" value="{{ inspeccion.rae }}" required>
+            <label>ESTADO:</label>
+            <input type="text" name="estado" value="{{ inspeccion.estado }}" placeholder="Estado general (texto libre)">
+
+            <label>Estado del material:</label>
+            <input type="text" name="estado_material" value="{{ inspeccion.estado_material }}" placeholder="Estado del material (texto libre)">
 
             <label>OCA:</label>
             <select name="oca_id">
@@ -92,9 +103,6 @@
                 <option value="{{ oca.id }}" {% if inspeccion.oca_id == oca.id %}selected{% endif %}>{{ oca.nombre }}</option>
                 {% endfor %}
             </select>
-
-            <label>Observaciones:</label>
-            <textarea name="observaciones" rows="3">{{ inspeccion.observaciones }}</textarea>
 
             <div style="margin-top: 30px;">
                 <button type="submit" class="button">Guardar Cambios</button>

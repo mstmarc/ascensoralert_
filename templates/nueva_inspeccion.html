@@ -143,14 +143,25 @@
         <h2 class="page-title">Nueva Inspección (IPO)</h2>
 
         <form method="POST">
-            <label>Fecha de Inspección: *</label>
+            <label>MAQUINA: *</label>
+            <input type="text" name="maquina" required placeholder="Identificador de la máquina">
+
+            <label>FECHA INSPECCION: *</label>
             <input type="date" name="fecha_inspeccion" required>
 
-            <label>Instalación: *</label>
-            <input type="text" name="direccion_instalacion" required placeholder="ANTONIO ALMEIDA CASTELLANO - C/ TAMARCO Nº7, BUEN LUGAR">
+            <label>PRESUPUESTO:</label>
+            <select name="presupuesto">
+                <option value="PENDIENTE" selected>PENDIENTE</option>
+                <option value="EN_PREPARACION">EN PREPARACION</option>
+                <option value="ENVIADO">ENVIADO</option>
+                <option value="ACEPTADO">ACEPTADO</option>
+            </select>
 
-            <label>Máquina: *</label>
-            <input type="text" name="rae" required placeholder="AC310373">
+            <label>ESTADO:</label>
+            <input type="text" name="estado" placeholder="Estado general (texto libre)">
+
+            <label>Estado del material:</label>
+            <input type="text" name="estado_material" placeholder="Estado del material (texto libre)">
 
             <label>OCA:</label>
             <select name="oca_id">
@@ -159,21 +170,6 @@
                 <option value="{{ oca.id }}">{{ oca.nombre }}</option>
                 {% endfor %}
             </select>
-
-            <label>Presupuesto (Estado):</label>
-            <select name="estado_presupuesto">
-                <option value="PENDIENTE" selected>PENDIENTE</option>
-                <option value="PREPARANDO">PREPARANDO</option>
-                <option value="ENVIADO">ENVIADO</option>
-                <option value="ACEPTADO">ACEPTADO</option>
-                <option value="RECHAZADO">RECHAZADO</option>
-            </select>
-
-            <label>Estado:</label>
-            <input type="text" name="estado_trabajo" placeholder="EN PROCESO, COMPLETADO, etc.">
-
-            <label>Observaciones:</label>
-            <textarea name="observaciones" rows="3" placeholder="Notas..."></textarea>
 
             <div style="margin-top: 30px;">
                 <button type="submit" class="button">Guardar</button>

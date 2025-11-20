@@ -3761,10 +3761,16 @@ def inspecciones_dashboard():
 
     # Calcular estadísticas
     total_inspecciones = len(inspecciones)
-    pendiente_presupuesto = len([i for i in inspecciones if i.get('estado_presupuesto') in ['PENDIENTE', 'PREPARANDO']])
-    enviados_sin_respuesta = len([i for i in inspecciones if i.get('estado_presupuesto') == 'ENVIADO'])
-    trabajos_en_ejecucion = len([i for i in inspecciones if i.get('estado_trabajo') == 'EN_EJECUCION'])
-    completados = len([i for i in inspecciones if i.get('estado_trabajo') == 'COMPLETADO'])
+    pendiente_presupuesto = len([i for i in inspecciones if i.get('presupuesto') in ['PENDIENTE', 'EN_PREPARACION']])
+    enviados_sin_respuesta = len([i for i in inspecciones if i.get('presupuesto') == 'ENVIADO'])
+    aceptados = len([i for i in inspecciones if i.get('presupuesto') == 'ACEPTADO'])
+
+    # Contar por estados personalizados (texto libre)
+    estados_unicos = {}
+    for i in inspecciones:
+        estado = i.get('estado', '').strip()
+        if estado:
+            estados_unicos[estado] = estados_unicos.get(estado, 0) + 1
 
     # Obtener lista de OCAs para filtros
     response_ocas = requests.get(
@@ -3781,8 +3787,8 @@ def inspecciones_dashboard():
         total_inspecciones=total_inspecciones,
         pendiente_presupuesto=pendiente_presupuesto,
         enviados_sin_respuesta=enviados_sin_respuesta,
-        trabajos_en_ejecucion=trabajos_en_ejecucion,
-        completados=completados,
+        aceptados=aceptados,
+        estados_unicos=estados_unicos,
         alertas_criticas=alertas_criticas,
         alertas_urgentes=alertas_urgentes,
         alertas_proximas=alertas_proximas,
@@ -3797,38 +3803,25 @@ def nueva_inspeccion():
     """Crear una nueva inspección"""
 
     if request.method == "POST":
-        # Recoger datos del formulario (simplificado)
+        # Recoger datos del formulario
         data = {
-            # Campos esenciales
-            "rae": request.form.get("rae"),
+            # Campos principales
+            "maquina": request.form.get("maquina"),
             "fecha_inspeccion": request.form.get("fecha_inspeccion"),
-            "direccion_instalacion": request.form.get("direccion_instalacion"),
+            "presupuesto": request.form.get("presupuesto") or "PENDIENTE",
+            "estado": request.form.get("estado") or "",
+            "estado_material": request.form.get("estado_material") or "",
 
             # OCA
             "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None,
-
-            # Titular (opcional, puede estar incluido en direccion_instalacion)
-            "titular_nombre": request.form.get("titular_nombre") or "Sin especificar",
-
-            # Estados
-            "estado_presupuesto": request.form.get("estado_presupuesto") or "PENDIENTE",
-            "estado_trabajo": request.form.get("estado_trabajo") or "PENDIENTE",
-
-            # Campos técnicos por defecto
-            "resultado": "Desfavorable",
-            "tiene_defectos": True,
-            "empresa_conservadora": "FEDES ASCENSORES",
-
-            # Observaciones
-            "observaciones": request.form.get("observaciones") or None,
 
             # Usuario que crea
             "created_by": session.get("usuario")
         }
 
         # Validaciones mínimas
-        if not data["rae"] or not data["fecha_inspeccion"] or not data["direccion_instalacion"]:
-            flash("Los campos Fecha, Instalación y Máquina son obligatorios", "error")
+        if not data["maquina"] or not data["fecha_inspeccion"]:
+            flash("Los campos Máquina y Fecha de Inspección son obligatorios", "error")
             return redirect(request.referrer)
 
         # Crear inspección
@@ -3934,13 +3927,14 @@ def editar_inspeccion(inspeccion_id):
     """Editar una inspección existente"""
 
     if request.method == "POST":
-        # Recoger datos del formulario (simplificado)
+        # Recoger datos del formulario
         data = {
-            "rae": request.form.get("rae"),
+            "maquina": request.form.get("maquina"),
             "fecha_inspeccion": request.form.get("fecha_inspeccion"),
-            "direccion_instalacion": request.form.get("direccion_instalacion"),
-            "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None,
-            "observaciones": request.form.get("observaciones") or None
+            "presupuesto": request.form.get("presupuesto") or "PENDIENTE",
+            "estado": request.form.get("estado") or "",
+            "estado_material": request.form.get("estado_material") or "",
+            "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None
         }
 
         # Actualizar inspección
@@ -3995,19 +3989,11 @@ def editar_inspeccion(inspeccion_id):
 def cambiar_estado_presupuesto(inspeccion_id):
     """Cambiar el estado del presupuesto de una inspección"""
 
-    nuevo_estado = request.form.get("estado_presupuesto")
+    nuevo_estado = request.form.get("presupuesto")
 
     data = {
-        "estado_presupuesto": nuevo_estado
+        "presupuesto": nuevo_estado
     }
-
-    # Si se marca como ENVIADO, guardar fecha de envío
-    if nuevo_estado == "ENVIADO":
-        data["fecha_envio_presupuesto"] = date.today().isoformat()
-
-    # Si se marca como ACEPTADO o RECHAZADO, guardar fecha de respuesta
-    if nuevo_estado in ["ACEPTADO", "RECHAZADO"]:
-        data["fecha_respuesta_presupuesto"] = date.today().isoformat()
 
     response = requests.patch(
         f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
@@ -4016,45 +4002,12 @@ def cambiar_estado_presupuesto(inspeccion_id):
     )
 
     if response.status_code in [200, 204]:
-        flash(f"Estado del presupuesto cambiado a {nuevo_estado}", "success")
+        flash(f"Presupuesto cambiado a {nuevo_estado}", "success")
     else:
         flash("Error al cambiar estado", "error")
 
     return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
-# Cambiar Estado de Trabajo
-@app.route("/inspecciones/estado_trabajo/<int:inspeccion_id>", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def cambiar_estado_trabajo(inspeccion_id):
-    """Cambiar el estado del trabajo de una inspección"""
-
-    nuevo_estado = request.form.get("estado_trabajo")
-
-    data = {
-        "estado_trabajo": nuevo_estado
-    }
-
-    # Si se marca como EN_EJECUCION, guardar fecha de inicio
-    if nuevo_estado == "EN_EJECUCION":
-        data["fecha_inicio_trabajo"] = date.today().isoformat()
-
-    # Si se marca como COMPLETADO, guardar fecha de fin
-    if nuevo_estado == "COMPLETADO":
-        data["fecha_fin_trabajo"] = date.today().isoformat()
-
-    response = requests.patch(
-        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
-        json=data,
-        headers=HEADERS
-    )
-
-    if response.status_code in [200, 204]:
-        flash(f"Estado del trabajo cambiado a {nuevo_estado}", "success")
-    else:
-        flash("Error al cambiar estado", "error")
-
-    return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
 # Eliminar Inspección
 @app.route("/inspecciones/eliminar/<int:inspeccion_id>")
