@@ -62,22 +62,25 @@
 
         .info-item span {
             color: #666;
+        }
+
+        .info-item > div {
             display: flex;
-            align-items: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 0;
         }
 
         .badge {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
         }
 
         .badge-pendiente { background: #f0f0f0; color: #666; }
-        .badge-preparando { background: #fff8e1; color: #856404; }
+        .badge-en-preparacion { background: #fff8e1; color: #856404; }
         .badge-enviado { background: #e3f2fd; color: #1565c0; }
         .badge-aceptado { background: #e8f5e9; color: #2e7d32; }
         .badge-rechazado { background: #fee; color: #c62828; }
@@ -169,35 +172,32 @@
         }
 
         .cambio-estado-form {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: 15px;
+            margin-top: 8px;
+            width: 100%;
         }
 
         .cambio-estado-form select {
+            width: 100%;
+            max-width: 300px;
             padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             font-size: 13px;
             font-family: 'Montserrat', sans-serif;
             font-weight: 600;
-        }
-
-        .cambio-estado-form button {
-            padding: 8px 16px;
-            background: #003c80;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 700;
             cursor: pointer;
-            transition: background 0.2s;
+            background: white;
+            transition: all 0.2s;
         }
 
-        .cambio-estado-form button:hover {
-            background: #002a5c;
+        .cambio-estado-form select:hover {
+            border-color: #003366;
+        }
+
+        .cambio-estado-form select:focus {
+            outline: none;
+            border-color: #003366;
+            box-shadow: 0 0 0 3px rgba(0,51,102,0.1);
         }
 
         .materiales-list {
@@ -257,19 +257,19 @@
                 </div>
                 <div class="info-item">
                     <label>PRESUPUESTO</label>
-                    <div style="display: flex; align-items: center; gap: 0;">
+                    <div>
                         <span class="badge badge-{{ inspeccion.presupuesto|lower|replace('_', '-') }}">
                             {{ inspeccion.presupuesto|replace('_', ' ') }}
                         </span>
-                        <form method="POST" action="/inspecciones/estado_presupuesto/{{ inspeccion.id }}" class="cambio-estado-form">
-                            <select name="presupuesto">
-                                <option value="PENDIENTE" {% if inspeccion.presupuesto == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
-                                <option value="EN_PREPARACION" {% if inspeccion.presupuesto == 'EN_PREPARACION' %}selected{% endif %}>EN PREPARACION</option>
-                                <option value="ENVIADO" {% if inspeccion.presupuesto == 'ENVIADO' %}selected{% endif %}>ENVIADO</option>
-                                <option value="ACEPTADO" {% if inspeccion.presupuesto == 'ACEPTADO' %}selected{% endif %}>ACEPTADO</option>
+                        <div class="cambio-estado-form">
+                            <select id="cambiar-presupuesto" data-inspeccion-id="{{ inspeccion.id }}">
+                                <option value="">⚡ Cambiar estado...</option>
+                                <option value="PENDIENTE">PENDIENTE</option>
+                                <option value="EN_PREPARACION">EN PREPARACION</option>
+                                <option value="ENVIADO">ENVIADO</option>
+                                <option value="ACEPTADO">ACEPTADO</option>
                             </select>
-                            <button type="submit">Cambiar</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
                 <div class="info-item">
@@ -378,6 +378,35 @@
         window.perfilUsuario = '{{ perfil_usuario }}';
     </script>
 
+    <script>
+        // Manejo de cambio de presupuesto
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('cambiar-presupuesto');
+
+            if (selector) {
+                selector.addEventListener('change', function() {
+                    const inspeccionId = this.dataset.inspeccionId;
+                    const nuevoPresupuesto = this.value;
+
+                    if (!nuevoPresupuesto) return;
+
+                    // Crear formulario y enviarlo
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/inspecciones/estado_presupuesto/${inspeccionId}`;
+
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'presupuesto';
+                    input.value = nuevoPresupuesto;
+
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+            }
+        });
+    </script>
 
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
