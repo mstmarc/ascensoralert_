@@ -140,30 +140,45 @@
         /* Tarjetas de alertas */
         .alerta-card {
             background: transparent;
-            border: none;
-            border-bottom: 2px solid #e6e6e6;
-            border-radius: 0;
-            padding: 16px 0;
+            border: 1px solid #e6e6e6;
+            border-radius: 8px;
+            padding: 16px;
             transition: all 0.2s;
         }
 
         .alerta-card:hover {
-            border-bottom-color: #003366;
+            border-color: #003366;
+            box-shadow: 0 2px 8px rgba(0, 51, 102, 0.1);
         }
 
         /* Tarjeta crítica */
+        .alerta-card.alerta-critica {
+            border-color: #fdd;
+        }
+
         .alerta-card.alerta-critica:hover {
-            border-bottom-color: #dc3545;
+            border-color: #dc3545;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
         }
 
         /* Tarjeta urgente */
+        .alerta-card.alerta-urgente {
+            border-color: #fff3cd;
+        }
+
         .alerta-card.alerta-urgente:hover {
-            border-bottom-color: #ffc107;
+            border-color: #ffc107;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);
         }
 
         /* Tarjeta próxima */
+        .alerta-card.alerta-proxima {
+            border-color: #d4edda;
+        }
+
         .alerta-card.alerta-proxima:hover {
-            border-bottom-color: #4caf50;
+            border-color: #4caf50;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
         }
 
         .alerta-badge {
@@ -244,15 +259,31 @@
             border-top: 1px solid #f0f0f0;
         }
 
-        .alerta-link {
-            color: #003366;
-            font-weight: 600;
+        /* Botones de alertas */
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #003c80;
+            color: white;
             text-decoration: none;
-            font-size: 14px;
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
         }
 
-        .alerta-link:hover {
-            text-decoration: underline;
+        .btn:hover {
+            background: #002f66;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
         }
 
         /* Lista de inspecciones */
@@ -446,7 +477,7 @@
                                 </div>
                                 <div class="alerta-dias critica">⚠️ Vencida hace {{ item.dias_hasta_segunda|abs }} días</div>
                                 <div class="alerta-acciones">
-                                    <a href="/inspecciones/ver/{{ item.id }}" class="alerta-link">Ver inspección →</a>
+                                    <a href="/inspecciones/ver/{{ item.id }}" class="btn btn-sm">Ver inspección</a>
                                 </div>
                             {% endif %}
                         </div>
@@ -491,7 +522,7 @@
                                 </div>
                                 <div class="alerta-dias urgente">⏰ Quedan {{ item.dias_hasta_segunda }} días</div>
                                 <div class="alerta-acciones">
-                                    <a href="/inspecciones/ver/{{ item.id }}" class="alerta-link">Ver inspección →</a>
+                                    <a href="/inspecciones/ver/{{ item.id }}" class="btn btn-sm">Ver inspección</a>
                                 </div>
                             {% endif %}
                         </div>
@@ -536,7 +567,7 @@
                                 </div>
                                 <div class="alerta-dias proxima">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
                                 <div class="alerta-acciones">
-                                    <a href="/inspecciones/ver/{{ item.id }}" class="alerta-link">Ver inspección →</a>
+                                    <a href="/inspecciones/ver/{{ item.id }}" class="btn btn-sm">Ver inspección</a>
                                 </div>
                             {% endif %}
                         </div>
