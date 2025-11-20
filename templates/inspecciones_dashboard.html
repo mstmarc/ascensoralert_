@@ -139,7 +139,8 @@
 
         /* Tarjetas de alertas */
         .alerta-card {
-            display: block;
+            display: flex;
+            flex-direction: column;
             background: transparent;
             border: 1px solid #e6e6e6;
             border-radius: 8px;
@@ -187,6 +188,16 @@
             box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
         }
 
+        /* Tarjeta normal/programada */
+        .alerta-card.alerta-normal {
+            border-color: #e8f5e9;
+        }
+
+        .alerta-card.alerta-normal:hover {
+            border-color: #2e7d32;
+            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
+        }
+
         .alerta-badge {
             display: inline-block;
             padding: 6px 12px;
@@ -209,6 +220,11 @@
         }
 
         .alerta-badge-proxima {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .alerta-badge-normal {
             background: #e8f5e9;
             color: #2e7d32;
         }
@@ -244,7 +260,8 @@
         .alerta-dias {
             font-size: 16px;
             font-weight: 700;
-            margin: 8px 0;
+            margin: 8px 0 0 0;
+            margin-top: auto;
         }
 
         .alerta-dias.critica {
@@ -256,6 +273,10 @@
         }
 
         .alerta-dias.proxima {
+            color: #2e7d32;
+        }
+
+        .alerta-dias.normal {
             color: #2e7d32;
         }
 
@@ -421,45 +442,49 @@
               {% endif %}
             {% endwith %}
 
-            <!-- Estadísticas de 2ª Inspección -->
+            <!-- Estadísticas de Gestión de Defectos -->
             <div class="stats">
                 <div class="stat-card filtro-kpi" data-filtro="todas" style="cursor: pointer;">
                     <h3>Total Inspecciones</h3>
                     <div class="number">{{ total_inspecciones }}</div>
                 </div>
                 <div class="stat-card filtro-kpi" data-filtro="vencidas" style="cursor: pointer; border-color: #dc3545;">
-                    <h3 style="color: #dc3545;">2ª Insp. Vencidas</h3>
-                    <div class="number" style="color: #dc3545;">{{ segunda_vencidas }}</div>
+                    <h3 style="color: #dc3545;">Plazo Vencido</h3>
+                    <div class="number" style="color: #dc3545;">{{ defectos_vencidos }}</div>
                 </div>
                 <div class="stat-card filtro-kpi" data-filtro="este-mes" style="cursor: pointer; border-color: #ffc107;">
-                    <h3 style="color: #f57c00;">2ª Insp. Este Mes</h3>
-                    <div class="number" style="color: #f57c00;">{{ segunda_este_mes }}</div>
+                    <h3 style="color: #f57c00;">Urgentes (Este Mes)</h3>
+                    <div class="number" style="color: #f57c00;">{{ defectos_urgentes }}</div>
                 </div>
                 <div class="stat-card filtro-kpi" data-filtro="proximo-mes" style="cursor: pointer; border-color: #007bff;">
-                    <h3 style="color: #1565c0;">2ª Insp. Próximo Mes</h3>
-                    <div class="number" style="color: #1565c0;">{{ segunda_proximo_mes }}</div>
+                    <h3 style="color: #1565c0;">Próximos (Próx. Mes)</h3>
+                    <div class="number" style="color: #1565c0;">{{ defectos_proximos }}</div>
+                </div>
+                <div class="stat-card filtro-kpi" data-filtro="programadas" style="cursor: pointer; border-color: #28a745;">
+                    <h3 style="color: #2e7d32;">Sin Urgencia / OK</h3>
+                    <div class="number" style="color: #2e7d32;">{{ defectos_ok }}</div>
                 </div>
             </div>
 
             <!-- Alertas Críticas -->
             {% if alertas_criticas %}
-            <div class="alertas-section">
+            <div class="alertas-section seccion-alerta" data-categoria="vencidas">
                 <div class="alertas-header">
-                    <h3 class="alertas-titulo">⚠️ Alertas Críticas</h3>
+                    <h3 class="alertas-titulo">⚠️ Plazo Vencido - Defectos Pendientes</h3>
                     <span class="alertas-contador">{{ alertas_criticas|length }}</span>
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_criticas %}
-                        {% if tipo == 'segunda_inspeccion' %}
+                        {% if tipo == 'defectos' %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-critica">
-                                <span class="alerta-badge alerta-badge-critica">2ª INSPECCIÓN</span>
+                                <span class="alerta-badge alerta-badge-critica">PLAZO VENCIDO</span>
                                 <div class="alerta-maquina">{{ item.maquina }}</div>
                                 <div class="alerta-info">
                                     <div class="alerta-info-item">
-                                        <strong>Fecha 2ª:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                     </div>
                                 </div>
-                                <div class="alerta-dias critica">⚠️ Vencida hace {{ item.dias_hasta_segunda|abs }} días</div>
+                                <div class="alerta-dias critica">⚠️ Venció hace {{ item.dias_hasta_segunda|abs }} días</div>
                             </a>
                         {% else %}
                             <div class="alerta-card alerta-critica">
@@ -488,20 +513,20 @@
 
             <!-- Alertas Urgentes -->
             {% if alertas_urgentes %}
-            <div class="alertas-section">
+            <div class="alertas-section seccion-alerta" data-categoria="este-mes">
                 <div class="alertas-header">
-                    <h3 class="alertas-titulo">🔔 Alertas Urgentes</h3>
+                    <h3 class="alertas-titulo">🔔 Urgentes - Defectos Este Mes</h3>
                     <span class="alertas-contador">{{ alertas_urgentes|length }}</span>
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_urgentes %}
-                        {% if tipo == 'segunda_inspeccion' %}
+                        {% if tipo == 'defectos' %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-urgente">
-                                <span class="alerta-badge alerta-badge-urgente">2ª INSPECCIÓN</span>
+                                <span class="alerta-badge alerta-badge-urgente">URGENTE</span>
                                 <div class="alerta-maquina">{{ item.maquina }}</div>
                                 <div class="alerta-info">
                                     <div class="alerta-info-item">
-                                        <strong>Fecha 2ª:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                     </div>
                                 </div>
                                 <div class="alerta-dias urgente">⏰ Quedan {{ item.dias_hasta_segunda }} días</div>
@@ -533,20 +558,20 @@
 
             <!-- Alertas Próximas -->
             {% if alertas_proximas %}
-            <div class="alertas-section">
+            <div class="alertas-section seccion-alerta" data-categoria="proximo-mes">
                 <div class="alertas-header">
-                    <h3 class="alertas-titulo">📋 Próximos Vencimientos</h3>
+                    <h3 class="alertas-titulo">📋 Próximos - Defectos Próximo Mes</h3>
                     <span class="alertas-contador">{{ alertas_proximas|length }}</span>
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_proximas %}
-                        {% if tipo == 'segunda_inspeccion' %}
+                        {% if tipo == 'defectos' %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-proxima">
-                                <span class="alerta-badge alerta-badge-proxima">2ª INSPECCIÓN</span>
+                                <span class="alerta-badge alerta-badge-proxima">PRÓXIMO</span>
                                 <div class="alerta-maquina">{{ item.maquina }}</div>
                                 <div class="alerta-info">
                                     <div class="alerta-info-item">
-                                        <strong>Fecha 2ª:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                     </div>
                                 </div>
                                 <div class="alerta-dias proxima">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
@@ -576,48 +601,43 @@
             </div>
             {% endif %}
 
-            <!-- Lista de Inspecciones -->
-            <div style="margin-top: 40px;">
-                <h2 style="color: #003366; font-size: 17px; font-weight: 700; text-transform: uppercase; margin: 0 0 20px 0; padding-bottom: 8px; border-bottom: 2px solid #003366;">
-                    Todas las Inspecciones
-                </h2>
-
-                {% if inspecciones %}
-                    <div class="leads-list">
-                        {% for inspeccion in inspecciones %}
-                        <div class="lead-list-item inspeccion-item" data-categoria="{{ inspeccion.categoria_segunda }}">
-                            <a href="/inspecciones/ver/{{ inspeccion.id }}" class="lead-list-direccion">
-                                {{ inspeccion.maquina }}
-                            </a>
-                            <div class="lead-list-info">
-                                <span class="lead-list-info-item">
-                                    Fecha: {{ inspeccion.fecha_inspeccion|format_fecha }}
-                                </span>
-                                <span class="lead-list-info-item">
-                                    Presupuesto:
-                                    <span class="badge badge-{{ inspeccion.presupuesto|lower|replace('_', '-') }}">
-                                        {{ inspeccion.presupuesto|replace('_', ' ') }}
-                                    </span>
-                                </span>
-                                <span class="lead-list-info-item">
-                                    Estado: <strong>{{ inspeccion.estado or '-' }}</strong>
-                                </span>
-                                <span class="lead-list-info-item">
-                                    Material: <strong>{{ inspeccion.estado_material or '-' }}</strong>
-                                </span>
-                                <span class="lead-list-info-item">
-                                    OCA: {{ inspeccion.oca.nombre if inspeccion.oca else '-' }}
-                                </span>
+            <!-- Inspecciones Sin Urgencia / OK -->
+            {% if alertas_normales %}
+            <div class="alertas-section seccion-alerta" data-categoria="programadas">
+                <div class="alertas-header">
+                    <h3 class="alertas-titulo">✅ Sin Urgencia / Defectos OK</h3>
+                    <span class="alertas-contador">{{ alertas_normales|length }}</span>
+                </div>
+                <div class="alertas-grid">
+                    {% for tipo, item in alertas_normales %}
+                        <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-normal">
+                            {% if item.fecha_segunda_realizada %}
+                                <span class="alerta-badge alerta-badge-normal">✅ SUBSANADO</span>
+                            {% else %}
+                                <span class="alerta-badge alerta-badge-normal">SIN URGENCIA</span>
+                            {% endif %}
+                            <div class="alerta-maquina">{{ item.maquina }}</div>
+                            <div class="alerta-info">
+                                {% if item.fecha_segunda_realizada %}
+                                    <div class="alerta-info-item">
+                                        <strong>Verificado:</strong> <span>{{ item.fecha_segunda_realizada|format_fecha }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="alerta-info-item">
+                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                    </div>
+                                {% endif %}
                             </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="no-registros">
-                        No hay inspecciones registradas
-                    </div>
-                {% endif %}
+                            {% if item.fecha_segunda_realizada %}
+                                <div class="alerta-dias normal">✅ Defectos subsanados</div>
+                            {% else %}
+                                <div class="alerta-dias normal">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
             </div>
+            {% endif %}
 
             <br><br>
             <a href="/home" class="button">Volver al Home</a>
@@ -635,7 +655,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const kpis = document.querySelectorAll('.filtro-kpi');
-            const inspecciones = document.querySelectorAll('.inspeccion-item');
+            const secciones = document.querySelectorAll('.seccion-alerta');
 
             kpis.forEach(kpi => {
                 kpi.addEventListener('click', function() {
@@ -647,10 +667,10 @@
                         k.style.transform = '';
                     });
 
-                    // Si se hace click en "todas", mostrar todas
+                    // Si se hace click en "todas", mostrar todas las secciones
                     if (filtro === 'todas') {
-                        inspecciones.forEach(insp => {
-                            insp.style.display = '';
+                        secciones.forEach(seccion => {
+                            seccion.style.display = '';
                         });
                         // Marcar KPI como activo
                         this.style.boxShadow = '0 4px 12px rgba(0, 51, 102, 0.2)';
@@ -658,26 +678,19 @@
                         return;
                     }
 
-                    // Filtrar inspecciones según categoría
-                    let hayResultados = false;
-                    inspecciones.forEach(insp => {
-                        const categoria = insp.dataset.categoria;
+                    // Filtrar secciones según categoría del KPI
+                    secciones.forEach(seccion => {
+                        const categoria = seccion.dataset.categoria;
                         if (categoria === filtro) {
-                            insp.style.display = '';
-                            hayResultados = true;
+                            seccion.style.display = '';
                         } else {
-                            insp.style.display = 'none';
+                            seccion.style.display = 'none';
                         }
                     });
 
                     // Marcar KPI como activo
                     this.style.boxShadow = '0 4px 12px rgba(0, 51, 102, 0.2)';
                     this.style.transform = 'translateY(-4px)';
-
-                    // Si no hay resultados, mostrar mensaje (opcional)
-                    if (!hayResultados) {
-                        console.log('No hay inspecciones en esta categoría');
-                    }
                 });
             });
         });
