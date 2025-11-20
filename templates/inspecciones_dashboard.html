@@ -270,23 +270,27 @@
               {% endif %}
             {% endwith %}
 
-            <!-- Estadísticas -->
+            <!-- Estadísticas de 2ª Inspección -->
             <div class="stats">
-                <div class="stat-card">
+                <div class="stat-card filtro-kpi" data-filtro="todas" style="cursor: pointer;">
                     <h3>Total Inspecciones</h3>
                     <div class="number">{{ total_inspecciones }}</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Pendientes</h3>
-                    <div class="number">{{ pendiente_presupuesto }}</div>
+                <div class="stat-card filtro-kpi" data-filtro="vencidas" style="cursor: pointer; border-color: #dc3545;">
+                    <h3 style="color: #dc3545;">2ª Insp. Vencidas</h3>
+                    <div class="number" style="color: #dc3545;">{{ segunda_vencidas }}</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Enviados</h3>
-                    <div class="number">{{ enviados_sin_respuesta }}</div>
+                <div class="stat-card filtro-kpi" data-filtro="este-mes" style="cursor: pointer; border-color: #ffc107;">
+                    <h3 style="color: #f57c00;">2ª Insp. Este Mes</h3>
+                    <div class="number" style="color: #f57c00;">{{ segunda_este_mes }}</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Aceptados</h3>
-                    <div class="number">{{ aceptados }}</div>
+                <div class="stat-card filtro-kpi" data-filtro="proximo-mes" style="cursor: pointer; border-color: #007bff;">
+                    <h3 style="color: #1565c0;">2ª Insp. Próximo Mes</h3>
+                    <div class="number" style="color: #1565c0;">{{ segunda_proximo_mes }}</div>
+                </div>
+                <div class="stat-card filtro-kpi" data-filtro="realizadas" style="cursor: pointer; border-color: #28a745;">
+                    <h3 style="color: #28a745;">2ª Insp. Realizadas</h3>
+                    <div class="number" style="color: #28a745;">{{ segunda_realizadas }}</div>
                 </div>
             </div>
 
@@ -368,7 +372,7 @@
                 {% if inspecciones %}
                     <div class="leads-list">
                         {% for inspeccion in inspecciones %}
-                        <div class="lead-list-item">
+                        <div class="lead-list-item inspeccion-item" data-categoria="{{ inspeccion.categoria_segunda }}">
                             <a href="/inspecciones/ver/{{ inspeccion.id }}" class="lead-list-direccion">
                                 {{ inspeccion.maquina }}
                             </a>
@@ -413,5 +417,57 @@
 
 
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+
+    <!-- Filtrado de KPIs de segunda inspección -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const kpis = document.querySelectorAll('.filtro-kpi');
+            const inspecciones = document.querySelectorAll('.inspeccion-item');
+
+            kpis.forEach(kpi => {
+                kpi.addEventListener('click', function() {
+                    const filtro = this.dataset.filtro;
+
+                    // Remover estilo activo de todos los KPIs
+                    kpis.forEach(k => {
+                        k.style.boxShadow = '';
+                        k.style.transform = '';
+                    });
+
+                    // Si se hace click en "todas", mostrar todas
+                    if (filtro === 'todas') {
+                        inspecciones.forEach(insp => {
+                            insp.style.display = '';
+                        });
+                        // Marcar KPI como activo
+                        this.style.boxShadow = '0 4px 12px rgba(0, 51, 102, 0.2)';
+                        this.style.transform = 'translateY(-4px)';
+                        return;
+                    }
+
+                    // Filtrar inspecciones según categoría
+                    let hayResultados = false;
+                    inspecciones.forEach(insp => {
+                        const categoria = insp.dataset.categoria;
+                        if (categoria === filtro) {
+                            insp.style.display = '';
+                            hayResultados = true;
+                        } else {
+                            insp.style.display = 'none';
+                        }
+                    });
+
+                    // Marcar KPI como activo
+                    this.style.boxShadow = '0 4px 12px rgba(0, 51, 102, 0.2)';
+                    this.style.transform = 'translateY(-4px)';
+
+                    // Si no hay resultados, mostrar mensaje (opcional)
+                    if (!hayResultados) {
+                        console.log('No hay inspecciones en esta categoría');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

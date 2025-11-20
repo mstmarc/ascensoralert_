@@ -3762,34 +3762,79 @@ def inspecciones_dashboard():
     # Procesar segundas inspecciones (re-inspecciones)
     # SOLO alertar si NO se ha realizado aún (fecha_segunda_realizada es NULL)
     for inspeccion in inspecciones:
-        if inspeccion.get('fecha_segunda_inspeccion') and not inspeccion.get('fecha_segunda_realizada'):
+        # Categorizar segunda inspección para filtros
+        if inspeccion.get('fecha_segunda_realizada'):
+            inspeccion['categoria_segunda'] = 'realizadas'
+        elif inspeccion.get('fecha_segunda_inspeccion'):
             try:
                 fecha_segunda = datetime.strptime(inspeccion['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
                 dias_restantes = (fecha_segunda - hoy).days
 
                 inspeccion['dias_hasta_segunda'] = dias_restantes
 
-                if dias_restantes < 0:
+                # Categorizar para filtros
+                if fecha_segunda < hoy:
+                    inspeccion['categoria_segunda'] = 'vencidas'
                     alertas_criticas.append(('segunda_inspeccion', inspeccion))
-                elif dias_restantes <= 30:
-                    alertas_urgentes.append(('segunda_inspeccion', inspeccion))
-                elif dias_restantes <= 60:
-                    alertas_proximas.append(('segunda_inspeccion', inspeccion))
+                elif primer_dia_mes <= fecha_segunda <= ultimo_dia_mes:
+                    inspeccion['categoria_segunda'] = 'este-mes'
+                    if dias_restantes <= 30:
+                        alertas_urgentes.append(('segunda_inspeccion', inspeccion))
+                elif primer_dia_proximo <= fecha_segunda <= ultimo_dia_proximo:
+                    inspeccion['categoria_segunda'] = 'proximo-mes'
+                    if dias_restantes <= 60:
+                        alertas_proximas.append(('segunda_inspeccion', inspeccion))
+                else:
+                    inspeccion['categoria_segunda'] = 'pendiente'
+            except:
+                inspeccion['categoria_segunda'] = 'sin-fecha'
+        else:
+            inspeccion['categoria_segunda'] = 'sin-fecha'
+
+    # Calcular estadísticas centradas en FECHA DE SEGUNDA INSPECCIÓN
+    total_inspecciones = len(inspecciones)
+
+    # Calcular rangos de fechas
+    from datetime import timedelta
+    from calendar import monthrange
+
+    hoy = date.today()
+    primer_dia_mes = hoy.replace(day=1)
+    ultimo_dia_mes = hoy.replace(day=monthrange(hoy.year, hoy.month)[1])
+
+    # Próximo mes
+    if hoy.month == 12:
+        primer_dia_proximo = date(hoy.year + 1, 1, 1)
+        ultimo_dia_proximo = date(hoy.year + 1, 1, monthrange(hoy.year + 1, 1)[1])
+    else:
+        primer_dia_proximo = date(hoy.year, hoy.month + 1, 1)
+        ultimo_dia_proximo = date(hoy.year, hoy.month + 1, monthrange(hoy.year, hoy.month + 1)[1])
+
+    # KPIs de segunda inspección
+    segunda_vencidas = 0
+    segunda_este_mes = 0
+    segunda_proximo_mes = 0
+    segunda_realizadas = 0
+
+    for insp in inspecciones:
+        # Contar realizadas
+        if insp.get('fecha_segunda_realizada'):
+            segunda_realizadas += 1
+            continue
+
+        # Para las no realizadas, analizar fecha programada
+        if insp.get('fecha_segunda_inspeccion'):
+            try:
+                fecha_segunda = datetime.strptime(insp['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
+
+                if fecha_segunda < hoy:
+                    segunda_vencidas += 1
+                elif primer_dia_mes <= fecha_segunda <= ultimo_dia_mes:
+                    segunda_este_mes += 1
+                elif primer_dia_proximo <= fecha_segunda <= ultimo_dia_proximo:
+                    segunda_proximo_mes += 1
             except:
                 pass
-
-    # Calcular estadísticas
-    total_inspecciones = len(inspecciones)
-    pendiente_presupuesto = len([i for i in inspecciones if i.get('presupuesto') in ['PENDIENTE', 'EN_PREPARACION']])
-    enviados_sin_respuesta = len([i for i in inspecciones if i.get('presupuesto') == 'ENVIADO'])
-    aceptados = len([i for i in inspecciones if i.get('presupuesto') == 'ACEPTADO'])
-
-    # Contar por estados personalizados (texto libre)
-    estados_unicos = {}
-    for i in inspecciones:
-        estado = (i.get('estado') or '').strip()
-        if estado:
-            estados_unicos[estado] = estados_unicos.get(estado, 0) + 1
 
     # Obtener lista de OCAs para filtros
     response_ocas = requests.get(
@@ -3804,10 +3849,10 @@ def inspecciones_dashboard():
         "inspecciones_dashboard.html",
         inspecciones=inspecciones,
         total_inspecciones=total_inspecciones,
-        pendiente_presupuesto=pendiente_presupuesto,
-        enviados_sin_respuesta=enviados_sin_respuesta,
-        aceptados=aceptados,
-        estados_unicos=estados_unicos,
+        segunda_vencidas=segunda_vencidas,
+        segunda_este_mes=segunda_este_mes,
+        segunda_proximo_mes=segunda_proximo_mes,
+        segunda_realizadas=segunda_realizadas,
         alertas_criticas=alertas_criticas,
         alertas_urgentes=alertas_urgentes,
         alertas_proximas=alertas_proximas,
