@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS inspecciones (
     -- Fecha de inspección
     fecha_inspeccion DATE NOT NULL,
     fecha_segunda_inspeccion DATE, -- Segunda inspección programada (6 meses después)
-    segunda_realizada BOOLEAN DEFAULT false, -- Indica si ya se hizo la segunda inspección
+    fecha_segunda_realizada DATE, -- Fecha en que se realizó la segunda inspección
 
     -- Estado del presupuesto
     presupuesto VARCHAR(50) DEFAULT 'PENDIENTE', -- PENDIENTE/EN_PREPARACION/ENVIADO/ACEPTADO
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS inspecciones (
 CREATE INDEX idx_inspecciones_maquina ON inspecciones(maquina);
 CREATE INDEX idx_inspecciones_fecha ON inspecciones(fecha_inspeccion DESC);
 CREATE INDEX idx_inspecciones_fecha_segunda ON inspecciones(fecha_segunda_inspeccion);
-CREATE INDEX idx_inspecciones_fecha_segunda_realizada ON inspecciones(fecha_segunda_realizada);
+CREATE INDEX idx_inspecciones_fecha_segunda_realizada ON inspecciones(fecha_segunda_realizada) WHERE fecha_segunda_realizada IS NOT NULL;
 CREATE INDEX idx_inspecciones_oca ON inspecciones(oca_id);
 CREATE INDEX idx_inspecciones_presupuesto ON inspecciones(presupuesto);
 
