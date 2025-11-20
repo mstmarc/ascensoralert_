@@ -143,160 +143,40 @@
         <h2 class="page-title">Nueva Inspección (IPO)</h2>
 
         <form method="POST">
-            <!-- Sección: Identificación -->
-            <div class="seccion">
-                <h2>Identificación del Ascensor</h2>
-                <div class="form-grid">
-                    <div>
-                        <label>RAE (Registro Aparatos Elevadores): *</label>
-                        <input type="text" name="rae" required placeholder="Ej: RAE123456">
-                    </div>
-                    <div>
-                        <label>Número de Certificado:</label>
-                        <input type="text" name="numero_certificado" placeholder="Ej: CERT-2024-001">
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div>
-                        <label>Fecha de Inspección: *</label>
-                        <input type="date" name="fecha_inspeccion" required>
-                    </div>
-                    <div>
-                        <label>OCA (Organismo de Control):</label>
-                        <select name="oca_id">
-                            <option value="">-- Seleccionar OCA --</option>
-                            {% for oca in ocas %}
-                            <option value="{{ oca.id }}">{{ oca.nombre }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <label>Fecha de Inspección: *</label>
+            <input type="date" name="fecha_inspeccion" required>
 
-            <!-- Sección: Titular -->
-            <div class="seccion">
-                <h2>Titular (Cliente Propietario)</h2>
-                <div class="form-grid">
-                    <div>
-                        <label>Nombre del Titular: *</label>
-                        <input type="text" name="titular_nombre" required placeholder="Comunidad de Propietarios...">
-                    </div>
-                    <div>
-                        <label>NIF/CIF:</label>
-                        <input type="text" name="titular_nif" placeholder="B12345678">
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div class="form-grid-full">
-                        <label>Dirección de la Instalación: *</label>
-                        <input type="text" name="direccion_instalacion" required placeholder="Calle, número, piso...">
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div>
-                        <label>Municipio:</label>
-                        <input type="text" name="municipio" placeholder="Ej: Barcelona">
-                    </div>
-                </div>
-            </div>
+            <label>Instalación: *</label>
+            <input type="text" name="direccion_instalacion" required placeholder="ANTONIO ALMEIDA CASTELLANO - C/ TAMARCO Nº7, BUEN LUGAR">
 
-            <!-- Sección: Características Técnicas -->
-            <div class="seccion">
-                <h2>Características Técnicas del Ascensor</h2>
-                <div class="form-grid">
-                    <div>
-                        <label>Tipo de Ascensor:</label>
-                        <select name="tipo_ascensor">
-                            <option value="">-- Seleccionar --</option>
-                            <option value="Electromecánico">Electromecánico</option>
-                            <option value="Hidráulico">Hidráulico</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Capacidad (personas):</label>
-                        <input type="number" name="capacidad" placeholder="Ej: 6">
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div>
-                        <label>Carga (kg):</label>
-                        <input type="number" name="carga" placeholder="Ej: 450">
-                    </div>
-                    <div>
-                        <label>Número de Paradas:</label>
-                        <input type="number" name="paradas" placeholder="Ej: 5">
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div>
-                        <label>Recorrido (metros):</label>
-                        <input type="number" step="0.01" name="recorrido" placeholder="Ej: 12.5">
-                    </div>
-                    <div>
-                        <label>Velocidad (m/s):</label>
-                        <input type="number" step="0.01" name="velocidad" placeholder="Ej: 1.0">
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div>
-                        <label>Fecha Puesta en Servicio:</label>
-                        <input type="date" name="fecha_puesta_servicio">
-                    </div>
-                    <div>
-                        <label>Fecha Última Inspección Anterior:</label>
-                        <input type="date" name="fecha_ultima_inspeccion">
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div class="form-grid-full">
-                        <label>Empresa Conservadora:</label>
-                        <input type="text" name="empresa_conservadora" value="FEDES ASCENSORES">
-                    </div>
-                </div>
-            </div>
+            <label>Máquina: *</label>
+            <input type="text" name="rae" required placeholder="AC310373">
 
-            <!-- Sección: Resultado de la Inspección -->
-            <div class="seccion">
-                <h2>Resultado de la Inspección</h2>
-                <div class="form-grid">
-                    <div>
-                        <label>Resultado:</label>
-                        <select name="resultado">
-                            <option value="Desfavorable" selected>Desfavorable</option>
-                            <option value="Favorable">Favorable</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>¿Tiene defectos?:</label>
-                        <select name="tiene_defectos">
-                            <option value="true" selected>Sí</option>
-                            <option value="false">No</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div class="form-grid-full">
-                        <label>Estado del Presupuesto:</label>
-                        <select name="estado_presupuesto">
-                            <option value="PENDIENTE" selected>PENDIENTE</option>
-                            <option value="PREPARANDO">PREPARANDO</option>
-                            <option value="ENVIADO">ENVIADO</option>
-                            <option value="ACEPTADO">ACEPTADO</option>
-                            <option value="RECHAZADO">RECHAZADO</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <label>OCA:</label>
+            <select name="oca_id">
+                <option value="">-- Seleccionar OCA --</option>
+                {% for oca in ocas %}
+                <option value="{{ oca.id }}">{{ oca.nombre }}</option>
+                {% endfor %}
+            </select>
 
-            <!-- Sección: Observaciones -->
-            <div class="seccion">
-                <h2>Observaciones</h2>
-                <label>Notas Internas:</label>
-                <textarea name="observaciones" rows="4" placeholder="Información adicional sobre la inspección..."></textarea>
-            </div>
+            <label>Presupuesto (Estado):</label>
+            <select name="estado_presupuesto">
+                <option value="PENDIENTE" selected>PENDIENTE</option>
+                <option value="PREPARANDO">PREPARANDO</option>
+                <option value="ENVIADO">ENVIADO</option>
+                <option value="ACEPTADO">ACEPTADO</option>
+                <option value="RECHAZADO">RECHAZADO</option>
+            </select>
+
+            <label>Estado:</label>
+            <input type="text" name="estado_trabajo" placeholder="EN PROCESO, COMPLETADO, etc.">
+
+            <label>Observaciones:</label>
+            <textarea name="observaciones" rows="3" placeholder="Notas..."></textarea>
 
             <div style="margin-top: 30px;">
-                <button type="submit" class="button">Guardar Inspección</button>
+                <button type="submit" class="button">Guardar</button>
                 <a href="/inspecciones" class="btn-secondary">Cancelar</a>
             </div>
         </form>
