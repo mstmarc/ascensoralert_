@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS inspecciones (
     -- Fecha de inspección
     fecha_inspeccion DATE NOT NULL,
     fecha_segunda_inspeccion DATE, -- Segunda inspección programada (6 meses después)
-    fecha_segunda_realizada DATE, -- Fecha en que se realizó la segunda inspección
+    segunda_realizada BOOLEAN DEFAULT false, -- Indica si ya se hizo la segunda inspección
 
     -- Estado del presupuesto
     presupuesto VARCHAR(50) DEFAULT 'PENDIENTE', -- PENDIENTE/EN_PREPARACION/ENVIADO/ACEPTADO
