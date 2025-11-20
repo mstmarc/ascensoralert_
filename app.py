@@ -3768,7 +3768,7 @@ def inspecciones_dashboard():
     # Contar por estados personalizados (texto libre)
     estados_unicos = {}
     for i in inspecciones:
-        estado = i.get('estado', '').strip()
+        estado = (i.get('estado') or '').strip()
         if estado:
             estados_unicos[estado] = estados_unicos.get(estado, 0) + 1
 
