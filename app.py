@@ -3814,12 +3814,10 @@ def inspecciones_dashboard():
     segunda_vencidas = 0
     segunda_este_mes = 0
     segunda_proximo_mes = 0
-    segunda_realizadas = 0
 
     for insp in inspecciones:
-        # Contar realizadas
+        # Solo contar las NO realizadas (fecha_segunda_realizada es NULL)
         if insp.get('fecha_segunda_realizada'):
-            segunda_realizadas += 1
             continue
 
         # Para las no realizadas, analizar fecha programada
@@ -3852,7 +3850,6 @@ def inspecciones_dashboard():
         segunda_vencidas=segunda_vencidas,
         segunda_este_mes=segunda_este_mes,
         segunda_proximo_mes=segunda_proximo_mes,
-        segunda_realizadas=segunda_realizadas,
         alertas_criticas=alertas_criticas,
         alertas_urgentes=alertas_urgentes,
         alertas_proximas=alertas_proximas,
