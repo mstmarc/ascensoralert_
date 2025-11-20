@@ -44,15 +44,16 @@
         }
 
         .info-item {
-            display: flex;
-            gap: 12px;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 20px;
             font-size: 14px;
+            align-items: start;
         }
 
         .info-item label {
             font-weight: 700;
             color: #222;
-            min-width: 220px;
         }
 
         .info-item label::after {
@@ -61,6 +62,9 @@
 
         .info-item span {
             color: #666;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .badge {
@@ -165,20 +169,23 @@
         }
 
         .cambio-estado-form {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             margin-left: 15px;
         }
 
         .cambio-estado-form select {
-            padding: 6px 12px;
+            padding: 8px 12px;
             border-radius: 6px;
             border: 1px solid #ddd;
             font-size: 13px;
             font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
         }
 
         .cambio-estado-form button {
-            padding: 6px 12px;
+            padding: 8px 16px;
             background: #003c80;
             color: white;
             border: none;
@@ -186,7 +193,11 @@
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            margin-left: 5px;
+            transition: background 0.2s;
+        }
+
+        .cambio-estado-form button:hover {
+            background: #002a5c;
         }
 
         .materiales-list {
@@ -246,7 +257,7 @@
                 </div>
                 <div class="info-item">
                     <label>PRESUPUESTO</label>
-                    <span>
+                    <div style="display: flex; align-items: center; gap: 0;">
                         <span class="badge badge-{{ inspeccion.presupuesto|lower|replace('_', '-') }}">
                             {{ inspeccion.presupuesto|replace('_', ' ') }}
                         </span>
@@ -259,14 +270,14 @@
                             </select>
                             <button type="submit">Cambiar</button>
                         </form>
-                    </span>
+                    </div>
                 </div>
                 <div class="info-item">
                     <label>ESTADO</label>
                     <span>{{ inspeccion.estado or '-' }}</span>
                 </div>
                 <div class="info-item">
-                    <label>Estado del material</label>
+                    <label>ESTADO DEL MATERIAL</label>
                     <span>{{ inspeccion.estado_material or '-' }}</span>
                 </div>
                 <div class="info-item">
