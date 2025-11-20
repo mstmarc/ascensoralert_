@@ -256,6 +256,21 @@
                     <span>{{ inspeccion.fecha_inspeccion|format_fecha }}</span>
                 </div>
                 <div class="info-item">
+                    <label>2ª INSPECCIÓN (6 meses)</label>
+                    <span style="font-weight: 700; color: {% if inspeccion.dias_hasta_segunda is defined and inspeccion.dias_hasta_segunda < 0 %}#c62828{% elif inspeccion.dias_hasta_segunda is defined and inspeccion.dias_hasta_segunda <= 30 %}#f57c00{% else %}#003366{% endif %};">
+                        {{ inspeccion.fecha_segunda_inspeccion|format_fecha if inspeccion.fecha_segunda_inspeccion else 'No calculada' }}
+                        {% if inspeccion.dias_hasta_segunda is defined %}
+                            {% if inspeccion.dias_hasta_segunda < 0 %}
+                                <span style="color: #c62828; font-weight: 700; margin-left: 8px;">⚠️ VENCIDA hace {{ inspeccion.dias_hasta_segunda|abs }} días</span>
+                            {% elif inspeccion.dias_hasta_segunda <= 30 %}
+                                <span style="color: #f57c00; font-weight: 700; margin-left: 8px;">⏰ En {{ inspeccion.dias_hasta_segunda }} días</span>
+                            {% elif inspeccion.dias_hasta_segunda <= 60 %}
+                                <span style="color: #856404; font-weight: 700; margin-left: 8px;">📅 En {{ inspeccion.dias_hasta_segunda }} días</span>
+                            {% endif %}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
                     <label>PRESUPUESTO</label>
                     <div>
                         <span class="badge badge-{{ inspeccion.presupuesto|lower|replace('_', '-') }}">
