@@ -442,27 +442,27 @@
               {% endif %}
             {% endwith %}
 
-            <!-- Estadísticas de 2ª Inspección -->
+            <!-- Estadísticas de Gestión de Defectos -->
             <div class="stats">
                 <div class="stat-card filtro-kpi" data-filtro="todas" style="cursor: pointer;">
                     <h3>Total Inspecciones</h3>
                     <div class="number">{{ total_inspecciones }}</div>
                 </div>
                 <div class="stat-card filtro-kpi" data-filtro="vencidas" style="cursor: pointer; border-color: #dc3545;">
-                    <h3 style="color: #dc3545;">2ª Insp. Vencidas</h3>
-                    <div class="number" style="color: #dc3545;">{{ segunda_vencidas }}</div>
+                    <h3 style="color: #dc3545;">Plazo Vencido</h3>
+                    <div class="number" style="color: #dc3545;">{{ defectos_vencidos }}</div>
                 </div>
                 <div class="stat-card filtro-kpi" data-filtro="este-mes" style="cursor: pointer; border-color: #ffc107;">
-                    <h3 style="color: #f57c00;">2ª Insp. Este Mes</h3>
-                    <div class="number" style="color: #f57c00;">{{ segunda_este_mes }}</div>
+                    <h3 style="color: #f57c00;">Urgentes (Este Mes)</h3>
+                    <div class="number" style="color: #f57c00;">{{ defectos_urgentes }}</div>
                 </div>
                 <div class="stat-card filtro-kpi" data-filtro="proximo-mes" style="cursor: pointer; border-color: #007bff;">
-                    <h3 style="color: #1565c0;">2ª Insp. Próximo Mes</h3>
-                    <div class="number" style="color: #1565c0;">{{ segunda_proximo_mes }}</div>
+                    <h3 style="color: #1565c0;">Próximos (Próx. Mes)</h3>
+                    <div class="number" style="color: #1565c0;">{{ defectos_proximos }}</div>
                 </div>
                 <div class="stat-card filtro-kpi" data-filtro="programadas" style="cursor: pointer; border-color: #28a745;">
-                    <h3 style="color: #2e7d32;">2ª Insp. Programadas</h3>
-                    <div class="number" style="color: #2e7d32;">{{ segunda_programadas }}</div>
+                    <h3 style="color: #2e7d32;">Sin Urgencia / OK</h3>
+                    <div class="number" style="color: #2e7d32;">{{ defectos_ok }}</div>
                 </div>
             </div>
 
@@ -470,21 +470,21 @@
             {% if alertas_criticas %}
             <div class="alertas-section seccion-alerta" data-categoria="vencidas">
                 <div class="alertas-header">
-                    <h3 class="alertas-titulo">⚠️ Alertas Críticas</h3>
+                    <h3 class="alertas-titulo">⚠️ Plazo Vencido - Defectos Pendientes</h3>
                     <span class="alertas-contador">{{ alertas_criticas|length }}</span>
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_criticas %}
-                        {% if tipo == 'segunda_inspeccion' %}
+                        {% if tipo == 'defectos' %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-critica">
-                                <span class="alerta-badge alerta-badge-critica">2ª INSPECCIÓN</span>
+                                <span class="alerta-badge alerta-badge-critica">PLAZO VENCIDO</span>
                                 <div class="alerta-maquina">{{ item.maquina }}</div>
                                 <div class="alerta-info">
                                     <div class="alerta-info-item">
-                                        <strong>Fecha 2ª:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                     </div>
                                 </div>
-                                <div class="alerta-dias critica">⚠️ Vencida hace {{ item.dias_hasta_segunda|abs }} días</div>
+                                <div class="alerta-dias critica">⚠️ Venció hace {{ item.dias_hasta_segunda|abs }} días</div>
                             </a>
                         {% else %}
                             <div class="alerta-card alerta-critica">
@@ -515,18 +515,18 @@
             {% if alertas_urgentes %}
             <div class="alertas-section seccion-alerta" data-categoria="este-mes">
                 <div class="alertas-header">
-                    <h3 class="alertas-titulo">🔔 Alertas Urgentes</h3>
+                    <h3 class="alertas-titulo">🔔 Urgentes - Defectos Este Mes</h3>
                     <span class="alertas-contador">{{ alertas_urgentes|length }}</span>
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_urgentes %}
-                        {% if tipo == 'segunda_inspeccion' %}
+                        {% if tipo == 'defectos' %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-urgente">
-                                <span class="alerta-badge alerta-badge-urgente">2ª INSPECCIÓN</span>
+                                <span class="alerta-badge alerta-badge-urgente">URGENTE</span>
                                 <div class="alerta-maquina">{{ item.maquina }}</div>
                                 <div class="alerta-info">
                                     <div class="alerta-info-item">
-                                        <strong>Fecha 2ª:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                     </div>
                                 </div>
                                 <div class="alerta-dias urgente">⏰ Quedan {{ item.dias_hasta_segunda }} días</div>
@@ -560,18 +560,18 @@
             {% if alertas_proximas %}
             <div class="alertas-section seccion-alerta" data-categoria="proximo-mes">
                 <div class="alertas-header">
-                    <h3 class="alertas-titulo">📋 Próximos Vencimientos</h3>
+                    <h3 class="alertas-titulo">📋 Próximos - Defectos Próximo Mes</h3>
                     <span class="alertas-contador">{{ alertas_proximas|length }}</span>
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_proximas %}
-                        {% if tipo == 'segunda_inspeccion' %}
+                        {% if tipo == 'defectos' %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-proxima">
-                                <span class="alerta-badge alerta-badge-proxima">2ª INSPECCIÓN</span>
+                                <span class="alerta-badge alerta-badge-proxima">PRÓXIMO</span>
                                 <div class="alerta-maquina">{{ item.maquina }}</div>
                                 <div class="alerta-info">
                                     <div class="alerta-info-item">
-                                        <strong>Fecha 2ª:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                     </div>
                                 </div>
                                 <div class="alerta-dias proxima">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
@@ -601,35 +601,35 @@
             </div>
             {% endif %}
 
-            <!-- Inspecciones Programadas (sin urgencia) -->
+            <!-- Inspecciones Sin Urgencia / OK -->
             {% if alertas_normales %}
             <div class="alertas-section seccion-alerta" data-categoria="programadas">
                 <div class="alertas-header">
-                    <h3 class="alertas-titulo">✅ Inspecciones Programadas</h3>
+                    <h3 class="alertas-titulo">✅ Sin Urgencia / Defectos OK</h3>
                     <span class="alertas-contador">{{ alertas_normales|length }}</span>
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_normales %}
                         <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-normal">
                             {% if item.fecha_segunda_realizada %}
-                                <span class="alerta-badge alerta-badge-normal">✅ REALIZADA</span>
+                                <span class="alerta-badge alerta-badge-normal">✅ SUBSANADO</span>
                             {% else %}
-                                <span class="alerta-badge alerta-badge-normal">PROGRAMADA</span>
+                                <span class="alerta-badge alerta-badge-normal">SIN URGENCIA</span>
                             {% endif %}
                             <div class="alerta-maquina">{{ item.maquina }}</div>
                             <div class="alerta-info">
                                 {% if item.fecha_segunda_realizada %}
                                     <div class="alerta-info-item">
-                                        <strong>Realizada:</strong> <span>{{ item.fecha_segunda_realizada|format_fecha }}</span>
+                                        <strong>Verificado:</strong> <span>{{ item.fecha_segunda_realizada|format_fecha }}</span>
                                     </div>
                                 {% else %}
                                     <div class="alerta-info-item">
-                                        <strong>Fecha 2ª:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                     </div>
                                 {% endif %}
                             </div>
                             {% if item.fecha_segunda_realizada %}
-                                <div class="alerta-dias normal">✅ Completada</div>
+                                <div class="alerta-dias normal">✅ Defectos subsanados</div>
                             {% else %}
                                 <div class="alerta-dias normal">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
                             {% endif %}

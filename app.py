@@ -3759,45 +3759,49 @@ def inspecciones_dashboard():
             except:
                 pass
 
-    # Procesar segundas inspecciones (re-inspecciones)
-    # SOLO alertar si NO se ha realizado aún (fecha_segunda_realizada es NULL)
-    alertas_normales = []  # Inspecciones sin urgencia
+    # Gestión de defectos pendientes por fecha límite
+    # La fecha_segunda_inspeccion es la FECHA LÍMITE para tener los defectos solucionados
+    # SOLO alertar si NO se ha realizado la 2ª inspección (fecha_segunda_realizada es NULL)
+    alertas_normales = []  # Inspecciones sin urgencia de defectos
 
     for inspeccion in inspecciones:
-        # Categorizar segunda inspección para filtros
+        # Categorizar según urgencia para solucionar defectos antes de la fecha límite
         if inspeccion.get('fecha_segunda_realizada'):
             inspeccion['categoria_segunda'] = 'realizadas'
-            # Añadir realizadas a inspecciones normales para mostrarlas
-            alertas_normales.append(('segunda_inspeccion', inspeccion))
+            # Ya pasó la 2ª inspección, defectos subsanados
+            alertas_normales.append(('defectos', inspeccion))
         elif inspeccion.get('fecha_segunda_inspeccion'):
             try:
-                fecha_segunda = datetime.strptime(inspeccion['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
-                dias_restantes = (fecha_segunda - hoy).days
+                fecha_limite = datetime.strptime(inspeccion['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
+                dias_restantes = (fecha_limite - hoy).days
 
                 inspeccion['dias_hasta_segunda'] = dias_restantes
 
-                # Categorizar para filtros
-                if fecha_segunda < hoy:
+                # Categorizar por urgencia de defectos
+                if fecha_limite < hoy:
                     inspeccion['categoria_segunda'] = 'vencidas'
-                    alertas_criticas.append(('segunda_inspeccion', inspeccion))
-                elif primer_dia_mes <= fecha_segunda <= ultimo_dia_mes:
+                    # CRÍTICO: Fecha límite vencida, defectos sin subsanar
+                    alertas_criticas.append(('defectos', inspeccion))
+                elif primer_dia_mes <= fecha_limite <= ultimo_dia_mes:
                     inspeccion['categoria_segunda'] = 'este-mes'
                     if dias_restantes <= 30:
-                        alertas_urgentes.append(('segunda_inspeccion', inspeccion))
-                elif primer_dia_proximo <= fecha_segunda <= ultimo_dia_proximo:
+                        # URGENTE: Menos de 30 días para solucionar defectos
+                        alertas_urgentes.append(('defectos', inspeccion))
+                elif primer_dia_proximo <= fecha_limite <= ultimo_dia_proximo:
                     inspeccion['categoria_segunda'] = 'proximo-mes'
                     if dias_restantes <= 60:
-                        alertas_proximas.append(('segunda_inspeccion', inspeccion))
+                        # PRÓXIMO: Entre 30-60 días para solucionar defectos
+                        alertas_proximas.append(('defectos', inspeccion))
                 else:
                     inspeccion['categoria_segunda'] = 'pendiente'
-                    # Añadir a inspecciones normales (sin urgencia)
-                    alertas_normales.append(('segunda_inspeccion', inspeccion))
+                    # SIN URGENCIA: Más de 60 días para solucionar defectos
+                    alertas_normales.append(('defectos', inspeccion))
             except:
                 inspeccion['categoria_segunda'] = 'sin-fecha'
         else:
             inspeccion['categoria_segunda'] = 'sin-fecha'
 
-    # Calcular estadísticas centradas en FECHA DE SEGUNDA INSPECCIÓN
+    # Calcular estadísticas centradas en GESTIÓN DE DEFECTOS
     total_inspecciones = len(inspecciones)
 
     # Calcular rangos de fechas
@@ -3816,28 +3820,28 @@ def inspecciones_dashboard():
         primer_dia_proximo = date(hoy.year, hoy.month + 1, 1)
         ultimo_dia_proximo = date(hoy.year, hoy.month + 1, monthrange(hoy.year, hoy.month + 1)[1])
 
-    # KPIs de segunda inspección
-    segunda_vencidas = 0
-    segunda_este_mes = 0
-    segunda_proximo_mes = 0
-    segunda_programadas = len(alertas_normales)  # Incluye pendientes lejanas y realizadas
+    # KPIs de gestión de defectos por fecha límite
+    defectos_vencidos = 0
+    defectos_urgentes = 0
+    defectos_proximos = 0
+    defectos_ok = len(alertas_normales)  # Incluye pendientes lejanas y ya subsanados
 
     for insp in inspecciones:
-        # Solo contar las NO realizadas (fecha_segunda_realizada es NULL)
+        # Solo contar los que aún NO han pasado la 2ª inspección
         if insp.get('fecha_segunda_realizada'):
             continue
 
-        # Para las no realizadas, analizar fecha programada
+        # Para los pendientes, analizar fecha límite
         if insp.get('fecha_segunda_inspeccion'):
             try:
-                fecha_segunda = datetime.strptime(insp['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
+                fecha_limite = datetime.strptime(insp['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
 
-                if fecha_segunda < hoy:
-                    segunda_vencidas += 1
-                elif primer_dia_mes <= fecha_segunda <= ultimo_dia_mes:
-                    segunda_este_mes += 1
-                elif primer_dia_proximo <= fecha_segunda <= ultimo_dia_proximo:
-                    segunda_proximo_mes += 1
+                if fecha_limite < hoy:
+                    defectos_vencidos += 1
+                elif primer_dia_mes <= fecha_limite <= ultimo_dia_mes:
+                    defectos_urgentes += 1
+                elif primer_dia_proximo <= fecha_limite <= ultimo_dia_proximo:
+                    defectos_proximos += 1
             except:
                 pass
 
@@ -3854,10 +3858,10 @@ def inspecciones_dashboard():
         "inspecciones_dashboard.html",
         inspecciones=inspecciones,
         total_inspecciones=total_inspecciones,
-        segunda_vencidas=segunda_vencidas,
-        segunda_este_mes=segunda_este_mes,
-        segunda_proximo_mes=segunda_proximo_mes,
-        segunda_programadas=segunda_programadas,
+        defectos_vencidos=defectos_vencidos,
+        defectos_urgentes=defectos_urgentes,
+        defectos_proximos=defectos_proximos,
+        defectos_ok=defectos_ok,
         alertas_criticas=alertas_criticas,
         alertas_urgentes=alertas_urgentes,
         alertas_proximas=alertas_proximas,
