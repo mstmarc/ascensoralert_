@@ -3761,10 +3761,14 @@ def inspecciones_dashboard():
 
     # Procesar segundas inspecciones (re-inspecciones)
     # SOLO alertar si NO se ha realizado aún (fecha_segunda_realizada es NULL)
+    alertas_normales = []  # Inspecciones sin urgencia
+
     for inspeccion in inspecciones:
         # Categorizar segunda inspección para filtros
         if inspeccion.get('fecha_segunda_realizada'):
             inspeccion['categoria_segunda'] = 'realizadas'
+            # Añadir realizadas a inspecciones normales para mostrarlas
+            alertas_normales.append(('segunda_inspeccion', inspeccion))
         elif inspeccion.get('fecha_segunda_inspeccion'):
             try:
                 fecha_segunda = datetime.strptime(inspeccion['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
@@ -3786,6 +3790,8 @@ def inspecciones_dashboard():
                         alertas_proximas.append(('segunda_inspeccion', inspeccion))
                 else:
                     inspeccion['categoria_segunda'] = 'pendiente'
+                    # Añadir a inspecciones normales (sin urgencia)
+                    alertas_normales.append(('segunda_inspeccion', inspeccion))
             except:
                 inspeccion['categoria_segunda'] = 'sin-fecha'
         else:
@@ -3853,6 +3859,7 @@ def inspecciones_dashboard():
         alertas_criticas=alertas_criticas,
         alertas_urgentes=alertas_urgentes,
         alertas_proximas=alertas_proximas,
+        alertas_normales=alertas_normales,
         ocas=ocas
     )
 
