@@ -3759,6 +3759,24 @@ def inspecciones_dashboard():
             except:
                 pass
 
+    # Procesar segundas inspecciones (re-inspecciones)
+    for inspeccion in inspecciones:
+        if inspeccion.get('fecha_segunda_inspeccion'):
+            try:
+                fecha_segunda = datetime.strptime(inspeccion['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
+                dias_restantes = (fecha_segunda - hoy).days
+
+                inspeccion['dias_hasta_segunda'] = dias_restantes
+
+                if dias_restantes < 0:
+                    alertas_criticas.append(('segunda_inspeccion', inspeccion))
+                elif dias_restantes <= 30:
+                    alertas_urgentes.append(('segunda_inspeccion', inspeccion))
+                elif dias_restantes <= 60:
+                    alertas_proximas.append(('segunda_inspeccion', inspeccion))
+            except:
+                pass
+
     # Calcular estadísticas
     total_inspecciones = len(inspecciones)
     pendiente_presupuesto = len([i for i in inspecciones if i.get('presupuesto') in ['PENDIENTE', 'EN_PREPARACION']])
@@ -3804,10 +3822,27 @@ def nueva_inspeccion():
 
     if request.method == "POST":
         # Recoger datos del formulario
+        fecha_inspeccion_str = request.form.get("fecha_inspeccion")
+
+        # Calcular fecha de segunda inspección (6 meses después)
+        fecha_segunda_inspeccion = None
+        if fecha_inspeccion_str:
+            try:
+                fecha_insp = datetime.strptime(fecha_inspeccion_str, '%Y-%m-%d')
+                # Sumar 6 meses
+                mes_segunda = fecha_insp.month + 6
+                anio_segunda = fecha_insp.year + (mes_segunda - 1) // 12
+                mes_segunda = ((mes_segunda - 1) % 12) + 1
+                fecha_segunda = fecha_insp.replace(year=anio_segunda, month=mes_segunda)
+                fecha_segunda_inspeccion = fecha_segunda.strftime('%Y-%m-%d')
+            except:
+                pass
+
         data = {
             # Campos principales
             "maquina": request.form.get("maquina"),
-            "fecha_inspeccion": request.form.get("fecha_inspeccion"),
+            "fecha_inspeccion": fecha_inspeccion_str,
+            "fecha_segunda_inspeccion": fecha_segunda_inspeccion,
             "presupuesto": request.form.get("presupuesto") or "PENDIENTE",
             "estado": request.form.get("estado") or "",
             "estado_material": request.form.get("estado_material") or "",
@@ -3911,6 +3946,15 @@ def ver_inspeccion(inspeccion_id):
     materiales = []
     if response_materiales.status_code == 200:
         materiales = response_materiales.json()
+
+    # Calcular días hasta segunda inspección
+    if inspeccion.get('fecha_segunda_inspeccion'):
+        try:
+            fecha_segunda = datetime.strptime(inspeccion['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
+            dias_hasta_segunda = (fecha_segunda - hoy).days
+            inspeccion['dias_hasta_segunda'] = dias_hasta_segunda
+        except:
+            pass
 
     return render_template(
         "ver_inspeccion.html",

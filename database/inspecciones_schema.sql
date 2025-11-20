@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS inspecciones (
 
     -- Fecha de inspección
     fecha_inspeccion DATE NOT NULL,
+    fecha_segunda_inspeccion DATE, -- Segunda inspección (6 meses después) para verificar defectos
 
     -- Estado del presupuesto
     presupuesto VARCHAR(50) DEFAULT 'PENDIENTE', -- PENDIENTE/EN_PREPARACION/ENVIADO/ACEPTADO
@@ -53,6 +54,7 @@ CREATE TABLE IF NOT EXISTS inspecciones (
 -- Índices para Inspecciones
 CREATE INDEX idx_inspecciones_maquina ON inspecciones(maquina);
 CREATE INDEX idx_inspecciones_fecha ON inspecciones(fecha_inspeccion DESC);
+CREATE INDEX idx_inspecciones_fecha_segunda ON inspecciones(fecha_segunda_inspeccion);
 CREATE INDEX idx_inspecciones_oca ON inspecciones(oca_id);
 CREATE INDEX idx_inspecciones_presupuesto ON inspecciones(presupuesto);
 
@@ -177,7 +179,20 @@ SELECT
     (SELECT COUNT(*) FROM defectos_inspeccion WHERE inspeccion_id = i.id) as total_defectos,
     (SELECT COUNT(*) FROM defectos_inspeccion WHERE inspeccion_id = i.id AND estado = 'SUBSANADO') as defectos_subsanados,
     (SELECT COUNT(*) FROM defectos_inspeccion WHERE inspeccion_id = i.id AND estado = 'PENDIENTE') as defectos_pendientes,
-    (SELECT MIN(fecha_limite) FROM defectos_inspeccion WHERE inspeccion_id = i.id AND estado = 'PENDIENTE') as fecha_limite_proxima
+    (SELECT MIN(fecha_limite) FROM defectos_inspeccion WHERE inspeccion_id = i.id AND estado = 'PENDIENTE') as fecha_limite_proxima,
+    -- Información de segunda inspección
+    CASE
+        WHEN i.fecha_segunda_inspeccion IS NOT NULL THEN
+            (i.fecha_segunda_inspeccion - CURRENT_DATE)
+        ELSE NULL
+    END as dias_hasta_segunda_inspeccion,
+    CASE
+        WHEN i.fecha_segunda_inspeccion IS NULL THEN 'SIN_FECHA'
+        WHEN i.fecha_segunda_inspeccion < CURRENT_DATE THEN 'VENCIDA'
+        WHEN (i.fecha_segunda_inspeccion - CURRENT_DATE) <= 30 THEN 'URGENTE'
+        WHEN (i.fecha_segunda_inspeccion - CURRENT_DATE) <= 60 THEN 'PROXIMA'
+        ELSE 'NORMAL'
+    END as urgencia_segunda_inspeccion
 FROM inspecciones i
 LEFT JOIN ocas o ON i.oca_id = o.id;
 

@@ -296,13 +296,17 @@
                 <h2>⚠️ Alertas Críticas (Plazos Vencidos)</h2>
                 {% for tipo, item in alertas_criticas %}
                     <div class="alerta-box alerta-critica">
-                        <span class="alerta-tipo">[{{ 'DEFECTO' if tipo == 'defecto' else 'MATERIAL' }}]</span>
+                        <span class="alerta-tipo">[{% if tipo == 'defecto' %}DEFECTO{% elif tipo == 'material' %}MATERIAL{% elif tipo == 'segunda_inspeccion' %}2ª INSPECCIÓN{% endif %}]</span>
                         {% if tipo == 'defecto' %}
                             <strong>{{ item.descripcion }}</strong> -
                             Vencido hace {{ item.dias_restantes|abs }} días
-                        {% else %}
+                        {% elif tipo == 'material' %}
                             <strong>{{ item.tipo }}: {{ item.cliente_nombre }}</strong> -
                             Vencido hace {{ item.dias_restantes|abs }} días
+                        {% elif tipo == 'segunda_inspeccion' %}
+                            <strong>2ª INSPECCIÓN: {{ item.maquina }}</strong> -
+                            Vencida hace {{ item.dias_hasta_segunda|abs }} días
+                            <a href="/inspecciones/ver/{{ item.id }}" style="margin-left: 10px; color: #721c24; font-weight: 700; text-decoration: underline;">Ver inspección</a>
                         {% endif %}
                     </div>
                 {% endfor %}
@@ -312,16 +316,20 @@
             <!-- Alertas Urgentes -->
             {% if alertas_urgentes %}
             <div class="alertas-section">
-                <h2>🔔 Alertas Urgentes (Próximos 15 días)</h2>
+                <h2>🔔 Alertas Urgentes (Próximos 15-30 días)</h2>
                 {% for tipo, item in alertas_urgentes %}
                     <div class="alerta-box alerta-urgente">
-                        <span class="alerta-tipo">[{{ 'DEFECTO' if tipo == 'defecto' else 'MATERIAL' }}]</span>
+                        <span class="alerta-tipo">[{% if tipo == 'defecto' %}DEFECTO{% elif tipo == 'material' %}MATERIAL{% elif tipo == 'segunda_inspeccion' %}2ª INSPECCIÓN{% endif %}]</span>
                         {% if tipo == 'defecto' %}
                             <strong>{{ item.descripcion }}</strong> -
                             Quedan {{ item.dias_restantes }} días
-                        {% else %}
+                        {% elif tipo == 'material' %}
                             <strong>{{ item.tipo }}: {{ item.cliente_nombre }}</strong> -
                             Quedan {{ item.dias_restantes }} días
+                        {% elif tipo == 'segunda_inspeccion' %}
+                            <strong>2ª INSPECCIÓN: {{ item.maquina }}</strong> -
+                            Quedan {{ item.dias_hasta_segunda }} días
+                            <a href="/inspecciones/ver/{{ item.id }}" style="margin-left: 10px; color: #856404; font-weight: 700; text-decoration: underline;">Ver inspección</a>
                         {% endif %}
                     </div>
                 {% endfor %}
@@ -331,16 +339,20 @@
             <!-- Alertas Próximas -->
             {% if alertas_proximas %}
             <div class="alertas-section">
-                <h2>📋 Próximos Vencimientos (15-30 días)</h2>
+                <h2>📋 Próximos Vencimientos (30-60 días)</h2>
                 {% for tipo, item in alertas_proximas %}
                     <div class="alerta-box alerta-proxima">
-                        <span class="alerta-tipo">[{{ 'DEFECTO' if tipo == 'defecto' else 'MATERIAL' }}]</span>
+                        <span class="alerta-tipo">[{% if tipo == 'defecto' %}DEFECTO{% elif tipo == 'material' %}MATERIAL{% elif tipo == 'segunda_inspeccion' %}2ª INSPECCIÓN{% endif %}]</span>
                         {% if tipo == 'defecto' %}
                             <strong>{{ item.descripcion }}</strong> -
                             Quedan {{ item.dias_restantes }} días
-                        {% else %}
+                        {% elif tipo == 'material' %}
                             <strong>{{ item.tipo }}: {{ item.cliente_nombre }}</strong> -
                             Quedan {{ item.dias_restantes }} días
+                        {% elif tipo == 'segunda_inspeccion' %}
+                            <strong>2ª INSPECCIÓN: {{ item.maquina }}</strong> -
+                            Quedan {{ item.dias_hasta_segunda }} días
+                            <a href="/inspecciones/ver/{{ item.id }}" style="margin-left: 10px; color: #2e7d32; font-weight: 700; text-decoration: underline;">Ver inspección</a>
                         {% endif %}
                     </div>
                 {% endfor %}
