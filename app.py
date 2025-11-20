@@ -2735,6 +2735,108 @@ def delete_accion(oportunidad_id, index):
 
 
 # ============================================
+# GESTIÓN DE ACCIONES PARA EQUIPOS
+# ============================================
+
+@app.route('/equipo/<int:equipo_id>/accion/add', methods=['POST'])
+def add_accion_equipo(equipo_id):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    texto_accion = request.form.get('texto_accion', '').strip()
+
+    if not texto_accion:
+        flash('Debes escribir una acción', 'error')
+        return redirect(url_for('ver_equipo', equipo_id=equipo_id))
+
+    # Obtener acciones actuales
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=acciones",
+        headers=HEADERS
+    )
+
+    if response.status_code == 200 and response.json():
+        acciones = response.json()[0].get('acciones', [])
+        if not isinstance(acciones, list):
+            acciones = []
+
+        # Añadir nueva acción
+        acciones.append({
+            'texto': texto_accion,
+            'completada': False
+        })
+
+        # Actualizar en BD
+        requests.patch(
+            f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}",
+            headers=HEADERS,
+            json={'acciones': acciones}
+        )
+
+        flash('Acción añadida', 'success')
+
+    return redirect(url_for('ver_equipo', equipo_id=equipo_id))
+
+
+@app.route('/equipo/<int:equipo_id>/accion/toggle/<int:index>', methods=['POST'])
+def toggle_accion_equipo(equipo_id, index):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    # Obtener acciones actuales
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=acciones",
+        headers=HEADERS
+    )
+
+    if response.status_code == 200 and response.json():
+        acciones = response.json()[0].get('acciones', [])
+
+        if 0 <= index < len(acciones):
+            # Toggle el estado
+            acciones[index]['completada'] = not acciones[index]['completada']
+
+            # Actualizar en BD
+            requests.patch(
+                f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}",
+                headers=HEADERS,
+                json={'acciones': acciones}
+            )
+
+    return redirect(url_for('ver_equipo', equipo_id=equipo_id))
+
+
+@app.route('/equipo/<int:equipo_id>/accion/delete/<int:index>', methods=['POST'])
+def delete_accion_equipo(equipo_id, index):
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    # Obtener acciones actuales
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=acciones",
+        headers=HEADERS
+    )
+
+    if response.status_code == 200 and response.json():
+        acciones = response.json()[0].get('acciones', [])
+
+        if 0 <= index < len(acciones):
+            # Eliminar acción
+            acciones.pop(index)
+
+            # Actualizar en BD
+            requests.patch(
+                f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}",
+                headers=HEADERS,
+                json={'acciones': acciones}
+            )
+
+            flash('Acción eliminada', 'success')
+
+    return redirect(url_for('ver_equipo', equipo_id=equipo_id))
+
+
+# ============================================
 # MÓDULO DE NOTIFICACIONES POR EMAIL
 # ============================================
 
