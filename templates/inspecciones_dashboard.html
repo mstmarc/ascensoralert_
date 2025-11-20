@@ -460,11 +460,15 @@
                     <h3 style="color: #1565c0;">2ª Insp. Próximo Mes</h3>
                     <div class="number" style="color: #1565c0;">{{ segunda_proximo_mes }}</div>
                 </div>
+                <div class="stat-card filtro-kpi" data-filtro="programadas" style="cursor: pointer; border-color: #28a745;">
+                    <h3 style="color: #2e7d32;">2ª Insp. Programadas</h3>
+                    <div class="number" style="color: #2e7d32;">{{ segunda_programadas }}</div>
+                </div>
             </div>
 
             <!-- Alertas Críticas -->
             {% if alertas_criticas %}
-            <div class="alertas-section">
+            <div class="alertas-section seccion-alerta" data-categoria="vencidas">
                 <div class="alertas-header">
                     <h3 class="alertas-titulo">⚠️ Alertas Críticas</h3>
                     <span class="alertas-contador">{{ alertas_criticas|length }}</span>
@@ -509,7 +513,7 @@
 
             <!-- Alertas Urgentes -->
             {% if alertas_urgentes %}
-            <div class="alertas-section">
+            <div class="alertas-section seccion-alerta" data-categoria="este-mes">
                 <div class="alertas-header">
                     <h3 class="alertas-titulo">🔔 Alertas Urgentes</h3>
                     <span class="alertas-contador">{{ alertas_urgentes|length }}</span>
@@ -554,7 +558,7 @@
 
             <!-- Alertas Próximas -->
             {% if alertas_proximas %}
-            <div class="alertas-section">
+            <div class="alertas-section seccion-alerta" data-categoria="proximo-mes">
                 <div class="alertas-header">
                     <h3 class="alertas-titulo">📋 Próximos Vencimientos</h3>
                     <span class="alertas-contador">{{ alertas_proximas|length }}</span>
@@ -599,7 +603,7 @@
 
             <!-- Inspecciones Programadas (sin urgencia) -->
             {% if alertas_normales %}
-            <div class="alertas-section">
+            <div class="alertas-section seccion-alerta" data-categoria="programadas">
                 <div class="alertas-header">
                     <h3 class="alertas-titulo">✅ Inspecciones Programadas</h3>
                     <span class="alertas-contador">{{ alertas_normales|length }}</span>
@@ -646,5 +650,50 @@
 
 
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+
+    <!-- Filtrado de KPIs de segunda inspección -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const kpis = document.querySelectorAll('.filtro-kpi');
+            const secciones = document.querySelectorAll('.seccion-alerta');
+
+            kpis.forEach(kpi => {
+                kpi.addEventListener('click', function() {
+                    const filtro = this.dataset.filtro;
+
+                    // Remover estilo activo de todos los KPIs
+                    kpis.forEach(k => {
+                        k.style.boxShadow = '';
+                        k.style.transform = '';
+                    });
+
+                    // Si se hace click en "todas", mostrar todas las secciones
+                    if (filtro === 'todas') {
+                        secciones.forEach(seccion => {
+                            seccion.style.display = '';
+                        });
+                        // Marcar KPI como activo
+                        this.style.boxShadow = '0 4px 12px rgba(0, 51, 102, 0.2)';
+                        this.style.transform = 'translateY(-4px)';
+                        return;
+                    }
+
+                    // Filtrar secciones según categoría del KPI
+                    secciones.forEach(seccion => {
+                        const categoria = seccion.dataset.categoria;
+                        if (categoria === filtro) {
+                            seccion.style.display = '';
+                        } else {
+                            seccion.style.display = 'none';
+                        }
+                    });
+
+                    // Marcar KPI como activo
+                    this.style.boxShadow = '0 4px 12px rgba(0, 51, 102, 0.2)';
+                    this.style.transform = 'translateY(-4px)';
+                });
+            });
+        });
+    </script>
 </body>
 </html>

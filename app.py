@@ -3820,6 +3820,7 @@ def inspecciones_dashboard():
     segunda_vencidas = 0
     segunda_este_mes = 0
     segunda_proximo_mes = 0
+    segunda_programadas = len(alertas_normales)  # Incluye pendientes lejanas y realizadas
 
     for insp in inspecciones:
         # Solo contar las NO realizadas (fecha_segunda_realizada es NULL)
@@ -3856,6 +3857,7 @@ def inspecciones_dashboard():
         segunda_vencidas=segunda_vencidas,
         segunda_este_mes=segunda_este_mes,
         segunda_proximo_mes=segunda_proximo_mes,
+        segunda_programadas=segunda_programadas,
         alertas_criticas=alertas_criticas,
         alertas_urgentes=alertas_urgentes,
         alertas_proximas=alertas_proximas,
