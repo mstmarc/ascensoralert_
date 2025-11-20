@@ -9,13 +9,17 @@
 
 BEGIN;
 
--- 1. Agregar nuevos campos
+-- 1. PRIMERO: Eliminar las vistas que dependen de las columnas antiguas
+DROP VIEW IF EXISTS v_inspecciones_completas CASCADE;
+DROP VIEW IF EXISTS v_defectos_con_urgencia CASCADE;
+
+-- 2. Agregar nuevos campos
 ALTER TABLE inspecciones ADD COLUMN IF NOT EXISTS maquina VARCHAR(100);
 ALTER TABLE inspecciones ADD COLUMN IF NOT EXISTS presupuesto VARCHAR(50) DEFAULT 'PENDIENTE';
 ALTER TABLE inspecciones ADD COLUMN IF NOT EXISTS estado TEXT;
 ALTER TABLE inspecciones ADD COLUMN IF NOT EXISTS estado_material TEXT;
 
--- 2. Migrar datos existentes a nuevos campos
+-- 3. Migrar datos existentes a nuevos campos
 -- Copiar 'rae' a 'maquina' (si existe)
 UPDATE inspecciones SET maquina = rae WHERE maquina IS NULL;
 
@@ -25,37 +29,37 @@ UPDATE inspecciones SET presupuesto = estado_presupuesto WHERE presupuesto = 'PE
 -- Ajustar valores de presupuesto para el nuevo formato
 UPDATE inspecciones SET presupuesto = 'EN_PREPARACION' WHERE presupuesto = 'PREPARANDO';
 
--- 3. Eliminar columnas antiguas que ya no se usan
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS rae;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS numero_certificado;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS titular_nombre;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS titular_nif;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS direccion_instalacion;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS municipio;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS tipo_ascensor;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS capacidad;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS carga;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS paradas;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS recorrido;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS velocidad;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_puesta_servicio;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_ultima_inspeccion;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS empresa_conservadora;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS resultado;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS tiene_defectos;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS archivo_pdf;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS estado_presupuesto;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS estado_trabajo;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_envio_presupuesto;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_respuesta_presupuesto;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_inicio_trabajo;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_fin_trabajo;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS observaciones;
+-- 4. Eliminar columnas antiguas que ya no se usan (con CASCADE para forzar eliminación de vistas)
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS rae CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS numero_certificado CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS titular_nombre CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS titular_nif CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS direccion_instalacion CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS municipio CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS tipo_ascensor CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS capacidad CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS carga CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS paradas CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS recorrido CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS velocidad CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_puesta_servicio CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_ultima_inspeccion CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS empresa_conservadora CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS resultado CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS tiene_defectos CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS archivo_pdf CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS estado_presupuesto CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS estado_trabajo CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_envio_presupuesto CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_respuesta_presupuesto CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_inicio_trabajo CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_fin_trabajo CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS observaciones CASCADE;
 
--- 4. Hacer campo 'maquina' NOT NULL (después de migrar datos)
+-- 5. Hacer campo 'maquina' NOT NULL (después de migrar datos)
 ALTER TABLE inspecciones ALTER COLUMN maquina SET NOT NULL;
 
--- 5. Eliminar índices antiguos y crear nuevos
+-- 6. Eliminar índices antiguos y crear nuevos
 DROP INDEX IF EXISTS idx_inspecciones_rae;
 DROP INDEX IF EXISTS idx_inspecciones_titular;
 DROP INDEX IF EXISTS idx_inspecciones_municipio;
@@ -67,8 +71,7 @@ CREATE INDEX IF NOT EXISTS idx_inspecciones_fecha ON inspecciones(fecha_inspecci
 CREATE INDEX IF NOT EXISTS idx_inspecciones_oca ON inspecciones(oca_id);
 CREATE INDEX IF NOT EXISTS idx_inspecciones_presupuesto ON inspecciones(presupuesto);
 
--- 6. Actualizar vistas
-DROP VIEW IF EXISTS v_inspecciones_completas;
+-- 7. Recrear vistas con nueva estructura
 CREATE OR REPLACE VIEW v_inspecciones_completas AS
 SELECT
     i.*,
@@ -80,7 +83,6 @@ SELECT
 FROM inspecciones i
 LEFT JOIN ocas o ON i.oca_id = o.id;
 
-DROP VIEW IF EXISTS v_defectos_con_urgencia;
 CREATE OR REPLACE VIEW v_defectos_con_urgencia AS
 SELECT
     d.*,
