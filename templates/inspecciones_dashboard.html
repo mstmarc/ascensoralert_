@@ -277,20 +277,16 @@
                     <div class="number">{{ total_inspecciones }}</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Pendiente Presupuesto</h3>
+                    <h3>Pendientes</h3>
                     <div class="number">{{ pendiente_presupuesto }}</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Presup. Enviados</h3>
+                    <h3>Enviados</h3>
                     <div class="number">{{ enviados_sin_respuesta }}</div>
                 </div>
                 <div class="stat-card">
-                    <h3>En Ejecución</h3>
-                    <div class="number">{{ trabajos_en_ejecucion }}</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Completados</h3>
-                    <div class="number">{{ completados }}</div>
+                    <h3>Aceptados</h3>
+                    <div class="number">{{ aceptados }}</div>
                 </div>
             </div>
 
@@ -362,29 +358,26 @@
                         {% for inspeccion in inspecciones %}
                         <div class="lead-list-item">
                             <a href="/inspecciones/ver/{{ inspeccion.id }}" class="lead-list-direccion">
-                                {{ inspeccion.direccion_instalacion }} - {{ inspeccion.titular_nombre }}
+                                MAQUINA: {{ inspeccion.maquina }}
                             </a>
                             <div class="lead-list-info">
-                                <span class="lead-list-info-item">
-                                    RAE: <strong>{{ inspeccion.rae }}</strong>
-                                </span>
                                 <span class="lead-list-info-item">
                                     Fecha: {{ inspeccion.fecha_inspeccion|format_fecha }}
                                 </span>
                                 <span class="lead-list-info-item">
-                                    OCA: {{ inspeccion.oca.nombre if inspeccion.oca else '-' }}
-                                </span>
-                                <span class="lead-list-info-item">
                                     Presupuesto:
-                                    <span class="badge badge-{{ inspeccion.estado_presupuesto|lower }}">
-                                        {{ inspeccion.estado_presupuesto }}
+                                    <span class="badge badge-{{ inspeccion.presupuesto|lower|replace('_', '-') }}">
+                                        {{ inspeccion.presupuesto|replace('_', ' ') }}
                                     </span>
                                 </span>
                                 <span class="lead-list-info-item">
-                                    Trabajo:
-                                    <span class="badge badge-{{ inspeccion.estado_trabajo|lower|replace('_', '-') }}">
-                                        {{ inspeccion.estado_trabajo|replace('_', ' ') }}
-                                    </span>
+                                    Estado: <strong>{{ inspeccion.estado or '-' }}</strong>
+                                </span>
+                                <span class="lead-list-info-item">
+                                    Material: <strong>{{ inspeccion.estado_material or '-' }}</strong>
+                                </span>
+                                <span class="lead-list-info-item">
+                                    OCA: {{ inspeccion.oca.nombre if inspeccion.oca else '-' }}
                                 </span>
                             </div>
                         </div>

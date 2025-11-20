@@ -26,50 +26,23 @@ CREATE INDEX idx_ocas_nombre ON ocas(nombre);
 CREATE TABLE IF NOT EXISTS inspecciones (
     id SERIAL PRIMARY KEY,
 
-    -- Identificación del ascensor
-    rae VARCHAR(50) NOT NULL,
-    numero_certificado VARCHAR(100),
+    -- Identificación principal
+    maquina VARCHAR(100) NOT NULL, -- Identificador principal de la inspección
+
+    -- Fecha de inspección
     fecha_inspeccion DATE NOT NULL,
 
-    -- Titular (cliente propietario)
-    titular_nombre VARCHAR(255) NOT NULL,
-    titular_nif VARCHAR(20),
-    direccion_instalacion TEXT NOT NULL,
-    municipio VARCHAR(100),
+    -- Estado del presupuesto
+    presupuesto VARCHAR(50) DEFAULT 'PENDIENTE', -- PENDIENTE/EN_PREPARACION/ENVIADO/ACEPTADO
+
+    -- Estado general (texto libre)
+    estado TEXT,
+
+    -- Estado del material (texto libre)
+    estado_material TEXT,
 
     -- Organismo de Control
     oca_id INTEGER REFERENCES ocas(id) ON DELETE SET NULL,
-
-    -- Características técnicas del ascensor
-    tipo_ascensor VARCHAR(50), -- Electromecánico/Hidráulico
-    capacidad INTEGER, -- personas
-    carga INTEGER, -- kg
-    paradas INTEGER,
-    recorrido NUMERIC(10,2), -- metros
-    velocidad NUMERIC(10,2), -- m/s
-    fecha_puesta_servicio DATE,
-    fecha_ultima_inspeccion DATE,
-    empresa_conservadora VARCHAR(255) DEFAULT 'FEDES ASCENSORES',
-
-    -- Resultado de la inspección
-    resultado VARCHAR(50) DEFAULT 'Desfavorable', -- Favorable/Desfavorable
-    tiene_defectos BOOLEAN DEFAULT true,
-
-    -- Archivo PDF
-    archivo_pdf VARCHAR(500), -- Ruta del archivo
-
-    -- Estados de gestión
-    estado_presupuesto VARCHAR(50) DEFAULT 'PENDIENTE', -- PENDIENTE/PREPARANDO/ENVIADO/ACEPTADO/RECHAZADO
-    estado_trabajo VARCHAR(50) DEFAULT 'PENDIENTE', -- PENDIENTE/EN_EJECUCION/COMPLETADO
-
-    -- Fechas de seguimiento
-    fecha_envio_presupuesto DATE,
-    fecha_respuesta_presupuesto DATE,
-    fecha_inicio_trabajo DATE,
-    fecha_fin_trabajo DATE,
-
-    -- Observaciones
-    observaciones TEXT,
 
     -- Auditoría
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -78,13 +51,10 @@ CREATE TABLE IF NOT EXISTS inspecciones (
 );
 
 -- Índices para Inspecciones
-CREATE INDEX idx_inspecciones_rae ON inspecciones(rae);
+CREATE INDEX idx_inspecciones_maquina ON inspecciones(maquina);
 CREATE INDEX idx_inspecciones_fecha ON inspecciones(fecha_inspeccion DESC);
-CREATE INDEX idx_inspecciones_titular ON inspecciones(titular_nombre);
-CREATE INDEX idx_inspecciones_municipio ON inspecciones(municipio);
 CREATE INDEX idx_inspecciones_oca ON inspecciones(oca_id);
-CREATE INDEX idx_inspecciones_estado_presupuesto ON inspecciones(estado_presupuesto);
-CREATE INDEX idx_inspecciones_estado_trabajo ON inspecciones(estado_trabajo);
+CREATE INDEX idx_inspecciones_presupuesto ON inspecciones(presupuesto);
 
 -- Tabla 3: Defectos Detectados en Inspecciones
 -- ============================================
@@ -215,10 +185,7 @@ LEFT JOIN ocas o ON i.oca_id = o.id;
 CREATE OR REPLACE VIEW v_defectos_con_urgencia AS
 SELECT
     d.*,
-    i.titular_nombre,
-    i.direccion_instalacion,
-    i.municipio,
-    i.rae,
+    i.maquina,
     CASE
         WHEN d.estado = 'SUBSANADO' THEN 'COMPLETADO'
         WHEN d.fecha_limite < CURRENT_DATE THEN 'VENCIDO'

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inspección {{ inspeccion.rae }} - AscensorAlert</title>
+    <title>Inspección {{ inspeccion.maquina }} - AscensorAlert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -218,7 +218,7 @@
     </header>
 
     <main>
-        <h1 class="page-title">Inspección: {{ inspeccion.titular_nombre }}</h1>
+        <h1 class="page-title">Inspección: {{ inspeccion.maquina }}</h1>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -232,165 +232,47 @@
           {% endif %}
         {% endwith %}
 
-        <!-- Sección: Identificación -->
+        <!-- Información de la Inspección -->
         <div class="seccion">
-            <h2>Identificación del Ascensor</h2>
+            <h2>Información de la Inspección</h2>
             <div class="info-list">
                 <div class="info-item">
-                    <label>RAE</label>
-                    <span>{{ inspeccion.rae }}</span>
+                    <label>MAQUINA</label>
+                    <span>{{ inspeccion.maquina }}</span>
                 </div>
                 <div class="info-item">
-                    <label>Número de Certificado</label>
-                    <span>{{ inspeccion.numero_certificado or '-' }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Fecha de Inspección</label>
+                    <label>FECHA INSPECCION</label>
                     <span>{{ inspeccion.fecha_inspeccion|format_fecha }}</span>
+                </div>
+                <div class="info-item">
+                    <label>PRESUPUESTO</label>
+                    <span>
+                        <span class="badge badge-{{ inspeccion.presupuesto|lower|replace('_', '-') }}">
+                            {{ inspeccion.presupuesto|replace('_', ' ') }}
+                        </span>
+                        <form method="POST" action="/inspecciones/estado_presupuesto/{{ inspeccion.id }}" class="cambio-estado-form">
+                            <select name="presupuesto">
+                                <option value="PENDIENTE" {% if inspeccion.presupuesto == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                                <option value="EN_PREPARACION" {% if inspeccion.presupuesto == 'EN_PREPARACION' %}selected{% endif %}>EN PREPARACION</option>
+                                <option value="ENVIADO" {% if inspeccion.presupuesto == 'ENVIADO' %}selected{% endif %}>ENVIADO</option>
+                                <option value="ACEPTADO" {% if inspeccion.presupuesto == 'ACEPTADO' %}selected{% endif %}>ACEPTADO</option>
+                            </select>
+                            <button type="submit">Cambiar</button>
+                        </form>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <label>ESTADO</label>
+                    <span>{{ inspeccion.estado or '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Estado del material</label>
+                    <span>{{ inspeccion.estado_material or '-' }}</span>
                 </div>
                 <div class="info-item">
                     <label>OCA</label>
                     <span>{{ inspeccion.oca.nombre if inspeccion.oca else '-' }}</span>
                 </div>
-            </div>
-        </div>
-
-        <!-- Sección: Titular -->
-        <div class="seccion">
-            <h2>Titular (Cliente Propietario)</h2>
-            <div class="info-list">
-                <div class="info-item">
-                    <label>Nombre del Titular</label>
-                    <span>{{ inspeccion.titular_nombre }}</span>
-                </div>
-                <div class="info-item">
-                    <label>NIF/CIF</label>
-                    <span>{{ inspeccion.titular_nif or '-' }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Dirección de la Instalación</label>
-                    <span>{{ inspeccion.direccion_instalacion }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Municipio</label>
-                    <span>{{ inspeccion.municipio or '-' }}</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sección: Características Técnicas -->
-        <div class="seccion">
-            <h2>Características Técnicas del Ascensor</h2>
-            <div class="info-list">
-                <div class="info-item">
-                    <label>Tipo de Ascensor</label>
-                    <span>{{ inspeccion.tipo_ascensor or '-' }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Capacidad</label>
-                    <span>{{ inspeccion.capacidad or '-' }} personas</span>
-                </div>
-                <div class="info-item">
-                    <label>Carga</label>
-                    <span>{{ inspeccion.carga or '-' }} kg</span>
-                </div>
-                <div class="info-item">
-                    <label>Número de Paradas</label>
-                    <span>{{ inspeccion.paradas or '-' }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Recorrido</label>
-                    <span>{{ inspeccion.recorrido or '-' }} m</span>
-                </div>
-                <div class="info-item">
-                    <label>Velocidad</label>
-                    <span>{{ inspeccion.velocidad or '-' }} m/s</span>
-                </div>
-                <div class="info-item">
-                    <label>Fecha Puesta en Servicio</label>
-                    <span>{{ inspeccion.fecha_puesta_servicio|format_fecha }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Fecha Última Inspección Anterior</label>
-                    <span>{{ inspeccion.fecha_ultima_inspeccion|format_fecha }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Empresa Conservadora</label>
-                    <span>{{ inspeccion.empresa_conservadora or '-' }}</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sección: Resultado y Estados -->
-        <div class="seccion">
-            <h2>Resultado y Estados de Gestión</h2>
-            <div class="info-list">
-                <div class="info-item">
-                    <label>Resultado de la Inspección</label>
-                    <span>{{ inspeccion.resultado }}</span>
-                </div>
-                <div class="info-item">
-                    <label>¿Tiene defectos?</label>
-                    <span>{{ 'Sí' if inspeccion.tiene_defectos else 'No' }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Estado del Presupuesto</label>
-                    <span>
-                        <span class="badge badge-{{ inspeccion.estado_presupuesto|lower }}">
-                            {{ inspeccion.estado_presupuesto }}
-                        </span>
-                        <form method="POST" action="/inspecciones/estado_presupuesto/{{ inspeccion.id }}" class="cambio-estado-form">
-                            <select name="estado_presupuesto">
-                                <option value="PENDIENTE" {% if inspeccion.estado_presupuesto == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
-                                <option value="PREPARANDO" {% if inspeccion.estado_presupuesto == 'PREPARANDO' %}selected{% endif %}>PREPARANDO</option>
-                                <option value="ENVIADO" {% if inspeccion.estado_presupuesto == 'ENVIADO' %}selected{% endif %}>ENVIADO</option>
-                                <option value="ACEPTADO" {% if inspeccion.estado_presupuesto == 'ACEPTADO' %}selected{% endif %}>ACEPTADO</option>
-                                <option value="RECHAZADO" {% if inspeccion.estado_presupuesto == 'RECHAZADO' %}selected{% endif %}>RECHAZADO</option>
-                            </select>
-                            <button type="submit">Cambiar</button>
-                        </form>
-                    </span>
-                </div>
-                <div class="info-item">
-                    <label>Estado del Trabajo</label>
-                    <span>
-                        <span class="badge badge-{{ inspeccion.estado_trabajo|lower|replace('_', '-') }}">
-                            {{ inspeccion.estado_trabajo|replace('_', ' ') }}
-                        </span>
-                        <form method="POST" action="/inspecciones/estado_trabajo/{{ inspeccion.id }}" class="cambio-estado-form">
-                            <select name="estado_trabajo">
-                                <option value="PENDIENTE" {% if inspeccion.estado_trabajo == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
-                                <option value="EN_EJECUCION" {% if inspeccion.estado_trabajo == 'EN_EJECUCION' %}selected{% endif %}>EN EJECUCIÓN</option>
-                                <option value="COMPLETADO" {% if inspeccion.estado_trabajo == 'COMPLETADO' %}selected{% endif %}>COMPLETADO</option>
-                            </select>
-                            <button type="submit">Cambiar</button>
-                        </form>
-                    </span>
-                </div>
-                {% if inspeccion.fecha_envio_presupuesto %}
-                <div class="info-item">
-                    <label>Fecha Envío Presupuesto</label>
-                    <span>{{ inspeccion.fecha_envio_presupuesto|format_fecha }}</span>
-                </div>
-                {% endif %}
-                {% if inspeccion.fecha_respuesta_presupuesto %}
-                <div class="info-item">
-                    <label>Fecha Respuesta Presupuesto</label>
-                    <span>{{ inspeccion.fecha_respuesta_presupuesto|format_fecha }}</span>
-                </div>
-                {% endif %}
-                {% if inspeccion.fecha_inicio_trabajo %}
-                <div class="info-item">
-                    <label>Fecha Inicio Trabajo</label>
-                    <span>{{ inspeccion.fecha_inicio_trabajo|format_fecha }}</span>
-                </div>
-                {% endif %}
-                {% if inspeccion.fecha_fin_trabajo %}
-                <div class="info-item">
-                    <label>Fecha Fin Trabajo</label>
-                    <span>{{ inspeccion.fecha_fin_trabajo|format_fecha }}</span>
-                </div>
-                {% endif %}
             </div>
         </div>
 
@@ -472,15 +354,6 @@
         </div>
         {% endif %}
 
-        <!-- Sección: Observaciones -->
-        {% if inspeccion.observaciones %}
-        <div class="seccion">
-            <h2>Observaciones</h2>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; color: #666;">
-                {{ inspeccion.observaciones }}
-            </div>
-        </div>
-        {% endif %}
 
         <!-- Acciones -->
         <div class="btn-actions">
