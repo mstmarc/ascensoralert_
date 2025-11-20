@@ -29,32 +29,32 @@ UPDATE inspecciones SET presupuesto = estado_presupuesto WHERE presupuesto = 'PE
 -- Ajustar valores de presupuesto para el nuevo formato
 UPDATE inspecciones SET presupuesto = 'EN_PREPARACION' WHERE presupuesto = 'PREPARANDO';
 
--- 4. Eliminar columnas antiguas que ya no se usan
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS rae;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS numero_certificado;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS titular_nombre;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS titular_nif;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS direccion_instalacion;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS municipio;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS tipo_ascensor;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS capacidad;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS carga;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS paradas;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS recorrido;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS velocidad;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_puesta_servicio;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_ultima_inspeccion;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS empresa_conservadora;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS resultado;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS tiene_defectos;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS archivo_pdf;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS estado_presupuesto;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS estado_trabajo;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_envio_presupuesto;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_respuesta_presupuesto;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_inicio_trabajo;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_fin_trabajo;
-ALTER TABLE inspecciones DROP COLUMN IF EXISTS observaciones;
+-- 4. Eliminar columnas antiguas que ya no se usan (con CASCADE para forzar eliminación de vistas)
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS rae CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS numero_certificado CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS titular_nombre CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS titular_nif CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS direccion_instalacion CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS municipio CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS tipo_ascensor CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS capacidad CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS carga CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS paradas CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS recorrido CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS velocidad CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_puesta_servicio CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_ultima_inspeccion CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS empresa_conservadora CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS resultado CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS tiene_defectos CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS archivo_pdf CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS estado_presupuesto CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS estado_trabajo CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_envio_presupuesto CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_respuesta_presupuesto CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_inicio_trabajo CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS fecha_fin_trabajo CASCADE;
+ALTER TABLE inspecciones DROP COLUMN IF EXISTS observaciones CASCADE;
 
 -- 5. Hacer campo 'maquina' NOT NULL (después de migrar datos)
 ALTER TABLE inspecciones ALTER COLUMN maquina SET NOT NULL;
