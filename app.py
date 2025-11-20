@@ -3663,40 +3663,27 @@ def nueva_inspeccion():
         return redirect("/")
 
     if request.method == "POST":
-        # Recoger datos del formulario
+        # Recoger datos del formulario (simplificado)
         data = {
-            # Identificación
+            # Campos esenciales
             "rae": request.form.get("rae"),
-            "numero_certificado": request.form.get("numero_certificado") or None,
             "fecha_inspeccion": request.form.get("fecha_inspeccion"),
-
-            # Titular
-            "titular_nombre": request.form.get("titular_nombre"),
-            "titular_nif": request.form.get("titular_nif") or None,
             "direccion_instalacion": request.form.get("direccion_instalacion"),
-            "municipio": request.form.get("municipio") or None,
 
             # OCA
             "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None,
 
-            # Características técnicas
-            "tipo_ascensor": request.form.get("tipo_ascensor") or None,
-            "capacidad": int(request.form.get("capacidad")) if request.form.get("capacidad") else None,
-            "carga": int(request.form.get("carga")) if request.form.get("carga") else None,
-            "paradas": int(request.form.get("paradas")) if request.form.get("paradas") else None,
-            "recorrido": float(request.form.get("recorrido")) if request.form.get("recorrido") else None,
-            "velocidad": float(request.form.get("velocidad")) if request.form.get("velocidad") else None,
-            "fecha_puesta_servicio": request.form.get("fecha_puesta_servicio") or None,
-            "fecha_ultima_inspeccion": request.form.get("fecha_ultima_inspeccion") or None,
-            "empresa_conservadora": request.form.get("empresa_conservadora") or "FEDES ASCENSORES",
-
-            # Resultado
-            "resultado": request.form.get("resultado") or "Desfavorable",
-            "tiene_defectos": request.form.get("tiene_defectos") == "true",
+            # Titular (opcional, puede estar incluido en direccion_instalacion)
+            "titular_nombre": request.form.get("titular_nombre") or "Sin especificar",
 
             # Estados
             "estado_presupuesto": request.form.get("estado_presupuesto") or "PENDIENTE",
-            "estado_trabajo": "PENDIENTE",
+            "estado_trabajo": request.form.get("estado_trabajo") or "PENDIENTE",
+
+            # Campos técnicos por defecto
+            "resultado": "Desfavorable",
+            "tiene_defectos": True,
+            "empresa_conservadora": "FEDES ASCENSORES",
 
             # Observaciones
             "observaciones": request.form.get("observaciones") or None,
@@ -3705,9 +3692,9 @@ def nueva_inspeccion():
             "created_by": session.get("usuario")
         }
 
-        # Validaciones
-        if not data["rae"] or not data["fecha_inspeccion"] or not data["titular_nombre"] or not data["direccion_instalacion"]:
-            flash("Los campos RAE, Fecha de Inspección, Titular y Dirección son obligatorios", "error")
+        # Validaciones mínimas
+        if not data["rae"] or not data["fecha_inspeccion"] or not data["direccion_instalacion"]:
+            flash("Los campos Fecha, Instalación y Máquina son obligatorios", "error")
             return redirect(request.referrer)
 
         # Crear inspección
@@ -3813,38 +3800,12 @@ def editar_inspeccion(inspeccion_id):
         return redirect("/")
 
     if request.method == "POST":
-        # Recoger datos del formulario
+        # Recoger datos del formulario (simplificado)
         data = {
-            # Identificación
             "rae": request.form.get("rae"),
-            "numero_certificado": request.form.get("numero_certificado") or None,
             "fecha_inspeccion": request.form.get("fecha_inspeccion"),
-
-            # Titular
-            "titular_nombre": request.form.get("titular_nombre"),
-            "titular_nif": request.form.get("titular_nif") or None,
             "direccion_instalacion": request.form.get("direccion_instalacion"),
-            "municipio": request.form.get("municipio") or None,
-
-            # OCA
             "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None,
-
-            # Características técnicas
-            "tipo_ascensor": request.form.get("tipo_ascensor") or None,
-            "capacidad": int(request.form.get("capacidad")) if request.form.get("capacidad") else None,
-            "carga": int(request.form.get("carga")) if request.form.get("carga") else None,
-            "paradas": int(request.form.get("paradas")) if request.form.get("paradas") else None,
-            "recorrido": float(request.form.get("recorrido")) if request.form.get("recorrido") else None,
-            "velocidad": float(request.form.get("velocidad")) if request.form.get("velocidad") else None,
-            "fecha_puesta_servicio": request.form.get("fecha_puesta_servicio") or None,
-            "fecha_ultima_inspeccion": request.form.get("fecha_ultima_inspeccion") or None,
-            "empresa_conservadora": request.form.get("empresa_conservadora") or "FEDES ASCENSORES",
-
-            # Resultado
-            "resultado": request.form.get("resultado") or "Desfavorable",
-            "tiene_defectos": request.form.get("tiene_defectos") == "true",
-
-            # Observaciones
             "observaciones": request.form.get("observaciones") or None
         }
 
