@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS inspecciones (
 
     -- Fecha de inspección
     fecha_inspeccion DATE NOT NULL,
-    fecha_segunda_inspeccion DATE, -- Segunda inspección (6 meses después) para verificar defectos
+    fecha_segunda_inspeccion DATE, -- Segunda inspección programada (6 meses después)
+    fecha_segunda_realizada DATE, -- Fecha en que se realizó la segunda inspección
 
     -- Estado del presupuesto
     presupuesto VARCHAR(50) DEFAULT 'PENDIENTE', -- PENDIENTE/EN_PREPARACION/ENVIADO/ACEPTADO
@@ -55,6 +56,7 @@ CREATE TABLE IF NOT EXISTS inspecciones (
 CREATE INDEX idx_inspecciones_maquina ON inspecciones(maquina);
 CREATE INDEX idx_inspecciones_fecha ON inspecciones(fecha_inspeccion DESC);
 CREATE INDEX idx_inspecciones_fecha_segunda ON inspecciones(fecha_segunda_inspeccion);
+CREATE INDEX idx_inspecciones_fecha_segunda_realizada ON inspecciones(fecha_segunda_realizada) WHERE fecha_segunda_realizada IS NOT NULL;
 CREATE INDEX idx_inspecciones_oca ON inspecciones(oca_id);
 CREATE INDEX idx_inspecciones_presupuesto ON inspecciones(presupuesto);
 
@@ -186,13 +188,33 @@ SELECT
             (i.fecha_segunda_inspeccion - CURRENT_DATE)
         ELSE NULL
     END as dias_hasta_segunda_inspeccion,
+    -- Urgencia de segunda inspección (solo si NO se ha realizado)
     CASE
+        WHEN i.fecha_segunda_realizada IS NOT NULL THEN 'REALIZADA'
         WHEN i.fecha_segunda_inspeccion IS NULL THEN 'SIN_FECHA'
         WHEN i.fecha_segunda_inspeccion < CURRENT_DATE THEN 'VENCIDA'
         WHEN (i.fecha_segunda_inspeccion - CURRENT_DATE) <= 30 THEN 'URGENTE'
         WHEN (i.fecha_segunda_inspeccion - CURRENT_DATE) <= 60 THEN 'PROXIMA'
         ELSE 'NORMAL'
-    END as urgencia_segunda_inspeccion
+    END as urgencia_segunda_inspeccion,
+    -- Contar materiales especiales pendientes
+    (SELECT COUNT(*) FROM materiales_especiales m
+     WHERE m.inspeccion_id = i.id AND m.estado != 'INSTALADO') as materiales_pendientes,
+    -- Estado general de la inspección
+    CASE
+        WHEN i.fecha_segunda_realizada IS NOT NULL AND
+             NOT EXISTS (SELECT 1 FROM defectos_inspeccion WHERE inspeccion_id = i.id AND estado = 'PENDIENTE') AND
+             NOT EXISTS (SELECT 1 FROM materiales_especiales WHERE inspeccion_id = i.id AND estado != 'INSTALADO')
+        THEN 'CERRADA'
+        WHEN i.fecha_segunda_realizada IS NOT NULL AND
+             EXISTS (SELECT 1 FROM materiales_especiales WHERE inspeccion_id = i.id AND estado != 'INSTALADO')
+        THEN 'ESPERANDO_MATERIALES'
+        WHEN i.fecha_segunda_inspeccion < CURRENT_DATE AND i.fecha_segunda_realizada IS NULL
+        THEN 'SEGUNDA_VENCIDA'
+        WHEN i.fecha_segunda_inspeccion IS NOT NULL AND i.fecha_segunda_realizada IS NULL
+        THEN 'SEGUNDA_PENDIENTE'
+        ELSE 'ABIERTA'
+    END as estado_inspeccion
 FROM inspecciones i
 LEFT JOIN ocas o ON i.oca_id = o.id;
 

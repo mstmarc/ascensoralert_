@@ -3760,8 +3760,9 @@ def inspecciones_dashboard():
                 pass
 
     # Procesar segundas inspecciones (re-inspecciones)
+    # SOLO alertar si NO se ha realizado aún (fecha_segunda_realizada es NULL)
     for inspeccion in inspecciones:
-        if inspeccion.get('fecha_segunda_inspeccion'):
+        if inspeccion.get('fecha_segunda_inspeccion') and not inspeccion.get('fecha_segunda_realizada'):
             try:
                 fecha_segunda = datetime.strptime(inspeccion['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
                 dias_restantes = (fecha_segunda - hoy).days
@@ -4052,6 +4053,32 @@ def cambiar_estado_presupuesto(inspeccion_id):
 
     return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
+# Marcar Segunda Inspección como Realizada
+@app.route("/inspecciones/marcar_segunda_realizada/<int:inspeccion_id>", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
+def marcar_segunda_realizada(inspeccion_id):
+    """Marcar que se realizó la segunda inspección (a los 6 meses)"""
+
+    # Establecer fecha de hoy como fecha_segunda_realizada
+    hoy = date.today().strftime('%Y-%m-%d')
+
+    data = {
+        "fecha_segunda_realizada": hoy
+    }
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Segunda inspección marcada como realizada", "success")
+    else:
+        flash("Error al marcar segunda inspección", "error")
+
+    return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
 # Eliminar Inspección
 @app.route("/inspecciones/eliminar/<int:inspeccion_id>")

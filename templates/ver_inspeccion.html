@@ -257,18 +257,47 @@
                 </div>
                 <div class="info-item">
                     <label>2ª INSPECCIÓN (6 meses)</label>
-                    <span style="font-weight: 700; color: {% if inspeccion.dias_hasta_segunda is defined and inspeccion.dias_hasta_segunda < 0 %}#c62828{% elif inspeccion.dias_hasta_segunda is defined and inspeccion.dias_hasta_segunda <= 30 %}#f57c00{% else %}#003366{% endif %};">
-                        {{ inspeccion.fecha_segunda_inspeccion|format_fecha if inspeccion.fecha_segunda_inspeccion else 'No calculada' }}
-                        {% if inspeccion.dias_hasta_segunda is defined %}
-                            {% if inspeccion.dias_hasta_segunda < 0 %}
-                                <span style="color: #c62828; font-weight: 700; margin-left: 8px;">⚠️ VENCIDA hace {{ inspeccion.dias_hasta_segunda|abs }} días</span>
-                            {% elif inspeccion.dias_hasta_segunda <= 30 %}
-                                <span style="color: #f57c00; font-weight: 700; margin-left: 8px;">⏰ En {{ inspeccion.dias_hasta_segunda }} días</span>
-                            {% elif inspeccion.dias_hasta_segunda <= 60 %}
-                                <span style="color: #856404; font-weight: 700; margin-left: 8px;">📅 En {{ inspeccion.dias_hasta_segunda }} días</span>
+                    <div>
+                        <!-- Fecha programada -->
+                        <div style="margin-bottom: 8px;">
+                            <span style="font-weight: 600; color: #666;">Programada: </span>
+                            <span style="font-weight: 700; color: {% if inspeccion.dias_hasta_segunda is defined and inspeccion.dias_hasta_segunda < 0 and not inspeccion.fecha_segunda_realizada %}#c62828{% elif inspeccion.dias_hasta_segunda is defined and inspeccion.dias_hasta_segunda <= 30 and not inspeccion.fecha_segunda_realizada %}#f57c00{% else %}#003366{% endif %};">
+                                {{ inspeccion.fecha_segunda_inspeccion|format_fecha if inspeccion.fecha_segunda_inspeccion else 'No calculada' }}
+                                {% if inspeccion.dias_hasta_segunda is defined and not inspeccion.fecha_segunda_realizada %}
+                                    {% if inspeccion.dias_hasta_segunda < 0 %}
+                                        <span style="color: #c62828; font-weight: 700; margin-left: 8px;">⚠️ VENCIDA hace {{ inspeccion.dias_hasta_segunda|abs }} días</span>
+                                    {% elif inspeccion.dias_hasta_segunda <= 30 %}
+                                        <span style="color: #f57c00; font-weight: 700; margin-left: 8px;">⏰ En {{ inspeccion.dias_hasta_segunda }} días</span>
+                                    {% elif inspeccion.dias_hasta_segunda <= 60 %}
+                                        <span style="color: #856404; font-weight: 700; margin-left: 8px;">📅 En {{ inspeccion.dias_hasta_segunda }} días</span>
+                                    {% endif %}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <!-- Estado de realización -->
+                        {% if inspeccion.fecha_segunda_realizada %}
+                            <span class="badge" style="background: #e8f5e9; color: #2e7d32;">
+                                ✅ REALIZADA el {{ inspeccion.fecha_segunda_realizada|format_fecha }}
+                            </span>
+                            {% if materiales|length > 0 %}
+                                <div style="margin-top: 8px; padding: 8px 12px; background: #fff8e1; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                    <span style="color: #856404; font-weight: 600;">⏳ Esperando instalación de cortinas/pesacargas</span>
+                                </div>
+                            {% else %}
+                                <div style="margin-top: 8px; padding: 8px 12px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;">
+                                    <span style="color: #2e7d32; font-weight: 600;">✅ Inspección CERRADA - Todo completado</span>
+                                </div>
                             {% endif %}
+                        {% else %}
+                            <div class="cambio-estado-form">
+                                <select id="marcar-segunda-inspeccion" data-inspeccion-id="{{ inspeccion.id }}">
+                                    <option value="">✅ Marcar como realizada...</option>
+                                    <option value="realizada">Marcar 2ª inspección como REALIZADA</option>
+                                </select>
+                            </div>
                         {% endif %}
-                    </span>
+                    </div>
                 </div>
                 <div class="info-item">
                     <label>PRESUPUESTO</label>
@@ -394,12 +423,12 @@
     </script>
 
     <script>
-        // Manejo de cambio de presupuesto
+        // Manejo de cambio de presupuesto y segunda inspección
         document.addEventListener('DOMContentLoaded', function() {
-            const selector = document.getElementById('cambiar-presupuesto');
-
-            if (selector) {
-                selector.addEventListener('change', function() {
+            // Selector de presupuesto
+            const selectorPresupuesto = document.getElementById('cambiar-presupuesto');
+            if (selectorPresupuesto) {
+                selectorPresupuesto.addEventListener('change', function() {
                     const inspeccionId = this.dataset.inspeccionId;
                     const nuevoPresupuesto = this.value;
 
@@ -418,6 +447,29 @@
                     form.appendChild(input);
                     document.body.appendChild(form);
                     form.submit();
+                });
+            }
+
+            // Selector de segunda inspección
+            const selectorSegunda = document.getElementById('marcar-segunda-inspeccion');
+            if (selectorSegunda) {
+                selectorSegunda.addEventListener('change', function() {
+                    const inspeccionId = this.dataset.inspeccionId;
+                    const accion = this.value;
+
+                    if (!accion) return;
+
+                    if (confirm('¿Confirmas que se ha realizado la 2ª inspección? Esto marcará la inspección como revisada a los 6 meses.')) {
+                        // Crear formulario y enviarlo
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/inspecciones/marcar_segunda_realizada/${inspeccionId}`;
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    } else {
+                        this.value = ''; // Resetear selector
+                    }
                 });
             }
         });
