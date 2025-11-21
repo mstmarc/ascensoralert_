@@ -3782,24 +3782,26 @@ def inspecciones_dashboard():
                     inspeccion['categoria_segunda'] = 'vencidas'
                     # CRÍTICO: Fecha límite vencida, defectos sin subsanar
                     alertas_criticas.append(('defectos', inspeccion))
-                elif primer_dia_mes <= fecha_limite <= ultimo_dia_mes:
+                elif dias_restantes <= 30:
                     inspeccion['categoria_segunda'] = 'este-mes'
-                    if dias_restantes <= 30:
-                        # URGENTE: Menos de 30 días para solucionar defectos
-                        alertas_urgentes.append(('defectos', inspeccion))
-                elif primer_dia_proximo <= fecha_limite <= ultimo_dia_proximo:
+                    # URGENTE: Menos de 30 días para solucionar defectos
+                    alertas_urgentes.append(('defectos', inspeccion))
+                elif dias_restantes <= 60:
                     inspeccion['categoria_segunda'] = 'proximo-mes'
-                    if dias_restantes <= 60:
-                        # PRÓXIMO: Entre 30-60 días para solucionar defectos
-                        alertas_proximas.append(('defectos', inspeccion))
+                    # PRÓXIMO: Entre 30-60 días para solucionar defectos
+                    alertas_proximas.append(('defectos', inspeccion))
                 else:
                     inspeccion['categoria_segunda'] = 'pendiente'
                     # SIN URGENCIA: Más de 60 días para solucionar defectos
                     alertas_normales.append(('defectos', inspeccion))
             except:
+                # Error al parsear fecha, mostrar en normales
                 inspeccion['categoria_segunda'] = 'sin-fecha'
+                alertas_normales.append(('defectos', inspeccion))
         else:
+            # Sin fecha de segunda inspección, mostrar en normales
             inspeccion['categoria_segunda'] = 'sin-fecha'
+            alertas_normales.append(('defectos', inspeccion))
 
     # Calcular estadísticas centradas en GESTIÓN DE DEFECTOS
     total_inspecciones = len(inspecciones)
