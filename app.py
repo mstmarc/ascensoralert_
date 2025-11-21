@@ -2100,6 +2100,8 @@ def tarea_comercial_aplazar(tarea_id):
 @app.route("/tarea_comercial_descartar/<int:tarea_id>", methods=["POST"])
 def tarea_comercial_descartar(tarea_id):
     """Descartar una tarea comercial (cerrarla sin crear oportunidad)"""
+    import sys
+
     if "usuario" not in session:
         return {"error": "No autorizado"}, 401
 
@@ -2114,7 +2116,8 @@ def tarea_comercial_descartar(tarea_id):
             "fecha_cierre": datetime.now().isoformat()
         }
 
-        print(f"[DEBUG] Descartando tarea {tarea_id} con data: {data}")
+        print(f"[DEBUG] Descartando tarea {tarea_id} con data: {data}", flush=True)
+        sys.stdout.flush()
 
         response = requests.patch(
             f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
@@ -2122,17 +2125,22 @@ def tarea_comercial_descartar(tarea_id):
             json=data
         )
 
-        print(f"[DEBUG] Respuesta Supabase: status={response.status_code}, body={response.text}")
+        print(f"[DEBUG] Respuesta Supabase: status={response.status_code}, body={response.text}", flush=True)
+        sys.stdout.flush()
 
         if response.status_code in [200, 204]:
             return {"success": True}, 200
         else:
-            return {"error": f"Error al descartar tarea. Supabase respondió: {response.status_code} - {response.text}"}, 500
+            error_msg = f"Error al descartar tarea. Supabase respondió: {response.status_code} - {response.text}"
+            print(f"[ERROR] {error_msg}", flush=True)
+            sys.stdout.flush()
+            return {"error": error_msg}, 500
 
     except Exception as e:
-        print(f"[ERROR] Excepción en tarea_comercial_descartar: {str(e)}")
+        print(f"[ERROR] Excepción en tarea_comercial_descartar: {str(e)}", flush=True)
         import traceback
         traceback.print_exc()
+        sys.stdout.flush()
         return {"error": str(e)}, 500
 
 
