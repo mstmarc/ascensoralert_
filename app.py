@@ -2097,11 +2097,30 @@ def tarea_comercial_descartar(tarea_id):
         tipo_descarte = request.json.get("tipo", "descartada_sin_interes")
         motivo = request.json.get("motivo", "")
 
+        # Obtener la tarea actual para acceder a las notas
+        tarea_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS
+        )
+
+        if tarea_response.status_code != 200:
+            return {"error": "No se encontró la tarea"}, 404
+
+        tarea = tarea_response.json()[0]
+        notas = tarea.get('notas', [])
+
+        # Agregar nota con el motivo del descarte
+        nota_descarte = {
+            "fecha": datetime.now().isoformat(),
+            "usuario": session.get("usuario", "Usuario"),
+            "texto": f"Tarea descartada - Tipo: {tipo_descarte}" + (f" - Motivo: {motivo}" if motivo else "")
+        }
+        notas.append(nota_descarte)
+
+        # Actualizar estado y notas
         data = {
             "estado": "cerrada",
-            "tipo_cierre": tipo_descarte,
-            "motivo_cierre": motivo,
-            "fecha_cierre": datetime.now().isoformat()
+            "notas": notas
         }
 
         response = requests.patch(
