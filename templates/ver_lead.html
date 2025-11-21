@@ -587,16 +587,16 @@
                             <div class="oportunidad-detalles">
                                 <strong>Creada:</strong> {{ tarea.fecha_creacion[:10] if tarea.fecha_creacion else 'N/A' }}
 
-                                {% if tarea.estado == 'cerrada' and tarea.notas %}
-                                    {% for nota in tarea.notas %}
-                                        {% if nota.tipo == 'descarte' %}
-                                            <br><strong>Tipo de cierre:</strong> {{ nota.tipo_descarte|replace('_', ' ')|title }}
-                                            {% if nota.motivo %}
-                                                <br><strong>Motivo:</strong> {{ nota.motivo }}
-                                            {% endif %}
-                                            <br><strong>Cerrada:</strong> {{ nota.fecha[:10] }}
-                                        {% endif %}
-                                    {% endfor %}
+                                {% if tarea.estado == 'cerrada' %}
+                                    {% if tarea.tipo_cierre %}
+                                        <br><strong>Tipo de cierre:</strong> {{ tarea.tipo_cierre|replace('_', ' ')|title }}
+                                    {% endif %}
+                                    {% if tarea.motivo_cierre %}
+                                        <br><strong>Motivo:</strong> {{ tarea.motivo_cierre }}
+                                    {% endif %}
+                                    {% if tarea.fecha_cierre %}
+                                        <br><strong>Cerrada:</strong> {{ tarea.fecha_cierre[:10] }}
+                                    {% endif %}
                                 {% endif %}
 
                                 {% if tarea.aplazada_hasta %}
