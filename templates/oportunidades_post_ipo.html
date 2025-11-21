@@ -761,10 +761,12 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('✅ Tarea descartada exitosamente');
+                    // Cerrar modal primero
+                    cerrarModal('modalDescartar');
+                    // Recargar página
                     window.location.reload();
                 } else {
-                    alert('❌ Error al descartar tarea');
+                    alert('❌ Error al descartar tarea: ' + (data.error || 'Error desconocido'));
                 }
             } catch (error) {
                 console.error('Error:', error);
