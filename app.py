@@ -1868,8 +1868,14 @@ def oportunidades_post_ipo():
                     headers=HEADERS
                 ).json()
 
-                if not tarea_existe:
-                    # Crear tarea automáticamente
+                # Verificar si el cliente tiene tareas descartadas (para no crear nuevas)
+                tarea_descartada = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?cliente_id=eq.{cliente_id}&estado=eq.cerrada&tipo_cierre=not.is.null",
+                    headers=HEADERS
+                ).json()
+
+                if not tarea_existe and not tarea_descartada:
+                    # Crear tarea automáticamente solo si no hay tareas abiertas ni descartadas
                     nueva_tarea = {
                         'cliente_id': cliente_id,
                         'equipo_id': data['equipo_id'],
@@ -1920,8 +1926,14 @@ def oportunidades_post_ipo():
                     headers=HEADERS
                 ).json()
 
-                if not tarea_existe:
-                    # Crear tarea automáticamente
+                # Verificar si el cliente tiene tareas descartadas (para no crear nuevas)
+                tarea_descartada = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?cliente_id=eq.{cliente_id}&estado=eq.cerrada&tipo_cierre=not.is.null",
+                    headers=HEADERS
+                ).json()
+
+                if not tarea_existe and not tarea_descartada:
+                    # Crear tarea automáticamente solo si no hay tareas abiertas ni descartadas
                     nueva_tarea = {
                         'cliente_id': cliente_id,
                         'equipo_id': None,
@@ -1942,9 +1954,6 @@ def oportunidades_post_ipo():
             headers=HEADERS
         )
         tareas_data = tareas_response.json() if tareas_response.status_code == 200 else []
-
-        # Debug: verificar qué tareas se recuperan
-        print(f"[INFO] Tareas recuperadas: {len(tareas_data)}, IDs: {[t.get('id') for t in tareas_data]}", flush=True)
 
         # === 5. CLASIFICAR TAREAS ===
         tareas_abiertas = []
@@ -2117,34 +2126,18 @@ def tarea_comercial_descartar(tarea_id):
             "fecha_cierre": datetime.now().isoformat()
         }
 
-        print(f"[INFO] Intentando cerrar tarea {tarea_id}", flush=True)
-
         response = requests.patch(
             f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
             headers=HEADERS,
             json=data
         )
 
-        print(f"[INFO] Respuesta de Supabase: {response.status_code}", flush=True)
-
         if response.status_code in [200, 204]:
-            # Verificar que realmente se cerró
-            verify_response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
-                headers=HEADERS
-            )
-            if verify_response.status_code == 200:
-                tarea_actualizada = verify_response.json()
-                if tarea_actualizada:
-                    print(f"[INFO] Estado de tarea {tarea_id} después de cerrar: {tarea_actualizada[0].get('estado')}", flush=True)
-
             return {"success": True}, 200
         else:
-            print(f"[ERROR] Error al cerrar tarea: {response.text}", flush=True)
             return {"error": "Error al descartar tarea"}, 500
 
     except Exception as e:
-        print(f"[ERROR] Excepción: {str(e)}", flush=True)
         return {"error": str(e)}, 500
 
 
