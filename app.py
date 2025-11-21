@@ -4155,6 +4155,158 @@ def marcar_segunda_realizada(inspeccion_id):
 
     return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
+# Subir PDF de Acta
+@app.route("/inspecciones/<int:inspeccion_id>/subir_acta", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
+def subir_acta_pdf(inspeccion_id):
+    """Subir PDF del acta de inspección a Supabase Storage"""
+
+    if 'acta_pdf' not in request.files:
+        flash("No se seleccionó ningún archivo", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+    file = request.files['acta_pdf']
+
+    if file.filename == '':
+        flash("No se seleccionó ningún archivo", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+    # Validar que sea PDF
+    if not file.filename.lower().endswith('.pdf'):
+        flash("Solo se permiten archivos PDF", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+    try:
+        # Generar nombre de archivo único
+        file_name = f"inspeccion_{inspeccion_id}_acta.pdf"
+        file_path = f"inspecciones/{file_name}"
+
+        # Leer contenido del archivo
+        file_content = file.read()
+
+        # Subir a Supabase Storage (bucket: inspecciones-pdfs)
+        storage_headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/pdf",
+        }
+
+        # Primero intentar eliminar el archivo existente (si existe)
+        requests.delete(
+            f"{SUPABASE_URL}/storage/v1/object/inspecciones-pdfs/{file_path}",
+            headers=storage_headers
+        )
+
+        # Subir nuevo archivo
+        upload_response = requests.post(
+            f"{SUPABASE_URL}/storage/v1/object/inspecciones-pdfs/{file_path}",
+            data=file_content,
+            headers=storage_headers
+        )
+
+        if upload_response.status_code not in [200, 201]:
+            flash(f"Error al subir archivo: {upload_response.text}", "error")
+            return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+        # Obtener URL pública del archivo
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/inspecciones-pdfs/{file_path}"
+
+        # Actualizar base de datos con la URL
+        data = {"acta_pdf_url": public_url}
+
+        db_response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
+            json=data,
+            headers=HEADERS
+        )
+
+        if db_response.status_code in [200, 204]:
+            flash("Acta PDF subida correctamente", "success")
+        else:
+            flash("Archivo subido pero error al guardar en base de datos", "error")
+
+    except Exception as e:
+        flash(f"Error al procesar archivo: {str(e)}", "error")
+
+    return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+# Subir PDF de Presupuesto
+@app.route("/inspecciones/<int:inspeccion_id>/subir_presupuesto", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
+def subir_presupuesto_pdf(inspeccion_id):
+    """Subir PDF del presupuesto de inspección a Supabase Storage"""
+
+    if 'presupuesto_pdf' not in request.files:
+        flash("No se seleccionó ningún archivo", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+    file = request.files['presupuesto_pdf']
+
+    if file.filename == '':
+        flash("No se seleccionó ningún archivo", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+    # Validar que sea PDF
+    if not file.filename.lower().endswith('.pdf'):
+        flash("Solo se permiten archivos PDF", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+    try:
+        # Generar nombre de archivo único
+        file_name = f"inspeccion_{inspeccion_id}_presupuesto.pdf"
+        file_path = f"inspecciones/{file_name}"
+
+        # Leer contenido del archivo
+        file_content = file.read()
+
+        # Subir a Supabase Storage (bucket: inspecciones-pdfs)
+        storage_headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/pdf",
+        }
+
+        # Primero intentar eliminar el archivo existente (si existe)
+        requests.delete(
+            f"{SUPABASE_URL}/storage/v1/object/inspecciones-pdfs/{file_path}",
+            headers=storage_headers
+        )
+
+        # Subir nuevo archivo
+        upload_response = requests.post(
+            f"{SUPABASE_URL}/storage/v1/object/inspecciones-pdfs/{file_path}",
+            data=file_content,
+            headers=storage_headers
+        )
+
+        if upload_response.status_code not in [200, 201]:
+            flash(f"Error al subir archivo: {upload_response.text}", "error")
+            return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+        # Obtener URL pública del archivo
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/inspecciones-pdfs/{file_path}"
+
+        # Actualizar base de datos con la URL
+        data = {"presupuesto_pdf_url": public_url}
+
+        db_response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
+            json=data,
+            headers=HEADERS
+        )
+
+        if db_response.status_code in [200, 204]:
+            flash("Presupuesto PDF subido correctamente", "success")
+        else:
+            flash("Archivo subido pero error al guardar en base de datos", "error")
+
+    except Exception as e:
+        flash(f"Error al procesar archivo: {str(e)}", "error")
+
+    return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
 # Eliminar Inspección
 @app.route("/inspecciones/eliminar/<int:inspeccion_id>")
 @helpers.login_required
