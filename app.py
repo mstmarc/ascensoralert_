@@ -2114,18 +2114,25 @@ def tarea_comercial_descartar(tarea_id):
             "fecha_cierre": datetime.now().isoformat()
         }
 
+        print(f"[DEBUG] Descartando tarea {tarea_id} con data: {data}")
+
         response = requests.patch(
             f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
             headers=HEADERS,
             json=data
         )
 
+        print(f"[DEBUG] Respuesta Supabase: status={response.status_code}, body={response.text}")
+
         if response.status_code in [200, 204]:
             return {"success": True}, 200
         else:
-            return {"error": "Error al descartar tarea"}, 500
+            return {"error": f"Error al descartar tarea. Supabase respondió: {response.status_code} - {response.text}"}, 500
 
     except Exception as e:
+        print(f"[ERROR] Excepción en tarea_comercial_descartar: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {"error": str(e)}, 500
 
 
