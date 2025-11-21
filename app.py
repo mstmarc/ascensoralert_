@@ -1736,12 +1736,22 @@ def ver_lead(lead_id):
         if admin_response.status_code == 200 and admin_response.json():
             administrador = admin_response.json()[0]
 
+    # Obtener tareas comerciales del cliente (abiertas y cerradas)
+    tareas_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?cliente_id=eq.{lead_id}&order=fecha_creacion.desc",
+        headers=HEADERS
+    )
+    tareas_comerciales = []
+    if tareas_response.status_code == 200:
+        tareas_comerciales = tareas_response.json()
+
     return render_template("ver_lead.html",
         lead=lead,
         equipos=equipos,
         oportunidades=oportunidades,
         todas_visitas=todas_visitas,
-        administrador=administrador
+        administrador=administrador,
+        tareas_comerciales=tareas_comerciales
     )
 
 # Eliminar Lead
@@ -2097,30 +2107,11 @@ def tarea_comercial_descartar(tarea_id):
         tipo_descarte = request.json.get("tipo", "descartada_sin_interes")
         motivo = request.json.get("motivo", "")
 
-        # Obtener la tarea actual para acceder a las notas
-        tarea_response = requests.get(
-            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
-            headers=HEADERS
-        )
-
-        if tarea_response.status_code != 200:
-            return {"error": "No se encontró la tarea"}, 404
-
-        tarea = tarea_response.json()[0]
-        notas = tarea.get('notas', [])
-
-        # Agregar nota con el motivo del descarte
-        nota_descarte = {
-            "fecha": datetime.now().isoformat(),
-            "usuario": session.get("usuario", "Usuario"),
-            "texto": f"Tarea descartada - Tipo: {tipo_descarte}" + (f" - Motivo: {motivo}" if motivo else "")
-        }
-        notas.append(nota_descarte)
-
-        # Actualizar estado y notas
         data = {
             "estado": "cerrada",
-            "notas": notas
+            "tipo_cierre": tipo_descarte,
+            "motivo_cierre": motivo,
+            "fecha_cierre": datetime.now().isoformat()
         }
 
         response = requests.patch(
