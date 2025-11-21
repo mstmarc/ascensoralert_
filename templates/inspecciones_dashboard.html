@@ -613,8 +613,10 @@
                         <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-normal">
                             {% if item.fecha_segunda_realizada %}
                                 <span class="alerta-badge alerta-badge-normal">✅ SUBSANADO</span>
-                            {% else %}
+                            {% elif item.fecha_segunda_inspeccion %}
                                 <span class="alerta-badge alerta-badge-normal">SIN URGENCIA</span>
+                            {% else %}
+                                <span class="alerta-badge alerta-badge-normal">SIN FECHA</span>
                             {% endif %}
                             <div class="alerta-maquina">{{ item.maquina }}</div>
                             <div class="alerta-info">
@@ -622,16 +624,22 @@
                                     <div class="alerta-info-item">
                                         <strong>Verificado:</strong> <span>{{ item.fecha_segunda_realizada|format_fecha }}</span>
                                     </div>
-                                {% else %}
+                                {% elif item.fecha_segunda_inspeccion %}
                                     <div class="alerta-info-item">
                                         <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="alerta-info-item">
+                                        <strong>Inspección:</strong> <span>{{ item.fecha_inspeccion|format_fecha }}</span>
                                     </div>
                                 {% endif %}
                             </div>
                             {% if item.fecha_segunda_realizada %}
                                 <div class="alerta-dias normal">✅ Defectos subsanados</div>
-                            {% else %}
+                            {% elif item.fecha_segunda_inspeccion %}
                                 <div class="alerta-dias normal">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
+                            {% else %}
+                                <div class="alerta-dias normal">⚙️ Pendiente fecha límite</div>
                             {% endif %}
                         </a>
                     {% endfor %}
