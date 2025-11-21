@@ -568,6 +568,45 @@
                 </div>
             </div>
 
+            <!-- TAREAS DE GESTIÓN COMERCIAL -->
+            <div class="seccion">
+                <h2>Tareas de Gestión Comercial</h2>
+
+                {% if tareas_comerciales %}
+                    {% for tarea in tareas_comerciales %}
+                    <div class="oportunidad-item">
+                        <div class="oportunidad-info">
+                            <div class="oportunidad-header">
+                                <div class="oportunidad-tipo">
+                                    {{ tarea.motivo_creacion|replace('_', ' ')|title }}
+                                </div>
+                                <span class="oportunidad-estado" style="background: {% if tarea.estado == 'abierta' %}#28a745{% else %}#6c757d{% endif %}">
+                                    {{ tarea.estado|upper }}
+                                </span>
+                            </div>
+                            <div class="oportunidad-detalles">
+                                <strong>Creada:</strong> {{ tarea.fecha_creacion[:10] if tarea.fecha_creacion else 'N/A' }}
+                                {% if tarea.estado == 'cerrada' and tarea.tipo_cierre %}
+                                    <br><strong>Tipo de cierre:</strong> {{ tarea.tipo_cierre|replace('_', ' ')|title }}
+                                {% endif %}
+                                {% if tarea.estado == 'cerrada' and tarea.motivo_cierre %}
+                                    <br><strong>Motivo:</strong> {{ tarea.motivo_cierre }}
+                                {% endif %}
+                                {% if tarea.estado == 'cerrada' and tarea.fecha_cierre %}
+                                    <br><strong>Cerrada:</strong> {{ tarea.fecha_cierre[:10] }}
+                                {% endif %}
+                                {% if tarea.aplazada_hasta %}
+                                    <br><strong>Aplazada hasta:</strong> {{ tarea.aplazada_hasta }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="estado-vacio">No hay tareas de gestión comercial registradas</div>
+                {% endif %}
+            </div>
+
             <!-- BOTONES DE ACCIÓN -->
             <div class="botones-accion">
                 <a href="/editar_lead/{{ lead.id }}" class="btn">Editar Comunidad</a>

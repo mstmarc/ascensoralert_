@@ -1736,12 +1736,22 @@ def ver_lead(lead_id):
         if admin_response.status_code == 200 and admin_response.json():
             administrador = admin_response.json()[0]
 
+    # Obtener tareas comerciales del cliente (abiertas y cerradas)
+    tareas_response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?cliente_id=eq.{lead_id}&order=fecha_creacion.desc",
+        headers=HEADERS
+    )
+    tareas_comerciales = []
+    if tareas_response.status_code == 200:
+        tareas_comerciales = tareas_response.json()
+
     return render_template("ver_lead.html",
         lead=lead,
         equipos=equipos,
         oportunidades=oportunidades,
         todas_visitas=todas_visitas,
-        administrador=administrador
+        administrador=administrador,
+        tareas_comerciales=tareas_comerciales
     )
 
 # Eliminar Lead
