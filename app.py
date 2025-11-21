@@ -1943,6 +1943,9 @@ def oportunidades_post_ipo():
         )
         tareas_data = tareas_response.json() if tareas_response.status_code == 200 else []
 
+        # Debug: verificar qué tareas se recuperan
+        print(f"[INFO] Tareas recuperadas: {len(tareas_data)}, IDs: {[t.get('id') for t in tareas_data]}", flush=True)
+
         # === 5. CLASIFICAR TAREAS ===
         tareas_abiertas = []
         tareas_aplazadas = []
