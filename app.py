@@ -3902,8 +3902,6 @@ def nueva_inspeccion():
             "fecha_inspeccion": fecha_inspeccion_str,
             "fecha_segunda_inspeccion": fecha_segunda_inspeccion,
             "presupuesto": request.form.get("presupuesto") or "PENDIENTE",
-            "estado": request.form.get("estado") or "",
-            "estado_material": request.form.get("estado_material") or "",
 
             # OCA
             "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None,
@@ -4034,8 +4032,6 @@ def editar_inspeccion(inspeccion_id):
             "maquina": request.form.get("maquina"),
             "fecha_inspeccion": request.form.get("fecha_inspeccion"),
             "presupuesto": request.form.get("presupuesto") or "PENDIENTE",
-            "estado": request.form.get("estado") or "",
-            "estado_material": request.form.get("estado_material") or "",
             "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None
         }
 

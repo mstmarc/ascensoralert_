@@ -90,12 +90,6 @@
                 <option value="ACEPTADO" {% if inspeccion.presupuesto == 'ACEPTADO' %}selected{% endif %}>ACEPTADO</option>
             </select>
 
-            <label>ESTADO:</label>
-            <input type="text" name="estado" value="{{ inspeccion.estado }}" placeholder="Estado general (texto libre)">
-
-            <label>Estado del material:</label>
-            <input type="text" name="estado_material" value="{{ inspeccion.estado_material }}" placeholder="Estado del material (texto libre)">
-
             <label>OCA:</label>
             <select name="oca_id">
                 <option value="">-- Seleccionar OCA --</option>
