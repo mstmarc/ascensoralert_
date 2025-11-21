@@ -2114,18 +2114,34 @@ def tarea_comercial_descartar(tarea_id):
             "fecha_cierre": datetime.now().isoformat()
         }
 
+        print(f"[INFO] Intentando cerrar tarea {tarea_id}", flush=True)
+
         response = requests.patch(
             f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
             headers=HEADERS,
             json=data
         )
 
+        print(f"[INFO] Respuesta de Supabase: {response.status_code}", flush=True)
+
         if response.status_code in [200, 204]:
+            # Verificar que realmente se cerró
+            verify_response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+                headers=HEADERS
+            )
+            if verify_response.status_code == 200:
+                tarea_actualizada = verify_response.json()
+                if tarea_actualizada:
+                    print(f"[INFO] Estado de tarea {tarea_id} después de cerrar: {tarea_actualizada[0].get('estado')}", flush=True)
+
             return {"success": True}, 200
         else:
+            print(f"[ERROR] Error al cerrar tarea: {response.text}", flush=True)
             return {"error": "Error al descartar tarea"}, 500
 
     except Exception as e:
+        print(f"[ERROR] Excepción: {str(e)}", flush=True)
         return {"error": str(e)}, 500
 
 
