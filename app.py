@@ -4050,9 +4050,26 @@ def editar_inspeccion(inspeccion_id):
 
     if request.method == "POST":
         # Recoger datos del formulario
+        fecha_inspeccion_str = request.form.get("fecha_inspeccion")
+
+        # Calcular fecha de segunda inspección (6 meses después)
+        fecha_segunda_inspeccion = None
+        if fecha_inspeccion_str:
+            try:
+                fecha_insp = datetime.strptime(fecha_inspeccion_str, '%Y-%m-%d')
+                # Sumar 6 meses
+                mes_segunda = fecha_insp.month + 6
+                anio_segunda = fecha_insp.year + (mes_segunda - 1) // 12
+                mes_segunda = ((mes_segunda - 1) % 12) + 1
+                fecha_segunda = fecha_insp.replace(year=anio_segunda, month=mes_segunda)
+                fecha_segunda_inspeccion = fecha_segunda.strftime('%Y-%m-%d')
+            except:
+                pass
+
         data = {
             "maquina": request.form.get("maquina"),
-            "fecha_inspeccion": request.form.get("fecha_inspeccion"),
+            "fecha_inspeccion": fecha_inspeccion_str,
+            "fecha_segunda_inspeccion": fecha_segunda_inspeccion,
             "presupuesto": request.form.get("presupuesto") or "PENDIENTE",
             "oca_id": int(request.form.get("oca_id")) if request.form.get("oca_id") else None
         }
