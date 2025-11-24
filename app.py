@@ -4223,7 +4223,8 @@ def subir_acta_pdf(inspeccion_id):
         if db_response.status_code in [200, 204]:
             flash("Acta PDF subida correctamente", "success")
         else:
-            flash("Archivo subido pero error al guardar en base de datos", "error")
+            error_detail = db_response.text
+            flash(f"Archivo subido pero error al guardar en base de datos: {error_detail}", "error")
 
     except Exception as e:
         flash(f"Error al procesar archivo: {str(e)}", "error")
@@ -4298,7 +4299,8 @@ def subir_presupuesto_pdf(inspeccion_id):
         if db_response.status_code in [200, 204]:
             flash("Presupuesto PDF subido correctamente", "success")
         else:
-            flash("Archivo subido pero error al guardar en base de datos", "error")
+            error_detail = db_response.text
+            flash(f"Archivo subido pero error al guardar en base de datos: {error_detail}", "error")
 
     except Exception as e:
         flash(f"Error al procesar archivo: {str(e)}", "error")
