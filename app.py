@@ -4491,23 +4491,61 @@ def extraer_descripciones_pdf(pdf_content):
                     logger.info(" No se encontraron tablas, intentando extracción de texto")
                     text = page.extract_text()
                     if text:
-                        # Buscar líneas que parezcan items del presupuesto
-                        # Típicamente: código numérico seguido de descripción
                         lines = text.split('\n')
                         for line in lines:
                             line = line.strip()
-                            # Buscar patrón: número al inicio (código)
-                            if line and len(line) > 10:
-                                parts = line.split(None, 1)  # Separar por primer espacio
-                                if len(parts) == 2:
-                                    possible_code = parts[0]
-                                    possible_desc = parts[1]
-                                    # Si el primer elemento parece un código numérico
-                                    if any(char.isdigit() for char in possible_code):
-                                        descripciones.append({
-                                            'codigo': possible_code,
-                                            'descripcion': possible_desc
-                                        })
+
+                            if not line or len(line) < 10:
+                                continue
+
+                            # Buscar líneas que empiezan con código numérico (8-10 dígitos)
+                            parts = line.split(None, 1)
+                            if len(parts) < 2:
+                                continue
+
+                            possible_code = parts[0]
+                            descripcion = parts[1]
+
+                            # Código debe ser numérico de 8-11 dígitos
+                            if not (possible_code.isdigit() and 8 <= len(possible_code) <= 11):
+                                continue
+
+                            # Aplicar MISMA LIMPIEZA que Estrategia 1
+                            import re
+
+                            logger.info(f" Antes de limpiar: {descripcion[:100]}")
+
+                            # Cortar en el primer número decimal
+                            match = re.search(r'\s+\d+[,\.]?\d*', descripcion)
+                            if match:
+                                descripcion = descripcion[:match.start()].strip()
+                                logger.info(f" Después de cortar: {descripcion[:100]}")
+
+                            # Eliminar números al final
+                            descripcion = re.sub(r'\s+[\d\.,\s]+$', '', descripcion)
+                            descripcion = descripcion.strip()
+
+                            # APLICAR MISMAS VALIDACIONES que Estrategia 1
+                            if len(descripcion) < 10:
+                                continue
+
+                            if any(x in descripcion for x in ['Descripción', 'Cód.', 'Cant.', 'Precio', 'Total', 'INSTALACIÓN']):
+                                continue
+
+                            if descripcion.startswith(('C/', 'Calle', 'Avda')):
+                                continue
+
+                            if not any(c.isalpha() for c in descripcion):
+                                continue
+
+                            if len(descripcion.split()) < 3:
+                                continue
+
+                            logger.info(f" ✓ Añadiendo: {descripcion[:70]}...")
+                            descripciones.append({
+                                'codigo': possible_code,
+                                'descripcion': descripcion
+                            })
 
         logger.info(f" Total descripciones extraídas: {len(descripciones)}")
 
