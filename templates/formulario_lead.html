@@ -376,23 +376,15 @@
         const datalist = document.getElementById('administradores-list');
 
         if (searchInput && hiddenInput && datalist) {
-            console.log('=== Selector administrador inicializado ===');
-            console.log('Opciones en datalist:', datalist.options.length);
-
             function syncAdministrador() {
-                console.log('Sincronizando administrador, valor:', searchInput.value);
                 const selectedOption = Array.from(datalist.options).find(
                     option => option.value === searchInput.value
                 );
 
                 if (selectedOption) {
                     hiddenInput.value = selectedOption.dataset.id;
-                    console.log('  ✓ ID asignado:', selectedOption.dataset.id);
-                } else {
-                    console.log('  ✗ No match encontrado');
-                    if (!hiddenInput.value) {
-                        hiddenInput.value = '';
-                    }
+                } else if (!hiddenInput.value) {
+                    hiddenInput.value = '';
                 }
             }
 
@@ -400,7 +392,6 @@
             searchInput.addEventListener('input', syncAdministrador);
             searchInput.addEventListener('change', syncAdministrador);
             searchInput.addEventListener('blur', function() {
-                console.log('Blur event');
                 setTimeout(syncAdministrador, 100);
             });
         }

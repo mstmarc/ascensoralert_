@@ -316,30 +316,16 @@
         const datalist = document.getElementById('administradores-list');
         const form = document.querySelector('form');
 
-        console.log('=== Inicialización del formulario ===');
-        console.log('searchInput:', searchInput);
-        console.log('hiddenInput:', hiddenInput);
-        console.log('datalist opciones:', datalist.options.length);
-
         function syncAdministradorFields() {
-            console.log('syncAdministradorFields() llamado');
-            console.log('  Valor actual del searchInput:', searchInput.value);
-
             const selectedOption = Array.from(datalist.options).find(
                 option => option.value === searchInput.value
             );
 
             if (selectedOption) {
                 hiddenInput.value = selectedOption.dataset.id;
-                console.log('  ✓ Administrador seleccionado:', searchInput.value, 'ID:', selectedOption.dataset.id);
-            } else {
-                console.log('  ✗ No se encontró opción matching para:', searchInput.value);
-                // Si no hay match pero el usuario estaba escribiendo, limpiar
-                if (searchInput.value && !hiddenInput.value) {
-                    hiddenInput.value = '';
-                }
+            } else if (searchInput.value && !hiddenInput.value) {
+                hiddenInput.value = '';
             }
-            console.log('  Valor final de hiddenInput:', hiddenInput.value);
         }
 
         // Sincronizar cuando el usuario cambia el campo (múltiples eventos)
@@ -347,42 +333,31 @@
         searchInput.addEventListener('change', syncAdministradorFields);
         // Importante: el evento 'blur' captura cuando se selecciona del datalist con click
         searchInput.addEventListener('blur', function() {
-            console.log('Evento blur disparado');
-            setTimeout(syncAdministradorFields, 100); // Pequeño delay para que se complete la selección
+            setTimeout(syncAdministradorFields, 100);
         });
 
         // Si hay administrador_id pre-cargado, buscar el nombre en la lista
         if (hiddenInput.value) {
-            const adminId = hiddenInput.value;
-            console.log('Administrador pre-cargado con ID:', adminId);
             const matchingOption = Array.from(datalist.options).find(
-                option => option.dataset.id === adminId
+                option => option.dataset.id === hiddenInput.value
             );
             if (matchingOption) {
                 searchInput.value = matchingOption.value;
-                console.log('  ✓ Nombre encontrado:', matchingOption.value);
             }
         }
 
         // Sincronizar al cargar la página si ya hay un valor en el campo de búsqueda
         if (searchInput.value) {
-            console.log('Sincronizando valor inicial:', searchInput.value);
             syncAdministradorFields();
         }
 
         // Validar antes de enviar el formulario
         form.addEventListener('submit', function(e) {
-            console.log('\n=== Enviando formulario ===');
-            console.log('administrador_search:', searchInput.value);
-            console.log('administrador_id:', hiddenInput.value);
-
             if (!hiddenInput.value) {
                 e.preventDefault();
                 alert('Por favor selecciona un administrador de la lista');
-                console.log('  ✗ Formulario bloqueado: administrador_id vacío');
                 return false;
             }
-            console.log('  ✓ Validación OK, enviando formulario');
         });
     </script>    <!-- Inyectar permisos del usuario para JavaScript -->
     <script>
