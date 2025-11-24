@@ -4340,53 +4340,110 @@ def extraer_descripciones_pdf(pdf_content):
         pdf_file = io.BytesIO(pdf_content)
 
         with pdfplumber.open(pdf_file) as pdf:
-            for page in pdf.pages:
-                # Extraer tablas de la página
-                tables = page.extract_tables()
+            for page_num, page in enumerate(pdf.pages):
+                print(f"DEBUG: Procesando página {page_num + 1}")
 
-                for table in tables:
-                    # La primera fila suele ser el header (Cód., Descripción, Cant., Precio, etc.)
-                    # Buscar la fila del header para identificar columnas
-                    header_row = None
-                    data_start = 0
+                # Estrategia 1: Extraer tablas con configuración específica
+                tables = page.extract_tables(table_settings={
+                    "vertical_strategy": "lines",
+                    "horizontal_strategy": "lines",
+                    "snap_tolerance": 3,
+                })
 
-                    for i, row in enumerate(table):
-                        # Buscar fila con "Descripción" o similar
-                        if row and any(cell and 'Descripción' in str(cell) for cell in row):
-                            header_row = row
-                            data_start = i + 1
-                            break
+                if tables:
+                    print(f"DEBUG: Encontradas {len(tables)} tablas en página {page_num + 1}")
 
-                    # Si no encontramos header, asumir que las primeras 2 columnas son Cód. y Descripción
-                    if not header_row and table:
-                        # Intentar extraer desde la primera fila de datos
-                        for row in table[1:]:  # Saltar primera fila (header)
-                            if row and len(row) >= 2:
-                                codigo = str(row[0]).strip() if row[0] else ""
-                                descripcion = str(row[1]).strip() if row[1] else ""
+                    for table_idx, table in enumerate(tables):
+                        print(f"DEBUG: Tabla {table_idx + 1} tiene {len(table)} filas")
 
-                                # Filtrar filas vacías o que no parezcan descripciones
-                                if descripcion and len(descripcion) > 10 and not descripcion.startswith('ORDEN:'):
-                                    descripciones.append({
-                                        'codigo': codigo,
-                                        'descripcion': descripcion
-                                    })
-                    else:
-                        # Extraer datos usando el header identificado
+                        # Buscar índice de columnas Código y Descripción
+                        codigo_idx = None
+                        descripcion_idx = None
+                        data_start = 0
+
+                        for i, row in enumerate(table):
+                            if not row:
+                                continue
+
+                            # Buscar header
+                            for j, cell in enumerate(row):
+                                cell_str = str(cell).strip().lower() if cell else ""
+                                if 'cód' in cell_str or 'codigo' in cell_str:
+                                    codigo_idx = j
+                                if 'descripción' in cell_str or 'descripcion' in cell_str:
+                                    descripcion_idx = j
+
+                            if codigo_idx is not None and descripcion_idx is not None:
+                                data_start = i + 1
+                                print(f"DEBUG: Header encontrado en fila {i}, Código col={codigo_idx}, Descripción col={descripcion_idx}")
+                                break
+
+                        # Si no encontramos header, asumir primeras 2 columnas
+                        if codigo_idx is None or descripcion_idx is None:
+                            print("DEBUG: Header no encontrado, asumiendo columnas 0 y 1")
+                            codigo_idx = 0
+                            descripcion_idx = 1
+                            data_start = 1  # Saltar primera fila que probablemente sea header
+
+                        # Extraer datos
                         for row in table[data_start:]:
-                            if row and len(row) >= 2:
-                                codigo = str(row[0]).strip() if row[0] else ""
-                                descripcion = str(row[1]).strip() if row[1] else ""
+                            if not row or len(row) <= max(codigo_idx, descripcion_idx):
+                                continue
 
-                                # Filtrar filas vacías o que no parezcan descripciones
-                                if descripcion and len(descripcion) > 10 and not descripcion.startswith('ORDEN:'):
+                            codigo = str(row[codigo_idx]).strip() if row[codigo_idx] else ""
+                            descripcion_raw = str(row[descripcion_idx]).strip() if row[descripcion_idx] else ""
+
+                            # Limpiar descripción
+                            # Eliminar líneas que empiezan con "ORDEN:" pero mantener el resto
+                            lineas = descripcion_raw.split('\n')
+                            descripcion_limpia = []
+                            for linea in lineas:
+                                linea = linea.strip()
+                                if not linea.startswith('ORDEN:') and linea:
+                                    descripcion_limpia.append(linea)
+
+                            descripcion = ' '.join(descripcion_limpia)
+
+                            # Validar que sea una descripción válida
+                            # Eliminar filtros muy restrictivos
+                            if descripcion and len(descripcion) > 5:
+                                # Evitar líneas que son solo el header repetido
+                                if 'Descripción' not in descripcion and 'PRESUPUESTO' not in descripcion:
+                                    print(f"DEBUG: Añadiendo: {codigo[:20]}... | {descripcion[:50]}...")
                                     descripciones.append({
                                         'codigo': codigo,
                                         'descripcion': descripcion
                                     })
+
+                # Estrategia 2: Si no encontró tablas, intentar extracción de texto
+                if not tables:
+                    print("DEBUG: No se encontraron tablas, intentando extracción de texto")
+                    text = page.extract_text()
+                    if text:
+                        # Buscar líneas que parezcan items del presupuesto
+                        # Típicamente: código numérico seguido de descripción
+                        lines = text.split('\n')
+                        for line in lines:
+                            line = line.strip()
+                            # Buscar patrón: número al inicio (código)
+                            if line and len(line) > 10:
+                                parts = line.split(None, 1)  # Separar por primer espacio
+                                if len(parts) == 2:
+                                    possible_code = parts[0]
+                                    possible_desc = parts[1]
+                                    # Si el primer elemento parece un código numérico
+                                    if any(char.isdigit() for char in possible_code):
+                                        descripciones.append({
+                                            'codigo': possible_code,
+                                            'descripcion': possible_desc
+                                        })
+
+        print(f"DEBUG: Total descripciones extraídas: {len(descripciones)}")
 
     except Exception as e:
         print(f"Error al extraer descripciones del PDF: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise
 
     return descripciones
