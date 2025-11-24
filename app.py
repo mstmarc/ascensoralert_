@@ -839,22 +839,39 @@ def visita_administrador():
             print(f"  ✗ administrador_id está vacío o None")
             flash(f"❌ administrador_id está vacío o None", "error")
 
+        # Validación: fecha y administrador son obligatorios
+        if not request.form.get("fecha_visita") or not administrador_id:
+            print(f"  ✗ VALIDACIÓN FALLÓ: fecha_visita={request.form.get('fecha_visita')}, administrador_id={administrador_id}")
+            flash(f"⛔ VALIDACIÓN FALLÓ - Fecha y Administrador son obligatorios", "error")
+            return redirect(request.referrer)
+
+        # Buscar el nombre del administrador para el campo administrador_fincas (NOT NULL en BD)
+        administrador_nombre = None
+        if administrador_id:
+            admin_response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/administradores_fincas?id=eq.{administrador_id}&select=nombre_empresa",
+                headers=HEADERS
+            )
+            if admin_response.status_code == 200 and admin_response.json():
+                administrador_nombre = admin_response.json()[0].get("nombre_empresa")
+                print(f"  ✓ Nombre del administrador encontrado: {administrador_nombre}")
+                flash(f"✅ Nombre encontrado: {administrador_nombre}", "error")
+            else:
+                print(f"  ✗ No se encontró el administrador con ID {administrador_id}")
+                flash(f"❌ No se encontró el administrador con ID {administrador_id}", "error")
+                return redirect(request.referrer)
+
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
             "administrador_id": administrador_id,
+            "administrador_fincas": administrador_nombre,  # Campo NOT NULL en BD
             "persona_contacto": request.form.get("persona_contacto") or None,
             "observaciones": request.form.get("observaciones") or None,
             "oportunidad_id": int(request.form.get("oportunidad_id")) if request.form.get("oportunidad_id") else None
         }
 
         print(f"Data a enviar a la BD: {data}")
-        flash(f"📦 Data a enviar: fecha={data['fecha_visita']}, admin_id={data['administrador_id']}", "error")
-
-        # Validación: fecha y administrador son obligatorios
-        if not data["fecha_visita"] or not data["administrador_id"]:
-            print(f"  ✗ VALIDACIÓN FALLÓ: fecha_visita={data['fecha_visita']}, administrador_id={data['administrador_id']}")
-            flash(f"⛔ VALIDACIÓN FALLÓ - Fecha: {data['fecha_visita']}, Admin ID: {data['administrador_id']}", "error")
-            return redirect(request.referrer)
+        flash(f"📦 Data a enviar: fecha={data['fecha_visita']}, admin_id={data['administrador_id']}, nombre={data['administrador_fincas']}", "error")
 
         response = requests.post(f"{SUPABASE_URL}/rest/v1/visitas_administradores", json=data, headers=HEADERS)
         print(f"Respuesta de Supabase: status_code={response.status_code}")
@@ -948,9 +965,20 @@ def editar_visita_admin(visita_id):
         else:
             administrador_id = None
 
+        # Buscar el nombre del administrador para el campo administrador_fincas (NOT NULL en BD)
+        administrador_nombre = None
+        if administrador_id:
+            admin_response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/administradores_fincas?id=eq.{administrador_id}&select=nombre_empresa",
+                headers=HEADERS
+            )
+            if admin_response.status_code == 200 and admin_response.json():
+                administrador_nombre = admin_response.json()[0].get("nombre_empresa")
+
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
             "administrador_id": administrador_id,
+            "administrador_fincas": administrador_nombre,  # Campo NOT NULL en BD
             "persona_contacto": request.form.get("persona_contacto") or None,
             "observaciones": request.form.get("observaciones") or None
         }
