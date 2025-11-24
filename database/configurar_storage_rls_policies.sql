@@ -21,26 +21,26 @@ ON storage.objects FOR SELECT
 TO public
 USING (bucket_id = 'inspecciones-pdfs');
 
--- Política de ESCRITURA (INSERT): Solo usuarios autenticados pueden subir
+-- Política de ESCRITURA (INSERT): Permite subir con anon, authenticated o service_role
 CREATE POLICY "Permitir subida de PDFs a usuarios autenticados"
 ON storage.objects FOR INSERT
-TO authenticated
+TO public
 WITH CHECK (
     bucket_id = 'inspecciones-pdfs' AND
     (storage.foldername(name))[1] = 'inspecciones'
 );
 
--- Política de ACTUALIZACIÓN (UPDATE): Solo usuarios autenticados pueden actualizar
+-- Política de ACTUALIZACIÓN (UPDATE): Permite actualizar con anon, authenticated o service_role
 CREATE POLICY "Permitir actualización de PDFs a usuarios autenticados"
 ON storage.objects FOR UPDATE
-TO authenticated
+TO public
 USING (bucket_id = 'inspecciones-pdfs')
 WITH CHECK (bucket_id = 'inspecciones-pdfs');
 
--- Política de ELIMINACIÓN (DELETE): Solo usuarios autenticados pueden eliminar
+-- Política de ELIMINACIÓN (DELETE): Permite eliminar con anon, authenticated o service_role
 CREATE POLICY "Permitir eliminación de PDFs a usuarios autenticados"
 ON storage.objects FOR DELETE
-TO authenticated
+TO public
 USING (bucket_id = 'inspecciones-pdfs');
 
 -- ============================================
