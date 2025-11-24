@@ -133,7 +133,7 @@
                         <div class="lead-list-content">
                             <div class="lead-list-direccion lead-list-direccion--static">📅 {{ visita.fecha_visita }}</div>
                             <div class="lead-list-info lead-list-info--left">
-                                <span class="lead-list-info-item">Administrador: {{ visita.administradores_fincas.nombre_empresa if visita.administradores_fincas else '-' }}</span>
+                                <span class="lead-list-info-item">Administrador: {{ visita.administradores.nombre_empresa if visita.administradores else '-' }}</span>
                                 <span class="lead-list-info-item lead-list-info-item--grow">Observaciones: {{ visita.observaciones or '-' }}</span>
                             </div>
                         </div>

@@ -917,7 +917,7 @@ def visitas_administradores_dashboard():
     total_pages = max(1, (total_registros + per_page - 1) // per_page)
 
     # OPTIMIZACIÓN: Seleccionar campos específicos con JOIN a administradores
-    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,administradores_fincas(nombre_empresa),persona_contacto,observaciones,oportunidad_id&order=fecha_visita.desc&limit={per_page}&offset={offset}"
+    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,administradores(nombre_empresa),persona_contacto,observaciones,oportunidad_id&order=fecha_visita.desc&limit={per_page}&offset={offset}"
     response = requests.get(data_url, headers=HEADERS)
     
     if response.status_code != 200:
