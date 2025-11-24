@@ -810,15 +810,27 @@ def visita_administrador():
             oportunidad_data = oportunidad_response.json()[0]
 
     if request.method == "POST":
+        # Debug: Ver datos recibidos del formulario
+        print("\n=== DEBUG POST /visita_administrador ===")
+        print(f"Datos del formulario recibidos:")
+        print(f"  fecha_visita: '{request.form.get('fecha_visita')}'")
+        print(f"  administrador_id (raw): '{request.form.get('administrador_id')}'")
+        print(f"  persona_contacto: '{request.form.get('persona_contacto')}'")
+        print(f"  observaciones: '{request.form.get('observaciones')}'")
+        print(f"  oportunidad_id: '{request.form.get('oportunidad_id')}'")
+
         # Obtener administrador_id y convertir a int o None
         administrador_id = request.form.get("administrador_id")
         if administrador_id and administrador_id.strip():
             try:
                 administrador_id = int(administrador_id)
+                print(f"  ✓ administrador_id convertido a int: {administrador_id}")
             except ValueError:
                 administrador_id = None
+                print(f"  ✗ Error al convertir administrador_id a int")
         else:
             administrador_id = None
+            print(f"  ✗ administrador_id está vacío o None")
 
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
@@ -828,12 +840,21 @@ def visita_administrador():
             "oportunidad_id": int(request.form.get("oportunidad_id")) if request.form.get("oportunidad_id") else None
         }
 
+        print(f"Data a enviar a la BD: {data}")
+
         # Validación: fecha y administrador son obligatorios
         if not data["fecha_visita"] or not data["administrador_id"]:
+            print(f"  ✗ VALIDACIÓN FALLÓ: fecha_visita={data['fecha_visita']}, administrador_id={data['administrador_id']}")
             flash("Fecha y Administrador son obligatorios", "error")
             return redirect(request.referrer)
 
         response = requests.post(f"{SUPABASE_URL}/rest/v1/visitas_administradores", json=data, headers=HEADERS)
+        print(f"Respuesta de Supabase: status_code={response.status_code}")
+        if response.status_code not in [200, 201]:
+            print(f"  ✗ Error: {response.text}")
+        else:
+            print(f"  ✓ Visita creada exitosamente")
+
         if response.status_code in [200, 201]:
             # Si viene de una oportunidad, volver a la oportunidad
             if data["oportunidad_id"]:
