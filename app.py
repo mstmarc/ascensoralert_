@@ -4404,6 +4404,19 @@ def extraer_descripciones_pdf(pdf_content):
 
                             descripcion = ' '.join(descripcion_limpia)
 
+                            # ===== LIMPIEZA AGRESIVA DE NÚMEROS =====
+                            import re
+
+                            # Eliminar TODO después del primer número con coma decimal (1,00 1.300,00 etc)
+                            # Esto corta donde empiezan los precios/cantidades
+                            match = re.search(r'\d+,\d+', descripcion)
+                            if match:
+                                descripcion = descripcion[:match.start()].strip()
+
+                            # También eliminar patrones de números al final
+                            descripcion = re.sub(r'\s+[\d\.,\s]+$', '', descripcion)
+                            descripcion = descripcion.strip()
+
                             # ===== VALIDACIONES ESTRICTAS =====
                             # 1. Longitud mínima
                             if not descripcion or len(descripcion) < 10:
@@ -4424,13 +4437,7 @@ def extraer_descripciones_pdf(pdf_content):
                                 if numeros_count >= len(palabras) * 0.6:  # 60%+ son números
                                     continue
 
-                            # 5. Limpiar números al final (precios, cantidades)
-                            import re
-                            # Eliminar números con separadores (. , espacios) al final
-                            descripcion = re.sub(r'\s+[\d\.,\s]+$', '', descripcion)
-                            descripcion = descripcion.strip()
-
-                            # Volver a validar longitud después de limpiar
+                            # 5. Volver a validar longitud después de limpiar
                             if len(descripcion) < 10:
                                 continue
 
