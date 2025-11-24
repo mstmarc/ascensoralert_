@@ -271,9 +271,29 @@
     </style>
 </head>
 <body>
-    {% include 'header.html' %}
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
 
     <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div style="background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                          color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                          padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         <h1 class="page-title">Importar Defectos desde PDF</h1>
         <p class="subtitle">Revisa las descripciones extraídas y clasifícalas antes de guardar</p>
 
@@ -422,6 +442,6 @@
         });
     </script>
 
-    {% include 'footer.html' %}
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
 </html>
