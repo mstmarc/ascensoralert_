@@ -4404,16 +4404,47 @@ def extraer_descripciones_pdf(pdf_content):
 
                             descripcion = ' '.join(descripcion_limpia)
 
-                            # Validar que sea una descripción válida
-                            # Eliminar filtros muy restrictivos
-                            if descripcion and len(descripcion) > 5:
-                                # Evitar líneas que son solo el header repetido
-                                if 'Descripción' not in descripcion and 'PRESUPUESTO' not in descripcion:
-                                    print(f"DEBUG: Añadiendo: {codigo[:20]}... | {descripcion[:50]}...")
-                                    descripciones.append({
-                                        'codigo': codigo,
-                                        'descripcion': descripcion
-                                    })
+                            # ===== VALIDACIONES ESTRICTAS =====
+                            # 1. Longitud mínima
+                            if not descripcion or len(descripcion) < 10:
+                                continue
+
+                            # 2. Filtrar headers repetidos
+                            if any(x in descripcion for x in ['Descripción', 'PRESUPUESTO', 'Cód.', 'Cant.', 'Precio', 'Total', '% Igic', 'INSTALACIÓN']):
+                                continue
+
+                            # 3. Filtrar direcciones (empiezan con C/, Calle, Avenida, etc.)
+                            if descripcion.startswith(('C/', 'Calle', 'Avenida', 'Avda', 'c/', 'calle', 'C /')):
+                                continue
+
+                            # 4. Filtrar líneas que son mayormente números (totales, impuestos)
+                            palabras = descripcion.split()
+                            if len(palabras) <= 4:  # Líneas cortas tipo "7% 339,50 5.189,47"
+                                numeros_count = sum(1 for p in palabras if any(c.isdigit() for c in p) or '%' in p)
+                                if numeros_count >= len(palabras) * 0.6:  # 60%+ son números
+                                    continue
+
+                            # 5. Limpiar números al final (precios, cantidades)
+                            import re
+                            # Eliminar números con separadores (. , espacios) al final
+                            descripcion = re.sub(r'\s+[\d\.,\s]+$', '', descripcion)
+                            descripcion = descripcion.strip()
+
+                            # Volver a validar longitud después de limpiar
+                            if len(descripcion) < 10:
+                                continue
+
+                            # 6. La descripción debe contener letras (no solo números/símbolos)
+                            if not any(c.isalpha() for c in descripcion):
+                                continue
+
+                            # NOTA: No validamos el código ya que no es necesario
+                            # Guardamos código si existe, o vacío si no
+                            print(f"DEBUG: ✓ Añadiendo: {descripcion[:70]}...")
+                            descripciones.append({
+                                'codigo': codigo if codigo else "",
+                                'descripcion': descripcion
+                            })
 
                 # Estrategia 2: Si no encontró tablas, intentar extracción de texto
                 if not tables:
