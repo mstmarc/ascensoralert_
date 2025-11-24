@@ -813,24 +813,31 @@ def visita_administrador():
         # Debug: Ver datos recibidos del formulario
         print("\n=== DEBUG POST /visita_administrador ===")
         print(f"Datos del formulario recibidos:")
+        admin_id_raw = request.form.get('administrador_id')
         print(f"  fecha_visita: '{request.form.get('fecha_visita')}'")
-        print(f"  administrador_id (raw): '{request.form.get('administrador_id')}'")
+        print(f"  administrador_id (raw): '{admin_id_raw}'")
         print(f"  persona_contacto: '{request.form.get('persona_contacto')}'")
         print(f"  observaciones: '{request.form.get('observaciones')}'")
         print(f"  oportunidad_id: '{request.form.get('oportunidad_id')}'")
 
+        # Debug VISIBLE para el usuario en el navegador
+        flash(f"🔍 DEBUG: administrador_id recibido del formulario = '{admin_id_raw}' (tipo: {type(admin_id_raw).__name__})", "error")
+
         # Obtener administrador_id y convertir a int o None
-        administrador_id = request.form.get("administrador_id")
+        administrador_id = admin_id_raw
         if administrador_id and administrador_id.strip():
             try:
                 administrador_id = int(administrador_id)
                 print(f"  ✓ administrador_id convertido a int: {administrador_id}")
+                flash(f"✅ administrador_id convertido a int: {administrador_id}", "error")
             except ValueError:
                 administrador_id = None
                 print(f"  ✗ Error al convertir administrador_id a int")
+                flash(f"❌ Error al convertir administrador_id a int", "error")
         else:
             administrador_id = None
             print(f"  ✗ administrador_id está vacío o None")
+            flash(f"❌ administrador_id está vacío o None", "error")
 
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
@@ -841,11 +848,12 @@ def visita_administrador():
         }
 
         print(f"Data a enviar a la BD: {data}")
+        flash(f"📦 Data a enviar: fecha={data['fecha_visita']}, admin_id={data['administrador_id']}", "error")
 
         # Validación: fecha y administrador son obligatorios
         if not data["fecha_visita"] or not data["administrador_id"]:
             print(f"  ✗ VALIDACIÓN FALLÓ: fecha_visita={data['fecha_visita']}, administrador_id={data['administrador_id']}")
-            flash("Fecha y Administrador son obligatorios", "error")
+            flash(f"⛔ VALIDACIÓN FALLÓ - Fecha: {data['fecha_visita']}, Admin ID: {data['administrador_id']}", "error")
             return redirect(request.referrer)
 
         response = requests.post(f"{SUPABASE_URL}/rest/v1/visitas_administradores", json=data, headers=HEADERS)
