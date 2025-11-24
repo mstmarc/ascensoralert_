@@ -10,6 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
+import pdfplumber
 import helpers
 
 app = Flask(__name__)
@@ -4325,6 +4326,243 @@ def eliminar_inspeccion(inspeccion_id):
     else:
         flash("Error al eliminar inspección", "error")
         return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+# Función auxiliar para extraer descripciones de PDF de presupuesto
+def extraer_descripciones_pdf(pdf_content):
+    """
+    Extrae las descripciones de la tabla del PDF de presupuesto FEDES.
+    Retorna una lista de diccionarios con: codigo, descripcion
+    """
+    descripciones = []
+
+    try:
+        # Crear objeto PDF desde bytes
+        pdf_file = io.BytesIO(pdf_content)
+
+        with pdfplumber.open(pdf_file) as pdf:
+            for page in pdf.pages:
+                # Extraer tablas de la página
+                tables = page.extract_tables()
+
+                for table in tables:
+                    # La primera fila suele ser el header (Cód., Descripción, Cant., Precio, etc.)
+                    # Buscar la fila del header para identificar columnas
+                    header_row = None
+                    data_start = 0
+
+                    for i, row in enumerate(table):
+                        # Buscar fila con "Descripción" o similar
+                        if row and any(cell and 'Descripción' in str(cell) for cell in row):
+                            header_row = row
+                            data_start = i + 1
+                            break
+
+                    # Si no encontramos header, asumir que las primeras 2 columnas son Cód. y Descripción
+                    if not header_row and table:
+                        # Intentar extraer desde la primera fila de datos
+                        for row in table[1:]:  # Saltar primera fila (header)
+                            if row and len(row) >= 2:
+                                codigo = str(row[0]).strip() if row[0] else ""
+                                descripcion = str(row[1]).strip() if row[1] else ""
+
+                                # Filtrar filas vacías o que no parezcan descripciones
+                                if descripcion and len(descripcion) > 10 and not descripcion.startswith('ORDEN:'):
+                                    descripciones.append({
+                                        'codigo': codigo,
+                                        'descripcion': descripcion
+                                    })
+                    else:
+                        # Extraer datos usando el header identificado
+                        for row in table[data_start:]:
+                            if row and len(row) >= 2:
+                                codigo = str(row[0]).strip() if row[0] else ""
+                                descripcion = str(row[1]).strip() if row[1] else ""
+
+                                # Filtrar filas vacías o que no parezcan descripciones
+                                if descripcion and len(descripcion) > 10 and not descripcion.startswith('ORDEN:'):
+                                    descripciones.append({
+                                        'codigo': codigo,
+                                        'descripcion': descripcion
+                                    })
+
+    except Exception as e:
+        print(f"Error al extraer descripciones del PDF: {str(e)}")
+        raise
+
+    return descripciones
+
+# Extraer defectos de PDF de presupuesto
+@app.route("/inspecciones/<int:inspeccion_id>/extraer_defectos_pdf", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
+def extraer_defectos_pdf(inspeccion_id):
+    """Extraer defectos del PDF de presupuesto y mostrar preview para clasificación"""
+
+    # Obtener información de la inspección
+    response_insp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=*",
+        headers=HEADERS
+    )
+
+    if response_insp.status_code != 200 or not response_insp.json():
+        flash("Inspección no encontrada", "error")
+        return redirect("/inspecciones")
+
+    inspeccion = response_insp.json()[0]
+
+    # Verificar que existe un PDF de presupuesto
+    presupuesto_pdf_url = inspeccion.get('presupuesto_pdf_url')
+
+    if not presupuesto_pdf_url:
+        flash("No hay PDF de presupuesto subido. Por favor, sube el PDF primero.", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+    try:
+        # Descargar el PDF desde Supabase Storage
+        pdf_response = requests.get(presupuesto_pdf_url)
+
+        if pdf_response.status_code != 200:
+            flash("Error al descargar el PDF de presupuesto", "error")
+            return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+        # Extraer descripciones del PDF
+        descripciones = extraer_descripciones_pdf(pdf_response.content)
+
+        if not descripciones:
+            flash("No se encontraron descripciones en el PDF. Verifica el formato del archivo.", "warning")
+            return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+        # Guardar descripciones en la sesión para el siguiente paso
+        session[f'defectos_extraidos_{inspeccion_id}'] = descripciones
+
+        # Renderizar template de preview
+        return render_template(
+            "importar_defectos_preview.html",
+            inspeccion=inspeccion,
+            descripciones=descripciones
+        )
+
+    except Exception as e:
+        flash(f"Error al procesar PDF: {str(e)}", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+# Guardar defectos importados desde PDF
+@app.route("/inspecciones/<int:inspeccion_id>/guardar_defectos_importados", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
+def guardar_defectos_importados(inspeccion_id):
+    """Guardar defectos clasificados manualmente después de la extracción del PDF"""
+
+    # Recuperar descripciones de la sesión
+    descripciones = session.get(f'defectos_extraidos_{inspeccion_id}')
+
+    if not descripciones:
+        flash("No hay defectos pendientes de importar", "error")
+        return redirect(f"/inspecciones/ver/{inspeccion_id}")
+
+    # Obtener fecha de inspección para calcular fechas límite
+    response_insp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=fecha_inspeccion,titular_nombre,direccion_instalacion,municipio",
+        headers=HEADERS
+    )
+
+    if response_insp.status_code != 200 or not response_insp.json():
+        flash("Inspección no encontrada", "error")
+        return redirect("/inspecciones")
+
+    insp_data = response_insp.json()[0]
+    fecha_inspeccion = insp_data.get('fecha_inspeccion')
+
+    # Procesar formulario
+    defectos_guardados = 0
+    defectos_omitidos = 0
+
+    for i, descripcion_data in enumerate(descripciones):
+        # Verificar si este defecto fue seleccionado (checkbox)
+        seleccionado = request.form.get(f'seleccionar_{i}') == 'on'
+
+        if not seleccionado:
+            defectos_omitidos += 1
+            continue
+
+        # Obtener clasificación del usuario
+        calificacion = request.form.get(f'calificacion_{i}')
+        plazo_meses = int(request.form.get(f'plazo_{i}', 6))
+        es_cortina = request.form.get(f'es_cortina_{i}') == 'on'
+        es_pesacarga = request.form.get(f'es_pesacarga_{i}') == 'on'
+
+        # Validar que tenga calificación
+        if not calificacion:
+            continue
+
+        # Calcular fecha límite
+        fecha_limite = None
+        if fecha_inspeccion:
+            try:
+                fecha_insp_dt = datetime.strptime(fecha_inspeccion.split('T')[0], '%Y-%m-%d')
+                mes_limite = fecha_insp_dt.month + plazo_meses
+                anio_limite = fecha_insp_dt.year + (mes_limite - 1) // 12
+                mes_limite = ((mes_limite - 1) % 12) + 1
+                fecha_limite_dt = fecha_insp_dt.replace(year=anio_limite, month=mes_limite)
+                fecha_limite = fecha_limite_dt.strftime('%Y-%m-%d')
+            except:
+                pass
+
+        # Crear defecto
+        defecto_data = {
+            "inspeccion_id": inspeccion_id,
+            "codigo": descripcion_data.get('codigo') or None,
+            "descripcion": descripcion_data.get('descripcion'),
+            "calificacion": calificacion,
+            "plazo_meses": plazo_meses,
+            "fecha_limite": fecha_limite,
+            "estado": "PENDIENTE",
+            "es_cortina": es_cortina,
+            "es_pesacarga": es_pesacarga,
+            "observaciones": f"Importado desde PDF de presupuesto"
+        }
+
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/defectos_inspeccion",
+            json=defecto_data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 201]:
+            defectos_guardados += 1
+
+            # Si es cortina o pesacarga, crear material especial
+            if es_cortina or es_pesacarga:
+                tipo_material = "CORTINA" if es_cortina else "PESACARGA"
+
+                material_data = {
+                    "tipo": tipo_material,
+                    "inspeccion_id": inspeccion_id,
+                    "cliente_nombre": insp_data.get('titular_nombre'),
+                    "direccion": insp_data.get('direccion_instalacion'),
+                    "municipio": insp_data.get('municipio'),
+                    "cantidad": 1,
+                    "fecha_limite": fecha_limite,
+                    "estado": "PENDIENTE"
+                }
+
+                requests.post(
+                    f"{SUPABASE_URL}/rest/v1/materiales_especiales",
+                    json=material_data,
+                    headers=HEADERS
+                )
+
+    # Limpiar sesión
+    session.pop(f'defectos_extraidos_{inspeccion_id}', None)
+
+    # Mostrar resultado
+    if defectos_guardados > 0:
+        flash(f"Se importaron {defectos_guardados} defecto(s) correctamente", "success")
+
+    if defectos_omitidos > 0:
+        flash(f"Se omitieron {defectos_omitidos} defecto(s)", "info")
+
+    return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
 # ============================================
 # DEFECTOS DE INSPECCIÓN

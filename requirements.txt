@@ -3,3 +3,4 @@ requests==2.31.0
 Werkzeug==2.3.7
 openpyxl==3.1.2
 resend
+pdfplumber==0.10.3

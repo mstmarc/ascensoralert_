@@ -422,6 +422,13 @@
                                 📥 Descargar Presupuesto
                             </a>
                         </div>
+                        <div style="margin-bottom: 15px;">
+                            <form method="POST" action="/inspecciones/{{ inspeccion.id }}/extraer_defectos_pdf" style="display: inline;">
+                                <button type="submit" class="btn-primary" style="display: inline-block;">
+                                    📋 Importar Defectos desde PDF
+                                </button>
+                            </form>
+                        </div>
                         <form method="POST" action="/inspecciones/{{ inspeccion.id }}/subir_presupuesto" enctype="multipart/form-data" style="margin-top: 10px;">
                             <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666;">Reemplazar presupuesto:</label>
                             <input type="file" name="presupuesto_pdf" accept=".pdf" required style="margin-bottom: 10px; width: 100%;">
