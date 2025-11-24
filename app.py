@@ -4404,16 +4404,60 @@ def extraer_descripciones_pdf(pdf_content):
 
                             descripcion = ' '.join(descripcion_limpia)
 
-                            # Validar que sea una descripción válida
-                            # Eliminar filtros muy restrictivos
-                            if descripcion and len(descripcion) > 5:
-                                # Evitar líneas que son solo el header repetido
-                                if 'Descripción' not in descripcion and 'PRESUPUESTO' not in descripcion:
-                                    print(f"DEBUG: Añadiendo: {codigo[:20]}... | {descripcion[:50]}...")
-                                    descripciones.append({
-                                        'codigo': codigo,
-                                        'descripcion': descripcion
-                                    })
+                            # ===== VALIDACIONES ESTRICTAS =====
+                            # 1. Longitud mínima
+                            if not descripcion or len(descripcion) < 10:
+                                continue
+
+                            # 2. Filtrar headers repetidos
+                            if any(x in descripcion for x in ['Descripción', 'PRESUPUESTO', 'Cód.', 'Cant.', 'Precio', 'Total', '% Igic', 'INSTALACIÓN']):
+                                continue
+
+                            # 3. Filtrar direcciones (empiezan con C/, Calle, Avenida, etc.)
+                            if descripcion.startswith(('C/', 'Calle', 'Avenida', 'Avda', 'c/', 'calle', 'C /')):
+                                continue
+
+                            # 4. Filtrar líneas que son mayormente números (totales, impuestos)
+                            palabras = descripcion.split()
+                            if len(palabras) <= 4:  # Líneas cortas tipo "7% 339,50 5.189,47"
+                                numeros_count = sum(1 for p in palabras if any(c.isdigit() for c in p) or '%' in p)
+                                if numeros_count >= len(palabras) * 0.6:  # 60%+ son números
+                                    continue
+
+                            # 5. Limpiar números al final (precios, cantidades)
+                            import re
+                            # Eliminar números con separadores (. , espacios) al final
+                            descripcion = re.sub(r'\s+[\d\.,\s]+$', '', descripcion)
+                            descripcion = descripcion.strip()
+
+                            # Volver a validar longitud después de limpiar
+                            if len(descripcion) < 10:
+                                continue
+
+                            # 6. El código debe parecer un código de producto (contener números)
+                            if not any(char.isdigit() for char in codigo):
+                                continue
+
+                            # 7. Códigos válidos: deben ser numéricos de 8-10 dígitos (formato FEDES)
+                            # Evitar códigos que son fechas, códigos postales, etc.
+                            if codigo.isdigit():
+                                codigo_len = len(codigo)
+                                # Códigos FEDES típicamente: 1001000059, 2003000008, etc. (10 dígitos)
+                                if codigo_len < 8 or codigo_len > 11:
+                                    continue
+                                # Evitar códigos que empiezan con 20 (fechas) o 35 (códigos postales)
+                                if codigo.startswith(('20110', '20120', '3500', '3501')):
+                                    continue
+                            else:
+                                # Si no es numérico puro, debe tener al menos 6 caracteres y contener dígitos
+                                if len(codigo) < 6:
+                                    continue
+
+                            print(f"DEBUG: ✓ Añadiendo: [{codigo}] {descripcion[:60]}...")
+                            descripciones.append({
+                                'codigo': codigo,
+                                'descripcion': descripcion
+                            })
 
                 # Estrategia 2: Si no encontró tablas, intentar extracción de texto
                 if not tables:
