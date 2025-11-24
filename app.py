@@ -849,7 +849,7 @@ def visita_administrador():
         administrador_nombre = None
         if administrador_id:
             admin_response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/administradores_fincas?id=eq.{administrador_id}&select=nombre_empresa",
+                f"{SUPABASE_URL}/rest/v1/administradores?id=eq.{administrador_id}&select=nombre_empresa",
                 headers=HEADERS
             )
             if admin_response.status_code == 200 and admin_response.json():
@@ -969,7 +969,7 @@ def editar_visita_admin(visita_id):
         administrador_nombre = None
         if administrador_id:
             admin_response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/administradores_fincas?id=eq.{administrador_id}&select=nombre_empresa",
+                f"{SUPABASE_URL}/rest/v1/administradores?id=eq.{administrador_id}&select=nombre_empresa",
                 headers=HEADERS
             )
             if admin_response.status_code == 200 and admin_response.json():
