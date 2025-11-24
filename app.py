@@ -763,7 +763,6 @@ def formulario_lead():
             "persona_contacto": request.form.get("persona_contacto") or None,
             "telefono": request.form.get("telefono") or None,
             "email": request.form.get("email") or None,
-            "administrador_fincas": request.form.get("administrador_fincas") or None,
             "administrador_id": administrador_id,
             "empresa_mantenedora": request.form.get("empresa_mantenedora") or None,
             "numero_ascensores": request.form.get("numero_ascensores") or None,
@@ -810,30 +809,7 @@ def visita_administrador():
         if oportunidad_response.status_code == 200 and oportunidad_response.json():
             oportunidad_data = oportunidad_response.json()[0]
 
-            # Si el cliente tiene administrador_id pero no administrador_fincas, buscar el nombre
-            if oportunidad_data.get('clientes'):
-                cliente = oportunidad_data['clientes']
-                admin_id = cliente.get('administrador_id')
-                admin_nombre = cliente.get('administrador_fincas')
-
-                # Si hay ID pero no nombre, buscar en la base de datos
-                if admin_id and not admin_nombre:
-                    admin_response = requests.get(
-                        f"{SUPABASE_URL}/rest/v1/administradores_fincas?id=eq.{admin_id}&select=nombre_empresa",
-                        headers=HEADERS
-                    )
-                    if admin_response.status_code == 200 and admin_response.json():
-                        nombre_empresa = admin_response.json()[0].get("nombre_empresa")
-                        # Actualizar el cliente en oportunidad_data con el nombre encontrado
-                        oportunidad_data['clientes']['administrador_fincas'] = nombre_empresa
-                        print(f"DEBUG GET: Administrador encontrado para pre-carga: {nombre_empresa} (ID: {admin_id})")
-
     if request.method == "POST":
-        # Debug: Ver datos recibidos del formulario
-        print(f"DEBUG POST: Datos recibidos del formulario:")
-        print(f"  administrador_id: '{request.form.get('administrador_id')}'")
-        print(f"  administrador_fincas: '{request.form.get('administrador_fincas')}'")
-
         # Obtener administrador_id y convertir a int o None
         administrador_id = request.form.get("administrador_id")
         if administrador_id and administrador_id.strip():
@@ -844,43 +820,16 @@ def visita_administrador():
         else:
             administrador_id = None
 
-        # Si se proporcionó administrador_id pero no administrador_fincas, buscar el nombre
-        administrador_fincas = request.form.get("administrador_fincas")
-        # Limpiar cadenas vacías o solo con espacios en blanco
-        if administrador_fincas:
-            administrador_fincas = administrador_fincas.strip()
-            if not administrador_fincas:
-                administrador_fincas = None
-        else:
-            administrador_fincas = None
-
-        # Si hay administrador_id pero no administrador_fincas, buscar el nombre
-        if administrador_id and not administrador_fincas:
-            # Buscar el nombre del administrador en la base de datos
-            admin_response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/administradores_fincas?id=eq.{administrador_id}&select=nombre_empresa",
-                headers=HEADERS
-            )
-            if admin_response.status_code == 200 and admin_response.json():
-                administrador_fincas = admin_response.json()[0].get("nombre_empresa")
-                print(f"DEBUG: Administrador encontrado: {administrador_fincas} para ID {administrador_id}")
-            else:
-                print(f"DEBUG: No se encontró administrador con ID {administrador_id}")
-
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
-            "administrador_fincas": administrador_fincas,
             "administrador_id": administrador_id,
             "persona_contacto": request.form.get("persona_contacto") or None,
             "observaciones": request.form.get("observaciones") or None,
             "oportunidad_id": int(request.form.get("oportunidad_id")) if request.form.get("oportunidad_id") else None
         }
 
-        # Debug: Mostrar datos antes de enviar
-        print(f"DEBUG: Datos a enviar: {data}")
-
-        # Solo fecha es obligatoria, al menos uno de los dos campos de administrador debe estar
-        if not data["fecha_visita"] or (not data["administrador_fincas"] and not data["administrador_id"]):
+        # Validación: fecha y administrador son obligatorios
+        if not data["fecha_visita"] or not data["administrador_id"]:
             flash("Fecha y Administrador son obligatorios", "error")
             return redirect(request.referrer)
 
@@ -921,8 +870,8 @@ def visitas_administradores_dashboard():
     total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
     total_pages = max(1, (total_registros + per_page - 1) // per_page)
 
-    # OPTIMIZACIÓN: Seleccionar campos específicos (ajusta según lo que necesite la vista)
-    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,administrador_fincas,persona_contacto,observaciones,oportunidad_id&order=fecha_visita.desc&limit={per_page}&offset={offset}"
+    # OPTIMIZACIÓN: Seleccionar campos específicos con JOIN a administradores
+    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,administradores_fincas(nombre_empresa),persona_contacto,observaciones,oportunidad_id&order=fecha_visita.desc&limit={per_page}&offset={offset}"
     response = requests.get(data_url, headers=HEADERS)
     
     if response.status_code != 200:
@@ -972,7 +921,6 @@ def editar_visita_admin(visita_id):
 
         data = {
             "fecha_visita": request.form.get("fecha_visita"),
-            "administrador_fincas": request.form.get("administrador_fincas") or None,
             "administrador_id": administrador_id,
             "persona_contacto": request.form.get("persona_contacto") or None,
             "observaciones": request.form.get("observaciones") or None
@@ -2245,7 +2193,6 @@ def editar_lead(lead_id):
             "persona_contacto": request.form.get("persona_contacto") or None,
             "telefono": request.form.get("telefono") or None,
             "email": request.form.get("email") or None,
-            "administrador_fincas": request.form.get("administrador_fincas") or None,
             "administrador_id": administrador_id,
             "empresa_mantenedora": request.form.get("empresa_mantenedora") or None,
             "numero_ascensores": request.form.get("numero_ascensores") or None,

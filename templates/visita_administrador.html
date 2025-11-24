@@ -259,7 +259,6 @@
                             list="administradores-list"
                             placeholder="🔍 Buscar administrador..."
                             autocomplete="off"
-                            {% if oportunidad and oportunidad.clientes.administrador_fincas %}value="{{ oportunidad.clientes.administrador_fincas }}"{% endif %}
                         >
                         <datalist id="administradores-list">
                             {% for admin in administradores %}
@@ -268,8 +267,6 @@
                         </datalist>
                         <input type="hidden" id="administrador_id" name="administrador_id"
                                {% if oportunidad and oportunidad.clientes.administrador_id %}value="{{ oportunidad.clientes.administrador_id }}"{% endif %}>
-                        <input type="hidden" id="administrador_fincas" name="administrador_fincas"
-                               {% if oportunidad and oportunidad.clientes.administrador_fincas %}value="{{ oportunidad.clientes.administrador_fincas }}"{% endif %}>
                         <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
                             💡 {% if oportunidad %}Pre-cargado desde la comunidad. Puedes cambiarlo si es necesario{% else %}Escribe para buscar o selecciona de la lista{% endif %}
                         </small>
@@ -316,7 +313,6 @@
         // Script para capturar el ID del administrador seleccionado
         const searchInput = document.getElementById('administrador_search');
         const hiddenInput = document.getElementById('administrador_id');
-        const administradorFincasInput = document.getElementById('administrador_fincas');
         const datalist = document.getElementById('administradores-list');
 
         function syncAdministradorFields() {
@@ -326,8 +322,6 @@
 
             if (selectedOption) {
                 hiddenInput.value = selectedOption.dataset.id;
-                // Llenar automáticamente el campo administrador_fincas
-                administradorFincasInput.value = searchInput.value;
                 console.log('Administrador seleccionado:', searchInput.value, 'ID:', selectedOption.dataset.id);
             } else if (!hiddenInput.value) {
                 // Solo limpiar si no hay un ID pre-cargado
@@ -338,28 +332,21 @@
         // Sincronizar cuando el usuario cambia el campo
         searchInput.addEventListener('input', syncAdministradorFields);
 
-        // Debug: Mostrar valores iniciales
-        console.log('DEBUG: Valores iniciales al cargar:');
-        console.log('  administrador_search:', searchInput.value);
-        console.log('  administrador_id:', hiddenInput.value);
-        console.log('  administrador_fincas:', administradorFincasInput.value);
-
-        // Sincronizar al cargar la página si ya hay un valor pre-cargado
-        if (searchInput.value) {
-            syncAdministradorFields();
-        }
-
-        // Si hay administrador_id pero no administrador_fincas, intentar buscar en la lista
-        if (hiddenInput.value && !administradorFincasInput.value) {
+        // Si hay administrador_id pre-cargado, buscar el nombre en la lista
+        if (hiddenInput.value) {
             const adminId = hiddenInput.value;
             const matchingOption = Array.from(datalist.options).find(
                 option => option.dataset.id === adminId
             );
             if (matchingOption) {
                 searchInput.value = matchingOption.value;
-                administradorFincasInput.value = matchingOption.value;
-                console.log('DEBUG: Campo administrador_fincas llenado automáticamente con:', matchingOption.value);
+                console.log('DEBUG: Administrador pre-cargado:', matchingOption.value, 'ID:', adminId);
             }
+        }
+
+        // Sincronizar al cargar la página si ya hay un valor en el campo de búsqueda
+        if (searchInput.value) {
+            syncAdministradorFields();
         }
     </script>    <!-- Inyectar permisos del usuario para JavaScript -->
     <script>

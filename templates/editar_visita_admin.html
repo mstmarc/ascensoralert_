@@ -126,7 +126,7 @@
                 <label>Fecha de Visita:</label><br>
                 <input type="date" name="fecha_visita" value="{{ visita.fecha_visita }}" required><br><br>
 
-                <label>Administrador de Fincas (de la base de datos):</label><br>
+                <label>Administrador de Fincas:</label><br>
                 <input
                     type="text"
                     id="administrador_search"
@@ -146,9 +146,6 @@
                     💡 Escribe para buscar o selecciona de la lista
                 </small>
                 <br><br>
-
-                <label>Administrador de Fincas (texto libre):</label><br>
-                <input type="text" name="administrador_fincas" value="{{ visita.administrador_fincas }}" placeholder="O escribe el nombre si no está en la lista"><br><br>
 
                 <label>Persona de Contacto:</label><br>
                 <input type="text" name="persona_contacto" value="{{ visita.persona_contacto or '' }}"><br><br>
