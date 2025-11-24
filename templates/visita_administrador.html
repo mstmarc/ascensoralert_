@@ -268,6 +268,8 @@
                         </datalist>
                         <input type="hidden" id="administrador_id" name="administrador_id"
                                {% if oportunidad and oportunidad.clientes.administrador_id %}value="{{ oportunidad.clientes.administrador_id }}"{% endif %}>
+                        <input type="hidden" id="administrador_fincas" name="administrador_fincas"
+                               {% if oportunidad and oportunidad.clientes.administrador_fincas %}value="{{ oportunidad.clientes.administrador_fincas }}"{% endif %}>
                         <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
                             💡 {% if oportunidad %}Pre-cargado desde la comunidad. Puedes cambiarlo si es necesario{% else %}Escribe para buscar o selecciona de la lista{% endif %}
                         </small>
