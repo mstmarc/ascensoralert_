@@ -324,7 +324,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for i, desc in descripciones | enumerate %}
+                    {% for desc in descripciones %}
+                    {% set i = loop.index0 %}
                     <tr id="row-{{ i }}">
                         <td class="checkbox-col">
                             <input type="checkbox" name="seleccionar_{{ i }}" class="checkbox-input checkbox-seleccionar"
