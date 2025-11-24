@@ -36,14 +36,24 @@ def format_fecha_filter(fecha_str):
 # Datos de Supabase
 SUPABASE_URL = "https://hvkifqguxsgegzaxwcmj.supabase.co"
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")  # Service role key para storage
 
 if not SUPABASE_KEY:
     raise RuntimeError("SUPABASE_KEY environment variable is not set")
+
+# Headers para operaciones de base de datos (usa anon key)
 HEADERS = {
     "apikey": SUPABASE_KEY,
     "Authorization": f"Bearer {SUPABASE_KEY}",
     "Content-Type": "application/json",
     "Prefer": "return=representation"
+}
+
+# Headers para operaciones de storage (usa service key si está disponible, sino anon key)
+STORAGE_KEY = SUPABASE_SERVICE_KEY if SUPABASE_SERVICE_KEY else SUPABASE_KEY
+STORAGE_HEADERS = {
+    "apikey": STORAGE_KEY,
+    "Authorization": f"Bearer {STORAGE_KEY}",
 }
 
 # Configuración de Resend para emails
@@ -4175,10 +4185,9 @@ def subir_acta_pdf(inspeccion_id):
         # Leer contenido del archivo
         file_content = file.read()
 
-        # Subir a Supabase Storage (bucket: inspecciones-pdfs)
+        # Headers para operaciones de storage con Content-Type
         storage_headers = {
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}",
+            **STORAGE_HEADERS,
             "Content-Type": "application/pdf",
         }
 
@@ -4251,10 +4260,9 @@ def subir_presupuesto_pdf(inspeccion_id):
         # Leer contenido del archivo
         file_content = file.read()
 
-        # Subir a Supabase Storage (bucket: inspecciones-pdfs)
+        # Headers para operaciones de storage con Content-Type
         storage_headers = {
-            "apikey": SUPABASE_KEY,
-            "Authorization": f"Bearer {SUPABASE_KEY}",
+            **STORAGE_HEADERS,
             "Content-Type": "application/pdf",
         }
 
