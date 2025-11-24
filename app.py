@@ -4619,8 +4619,12 @@ def extraer_defectos_pdf(inspeccion_id):
 def guardar_defectos_importados(inspeccion_id):
     """Guardar defectos clasificados manualmente después de la extracción del PDF"""
 
+    logger.info(f" Guardando defectos para inspección {inspeccion_id}")
+
     # Recuperar descripciones de la sesión
     descripciones = session.get(f'defectos_extraidos_{inspeccion_id}')
+
+    logger.info(f" Descripciones en sesión: {len(descripciones) if descripciones else 'None'}")
 
     if not descripciones:
         flash("No hay defectos pendientes de importar", "error")
@@ -4632,8 +4636,11 @@ def guardar_defectos_importados(inspeccion_id):
         headers=HEADERS
     )
 
+    logger.info(f" Respuesta BD: status={response_insp.status_code}, data={response_insp.json() if response_insp.status_code == 200 else 'error'}")
+
     if response_insp.status_code != 200 or not response_insp.json():
         flash("Inspección no encontrada", "error")
+        logger.error(f" Error: Inspección {inspeccion_id} no encontrada en BD")
         return redirect("/inspecciones")
 
     insp_data = response_insp.json()[0]
