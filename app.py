@@ -4438,6 +4438,20 @@ def extraer_descripciones_pdf(pdf_content):
                             if not any(c.isalpha() for c in descripcion):
                                 continue
 
+                            # 7. Filtrar líneas con palabras clave que NO son defectos
+                            palabras_invalidas = ['NIF', 'CIF', 'Tel.', 'Tel', 'Email', '@', 'www', 'http',
+                                                 'GRAN CANARIA', 'LAS PALMAS', 'Municipio', 'Serie']
+                            if any(palabra in descripcion for palabra in palabras_invalidas):
+                                continue
+
+                            # 8. Debe tener al menos 3 palabras (descripciones reales son más largas)
+                            if len(descripcion.split()) < 3:
+                                continue
+
+                            # 9. Filtrar si toda la descripción es MAYÚSCULAS cortas (probablemente headers/títulos)
+                            if descripcion.isupper() and len(descripcion) < 30:
+                                continue
+
                             # NOTA: No validamos el código ya que no es necesario
                             # Guardamos código si existe, o vacío si no
                             print(f"DEBUG: ✓ Añadiendo: {descripcion[:70]}...")
