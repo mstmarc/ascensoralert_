@@ -17,11 +17,15 @@ import helpers
 
 # Configurar logging para que aparezca en Render
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     stream=sys.stdout
 )
 logger = logging.getLogger(__name__)
+
+# Silenciar logs verbosos de pdfplumber/pdfminer
+logging.getLogger('pdfminer').setLevel(logging.WARNING)
+logging.getLogger('pdfplumber').setLevel(logging.WARNING)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -4351,7 +4355,7 @@ def extraer_descripciones_pdf(pdf_content):
 
         with pdfplumber.open(pdf_file) as pdf:
             for page_num, page in enumerate(pdf.pages):
-                logger.debug(f" Procesando página {page_num + 1}")
+                logger.info(f" Procesando página {page_num + 1}")
 
                 # Estrategia 1: Extraer tablas con configuración específica
                 tables = page.extract_tables(table_settings={
@@ -4361,10 +4365,10 @@ def extraer_descripciones_pdf(pdf_content):
                 })
 
                 if tables:
-                    logger.debug(f" Encontradas {len(tables)} tablas en página {page_num + 1}")
+                    logger.info(f" Encontradas {len(tables)} tablas en página {page_num + 1}")
 
                     for table_idx, table in enumerate(tables):
-                        logger.debug(f" Tabla {table_idx + 1} tiene {len(table)} filas")
+                        logger.info(f" Tabla {table_idx + 1} tiene {len(table)} filas")
 
                         # Buscar índice de columnas Código y Descripción
                         codigo_idx = None
@@ -4385,12 +4389,12 @@ def extraer_descripciones_pdf(pdf_content):
 
                             if codigo_idx is not None and descripcion_idx is not None:
                                 data_start = i + 1
-                                logger.debug(f" Header encontrado en fila {i}, Código col={codigo_idx}, Descripción col={descripcion_idx}")
+                                logger.info(f" Header encontrado en fila {i}, Código col={codigo_idx}, Descripción col={descripcion_idx}")
                                 break
 
                         # Si no encontramos header, asumir primeras 2 columnas
                         if codigo_idx is None or descripcion_idx is None:
-                            logger.debug(" Header no encontrado, asumiendo columnas 0 y 1")
+                            logger.info(" Header no encontrado, asumiendo columnas 0 y 1")
                             codigo_idx = 0
                             descripcion_idx = 1
                             data_start = 1  # Saltar primera fila que probablemente sea header
@@ -4417,20 +4421,20 @@ def extraer_descripciones_pdf(pdf_content):
                             # ===== LIMPIEZA AGRESIVA DE NÚMEROS =====
                             import re
 
-                            logger.debug(f" Antes de limpiar: {descripcion[:100]}")
+                            logger.info(f" Antes de limpiar: {descripcion[:100]}")
 
                             # Estrategia 1: Eliminar TODO después del primer número (con o sin decimales)
                             # Busca patrones como: "1,00" o "100" o "1.300,00"
                             match = re.search(r'\s+\d+[,\.]?\d*', descripcion)
                             if match:
                                 descripcion = descripcion[:match.start()].strip()
-                                logger.debug(f" Después de cortar: {descripcion[:100]}")
+                                logger.info(f" Después de cortar: {descripcion[:100]}")
 
                             # Estrategia 2: Si aún quedan números al final, eliminarlos
                             descripcion = re.sub(r'\s+[\d\.,\s]+$', '', descripcion)
                             descripcion = descripcion.strip()
 
-                            logger.debug(f" Final limpio: {descripcion[:100]}")
+                            logger.info(f" Final limpio: {descripcion[:100]}")
 
                             # ===== VALIDACIONES ESTRICTAS =====
                             # 1. Longitud mínima
@@ -4476,7 +4480,7 @@ def extraer_descripciones_pdf(pdf_content):
 
                             # NOTA: No validamos el código ya que no es necesario
                             # Guardamos código si existe, o vacío si no
-                            logger.debug(f" ✓ Añadiendo: {descripcion[:70]}...")
+                            logger.info(f" ✓ Añadiendo: {descripcion[:70]}...")
                             descripciones.append({
                                 'codigo': codigo if codigo else "",
                                 'descripcion': descripcion
@@ -4484,7 +4488,7 @@ def extraer_descripciones_pdf(pdf_content):
 
                 # Estrategia 2: Si no encontró tablas, intentar extracción de texto
                 if not tables:
-                    logger.debug(" No se encontraron tablas, intentando extracción de texto")
+                    logger.info(" No se encontraron tablas, intentando extracción de texto")
                     text = page.extract_text()
                     if text:
                         # Buscar líneas que parezcan items del presupuesto
@@ -4505,7 +4509,7 @@ def extraer_descripciones_pdf(pdf_content):
                                             'descripcion': possible_desc
                                         })
 
-        logger.debug(f" Total descripciones extraídas: {len(descripciones)}")
+        logger.info(f" Total descripciones extraídas: {len(descripciones)}")
 
     except Exception as e:
         logger.error(f"Error al extraer descripciones del PDF: {str(e)}")
