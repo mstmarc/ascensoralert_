@@ -637,11 +637,7 @@
                             <tr>
                                 <td>{{ visita.fecha_visita|format_fecha }}</td>
                                 <td>
-                                    {% if visita.administradores %}
-                                        {{ visita.administradores.nombre_empresa }}
-                                    {% else %}
-                                        {{ visita.administrador_fincas or '-' }}
-                                    {% endif %}
+                                    {{ visita.administradores.nombre_empresa if visita.administradores else '-' }}
                                 </td>
                                 <td>{{ visita.persona_contacto or '-' }}</td>
                                 <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -669,11 +665,7 @@
                 <div class="mobile-card">
                     <h3>{{ visita.fecha_visita|format_fecha }}</h3>
                     <p><strong>Administrador:</strong>
-                        {% if visita.administradores %}
-                            {{ visita.administradores.nombre_empresa }}
-                        {% else %}
-                            {{ visita.administrador_fincas or '-' }}
-                        {% endif %}
+                        {{ visita.administradores.nombre_empresa if visita.administradores else '-' }}
                     </p>
                     <p><strong>Contacto:</strong> {{ visita.persona_contacto or '-' }}</p>
                     {% if visita.observaciones %}

@@ -431,8 +431,6 @@
                         <label>Administrador de Fincas</label>
                         {% if administrador %}
                             <a href="/ver_administrador/{{ administrador.id }}">{{ administrador.nombre_empresa }}</a>
-                        {% elif lead.administrador_fincas %}
-                            <span>{{ lead.administrador_fincas }}</span>
                         {% else %}
                             <span>-</span>
                         {% endif %}
