@@ -4434,28 +4434,15 @@ def extraer_descripciones_pdf(pdf_content):
                             if len(descripcion) < 10:
                                 continue
 
-                            # 6. El código debe parecer un código de producto (contener números)
-                            if not any(char.isdigit() for char in codigo):
+                            # 6. La descripción debe contener letras (no solo números/símbolos)
+                            if not any(c.isalpha() for c in descripcion):
                                 continue
 
-                            # 7. Códigos válidos: deben ser numéricos de 8-10 dígitos (formato FEDES)
-                            # Evitar códigos que son fechas, códigos postales, etc.
-                            if codigo.isdigit():
-                                codigo_len = len(codigo)
-                                # Códigos FEDES típicamente: 1001000059, 2003000008, etc. (10 dígitos)
-                                if codigo_len < 8 or codigo_len > 11:
-                                    continue
-                                # Evitar códigos que empiezan con 20 (fechas) o 35 (códigos postales)
-                                if codigo.startswith(('20110', '20120', '3500', '3501')):
-                                    continue
-                            else:
-                                # Si no es numérico puro, debe tener al menos 6 caracteres y contener dígitos
-                                if len(codigo) < 6:
-                                    continue
-
-                            print(f"DEBUG: ✓ Añadiendo: [{codigo}] {descripcion[:60]}...")
+                            # NOTA: No validamos el código ya que no es necesario
+                            # Guardamos código si existe, o vacío si no
+                            print(f"DEBUG: ✓ Añadiendo: {descripcion[:70]}...")
                             descripciones.append({
-                                'codigo': codigo,
+                                'codigo': codigo if codigo else "",
                                 'descripcion': descripcion
                             })
 
