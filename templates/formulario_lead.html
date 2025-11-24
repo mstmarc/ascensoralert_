@@ -376,17 +376,32 @@
         const datalist = document.getElementById('administradores-list');
 
         if (searchInput && hiddenInput && datalist) {
-            searchInput.addEventListener('input', function() {
+            console.log('=== Selector administrador inicializado ===');
+            console.log('Opciones en datalist:', datalist.options.length);
+
+            function syncAdministrador() {
+                console.log('Sincronizando administrador, valor:', searchInput.value);
                 const selectedOption = Array.from(datalist.options).find(
-                    option => option.value === this.value
+                    option => option.value === searchInput.value
                 );
 
                 if (selectedOption) {
                     hiddenInput.value = selectedOption.dataset.id;
-                    console.log('Administrador seleccionado:', this.value, 'ID:', selectedOption.dataset.id);
+                    console.log('  ✓ ID asignado:', selectedOption.dataset.id);
                 } else {
-                    hiddenInput.value = '';
+                    console.log('  ✗ No match encontrado');
+                    if (!hiddenInput.value) {
+                        hiddenInput.value = '';
+                    }
                 }
+            }
+
+            // Múltiples eventos para capturar la selección
+            searchInput.addEventListener('input', syncAdministrador);
+            searchInput.addEventListener('change', syncAdministrador);
+            searchInput.addEventListener('blur', function() {
+                console.log('Blur event');
+                setTimeout(syncAdministrador, 100);
             });
         }
     </script>    <!-- Inyectar permisos del usuario para JavaScript -->
