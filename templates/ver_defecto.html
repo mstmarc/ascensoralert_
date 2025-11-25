@@ -358,32 +358,33 @@
         </div>
 
         <!-- Información de la Inspección -->
+        {% if defecto.inspeccion %}
         <div class="info-section">
             <h3>Inspección Asociada</h3>
 
             <div class="info-grid">
                 <div class="info-item">
                     <div class="info-label">RAE / Máquina</div>
-                    <div class="info-value">{{ defecto.inspeccion.maquina }}</div>
+                    <div class="info-value">{{ defecto.inspeccion.maquina or '-' }}</div>
                 </div>
 
                 <div class="info-item">
                     <div class="info-label">Organismo OCA</div>
-                    <div class="info-value">{{ defecto.inspeccion.oca.nombre if defecto.inspeccion.oca else '-' }}</div>
+                    <div class="info-value">{{ defecto.inspeccion.oca_nombre or '-' }}</div>
                 </div>
             </div>
 
             <div class="info-item">
                 <div class="info-label">Ubicación</div>
                 <div class="info-value">
-                    {{ defecto.inspeccion.direccion }}{% if defecto.inspeccion.poblacion %}, {{ defecto.inspeccion.poblacion }}{% endif %}
+                    {{ defecto.inspeccion.direccion or '-' }}{% if defecto.inspeccion.poblacion %}, {{ defecto.inspeccion.poblacion }}{% endif %}
                 </div>
             </div>
 
             <div class="info-grid">
                 <div class="info-item">
                     <div class="info-label">Fecha de Inspección</div>
-                    <div class="info-value">{{ defecto.inspeccion.fecha_inspeccion|format_fecha }}</div>
+                    <div class="info-value">{{ defecto.inspeccion.fecha_inspeccion|format_fecha if defecto.inspeccion.fecha_inspeccion else '-' }}</div>
                 </div>
 
                 {% if defecto.inspeccion.fecha_segunda_inspeccion %}
@@ -398,6 +399,7 @@
                 <a href="/inspecciones/ver/{{ defecto.inspeccion.id }}" class="button btn-secondary">Ver Inspección Completa</a>
             </div>
         </div>
+        {% endif %}
 
         <!-- Materiales Especiales Relacionados -->
         {% if materiales_relacionados %}
