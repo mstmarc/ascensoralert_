@@ -4973,7 +4973,7 @@ def ver_defecto(defecto_id):
 
     # Obtener el defecto con información de inspección
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}&select=*,inspeccion:inspecciones(id,rae,maquina,direccion,poblacion,fecha_inspeccion,fecha_segunda_inspeccion,oca_id,oca:ocas(nombre))",
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}&select=*",
         headers=HEADERS
     )
 
@@ -4982,6 +4982,35 @@ def ver_defecto(defecto_id):
         return redirect("/defectos_dashboard")
 
     defecto = response.json()[0]
+
+    # Obtener información de la inspección asociada
+    if defecto.get('inspeccion_id'):
+        response_insp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{defecto['inspeccion_id']}&select=*",
+            headers=HEADERS
+        )
+
+        if response_insp.status_code == 200 and response_insp.json():
+            inspeccion = response_insp.json()[0]
+
+            # Obtener información del OCA si existe
+            if inspeccion.get('oca_id'):
+                response_oca = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/ocas?id=eq.{inspeccion['oca_id']}&select=nombre",
+                    headers=HEADERS
+                )
+                if response_oca.status_code == 200 and response_oca.json():
+                    inspeccion['oca_nombre'] = response_oca.json()[0].get('nombre')
+                else:
+                    inspeccion['oca_nombre'] = None
+            else:
+                inspeccion['oca_nombre'] = None
+
+            defecto['inspeccion'] = inspeccion
+        else:
+            defecto['inspeccion'] = None
+    else:
+        defecto['inspeccion'] = None
 
     # Calcular días restantes
     if defecto.get('fecha_limite') and defecto.get('estado') == 'PENDIENTE':
@@ -5079,9 +5108,9 @@ def editar_defecto(defecto_id):
             return redirect(f"/defectos/{defecto_id}/editar")
 
     # GET: Mostrar formulario de edición
-    # Obtener el defecto con información de inspección
+    # Obtener el defecto
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}&select=*,inspeccion:inspecciones(id,rae,maquina,direccion,fecha_inspeccion)",
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}&select=*",
         headers=HEADERS
     )
 
@@ -5090,6 +5119,20 @@ def editar_defecto(defecto_id):
         return redirect("/defectos_dashboard")
 
     defecto = response.json()[0]
+
+    # Obtener información de la inspección asociada
+    if defecto.get('inspeccion_id'):
+        response_insp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{defecto['inspeccion_id']}&select=id,rae,maquina,direccion,fecha_inspeccion",
+            headers=HEADERS
+        )
+
+        if response_insp.status_code == 200 and response_insp.json():
+            defecto['inspeccion'] = response_insp.json()[0]
+        else:
+            defecto['inspeccion'] = {'maquina': 'N/A', 'direccion': 'N/A'}
+    else:
+        defecto['inspeccion'] = {'maquina': 'N/A', 'direccion': 'N/A'}
 
     return render_template(
         "editar_defecto.html",
