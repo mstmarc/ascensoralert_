@@ -3913,6 +3913,29 @@ def defectos_dashboard():
     defectos_pendientes = [d for d in todos_defectos if d.get('estado') == 'PENDIENTE']
     defectos_subsanados = [d for d in todos_defectos if d.get('estado') == 'SUBSANADO']
 
+    # Aplicar filtros
+    filtro_tecnico = request.args.get('tecnico', '')
+    filtro_material = request.args.get('material', '')
+    filtro_stock = request.args.get('stock', '')
+
+    if filtro_tecnico:
+        if filtro_tecnico == 'sin_asignar':
+            defectos_pendientes = [d for d in defectos_pendientes if not d.get('tecnico_asignado')]
+        else:
+            defectos_pendientes = [d for d in defectos_pendientes if d.get('tecnico_asignado') == filtro_tecnico]
+
+    if filtro_material:
+        if filtro_material == 'sin_definir':
+            defectos_pendientes = [d for d in defectos_pendientes if not d.get('gestion_material')]
+        else:
+            defectos_pendientes = [d for d in defectos_pendientes if d.get('gestion_material') == filtro_material]
+
+    if filtro_stock:
+        if filtro_stock == 'sin_definir':
+            defectos_pendientes = [d for d in defectos_pendientes if not d.get('estado_stock')]
+        else:
+            defectos_pendientes = [d for d in defectos_pendientes if d.get('estado_stock') == filtro_stock]
+
     # Clasificar por urgencia
     defectos_vencidos = [d for d in defectos_pendientes if d.get('nivel_urgencia') == 'VENCIDO']
     defectos_urgentes = [d for d in defectos_pendientes if d.get('nivel_urgencia') == 'URGENTE']
@@ -5146,6 +5169,54 @@ def editar_defecto(defecto_id):
         "editar_defecto.html",
         defecto=defecto
     )
+
+
+# Endpoint para actualización rápida de gestión operativa (AJAX)
+@app.route("/defectos/<int:defecto_id>/actualizar_gestion", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'update')
+def actualizar_gestion_defecto(defecto_id):
+    """Endpoint para actualización rápida de campos de gestión operativa desde el dashboard"""
+    try:
+        data = request.json
+        campo = data.get("campo")
+        valor = data.get("valor")
+
+        if not campo:
+            return {"error": "Campo requerido"}, 400
+
+        # Mapear campos del frontend a campos de base de datos
+        campos_map = {
+            "tecnico": "tecnico_asignado",
+            "material": "gestion_material",
+            "stock": "estado_stock"
+        }
+
+        if campo not in campos_map:
+            return {"error": "Campo no válido"}, 400
+
+        campo_db = campos_map[campo]
+
+        # Preparar datos para actualizar
+        datos_actualizacion = {
+            campo_db: valor if valor else None
+        }
+
+        # Actualizar en la base de datos
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}",
+            headers=HEADERS,
+            json=datos_actualizacion
+        )
+
+        if response.status_code in [200, 204]:
+            return {"success": True, "campo": campo, "valor": valor}, 200
+        else:
+            return {"error": f"Error al actualizar: {response.text}"}, 500
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
 
 # ============================================
 # MATERIALES ESPECIALES (Cortinas y Pesacargas)
