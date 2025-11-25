@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Defectos - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* HEADER CENTRADO */
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+        }
+
+        main {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 60px 80px !important;
+        }
+
+        main .menu {
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Estadísticas */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 2px solid #e6e6e6;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            border-color: #003366;
+            transform: translateY(-2px);
+        }
+
+        .stat-card.active {
+            box-shadow: 0 4px 12px rgba(0, 51, 102, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #003366;
+        }
+
+        /* Sección de defectos */
+        .defectos-section {
+            margin-bottom: 35px;
+        }
+
+        .defectos-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .defectos-titulo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #003366;
+            margin: 0;
+        }
+
+        .defectos-contador {
+            background: #003c80;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* Tabla de defectos */
+        .defectos-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .defectos-table thead {
+            background: #f8f9fa;
+        }
+
+        .defectos-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: #003366;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e6e6e6;
+        }
+
+        .defectos-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .defectos-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .defectos-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .defecto-codigo {
+            font-weight: 700;
+            color: #003366;
+            font-size: 13px;
+        }
+
+        .defecto-descripcion {
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+
+        .defecto-maquina {
+            font-weight: 600;
+            color: #003366;
+        }
+
+        .defecto-direccion {
+            color: #666;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-dl {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-dg {
+            background: #fff8e1;
+            color: #f57c00;
+        }
+
+        .badge-dmg {
+            background: #fee;
+            color: #dc3545;
+        }
+
+        .badge-pendiente {
+            background: #fff8e1;
+            color: #856404;
+        }
+
+        .badge-subsanado {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        /* Indicadores de urgencia */
+        .urgencia-vencido {
+            color: #dc3545;
+            font-weight: 700;
+        }
+
+        .urgencia-urgente {
+            color: #f57c00;
+            font-weight: 700;
+        }
+
+        .urgencia-proximo {
+            color: #1565c0;
+            font-weight: 600;
+        }
+
+        .urgencia-normal {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        /* Botones */
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #003c80;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn:hover {
+            background: #002f66;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-action {
+            padding: 4px 10px;
+            font-size: 11px;
+            background: #28a745;
+        }
+
+        .btn-action:hover {
+            background: #218838;
+        }
+
+        .btn-link {
+            background: transparent;
+            color: #003366;
+            text-decoration: underline;
+            padding: 4px 8px;
+        }
+
+        .btn-link:hover {
+            background: #f0f0f0;
+            box-shadow: none;
+        }
+
+        /* No hay registros */
+        .no-registros {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="menu">
+            <div class="page-header">
+                <h2 class="page-title">Dashboard de Defectos</h2>
+                <div>
+                    <a href="/inspecciones" class="btn btn-secondary">Volver a Inspecciones</a>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div style="background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                              color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                              padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <!-- Estadísticas Generales -->
+            <div class="stats">
+                <div class="stat-card filtro-kpi" data-filtro="todos">
+                    <h3>Total Defectos</h3>
+                    <div class="number">{{ total_defectos }}</div>
+                </div>
+                <div class="stat-card filtro-kpi" data-filtro="pendientes" style="border-color: #ffc107;">
+                    <h3 style="color: #f57c00;">Pendientes</h3>
+                    <div class="number" style="color: #f57c00;">{{ total_pendientes }}</div>
+                </div>
+                <div class="stat-card filtro-kpi" data-filtro="subsanados" style="border-color: #28a745;">
+                    <h3 style="color: #2e7d32;">Subsanados</h3>
+                    <div class="number" style="color: #2e7d32;">{{ total_subsanados }}</div>
+                </div>
+            </div>
+
+            <!-- Estadísticas por Urgencia -->
+            <div class="stats">
+                <div class="stat-card filtro-kpi" data-filtro="vencidos" style="border-color: #dc3545;">
+                    <h3 style="color: #dc3545;">⚠️ Vencidos</h3>
+                    <div class="number" style="color: #dc3545;">{{ defectos_vencidos|length }}</div>
+                </div>
+                <div class="stat-card filtro-kpi" data-filtro="urgentes" style="border-color: #ffc107;">
+                    <h3 style="color: #f57c00;">🔔 Urgentes (15 días)</h3>
+                    <div class="number" style="color: #f57c00;">{{ defectos_urgentes|length }}</div>
+                </div>
+                <div class="stat-card filtro-kpi" data-filtro="proximos" style="border-color: #007bff;">
+                    <h3 style="color: #1565c0;">📋 Próximos (30 días)</h3>
+                    <div class="number" style="color: #1565c0;">{{ defectos_proximos|length }}</div>
+                </div>
+                <div class="stat-card filtro-kpi" data-filtro="normales" style="border-color: #28a745;">
+                    <h3 style="color: #2e7d32;">✅ Normales</h3>
+                    <div class="number" style="color: #2e7d32;">{{ defectos_normales|length }}</div>
+                </div>
+            </div>
+
+            <!-- Estadísticas por Calificación -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Defectos Leves (DL)</h3>
+                    <div class="number" style="color: #1565c0;">{{ defectos_dl }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Defectos Graves (DG)</h3>
+                    <div class="number" style="color: #f57c00;">{{ defectos_dg }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Defectos Muy Graves (DMG)</h3>
+                    <div class="number" style="color: #dc3545;">{{ defectos_dmg }}</div>
+                </div>
+            </div>
+
+            <!-- Defectos Vencidos -->
+            {% if defectos_vencidos %}
+            <div class="defectos-section seccion-defectos" data-categoria="vencidos">
+                <div class="defectos-header">
+                    <h3 class="defectos-titulo">⚠️ Defectos Vencidos</h3>
+                    <span class="defectos-contador">{{ defectos_vencidos|length }}</span>
+                </div>
+                <table class="defectos-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Calificación</th>
+                            <th>Máquina / Dirección</th>
+                            <th>Fecha Límite</th>
+                            <th>Días Vencidos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for defecto in defectos_vencidos %}
+                        <tr>
+                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
+                            <td><span class="defecto-descripcion">{{ defecto.descripcion }}</span></td>
+                            <td>
+                                <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
+                            </td>
+                            <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }} - {{ defecto.poblacion or '' }}</div>
+                            </td>
+                            <td>{{ defecto.fecha_limite|format_fecha }}</td>
+                            <td><span class="urgencia-vencido">⚠️ {{ defecto.dias_restantes|abs }} días</span></td>
+                            <td>
+                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver Inspección</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Defectos Urgentes -->
+            {% if defectos_urgentes %}
+            <div class="defectos-section seccion-defectos" data-categoria="urgentes">
+                <div class="defectos-header">
+                    <h3 class="defectos-titulo">🔔 Defectos Urgentes (15 días)</h3>
+                    <span class="defectos-contador">{{ defectos_urgentes|length }}</span>
+                </div>
+                <table class="defectos-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Calificación</th>
+                            <th>Máquina / Dirección</th>
+                            <th>Fecha Límite</th>
+                            <th>Días Restantes</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for defecto in defectos_urgentes %}
+                        <tr>
+                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
+                            <td><span class="defecto-descripcion">{{ defecto.descripcion }}</span></td>
+                            <td>
+                                <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
+                            </td>
+                            <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }} - {{ defecto.poblacion or '' }}</div>
+                            </td>
+                            <td>{{ defecto.fecha_limite|format_fecha }}</td>
+                            <td><span class="urgencia-urgente">⏰ {{ defecto.dias_restantes }} días</span></td>
+                            <td>
+                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver Inspección</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Defectos Próximos -->
+            {% if defectos_proximos %}
+            <div class="defectos-section seccion-defectos" data-categoria="proximos">
+                <div class="defectos-header">
+                    <h3 class="defectos-titulo">📋 Defectos Próximos (30 días)</h3>
+                    <span class="defectos-contador">{{ defectos_proximos|length }}</span>
+                </div>
+                <table class="defectos-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Calificación</th>
+                            <th>Máquina / Dirección</th>
+                            <th>Fecha Límite</th>
+                            <th>Días Restantes</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for defecto in defectos_proximos %}
+                        <tr>
+                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
+                            <td><span class="defecto-descripcion">{{ defecto.descripcion }}</span></td>
+                            <td>
+                                <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
+                            </td>
+                            <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }} - {{ defecto.poblacion or '' }}</div>
+                            </td>
+                            <td>{{ defecto.fecha_limite|format_fecha }}</td>
+                            <td><span class="urgencia-proximo">📅 {{ defecto.dias_restantes }} días</span></td>
+                            <td>
+                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver Inspección</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Defectos Normales -->
+            {% if defectos_normales %}
+            <div class="defectos-section seccion-defectos" data-categoria="normales">
+                <div class="defectos-header">
+                    <h3 class="defectos-titulo">✅ Defectos Normales</h3>
+                    <span class="defectos-contador">{{ defectos_normales|length }}</span>
+                </div>
+                <table class="defectos-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Calificación</th>
+                            <th>Máquina / Dirección</th>
+                            <th>Fecha Límite</th>
+                            <th>Días Restantes</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for defecto in defectos_normales %}
+                        <tr>
+                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
+                            <td><span class="defecto-descripcion">{{ defecto.descripcion }}</span></td>
+                            <td>
+                                <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
+                            </td>
+                            <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }} - {{ defecto.poblacion or '' }}</div>
+                            </td>
+                            <td>{{ defecto.fecha_limite|format_fecha }}</td>
+                            <td><span class="urgencia-normal">✓ {{ defecto.dias_restantes }} días</span></td>
+                            <td>
+                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver Inspección</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Defectos Subsanados -->
+            {% if defectos_subsanados %}
+            <div class="defectos-section seccion-defectos" data-categoria="subsanados">
+                <div class="defectos-header">
+                    <h3 class="defectos-titulo">✔️ Defectos Subsanados</h3>
+                    <span class="defectos-contador">{{ defectos_subsanados|length }}</span>
+                </div>
+                <table class="defectos-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Calificación</th>
+                            <th>Máquina / Dirección</th>
+                            <th>Fecha Subsanación</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for defecto in defectos_subsanados %}
+                        <tr>
+                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
+                            <td><span class="defecto-descripcion">{{ defecto.descripcion }}</span></td>
+                            <td>
+                                <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
+                            </td>
+                            <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }} - {{ defecto.poblacion or '' }}</div>
+                            </td>
+                            <td>{{ defecto.fecha_subsanacion|format_fecha if defecto.fecha_subsanacion else '-' }}</td>
+                            <td><span class="badge badge-subsanado">SUBSANADO</span></td>
+                            <td>
+                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver Inspección</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            {% if total_defectos == 0 %}
+            <div class="no-registros">
+                No hay defectos registrados en el sistema
+            </div>
+            {% endif %}
+
+            <br><br>
+            <a href="/home" class="button">Volver al Home</a>
+        </div>
+    </main>
+
+    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+
+    <!-- Filtrado de KPIs -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const kpis = document.querySelectorAll('.filtro-kpi');
+            const secciones = document.querySelectorAll('.seccion-defectos');
+
+            kpis.forEach(kpi => {
+                kpi.addEventListener('click', function() {
+                    const filtro = this.dataset.filtro;
+
+                    // Remover estilo activo de todos los KPIs
+                    kpis.forEach(k => {
+                        k.classList.remove('active');
+                    });
+
+                    // Si se hace click en "todos", mostrar todas las secciones
+                    if (filtro === 'todos') {
+                        secciones.forEach(seccion => {
+                            seccion.style.display = '';
+                        });
+                        this.classList.add('active');
+                        return;
+                    }
+
+                    // Para "pendientes", mostrar todas excepto subsanados
+                    if (filtro === 'pendientes') {
+                        secciones.forEach(seccion => {
+                            const categoria = seccion.dataset.categoria;
+                            if (categoria === 'subsanados') {
+                                seccion.style.display = 'none';
+                            } else {
+                                seccion.style.display = '';
+                            }
+                        });
+                        this.classList.add('active');
+                        return;
+                    }
+
+                    // Filtrar secciones según categoría del KPI
+                    secciones.forEach(seccion => {
+                        const categoria = seccion.dataset.categoria;
+                        if (categoria === filtro) {
+                            seccion.style.display = '';
+                        } else {
+                            seccion.style.display = 'none';
+                        }
+                    });
+
+                    // Marcar KPI como activo
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

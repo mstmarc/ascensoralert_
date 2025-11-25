@@ -3891,6 +3891,77 @@ def inspecciones_dashboard():
         ocas=ocas
     )
 
+# Dashboard de Defectos (vista dedicada)
+@app.route("/defectos_dashboard")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'read')
+def defectos_dashboard():
+    """Dashboard principal de defectos con estadísticas y filtros"""
+
+    # Obtener todos los defectos con información de urgencia usando la vista
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/v_defectos_con_urgencia?select=*&order=fecha_limite.asc",
+        headers=HEADERS
+    )
+
+    todos_defectos = []
+    if response.status_code == 200:
+        todos_defectos = response.json()
+
+    # Calcular estadísticas generales
+    total_defectos = len(todos_defectos)
+    defectos_pendientes = [d for d in todos_defectos if d.get('estado') == 'PENDIENTE']
+    defectos_subsanados = [d for d in todos_defectos if d.get('estado') == 'SUBSANADO']
+
+    # Clasificar por urgencia
+    defectos_vencidos = [d for d in defectos_pendientes if d.get('nivel_urgencia') == 'VENCIDO']
+    defectos_urgentes = [d for d in defectos_pendientes if d.get('nivel_urgencia') == 'URGENTE']
+    defectos_proximos = [d for d in defectos_pendientes if d.get('nivel_urgencia') == 'PROXIMO']
+    defectos_normales = [d for d in defectos_pendientes if d.get('nivel_urgencia') == 'NORMAL']
+
+    # Estadísticas por calificación (solo pendientes)
+    defectos_dl = [d for d in defectos_pendientes if d.get('calificacion') == 'DL']  # Defecto Leve
+    defectos_dg = [d for d in defectos_pendientes if d.get('calificacion') == 'DG']  # Defecto Grave
+    defectos_dmg = [d for d in defectos_pendientes if d.get('calificacion') == 'DMG']  # Defecto Muy Grave
+
+    # Obtener información adicional de inspecciones para enriquecer datos
+    response_insp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?select=id,maquina,direccion,poblacion,fecha_inspeccion,oca_id,oca:ocas(nombre)",
+        headers=HEADERS
+    )
+
+    inspecciones_dict = {}
+    if response_insp.status_code == 200:
+        inspecciones = response_insp.json()
+        for insp in inspecciones:
+            inspecciones_dict[insp['id']] = insp
+
+    # Enriquecer defectos con información de inspección
+    for defecto in todos_defectos:
+        insp_id = defecto.get('inspeccion_id')
+        if insp_id and insp_id in inspecciones_dict:
+            insp = inspecciones_dict[insp_id]
+            defecto['direccion'] = insp.get('direccion')
+            defecto['poblacion'] = insp.get('poblacion')
+            defecto['fecha_inspeccion'] = insp.get('fecha_inspeccion')
+            defecto['oca_nombre'] = insp.get('oca', {}).get('nombre') if insp.get('oca') else None
+
+    return render_template(
+        "defectos_dashboard.html",
+        total_defectos=total_defectos,
+        total_pendientes=len(defectos_pendientes),
+        total_subsanados=len(defectos_subsanados),
+        defectos_vencidos=defectos_vencidos,
+        defectos_urgentes=defectos_urgentes,
+        defectos_proximos=defectos_proximos,
+        defectos_normales=defectos_normales,
+        defectos_subsanados=defectos_subsanados,
+        defectos_dl=len(defectos_dl),
+        defectos_dg=len(defectos_dg),
+        defectos_dmg=len(defectos_dmg),
+        todos_defectos=todos_defectos
+    )
+
 # Nueva Inspección - Formulario
 @app.route("/inspecciones/nueva", methods=["GET", "POST"])
 @helpers.login_required
