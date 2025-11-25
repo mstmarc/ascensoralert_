@@ -313,6 +313,21 @@
                         <p class="help-text">Define cómo obtener los materiales necesarios</p>
                     </div>
                 </div>
+
+                <div>
+                    <label for="estado_stock">
+                        📊 Estado de Stock
+                    </label>
+                    <select id="estado_stock" name="estado_stock">
+                        <option value="" {% if not defecto.estado_stock %}selected{% endif %}>-- Sin definir --</option>
+                        <option value="en_stock" {% if defecto.estado_stock == 'en_stock' %}selected{% endif %}>✅ En Stock (material disponible)</option>
+                        <option value="por_pedir" {% if defecto.estado_stock == 'por_pedir' %}selected{% endif %}>📋 Por Pedir (pendiente de pedido)</option>
+                        <option value="pedido" {% if defecto.estado_stock == 'pedido' %}selected{% endif %}>📦 Pedido (en camino)</option>
+                        <option value="recibido" {% if defecto.estado_stock == 'recibido' %}selected{% endif %}>📥 Recibido (listo para instalar)</option>
+                        <option value="instalado" {% if defecto.estado_stock == 'instalado' %}selected{% endif %}>✔️ Instalado (completado)</option>
+                    </select>
+                    <p class="help-text">Indica el estado actual del material necesario</p>
+                </div>
             </div>
 
             <!-- Observaciones Detalladas -->

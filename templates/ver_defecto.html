@@ -393,6 +393,25 @@
                         {% endif %}
                     </div>
                 </div>
+
+                <div class="info-item">
+                    <div class="info-label">Estado de Stock</div>
+                    <div class="info-value">
+                        {% if defecto.estado_stock == 'en_stock' %}
+                            ✅ En Stock
+                        {% elif defecto.estado_stock == 'por_pedir' %}
+                            📋 Por Pedir
+                        {% elif defecto.estado_stock == 'pedido' %}
+                            📦 Pedido
+                        {% elif defecto.estado_stock == 'recibido' %}
+                            📥 Recibido
+                        {% elif defecto.estado_stock == 'instalado' %}
+                            ✔️ Instalado
+                        {% else %}
+                            <span style="color: #999;">Sin definir</span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 
