@@ -4636,11 +4636,16 @@ def guardar_defectos_importados(inspeccion_id):
         headers=HEADERS
     )
 
-    logger.info(f" Respuesta BD: status={response_insp.status_code}, data={response_insp.json() if response_insp.status_code == 200 else 'error'}")
+    logger.info(f" Respuesta BD: status={response_insp.status_code}")
 
-    if response_insp.status_code != 200 or not response_insp.json():
+    if response_insp.status_code != 200:
+        logger.error(f" Error BD: {response_insp.text}")
+        flash("Error al consultar inspección", "error")
+        return redirect("/inspecciones")
+
+    if not response_insp.json():
         flash("Inspección no encontrada", "error")
-        logger.error(f" Error: Inspección {inspeccion_id} no encontrada en BD")
+        logger.error(f" Inspección {inspeccion_id} no tiene datos")
         return redirect("/inspecciones")
 
     insp_data = response_insp.json()[0]
