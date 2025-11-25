@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Defecto - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        header .header-container { display: flex; justify-content: center; align-items: center; }
+        header .logo-container { display: flex; justify-content: center; align-items: center; }
+
+        body { font-family: 'Montserrat', sans-serif; background: #ffffff; }
+        main { max-width: 1000px !important; margin: 0 auto !important; padding: 40px !important; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .badge-urgencia {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-vencido {
+            background: #fee;
+            color: #dc3545;
+        }
+
+        .badge-urgente {
+            background: #fff8e1;
+            color: #f57c00;
+        }
+
+        .badge-proximo {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-normal {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-completado {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-left: 4px solid #003366;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+
+        .info-section {
+            background: white;
+            border: 1px solid #e6e6e6;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .info-section h3 {
+            color: #003366;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e6e6e6;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 15px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .info-value.large {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-dl {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-dg {
+            background: #fff8e1;
+            color: #f57c00;
+        }
+
+        .badge-dmg {
+            background: #fee;
+            color: #dc3545;
+        }
+
+        .badge-material {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            margin-left: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            background: #003c80;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button:hover {
+            background: #002f66;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .materiales-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .materiales-list li {
+            padding: 10px;
+            background: #f8f9fa;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #7b1fa2;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <div>
+                <h2 class="page-title">📋 Detalle del Defecto {{ defecto.codigo }}</h2>
+            </div>
+            <div>
+                {% if defecto.nivel_urgencia == 'VENCIDO' %}
+                    <span class="badge-urgencia badge-vencido">⚠️ VENCIDO</span>
+                {% elif defecto.nivel_urgencia == 'URGENTE' %}
+                    <span class="badge-urgencia badge-urgente">🔔 URGENTE</span>
+                {% elif defecto.nivel_urgencia == 'PROXIMO' %}
+                    <span class="badge-urgencia badge-proximo">📅 PRÓXIMO</span>
+                {% elif defecto.nivel_urgencia == 'NORMAL' %}
+                    <span class="badge-urgencia badge-normal">✅ NORMAL</span>
+                {% elif defecto.nivel_urgencia == 'COMPLETADO' %}
+                    <span class="badge-urgencia badge-completado">✔️ SUBSANADO</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div style="background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                          color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                          padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Alerta de materiales especiales -->
+        {% if defecto.es_cortina or defecto.es_pesacarga %}
+        <div class="alert-warning">
+            <strong>⚠️ Materiales Especiales Requeridos:</strong>
+            {% if defecto.es_cortina %}🚪 Cortina Fotoeléctrica{% endif %}
+            {% if defecto.es_cortina and defecto.es_pesacarga %} | {% endif %}
+            {% if defecto.es_pesacarga %}⚖️ Sistema Pesacarga{% endif %}
+            <br>
+            <small>Recuerda gestionar el pedido de estos materiales desde Gran Canaria o Tenerife</small>
+        </div>
+        {% endif %}
+
+        <!-- Información del Defecto -->
+        <div class="info-section">
+            <h3>Información del Defecto</h3>
+
+            <div class="info-item">
+                <div class="info-label">Código del Defecto</div>
+                <div class="info-value">{{ defecto.codigo or '-' }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Descripción</div>
+                <div class="info-value large">{{ defecto.descripcion }}</div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Calificación</div>
+                    <div class="info-value">
+                        <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
+                        {% if defecto.calificacion == 'DL' %} - Defecto Leve
+                        {% elif defecto.calificacion == 'DG' %} - Defecto Grave
+                        {% elif defecto.calificacion == 'DMG' %} - Defecto Muy Grave
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Estado</div>
+                    <div class="info-value">
+                        {% if defecto.estado == 'PENDIENTE' %}
+                            <span style="color: #f57c00; font-weight: 700;">PENDIENTE</span>
+                        {% else %}
+                            <span style="color: #2e7d32; font-weight: 700;">✔️ SUBSANADO</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Plazo</div>
+                    <div class="info-value">{{ defecto.plazo_meses }} meses</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Fecha Límite</div>
+                    <div class="info-value">
+                        {{ defecto.fecha_limite|format_fecha }}
+                        {% if defecto.estado == 'PENDIENTE' and defecto.dias_restantes is defined %}
+                            {% if defecto.dias_restantes < 0 %}
+                                <span style="color: #dc3545; font-weight: 700;">(⚠️ Vencido hace {{ defecto.dias_restantes|abs }} días)</span>
+                            {% else %}
+                                <span style="color: #1565c0; font-weight: 600;">(Quedan {{ defecto.dias_restantes }} días)</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if defecto.estado == 'SUBSANADO' and defecto.fecha_subsanacion %}
+            <div class="info-item">
+                <div class="info-label">Fecha de Subsanación</div>
+                <div class="info-value">{{ defecto.fecha_subsanacion|format_fecha }}</div>
+            </div>
+            {% endif %}
+
+            {% if defecto.observaciones %}
+            <div class="info-item">
+                <div class="info-label">Observaciones</div>
+                <div class="info-value large">{{ defecto.observaciones }}</div>
+            </div>
+            {% endif %}
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Requiere Materiales Especiales</div>
+                    <div class="info-value">
+                        {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
+                        {% if defecto.es_pesacarga %}<span class="badge badge-material">⚖️ PESACARGA</span>{% endif %}
+                        {% if not defecto.es_cortina and not defecto.es_pesacarga %}No{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de la Inspección -->
+        <div class="info-section">
+            <h3>Inspección Asociada</h3>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">RAE / Máquina</div>
+                    <div class="info-value">{{ defecto.inspeccion.maquina }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Organismo OCA</div>
+                    <div class="info-value">{{ defecto.inspeccion.oca.nombre if defecto.inspeccion.oca else '-' }}</div>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Ubicación</div>
+                <div class="info-value">
+                    {{ defecto.inspeccion.direccion }}{% if defecto.inspeccion.poblacion %}, {{ defecto.inspeccion.poblacion }}{% endif %}
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Fecha de Inspección</div>
+                    <div class="info-value">{{ defecto.inspeccion.fecha_inspeccion|format_fecha }}</div>
+                </div>
+
+                {% if defecto.inspeccion.fecha_segunda_inspeccion %}
+                <div class="info-item">
+                    <div class="info-label">Fecha Segunda Inspección</div>
+                    <div class="info-value">{{ defecto.inspeccion.fecha_segunda_inspeccion|format_fecha }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-top: 15px;">
+                <a href="/inspecciones/ver/{{ defecto.inspeccion.id }}" class="button btn-secondary">Ver Inspección Completa</a>
+            </div>
+        </div>
+
+        <!-- Materiales Especiales Relacionados -->
+        {% if materiales_relacionados %}
+        <div class="info-section">
+            <h3>📦 Materiales Especiales Gestionados</h3>
+            <ul class="materiales-list">
+                {% for material in materiales_relacionados %}
+                <li>
+                    <strong>{{ material.tipo }}</strong> -
+                    Cantidad: {{ material.cantidad }} -
+                    Estado: <strong>{{ material.estado }}</strong>
+                    {% if material.fecha_pedido %} | Pedido: {{ material.fecha_pedido|format_fecha }}{% endif %}
+                    {% if material.fecha_recepcion %} | Recibido: {{ material.fecha_recepcion|format_fecha }}{% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Sección de gestión de materiales/productos -->
+        <div class="info-card">
+            <strong>📦 Gestión de Materiales y Productos</strong><br>
+            <p style="margin: 10px 0 15px 0; color: #666; font-size: 14px;">
+                Para solucionar este defecto, anota aquí los materiales o productos que necesitas comprar en Gran Canaria o pedir a Tenerife.
+                Puedes agregar esta información editando el defecto y añadiendo observaciones detalladas.
+            </p>
+            <p style="margin: 0; color: #666; font-size: 13px;">
+                💡 <strong>Tip:</strong> Usa las observaciones para indicar: proveedor, referencia del producto, cantidad, estado del pedido, etc.
+            </p>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="action-buttons">
+            <a href="/defectos/{{ defecto.id }}/editar" class="button">✏️ Editar Defecto</a>
+
+            {% if defecto.estado == 'PENDIENTE' %}
+            <form method="POST" action="/defectos/{{ defecto.id }}/subsanar" style="display: inline;">
+                <button type="submit" class="button btn-success" onclick="return confirm('¿Marcar este defecto como subsanado?')">
+                    ✅ Marcar como Subsanado
+                </button>
+            </form>
+            {% endif %}
+
+            <a href="/defectos_dashboard" class="button btn-secondary">Volver al Dashboard</a>
+
+            {% if session.get('perfil') == 'admin' %}
+            <a href="/defectos/{{ defecto.id }}/eliminar"
+               class="button btn-danger"
+               onclick="return confirm('¿Estás seguro de eliminar este defecto?')">
+                🗑️ Eliminar
+            </a>
+            {% endif %}
+        </div>
+
+        <br><br>
+    </main>
+
+    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>
