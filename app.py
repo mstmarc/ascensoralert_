@@ -5069,6 +5069,11 @@ def editar_defecto(defecto_id):
         es_pesacarga = request.form.get("es_pesacarga") == "on"
         observaciones = request.form.get("observaciones")
 
+        # Nuevos campos de gestión operativa
+        tecnico_asignado = request.form.get("tecnico_asignado") or None
+        gestion_material = request.form.get("gestion_material") or None
+        estado_stock = request.form.get("estado_stock") or None
+
         # Validaciones
         if not descripcion or not calificacion:
             flash("Descripción y calificación son obligatorios", "error")
@@ -5084,7 +5089,10 @@ def editar_defecto(defecto_id):
             "estado": estado,
             "es_cortina": es_cortina,
             "es_pesacarga": es_pesacarga,
-            "observaciones": observaciones
+            "observaciones": observaciones,
+            "tecnico_asignado": tecnico_asignado,
+            "gestion_material": gestion_material,
+            "estado_stock": estado_stock
         }
 
         # Si el estado es subsanado y hay fecha, incluirla

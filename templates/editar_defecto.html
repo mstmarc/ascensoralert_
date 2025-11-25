@@ -280,46 +280,96 @@
 
             <!-- Gestión del Trabajo, Técnicos y Materiales -->
             <div class="form-section">
-                <h3>📋 Planificación: Trabajo, Técnicos y Materiales</h3>
+                <h3>👷 Gestión Operativa: Materiales y Técnico</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">
+                    Asigna el técnico responsable y gestiona los materiales necesarios
+                </p>
+
+                <div class="form-grid">
+                    <div>
+                        <label for="tecnico_asignado">
+                            👷 Técnico Asignado
+                        </label>
+                        <select id="tecnico_asignado" name="tecnico_asignado">
+                            <option value="" {% if not defecto.tecnico_asignado %}selected{% endif %}>-- Sin asignar --</option>
+                            <option value="sergio" {% if defecto.tecnico_asignado == 'sergio' %}selected{% endif %}>Sergio</option>
+                            <option value="guimi" {% if defecto.tecnico_asignado == 'guimi' %}selected{% endif %}>Guimi</option>
+                            <option value="tenerife" {% if defecto.tecnico_asignado == 'tenerife' %}selected{% endif %}>Técnico Tenerife</option>
+                            <option value="subcontrata" {% if defecto.tecnico_asignado == 'subcontrata' %}selected{% endif %}>Subcontrata</option>
+                        </select>
+                        <p class="help-text">Selecciona quién realizará el trabajo</p>
+                    </div>
+
+                    <div>
+                        <label for="gestion_material">
+                            📦 Gestión de Materiales
+                        </label>
+                        <select id="gestion_material" name="gestion_material">
+                            <option value="" {% if not defecto.gestion_material %}selected{% endif %}>-- Sin definir --</option>
+                            <option value="comprar" {% if defecto.gestion_material == 'comprar' %}selected{% endif %}>Comprar en Gran Canaria</option>
+                            <option value="pedir_tenerife" {% if defecto.gestion_material == 'pedir_tenerife' %}selected{% endif %}>Pedir a Tenerife</option>
+                            <option value="no_necesita" {% if defecto.gestion_material == 'no_necesita' %}selected{% endif %}>No se necesita material</option>
+                        </select>
+                        <p class="help-text">Define cómo obtener los materiales necesarios</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="estado_stock">
+                        📊 Estado de Stock
+                    </label>
+                    <select id="estado_stock" name="estado_stock">
+                        <option value="" {% if not defecto.estado_stock %}selected{% endif %}>-- Sin definir --</option>
+                        <option value="en_stock" {% if defecto.estado_stock == 'en_stock' %}selected{% endif %}>✅ En Stock (material disponible)</option>
+                        <option value="por_pedir" {% if defecto.estado_stock == 'por_pedir' %}selected{% endif %}>📋 Por Pedir (pendiente de pedido)</option>
+                        <option value="pedido" {% if defecto.estado_stock == 'pedido' %}selected{% endif %}>📦 Pedido (en camino)</option>
+                        <option value="recibido" {% if defecto.estado_stock == 'recibido' %}selected{% endif %}>📥 Recibido (listo para instalar)</option>
+                        <option value="instalado" {% if defecto.estado_stock == 'instalado' %}selected{% endif %}>✔️ Instalado (completado)</option>
+                    </select>
+                    <p class="help-text">Indica el estado actual del material necesario</p>
+                </div>
+            </div>
+
+            <!-- Observaciones Detalladas -->
+            <div class="form-section">
+                <h3>📋 Observaciones y Detalles Adicionales</h3>
                 <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
-                    Documenta toda la información necesaria para planificar y ejecutar la solución del defecto
+                    Documenta información adicional sobre materiales específicos, referencias, fechas, coordinación, etc.
                 </p>
 
                 <div style="background: #fff8e1; border-left: 4px solid #f57c00; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <strong style="color: #003366;">📌 Qué documentar:</strong>
+                    <strong style="color: #003366;">💡 Información útil a documentar:</strong>
                     <ul style="margin: 10px 0 0 20px; color: #666; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Asignación:</strong> Técnico propio Gran Canaria, Subcontrata, o Técnico de Tenerife</li>
-                        <li><strong>Materiales:</strong> Productos necesarios, proveedor (GC/Tenerife), referencias, cantidades</li>
-                        <li><strong>Estado:</strong> Pedido pendiente, en camino, recibido, por instalar</li>
-                        <li><strong>Fechas:</strong> Pedido, recepción prevista, instalación programada</li>
+                        <li><strong>Materiales específicos:</strong> Modelo, referencia, proveedor exacto, cantidad</li>
+                        <li><strong>Estados:</strong> Pedido pendiente, en camino, recibido, por instalar</li>
+                        <li><strong>Fechas:</strong> Pedido realizado, recepción prevista, instalación programada</li>
+                        <li><strong>Coordinación:</strong> Acceso, horarios, contactos, instrucciones especiales</li>
                     </ul>
                 </div>
 
                 <label for="observaciones">
-                    Observaciones y Planificación Completa
+                    Observaciones y Notas Detalladas
                 </label>
                 <textarea id="observaciones"
                           name="observaciones"
-                          style="min-height: 200px;"
-                          placeholder="Estructura sugerida:
+                          style="min-height: 180px;"
+                          placeholder="Ejemplo:
 
-ASIGNACIÓN DE TRABAJO:
-- Responsable: [Técnico propio GC / Subcontrata / Técnico Tenerife]
-- Nombre/Empresa: [nombre o empresa]
+MATERIALES ESPECÍFICOS:
+- Producto: Cortina fotoeléctrica XYZ modelo ABC
+- Referencia/Código: REF-12345
+- Proveedor: Ferretería Central GC / Almacén Tenerife
+- Cantidad: 2 unidades
+- Estado: Pedido el 15/01/2024 / Recibido / Por instalar
+
+COORDINACIÓN:
 - Fecha programada: [dd/mm/aaaa]
-
-MATERIALES NECESARIOS:
-- Producto: [descripción y modelo]
-- Proveedor: [Gran Canaria / Tenerife]
-- Referencia/Código: [ref]
-- Cantidad: [número]
-- Estado pedido: [Pendiente / Pedido el [fecha] / Recibido el [fecha]]
-
-NOTAS ADICIONALES:
-- [información relevante sobre acceso, horarios, coordinación, etc.]">{{ defecto.observaciones or '' }}</textarea>
+- Contacto cliente: [nombre y teléfono]
+- Horario acceso: [horario]
+- Notas especiales: [información relevante]">{{ defecto.observaciones or '' }}</textarea>
 
                 <p class="help-text">
-                    💡 <strong>Tip:</strong> Usa esta estructura para facilitar la coordinación entre pedidos de materiales y asignación de técnicos
+                    💡 <strong>Tip:</strong> Usa este campo para información detallada que complemente las selecciones anteriores
                 </p>
             </div>
 

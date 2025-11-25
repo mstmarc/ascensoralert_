@@ -445,13 +445,14 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 100px;">Código</th>
-                            <th style="width: 300px;">Descripción</th>
-                            <th style="width: 70px;">Calificación</th>
+                            <th style="width: 90px;">Código</th>
+                            <th style="width: 250px;">Descripción</th>
+                            <th style="width: 60px;">Calif.</th>
                             <th>Máquina / Ubicación</th>
-                            <th style="width: 100px;">Fecha Límite</th>
-                            <th style="width: 100px;">Días Vencidos</th>
-                            <th style="width: 140px;">Acciones</th>
+                            <th style="width: 130px;">Técnico / Material / Stock</th>
+                            <th style="width: 95px;">Fecha Límite</th>
+                            <th style="width: 90px;">Días Vencidos</th>
+                            <th style="width: 120px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -469,6 +470,29 @@
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                            </td>
+                            <td style="font-size: 11px;">
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
+                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
+                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
+                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
+                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
+                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
+                                <div>
+                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
+                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
+                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
+                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
+                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-vencido">⚠️ {{ defecto.dias_restantes|abs }} días</span></td>
@@ -493,13 +517,14 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 100px;">Código</th>
-                            <th style="width: 300px;">Descripción</th>
-                            <th style="width: 70px;">Calificación</th>
+                            <th style="width: 90px;">Código</th>
+                            <th style="width: 250px;">Descripción</th>
+                            <th style="width: 60px;">Calif.</th>
                             <th>Máquina / Ubicación</th>
-                            <th style="width: 100px;">Fecha Límite</th>
-                            <th style="width: 100px;">Días Restantes</th>
-                            <th style="width: 140px;">Acciones</th>
+                            <th style="width: 130px;">Técnico / Material / Stock</th>
+                            <th style="width: 95px;">Fecha Límite</th>
+                            <th style="width: 90px;">Días Restantes</th>
+                            <th style="width: 120px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -517,6 +542,29 @@
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                            </td>
+                            <td style="font-size: 11px;">
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
+                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
+                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
+                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
+                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
+                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
+                                <div>
+                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
+                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
+                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
+                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
+                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-urgente">⏰ {{ defecto.dias_restantes }} días</span></td>
@@ -541,13 +589,14 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 100px;">Código</th>
-                            <th style="width: 300px;">Descripción</th>
-                            <th style="width: 70px;">Calificación</th>
+                            <th style="width: 90px;">Código</th>
+                            <th style="width: 250px;">Descripción</th>
+                            <th style="width: 60px;">Calif.</th>
                             <th>Máquina / Ubicación</th>
-                            <th style="width: 100px;">Fecha Límite</th>
-                            <th style="width: 100px;">Días Restantes</th>
-                            <th style="width: 140px;">Acciones</th>
+                            <th style="width: 130px;">Técnico / Material / Stock</th>
+                            <th style="width: 95px;">Fecha Límite</th>
+                            <th style="width: 90px;">Días Restantes</th>
+                            <th style="width: 120px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -565,6 +614,29 @@
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                            </td>
+                            <td style="font-size: 11px;">
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
+                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
+                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
+                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
+                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
+                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
+                                <div>
+                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
+                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
+                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
+                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
+                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-proximo">📆 {{ defecto.dias_restantes }} días</span></td>
@@ -589,13 +661,14 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 100px;">Código</th>
-                            <th style="width: 300px;">Descripción</th>
-                            <th style="width: 70px;">Calificación</th>
+                            <th style="width: 90px;">Código</th>
+                            <th style="width: 250px;">Descripción</th>
+                            <th style="width: 60px;">Calif.</th>
                             <th>Máquina / Ubicación</th>
-                            <th style="width: 100px;">Fecha Límite</th>
-                            <th style="width: 100px;">Días Restantes</th>
-                            <th style="width: 140px;">Acciones</th>
+                            <th style="width: 130px;">Técnico / Material / Stock</th>
+                            <th style="width: 95px;">Fecha Límite</th>
+                            <th style="width: 90px;">Días Restantes</th>
+                            <th style="width: 120px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -613,6 +686,29 @@
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                            </td>
+                            <td style="font-size: 11px;">
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
+                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
+                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
+                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
+                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
+                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
+                                <div>
+                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
+                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
+                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
+                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
+                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
+                                </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-normal">✓ {{ defecto.dias_restantes }} días</span></td>
