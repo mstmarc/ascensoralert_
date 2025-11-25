@@ -368,12 +368,14 @@
                             </td>
                             <td>{{ defecto.estado }}</td>
                             <td>
+                                <a href="/defectos/{{ defecto.id }}" class="btn-primary btn-sm" title="Ver detalle completo">👁️ Ver</a>
+                                <a href="/defectos/{{ defecto.id }}/editar" class="btn-primary btn-sm" title="Editar defecto">✏️ Editar</a>
                                 {% if defecto.estado == 'PENDIENTE' %}
                                 <form method="POST" action="/defectos/{{ defecto.id }}/subsanar" style="display: inline;">
-                                    <button type="submit" class="btn-primary btn-sm">Subsanar</button>
+                                    <button type="submit" class="btn-primary btn-sm" title="Marcar como subsanado">✅</button>
                                 </form>
                                 {% endif %}
-                                <a href="/defectos/{{ defecto.id }}/eliminar" class="btn-danger btn-sm" onclick="return confirm('¿Eliminar este defecto?')">Eliminar</a>
+                                <a href="/defectos/{{ defecto.id }}/eliminar" class="btn-danger btn-sm" onclick="return confirm('¿Eliminar este defecto?')" title="Eliminar defecto">🗑️</a>
                             </td>
                         </tr>
                         {% endfor %}
