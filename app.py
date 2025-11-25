@@ -4632,7 +4632,7 @@ def guardar_defectos_importados(inspeccion_id):
 
     # Obtener fecha de inspección para calcular fechas límite
     response_insp = requests.get(
-        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=fecha_inspeccion,titular_nombre,direccion_instalacion,municipio",
+        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=*",
         headers=HEADERS
     )
 
@@ -4716,9 +4716,9 @@ def guardar_defectos_importados(inspeccion_id):
                 material_data = {
                     "tipo": tipo_material,
                     "inspeccion_id": inspeccion_id,
-                    "cliente_nombre": insp_data.get('titular_nombre'),
-                    "direccion": insp_data.get('direccion_instalacion'),
-                    "municipio": insp_data.get('municipio'),
+                    "cliente_nombre": insp_data.get('maquina', ''),  # Usar maquina como referencia
+                    "direccion": "",  # No disponible en inspecciones
+                    "municipio": "",  # No disponible en inspecciones
                     "cantidad": 1,
                     "fecha_limite": fecha_limite,
                     "estado": "PENDIENTE"
