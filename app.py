@@ -4964,6 +4964,138 @@ def eliminar_defecto(defecto_id):
 
     return redirect(request.referrer)
 
+# Ver detalle de un defecto
+@app.route("/defectos/<int:defecto_id>")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'read')
+def ver_defecto(defecto_id):
+    """Ver detalle completo de un defecto"""
+
+    # Obtener el defecto con información de inspección
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}&select=*,inspeccion:inspecciones(id,rae,maquina,direccion,poblacion,fecha_inspeccion,fecha_segunda_inspeccion,oca_id,oca:ocas(nombre))",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Defecto no encontrado", "error")
+        return redirect("/defectos_dashboard")
+
+    defecto = response.json()[0]
+
+    # Calcular días restantes
+    if defecto.get('fecha_limite') and defecto.get('estado') == 'PENDIENTE':
+        try:
+            fecha_limite = datetime.strptime(defecto['fecha_limite'].split('T')[0], '%Y-%m-%d').date()
+            hoy = date.today()
+            dias_restantes = (fecha_limite - hoy).days
+            defecto['dias_restantes'] = dias_restantes
+
+            if dias_restantes < 0:
+                defecto['nivel_urgencia'] = 'VENCIDO'
+            elif dias_restantes <= 15:
+                defecto['nivel_urgencia'] = 'URGENTE'
+            elif dias_restantes <= 30:
+                defecto['nivel_urgencia'] = 'PROXIMO'
+            else:
+                defecto['nivel_urgencia'] = 'NORMAL'
+        except:
+            defecto['nivel_urgencia'] = 'NORMAL'
+    else:
+        defecto['nivel_urgencia'] = 'COMPLETADO'
+
+    # Verificar si hay materiales especiales relacionados
+    response_materiales = requests.get(
+        f"{SUPABASE_URL}/rest/v1/materiales_especiales?defecto_id=eq.{defecto_id}&select=*",
+        headers=HEADERS
+    )
+
+    materiales_relacionados = []
+    if response_materiales.status_code == 200:
+        materiales_relacionados = response_materiales.json()
+
+    return render_template(
+        "ver_defecto.html",
+        defecto=defecto,
+        materiales_relacionados=materiales_relacionados
+    )
+
+# Editar defecto
+@app.route("/defectos/<int:defecto_id>/editar", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
+def editar_defecto(defecto_id):
+    """Editar un defecto existente"""
+
+    if request.method == "POST":
+        # Obtener datos del formulario
+        codigo = request.form.get("codigo")
+        descripcion = request.form.get("descripcion")
+        calificacion = request.form.get("calificacion")
+        plazo_meses = request.form.get("plazo_meses", type=int)
+        fecha_limite_str = request.form.get("fecha_limite")
+        estado = request.form.get("estado")
+        fecha_subsanacion_str = request.form.get("fecha_subsanacion")
+        es_cortina = request.form.get("es_cortina") == "on"
+        es_pesacarga = request.form.get("es_pesacarga") == "on"
+        observaciones = request.form.get("observaciones")
+
+        # Validaciones
+        if not descripcion or not calificacion:
+            flash("Descripción y calificación son obligatorios", "error")
+            return redirect(f"/defectos/{defecto_id}/editar")
+
+        # Preparar datos para actualizar
+        datos_actualizacion = {
+            "codigo": codigo,
+            "descripcion": descripcion,
+            "calificacion": calificacion,
+            "plazo_meses": plazo_meses,
+            "fecha_limite": fecha_limite_str,
+            "estado": estado,
+            "es_cortina": es_cortina,
+            "es_pesacarga": es_pesacarga,
+            "observaciones": observaciones
+        }
+
+        # Si el estado es subsanado y hay fecha, incluirla
+        if estado == "SUBSANADO" and fecha_subsanacion_str:
+            datos_actualizacion["fecha_subsanacion"] = fecha_subsanacion_str
+        elif estado == "PENDIENTE":
+            datos_actualizacion["fecha_subsanacion"] = None
+
+        # Actualizar en la base de datos
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}",
+            headers=HEADERS,
+            json=datos_actualizacion
+        )
+
+        if response.status_code in [200, 204]:
+            flash("Defecto actualizado correctamente", "success")
+            return redirect(f"/defectos/{defecto_id}")
+        else:
+            flash(f"Error al actualizar defecto: {response.text}", "error")
+            return redirect(f"/defectos/{defecto_id}/editar")
+
+    # GET: Mostrar formulario de edición
+    # Obtener el defecto con información de inspección
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}&select=*,inspeccion:inspecciones(id,rae,maquina,direccion,fecha_inspeccion)",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Defecto no encontrado", "error")
+        return redirect("/defectos_dashboard")
+
+    defecto = response.json()[0]
+
+    return render_template(
+        "editar_defecto.html",
+        defecto=defecto
+    )
+
 # ============================================
 # MATERIALES ESPECIALES (Cortinas y Pesacargas)
 # ============================================

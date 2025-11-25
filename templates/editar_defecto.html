@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Defecto - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        header .header-container { display: flex; justify-content: center; align-items: center; }
+        header .logo-container { display: flex; justify-content: center; align-items: center; }
+
+        body { font-family: 'Montserrat', sans-serif; background: #ffffff; }
+        main { max-width: 900px !important; margin: 0 auto !important; padding: 40px !important; }
+
+        .page-title {
+            color: #003366;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-left: 4px solid #003366;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        form label .required {
+            color: #dc3545;
+        }
+
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .checkbox-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 20px;
+            font-weight: 600;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+            margin-bottom: 0;
+        }
+
+        .form-section {
+            background: white;
+            border: 1px solid #e6e6e6;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-section h3 {
+            color: #003366;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e6e6e6;
+        }
+
+        .button {
+            background: #003c80;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button:hover {
+            background: #002f66;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: -15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="page-title">✏️ Editar Defecto</h2>
+        <div class="page-subtitle">
+            Inspección: {{ defecto.inspeccion.maquina }} - {{ defecto.inspeccion.direccion }}
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div style="background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                          color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                          padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/defectos/{{ defecto.id }}/editar">
+            <!-- Información Básica -->
+            <div class="form-section">
+                <h3>Información del Defecto</h3>
+
+                <label for="codigo">
+                    Código del Defecto
+                </label>
+                <input type="text"
+                       id="codigo"
+                       name="codigo"
+                       value="{{ defecto.codigo }}"
+                       placeholder="Ej: 3.04.1, 10.06.5">
+
+                <label for="descripcion">
+                    Descripción <span class="required">*</span>
+                </label>
+                <textarea id="descripcion"
+                          name="descripcion"
+                          required>{{ defecto.descripcion }}</textarea>
+
+                <div class="form-grid">
+                    <div>
+                        <label for="calificacion">
+                            Calificación <span class="required">*</span>
+                        </label>
+                        <select id="calificacion" name="calificacion" required>
+                            <option value="DL" {% if defecto.calificacion == 'DL' %}selected{% endif %}>DL - Defecto Leve</option>
+                            <option value="DG" {% if defecto.calificacion == 'DG' %}selected{% endif %}>DG - Defecto Grave</option>
+                            <option value="DMG" {% if defecto.calificacion == 'DMG' %}selected{% endif %}>DMG - Defecto Muy Grave</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="estado">
+                            Estado <span class="required">*</span>
+                        </label>
+                        <select id="estado" name="estado" required onchange="toggleFechaSubsanacion()">
+                            <option value="PENDIENTE" {% if defecto.estado == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                            <option value="SUBSANADO" {% if defecto.estado == 'SUBSANADO' %}selected{% endif %}>SUBSANADO</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div>
+                        <label for="plazo_meses">
+                            Plazo (meses) <span class="required">*</span>
+                        </label>
+                        <input type="number"
+                               id="plazo_meses"
+                               name="plazo_meses"
+                               value="{{ defecto.plazo_meses }}"
+                               min="1"
+                               max="24"
+                               required>
+                    </div>
+
+                    <div>
+                        <label for="fecha_limite">
+                            Fecha Límite <span class="required">*</span>
+                        </label>
+                        <input type="date"
+                               id="fecha_limite"
+                               name="fecha_limite"
+                               value="{{ defecto.fecha_limite.split('T')[0] if defecto.fecha_limite else '' }}"
+                               required>
+                    </div>
+                </div>
+
+                <div id="fecha_subsanacion_container" style="{% if defecto.estado != 'SUBSANADO' %}display: none;{% endif %}">
+                    <label for="fecha_subsanacion">
+                        Fecha de Subsanación
+                    </label>
+                    <input type="date"
+                           id="fecha_subsanacion"
+                           name="fecha_subsanacion"
+                           value="{{ defecto.fecha_subsanacion.split('T')[0] if defecto.fecha_subsanacion else '' }}">
+                    <p class="help-text">Fecha en la que se solucionó el defecto</p>
+                </div>
+            </div>
+
+            <!-- Materiales Especiales -->
+            <div class="form-section">
+                <h3>Materiales Especiales Requeridos</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                    Marca si este defecto requiere cortinas fotoeléctricas o sistemas de pesacarga (normativa ITC-AEM1 julio 2024)
+                </p>
+
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox"
+                               id="es_cortina"
+                               name="es_cortina"
+                               {% if defecto.es_cortina %}checked{% endif %}>
+                        🚪 Requiere Cortina Fotoeléctrica
+                    </label>
+
+                    <label>
+                        <input type="checkbox"
+                               id="es_pesacarga"
+                               name="es_pesacarga"
+                               {% if defecto.es_pesacarga %}checked{% endif %}>
+                        ⚖️ Requiere Sistema Pesacarga
+                    </label>
+                </div>
+            </div>
+
+            <!-- Gestión del Trabajo, Técnicos y Materiales -->
+            <div class="form-section">
+                <h3>📋 Planificación: Trabajo, Técnicos y Materiales</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                    Documenta toda la información necesaria para planificar y ejecutar la solución del defecto
+                </p>
+
+                <div style="background: #fff8e1; border-left: 4px solid #f57c00; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <strong style="color: #003366;">📌 Qué documentar:</strong>
+                    <ul style="margin: 10px 0 0 20px; color: #666; font-size: 13px; line-height: 1.8;">
+                        <li><strong>Asignación:</strong> Técnico propio Gran Canaria, Subcontrata, o Técnico de Tenerife</li>
+                        <li><strong>Materiales:</strong> Productos necesarios, proveedor (GC/Tenerife), referencias, cantidades</li>
+                        <li><strong>Estado:</strong> Pedido pendiente, en camino, recibido, por instalar</li>
+                        <li><strong>Fechas:</strong> Pedido, recepción prevista, instalación programada</li>
+                    </ul>
+                </div>
+
+                <label for="observaciones">
+                    Observaciones y Planificación Completa
+                </label>
+                <textarea id="observaciones"
+                          name="observaciones"
+                          style="min-height: 200px;"
+                          placeholder="Estructura sugerida:
+
+ASIGNACIÓN DE TRABAJO:
+- Responsable: [Técnico propio GC / Subcontrata / Técnico Tenerife]
+- Nombre/Empresa: [nombre o empresa]
+- Fecha programada: [dd/mm/aaaa]
+
+MATERIALES NECESARIOS:
+- Producto: [descripción y modelo]
+- Proveedor: [Gran Canaria / Tenerife]
+- Referencia/Código: [ref]
+- Cantidad: [número]
+- Estado pedido: [Pendiente / Pedido el [fecha] / Recibido el [fecha]]
+
+NOTAS ADICIONALES:
+- [información relevante sobre acceso, horarios, coordinación, etc.]">{{ defecto.observaciones or '' }}</textarea>
+
+                <p class="help-text">
+                    💡 <strong>Tip:</strong> Usa esta estructura para facilitar la coordinación entre pedidos de materiales y asignación de técnicos
+                </p>
+            </div>
+
+            <!-- Botones -->
+            <div>
+                <button type="submit" class="button">💾 Guardar Cambios</button>
+                <a href="/defectos/{{ defecto.id }}" class="button btn-secondary">Cancelar</a>
+            </div>
+        </form>
+
+        <br><br>
+    </main>
+
+    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+
+    <script>
+        // Mostrar/ocultar campo de fecha de subsanación según el estado
+        function toggleFechaSubsanacion() {
+            const estado = document.getElementById('estado').value;
+            const container = document.getElementById('fecha_subsanacion_container');
+
+            if (estado === 'SUBSANADO') {
+                container.style.display = 'block';
+                // Si no hay fecha, poner la fecha de hoy por defecto
+                const fechaInput = document.getElementById('fecha_subsanacion');
+                if (!fechaInput.value) {
+                    const today = new Date().toISOString().split('T')[0];
+                    fechaInput.value = today;
+                }
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleFechaSubsanacion();
+        });
+    </script>
+</body>
+</html>

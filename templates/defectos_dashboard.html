@@ -451,7 +451,7 @@
                             <th>Máquina / Ubicación</th>
                             <th style="width: 100px;">Fecha Límite</th>
                             <th style="width: 100px;">Días Vencidos</th>
-                            <th style="width: 80px;">Acciones</th>
+                            <th style="width: 140px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -473,7 +473,8 @@
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-vencido">⚠️ {{ defecto.dias_restantes|abs }} días</span></td>
                             <td>
-                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver</a>
+                                <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
+                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -498,7 +499,7 @@
                             <th>Máquina / Ubicación</th>
                             <th style="width: 100px;">Fecha Límite</th>
                             <th style="width: 100px;">Días Restantes</th>
-                            <th style="width: 80px;">Acciones</th>
+                            <th style="width: 140px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -520,7 +521,8 @@
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-urgente">⏰ {{ defecto.dias_restantes }} días</span></td>
                             <td>
-                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver</a>
+                                <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
+                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -545,7 +547,7 @@
                             <th>Máquina / Ubicación</th>
                             <th style="width: 100px;">Fecha Límite</th>
                             <th style="width: 100px;">Días Restantes</th>
-                            <th style="width: 80px;">Acciones</th>
+                            <th style="width: 140px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -567,7 +569,8 @@
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-proximo">📆 {{ defecto.dias_restantes }} días</span></td>
                             <td>
-                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver</a>
+                                <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
+                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -592,7 +595,7 @@
                             <th>Máquina / Ubicación</th>
                             <th style="width: 100px;">Fecha Límite</th>
                             <th style="width: 100px;">Días Restantes</th>
-                            <th style="width: 80px;">Acciones</th>
+                            <th style="width: 140px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -614,7 +617,8 @@
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-normal">✓ {{ defecto.dias_restantes }} días</span></td>
                             <td>
-                                <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver</a>
+                                <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
+                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -646,7 +650,7 @@
                                     <th style="width: 70px;">Calificación</th>
                                     <th>Máquina / Ubicación</th>
                                     <th style="width: 120px;">Fecha Subsanación</th>
-                                    <th style="width: 80px;">Acciones</th>
+                                    <th style="width: 140px;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -667,7 +671,8 @@
                                     </td>
                                     <td>{{ defecto.fecha_subsanacion|format_fecha if defecto.fecha_subsanacion else '-' }}</td>
                                     <td>
-                                        <a href="/inspecciones/ver/{{ defecto.inspeccion_id }}" class="btn btn-link btn-sm">Ver</a>
+                                        <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
+                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
                                     </td>
                                 </tr>
                                 {% endfor %}
