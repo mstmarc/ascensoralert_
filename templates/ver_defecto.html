@@ -357,6 +357,45 @@
             </div>
         </div>
 
+        <!-- Gestión Operativa -->
+        <div class="info-section">
+            <h3>👷 Gestión Operativa</h3>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Técnico Asignado</div>
+                    <div class="info-value">
+                        {% if defecto.tecnico_asignado == 'sergio' %}
+                            👷 Sergio
+                        {% elif defecto.tecnico_asignado == 'guimi' %}
+                            👷 Guimi
+                        {% elif defecto.tecnico_asignado == 'tenerife' %}
+                            ✈️ Técnico Tenerife
+                        {% elif defecto.tecnico_asignado == 'subcontrata' %}
+                            🏢 Subcontrata
+                        {% else %}
+                            <span style="color: #999;">Sin asignar</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Gestión de Materiales</div>
+                    <div class="info-value">
+                        {% if defecto.gestion_material == 'comprar' %}
+                            🛒 Comprar en Gran Canaria
+                        {% elif defecto.gestion_material == 'pedir_tenerife' %}
+                            ✈️ Pedir a Tenerife
+                        {% elif defecto.gestion_material == 'no_necesita' %}
+                            ✅ No se necesita material
+                        {% else %}
+                            <span style="color: #999;">Sin definir</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Información de la Inspección -->
         {% if defecto.inspeccion %}
         <div class="info-section">
