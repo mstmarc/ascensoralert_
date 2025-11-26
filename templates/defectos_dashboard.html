@@ -377,40 +377,6 @@
             margin-right: 4px;
         }
 
-        /* DROPDOWNS INTERACTIVOS - Estilo Mi Agenda */
-        .gestion-selector {
-            width: 100%;
-            margin-bottom: 4px;
-        }
-
-        .gestion-selector select {
-            width: 100%;
-            padding: 4px 6px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            background: white;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            transition: all 0.2s;
-        }
-
-        .gestion-selector select:focus {
-            outline: none;
-            border-color: #003366;
-            box-shadow: 0 0 0 2px rgba(0,51,102,0.1);
-        }
-
-        .gestion-selector select:hover {
-            border-color: #003366;
-        }
-
-        .gestion-selector select:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
         /* FILTROS */
         .filtros-container {
             background: #f8f9fa;
@@ -644,38 +610,27 @@
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
-                            <td style="padding: 8px 10px;">
-                                <!-- Dropdown Técnico -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-tecnico" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.tecnico_asignado or '' }}">
-                                        <option value="">👷 Sin asignar</option>
-                                        <option value="sergio" {% if defecto.tecnico_asignado == 'sergio' %}selected{% endif %}>👷 Sergio</option>
-                                        <option value="guimi" {% if defecto.tecnico_asignado == 'guimi' %}selected{% endif %}>👷 Guimi</option>
-                                        <option value="tenerife" {% if defecto.tecnico_asignado == 'tenerife' %}selected{% endif %}>✈️ Tenerife</option>
-                                        <option value="subcontrata" {% if defecto.tecnico_asignado == 'subcontrata' %}selected{% endif %}>🏢 Subcontrata</option>
-                                    </select>
+                            <td style="font-size: 11px;">
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
+                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
+                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
+                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
-
-                                <!-- Dropdown Material -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-material" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.gestion_material or '' }}">
-                                        <option value="">📦 Sin definir</option>
-                                        <option value="comprar" {% if defecto.gestion_material == 'comprar' %}selected{% endif %}>🛒 Comprar GC</option>
-                                        <option value="pedir_tenerife" {% if defecto.gestion_material == 'pedir_tenerife' %}selected{% endif %}>✈️ Pedir TF</option>
-                                        <option value="no_necesita" {% if defecto.gestion_material == 'no_necesita' %}selected{% endif %}>✅ No necesita</option>
-                                    </select>
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
+                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
+                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
-
-                                <!-- Dropdown Stock -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-stock" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.estado_stock or '' }}">
-                                        <option value="">📊 Sin definir</option>
-                                        <option value="en_stock" {% if defecto.estado_stock == 'en_stock' %}selected{% endif %}>✅ En Stock</option>
-                                        <option value="por_pedir" {% if defecto.estado_stock == 'por_pedir' %}selected{% endif %}>📋 Por Pedir</option>
-                                        <option value="pedido" {% if defecto.estado_stock == 'pedido' %}selected{% endif %}>📦 Pedido</option>
-                                        <option value="recibido" {% if defecto.estado_stock == 'recibido' %}selected{% endif %}>📥 Recibido</option>
-                                        <option value="instalado" {% if defecto.estado_stock == 'instalado' %}selected{% endif %}>✔️ Instalado</option>
-                                    </select>
+                                <div>
+                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
+                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
+                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
+                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
+                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
@@ -727,38 +682,27 @@
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
-                            <td style="padding: 8px 10px;">
-                                <!-- Dropdown Técnico -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-tecnico" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.tecnico_asignado or '' }}">
-                                        <option value="">👷 Sin asignar</option>
-                                        <option value="sergio" {% if defecto.tecnico_asignado == 'sergio' %}selected{% endif %}>👷 Sergio</option>
-                                        <option value="guimi" {% if defecto.tecnico_asignado == 'guimi' %}selected{% endif %}>👷 Guimi</option>
-                                        <option value="tenerife" {% if defecto.tecnico_asignado == 'tenerife' %}selected{% endif %}>✈️ Tenerife</option>
-                                        <option value="subcontrata" {% if defecto.tecnico_asignado == 'subcontrata' %}selected{% endif %}>🏢 Subcontrata</option>
-                                    </select>
+                            <td style="font-size: 11px;">
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
+                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
+                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
+                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
-
-                                <!-- Dropdown Material -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-material" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.gestion_material or '' }}">
-                                        <option value="">📦 Sin definir</option>
-                                        <option value="comprar" {% if defecto.gestion_material == 'comprar' %}selected{% endif %}>🛒 Comprar GC</option>
-                                        <option value="pedir_tenerife" {% if defecto.gestion_material == 'pedir_tenerife' %}selected{% endif %}>✈️ Pedir TF</option>
-                                        <option value="no_necesita" {% if defecto.gestion_material == 'no_necesita' %}selected{% endif %}>✅ No necesita</option>
-                                    </select>
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
+                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
+                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
-
-                                <!-- Dropdown Stock -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-stock" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.estado_stock or '' }}">
-                                        <option value="">📊 Sin definir</option>
-                                        <option value="en_stock" {% if defecto.estado_stock == 'en_stock' %}selected{% endif %}>✅ En Stock</option>
-                                        <option value="por_pedir" {% if defecto.estado_stock == 'por_pedir' %}selected{% endif %}>📋 Por Pedir</option>
-                                        <option value="pedido" {% if defecto.estado_stock == 'pedido' %}selected{% endif %}>📦 Pedido</option>
-                                        <option value="recibido" {% if defecto.estado_stock == 'recibido' %}selected{% endif %}>📥 Recibido</option>
-                                        <option value="instalado" {% if defecto.estado_stock == 'instalado' %}selected{% endif %}>✔️ Instalado</option>
-                                    </select>
+                                <div>
+                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
+                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
+                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
+                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
+                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
@@ -810,38 +754,27 @@
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
-                            <td style="padding: 8px 10px;">
-                                <!-- Dropdown Técnico -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-tecnico" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.tecnico_asignado or '' }}">
-                                        <option value="">👷 Sin asignar</option>
-                                        <option value="sergio" {% if defecto.tecnico_asignado == 'sergio' %}selected{% endif %}>👷 Sergio</option>
-                                        <option value="guimi" {% if defecto.tecnico_asignado == 'guimi' %}selected{% endif %}>👷 Guimi</option>
-                                        <option value="tenerife" {% if defecto.tecnico_asignado == 'tenerife' %}selected{% endif %}>✈️ Tenerife</option>
-                                        <option value="subcontrata" {% if defecto.tecnico_asignado == 'subcontrata' %}selected{% endif %}>🏢 Subcontrata</option>
-                                    </select>
+                            <td style="font-size: 11px;">
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
+                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
+                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
+                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
-
-                                <!-- Dropdown Material -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-material" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.gestion_material or '' }}">
-                                        <option value="">📦 Sin definir</option>
-                                        <option value="comprar" {% if defecto.gestion_material == 'comprar' %}selected{% endif %}>🛒 Comprar GC</option>
-                                        <option value="pedir_tenerife" {% if defecto.gestion_material == 'pedir_tenerife' %}selected{% endif %}>✈️ Pedir TF</option>
-                                        <option value="no_necesita" {% if defecto.gestion_material == 'no_necesita' %}selected{% endif %}>✅ No necesita</option>
-                                    </select>
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
+                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
+                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
-
-                                <!-- Dropdown Stock -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-stock" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.estado_stock or '' }}">
-                                        <option value="">📊 Sin definir</option>
-                                        <option value="en_stock" {% if defecto.estado_stock == 'en_stock' %}selected{% endif %}>✅ En Stock</option>
-                                        <option value="por_pedir" {% if defecto.estado_stock == 'por_pedir' %}selected{% endif %}>📋 Por Pedir</option>
-                                        <option value="pedido" {% if defecto.estado_stock == 'pedido' %}selected{% endif %}>📦 Pedido</option>
-                                        <option value="recibido" {% if defecto.estado_stock == 'recibido' %}selected{% endif %}>📥 Recibido</option>
-                                        <option value="instalado" {% if defecto.estado_stock == 'instalado' %}selected{% endif %}>✔️ Instalado</option>
-                                    </select>
+                                <div>
+                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
+                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
+                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
+                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
+                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
@@ -893,38 +826,27 @@
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
-                            <td style="padding: 8px 10px;">
-                                <!-- Dropdown Técnico -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-tecnico" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.tecnico_asignado or '' }}">
-                                        <option value="">👷 Sin asignar</option>
-                                        <option value="sergio" {% if defecto.tecnico_asignado == 'sergio' %}selected{% endif %}>👷 Sergio</option>
-                                        <option value="guimi" {% if defecto.tecnico_asignado == 'guimi' %}selected{% endif %}>👷 Guimi</option>
-                                        <option value="tenerife" {% if defecto.tecnico_asignado == 'tenerife' %}selected{% endif %}>✈️ Tenerife</option>
-                                        <option value="subcontrata" {% if defecto.tecnico_asignado == 'subcontrata' %}selected{% endif %}>🏢 Subcontrata</option>
-                                    </select>
+                            <td style="font-size: 11px;">
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
+                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
+                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
+                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
-
-                                <!-- Dropdown Material -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-material" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.gestion_material or '' }}">
-                                        <option value="">📦 Sin definir</option>
-                                        <option value="comprar" {% if defecto.gestion_material == 'comprar' %}selected{% endif %}>🛒 Comprar GC</option>
-                                        <option value="pedir_tenerife" {% if defecto.gestion_material == 'pedir_tenerife' %}selected{% endif %}>✈️ Pedir TF</option>
-                                        <option value="no_necesita" {% if defecto.gestion_material == 'no_necesita' %}selected{% endif %}>✅ No necesita</option>
-                                    </select>
+                                <div style="margin-bottom: 3px;">
+                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
+                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
+                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
-
-                                <!-- Dropdown Stock -->
-                                <div class="gestion-selector">
-                                    <select class="cambiar-stock" data-defecto-id="{{ defecto.id }}" data-valor-actual="{{ defecto.estado_stock or '' }}">
-                                        <option value="">📊 Sin definir</option>
-                                        <option value="en_stock" {% if defecto.estado_stock == 'en_stock' %}selected{% endif %}>✅ En Stock</option>
-                                        <option value="por_pedir" {% if defecto.estado_stock == 'por_pedir' %}selected{% endif %}>📋 Por Pedir</option>
-                                        <option value="pedido" {% if defecto.estado_stock == 'pedido' %}selected{% endif %}>📦 Pedido</option>
-                                        <option value="recibido" {% if defecto.estado_stock == 'recibido' %}selected{% endif %}>📥 Recibido</option>
-                                        <option value="instalado" {% if defecto.estado_stock == 'instalado' %}selected{% endif %}>✔️ Instalado</option>
-                                    </select>
+                                <div>
+                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
+                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
+                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
+                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
+                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
+                                    {% else %}<span style="color: #999;">-</span>{% endif %}
                                 </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
@@ -1023,84 +945,6 @@
                 icon.textContent = '▲';
             }
         }
-    </script>
-
-    <!-- Script para gestión operativa interactiva -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Manejo de cambio de técnico
-            const selectoresTecnico = document.querySelectorAll('.cambiar-tecnico');
-            selectoresTecnico.forEach(selector => {
-                selector.addEventListener('change', async function() {
-                    await actualizarCampo(this, 'tecnico', this.value);
-                });
-            });
-
-            // Manejo de cambio de material
-            const selectoresMaterial = document.querySelectorAll('.cambiar-material');
-            selectoresMaterial.forEach(selector => {
-                selector.addEventListener('change', async function() {
-                    await actualizarCampo(this, 'material', this.value);
-                });
-            });
-
-            // Manejo de cambio de stock
-            const selectoresStock = document.querySelectorAll('.cambiar-stock');
-            selectoresStock.forEach(selector => {
-                selector.addEventListener('change', async function() {
-                    await actualizarCampo(this, 'stock', this.value);
-                });
-            });
-
-            async function actualizarCampo(selector, campo, valor) {
-                const defectoId = selector.dataset.defectoId;
-                const valorAnterior = selector.dataset.valorActual;
-
-                // Deshabilitar selector mientras se procesa
-                selector.disabled = true;
-                selector.style.opacity = '0.6';
-
-                try {
-                    const response = await fetch(`/defectos/${defectoId}/actualizar_gestion`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            campo: campo,
-                            valor: valor
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Actualizar el valor actual
-                        selector.dataset.valorActual = valor;
-                        selector.style.opacity = '1';
-                        selector.disabled = false;
-
-                        // Mostrar feedback visual breve
-                        const parent = selector.closest('.gestion-selector');
-                        parent.style.background = '#d4edda';
-                        setTimeout(() => {
-                            parent.style.background = '';
-                        }, 1000);
-                    } else {
-                        alert('Error al actualizar: ' + (data.error || 'Error desconocido'));
-                        selector.value = valorAnterior;
-                        selector.disabled = false;
-                        selector.style.opacity = '1';
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error al actualizar. Por favor, intenta de nuevo.');
-                    selector.value = valorAnterior;
-                    selector.disabled = false;
-                    selector.style.opacity = '1';
-                }
-            }
-        });
     </script>
 </body>
 </html>
