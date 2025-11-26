@@ -284,7 +284,7 @@
     <main>
         <div class="page-header">
             <div>
-                <h2 class="page-title">📋 Detalle del Defecto {{ defecto.codigo }}</h2>
+                <h2 class="page-title">📋 Detalle del Defecto</h2>
             </div>
             <div>
                 {% if defecto.nivel_urgencia == 'VENCIDO' %}
@@ -328,11 +328,6 @@
         <!-- Información del Defecto -->
         <div class="info-section">
             <h3>Información del Defecto</h3>
-
-            <div class="info-item">
-                <div class="info-label">Código del Defecto</div>
-                <div class="info-value">{{ defecto.codigo or '-' }}</div>
-            </div>
 
             <div class="info-item">
                 <div class="info-label">Descripción</div>

@@ -333,7 +333,6 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 80px;">Código</th>
                             <th>Descripción</th>
                             <th style="width: 80px;">Calificación</th>
                             <th style="width: 110px;">Fecha Límite</th>
@@ -345,7 +344,6 @@
                     <tbody>
                         {% for defecto in defectos %}
                         <tr>
-                            <td><strong>{{ defecto.codigo or '-' }}</strong></td>
                             <td>
                                 {{ defecto.descripcion }}
                                 {% if defecto.es_cortina %}

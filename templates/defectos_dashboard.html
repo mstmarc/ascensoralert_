@@ -584,7 +584,6 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 90px;">Código</th>
                             <th style="width: 250px;">Descripción</th>
                             <th style="width: 60px;">Calif.</th>
                             <th>Máquina / Ubicación</th>
@@ -597,7 +596,6 @@
                     <tbody>
                         {% for defecto in defectos_vencidos %}
                         <tr>
-                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
                             <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -656,7 +654,6 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 90px;">Código</th>
                             <th style="width: 250px;">Descripción</th>
                             <th style="width: 60px;">Calif.</th>
                             <th>Máquina / Ubicación</th>
@@ -669,7 +666,6 @@
                     <tbody>
                         {% for defecto in defectos_urgentes %}
                         <tr>
-                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
                             <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -728,7 +724,6 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 90px;">Código</th>
                             <th style="width: 250px;">Descripción</th>
                             <th style="width: 60px;">Calif.</th>
                             <th>Máquina / Ubicación</th>
@@ -741,7 +736,6 @@
                     <tbody>
                         {% for defecto in defectos_proximos %}
                         <tr>
-                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
                             <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -800,7 +794,6 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 90px;">Código</th>
                             <th style="width: 250px;">Descripción</th>
                             <th style="width: 60px;">Calif.</th>
                             <th>Máquina / Ubicación</th>
@@ -813,7 +806,6 @@
                     <tbody>
                         {% for defecto in defectos_normales %}
                         <tr>
-                            <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
                             <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -891,7 +883,6 @@
                             <tbody>
                                 {% for defecto in defectos_subsanados %}
                                 <tr>
-                                    <td><span class="defecto-codigo">{{ defecto.codigo }}</span></td>
                                     <td>
                                         <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                         {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
