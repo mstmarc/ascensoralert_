@@ -215,6 +215,59 @@
             border-radius: 8px;
             color: #856404;
         }
+
+        /* Dropdowns interactivos de gestión */
+        .estado-display {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .estado-actual {
+            background: #e8f4fd;
+            border: 2px solid #bbdefb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #003366;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+        }
+
+        .cambiar-gestion {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background: white;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s;
+            color: #003366;
+        }
+
+        .cambiar-gestion:focus {
+            outline: none;
+            border-color: #003366;
+            box-shadow: 0 0 0 3px rgba(0,51,102,0.1);
+        }
+
+        .cambiar-gestion:hover {
+            border-color: #003366;
+        }
+
+        .cambiar-gestion:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .cambiar-gestion option {
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -360,56 +413,92 @@
         <!-- Gestión Operativa -->
         <div class="info-section">
             <h3>👷 Gestión Operativa</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 20px;">
+                Gestiona el técnico responsable, los materiales y el estado de stock directamente desde aquí
+            </p>
 
             <div class="info-grid">
+                <!-- Técnico Asignado -->
                 <div class="info-item">
                     <div class="info-label">Técnico Asignado</div>
-                    <div class="info-value">
-                        {% if defecto.tecnico_asignado == 'sergio' %}
-                            👷 Sergio
-                        {% elif defecto.tecnico_asignado == 'guimi' %}
-                            👷 Guimi
-                        {% elif defecto.tecnico_asignado == 'tenerife' %}
-                            ✈️ Técnico Tenerife
-                        {% elif defecto.tecnico_asignado == 'subcontrata' %}
-                            🏢 Subcontrata
-                        {% else %}
-                            <span style="color: #999;">Sin asignar</span>
-                        {% endif %}
+                    <div class="estado-display">
+                        <div class="estado-actual" id="tecnicoActual">
+                            {% if defecto.tecnico_asignado == 'sergio' %}
+                                👷 Sergio
+                            {% elif defecto.tecnico_asignado == 'guimi' %}
+                                👷 Guimi
+                            {% elif defecto.tecnico_asignado == 'tenerife' %}
+                                ✈️ Técnico Tenerife
+                            {% elif defecto.tecnico_asignado == 'subcontrata' %}
+                                🏢 Subcontrata
+                            {% else %}
+                                <span style="color: #999;">Sin asignar</span>
+                            {% endif %}
+                        </div>
+                        <select class="cambiar-gestion" data-campo="tecnico" data-defecto-id="{{ defecto.id }}">
+                            <option value="">⚡ Cambiar técnico...</option>
+                            <option value="sergio">👷 Sergio</option>
+                            <option value="guimi">👷 Guimi</option>
+                            <option value="tenerife">✈️ Técnico Tenerife</option>
+                            <option value="subcontrata">🏢 Subcontrata</option>
+                            <option value="">-- Sin asignar --</option>
+                        </select>
                     </div>
                 </div>
 
+                <!-- Gestión de Materiales -->
                 <div class="info-item">
                     <div class="info-label">Gestión de Materiales</div>
-                    <div class="info-value">
-                        {% if defecto.gestion_material == 'comprar' %}
-                            🛒 Comprar en Gran Canaria
-                        {% elif defecto.gestion_material == 'pedir_tenerife' %}
-                            ✈️ Pedir a Tenerife
-                        {% elif defecto.gestion_material == 'no_necesita' %}
-                            ✅ No se necesita material
-                        {% else %}
-                            <span style="color: #999;">Sin definir</span>
-                        {% endif %}
+                    <div class="estado-display">
+                        <div class="estado-actual" id="materialActual">
+                            {% if defecto.gestion_material == 'comprar' %}
+                                🛒 Comprar en Gran Canaria
+                            {% elif defecto.gestion_material == 'pedir_tenerife' %}
+                                ✈️ Pedir a Tenerife
+                            {% elif defecto.gestion_material == 'no_necesita' %}
+                                ✅ No se necesita material
+                            {% else %}
+                                <span style="color: #999;">Sin definir</span>
+                            {% endif %}
+                        </div>
+                        <select class="cambiar-gestion" data-campo="material" data-defecto-id="{{ defecto.id }}">
+                            <option value="">⚡ Cambiar gestión...</option>
+                            <option value="comprar">🛒 Comprar en Gran Canaria</option>
+                            <option value="pedir_tenerife">✈️ Pedir a Tenerife</option>
+                            <option value="no_necesita">✅ No se necesita material</option>
+                            <option value="">-- Sin definir --</option>
+                        </select>
                     </div>
                 </div>
 
+                <!-- Estado de Stock -->
                 <div class="info-item">
                     <div class="info-label">Estado de Stock</div>
-                    <div class="info-value">
-                        {% if defecto.estado_stock == 'en_stock' %}
-                            ✅ En Stock
-                        {% elif defecto.estado_stock == 'por_pedir' %}
-                            📋 Por Pedir
-                        {% elif defecto.estado_stock == 'pedido' %}
-                            📦 Pedido
-                        {% elif defecto.estado_stock == 'recibido' %}
-                            📥 Recibido
-                        {% elif defecto.estado_stock == 'instalado' %}
-                            ✔️ Instalado
-                        {% else %}
-                            <span style="color: #999;">Sin definir</span>
-                        {% endif %}
+                    <div class="estado-display">
+                        <div class="estado-actual" id="stockActual">
+                            {% if defecto.estado_stock == 'en_stock' %}
+                                ✅ En Stock
+                            {% elif defecto.estado_stock == 'por_pedir' %}
+                                📋 Por Pedir
+                            {% elif defecto.estado_stock == 'pedido' %}
+                                📦 Pedido
+                            {% elif defecto.estado_stock == 'recibido' %}
+                                📥 Recibido
+                            {% elif defecto.estado_stock == 'instalado' %}
+                                ✔️ Instalado
+                            {% else %}
+                                <span style="color: #999;">Sin definir</span>
+                            {% endif %}
+                        </div>
+                        <select class="cambiar-gestion" data-campo="stock" data-defecto-id="{{ defecto.id }}">
+                            <option value="">⚡ Cambiar estado...</option>
+                            <option value="en_stock">✅ En Stock</option>
+                            <option value="por_pedir">📋 Por Pedir</option>
+                            <option value="pedido">📦 Pedido</option>
+                            <option value="recibido">📥 Recibido</option>
+                            <option value="instalado">✔️ Instalado</option>
+                            <option value="">-- Sin definir --</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -522,5 +611,100 @@
     </script>
 
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+
+    <!-- Script para gestión operativa interactiva -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectores = document.querySelectorAll('.cambiar-gestion');
+
+            // Mapeo de valores a textos para actualizar la UI
+            const textosPorCampo = {
+                tecnico: {
+                    'sergio': '👷 Sergio',
+                    'guimi': '👷 Guimi',
+                    'tenerife': '✈️ Técnico Tenerife',
+                    'subcontrata': '🏢 Subcontrata',
+                    '': '<span style="color: #999;">Sin asignar</span>'
+                },
+                material: {
+                    'comprar': '🛒 Comprar en Gran Canaria',
+                    'pedir_tenerife': '✈️ Pedir a Tenerife',
+                    'no_necesita': '✅ No se necesita material',
+                    '': '<span style="color: #999;">Sin definir</span>'
+                },
+                stock: {
+                    'en_stock': '✅ En Stock',
+                    'por_pedir': '📋 Por Pedir',
+                    'pedido': '📦 Pedido',
+                    'recibido': '📥 Recibido',
+                    'instalado': '✔️ Instalado',
+                    '': '<span style="color: #999;">Sin definir</span>'
+                }
+            };
+
+            selectores.forEach(selector => {
+                selector.addEventListener('change', async function() {
+                    const campo = this.dataset.campo;
+                    const defectoId = this.dataset.defectoId;
+                    const nuevoValor = this.value;
+
+                    // Deshabilitar selector mientras se procesa
+                    this.disabled = true;
+                    this.style.opacity = '0.6';
+
+                    try {
+                        const response = await fetch(`/defectos/${defectoId}/actualizar_gestion`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                campo: campo,
+                                valor: nuevoValor
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Actualizar el display visual
+                            const displayId = campo + 'Actual';
+                            const displayElement = document.getElementById(displayId);
+                            if (displayElement && textosPorCampo[campo]) {
+                                displayElement.innerHTML = textosPorCampo[campo][nuevoValor];
+                            }
+
+                            // Resetear el selector
+                            this.value = '';
+                            this.disabled = false;
+                            this.style.opacity = '1';
+
+                            // Feedback visual
+                            const estadoActual = displayElement;
+                            if (estadoActual) {
+                                estadoActual.style.background = '#d4edda';
+                                estadoActual.style.borderColor = '#c3e6cb';
+                                setTimeout(() => {
+                                    estadoActual.style.background = '#e8f4fd';
+                                    estadoActual.style.borderColor = '#bbdefb';
+                                }, 1500);
+                            }
+                        } else {
+                            alert('Error al actualizar: ' + (data.error || 'Error desconocido'));
+                            this.value = '';
+                            this.disabled = false;
+                            this.style.opacity = '1';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error al actualizar. Por favor, intenta de nuevo.');
+                        this.value = '';
+                        this.disabled = false;
+                        this.style.opacity = '1';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
