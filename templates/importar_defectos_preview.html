@@ -72,10 +72,6 @@
             text-align: center;
         }
 
-        .defectos-table th.codigo-col {
-            width: 120px;
-        }
-
         .defectos-table th.calificacion-col {
             width: 130px;
         }
@@ -121,13 +117,6 @@
             color: #333;
             line-height: 1.6;
             max-width: 600px;
-        }
-
-        .codigo-text {
-            color: #666;
-            font-family: monospace;
-            font-size: 13px;
-            font-weight: 600;
         }
 
         select {
@@ -316,7 +305,6 @@
                 <thead>
                     <tr>
                         <th class="checkbox-col">✓</th>
-                        <th class="codigo-col">Código</th>
                         <th>Descripción</th>
                         <th class="calificacion-col">Calificación</th>
                         <th class="plazo-col">Plazo (meses)</th>
@@ -330,9 +318,6 @@
                         <td class="checkbox-col">
                             <input type="checkbox" name="seleccionar_{{ i }}" class="checkbox-input checkbox-seleccionar"
                                    checked onchange="actualizarContador(); toggleRow({{ i }})">
-                        </td>
-                        <td>
-                            <span class="codigo-text">{{ desc.codigo or '-' }}</span>
                         </td>
                         <td>
                             <div class="descripcion-text">{{ desc.descripcion }}</div>

@@ -4783,7 +4783,6 @@ def guardar_defectos_importados(inspeccion_id):
         # Crear defecto
         defecto_data = {
             "inspeccion_id": inspeccion_id,
-            "codigo": descripcion_data.get('codigo') or None,
             "descripcion": descripcion_data.get('descripcion'),
             "calificacion": calificacion,
             "plazo_meses": plazo_meses,
@@ -4880,7 +4879,6 @@ def nuevo_defecto(inspeccion_id):
         # Crear defecto
         data = {
             "inspeccion_id": inspeccion_id,
-            "codigo": request.form.get("codigo") or None,
             "descripcion": request.form.get("descripcion"),
             "calificacion": request.form.get("calificacion"),
             "plazo_meses": plazo_meses,
@@ -5081,7 +5079,6 @@ def editar_defecto(defecto_id):
 
     if request.method == "POST":
         # Obtener datos del formulario
-        codigo = request.form.get("codigo")
         descripcion = request.form.get("descripcion")
         calificacion = request.form.get("calificacion")
         plazo_meses = request.form.get("plazo_meses", type=int)
@@ -5104,7 +5101,6 @@ def editar_defecto(defecto_id):
 
         # Preparar datos para actualizar
         datos_actualizacion = {
-            "codigo": codigo,
             "descripcion": descripcion,
             "calificacion": calificacion,
             "plazo_meses": plazo_meses,
