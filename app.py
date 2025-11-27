@@ -3767,8 +3767,6 @@ def inspecciones_dashboard():
             alertas_normales.append(('defectos', inspeccion))
 
     # Calcular estadísticas centradas en GESTIÓN DE DEFECTOS
-    total_inspecciones = len(inspecciones)
-
     # Calcular rangos de fechas
     from datetime import timedelta
     from calendar import monthrange
@@ -3822,7 +3820,6 @@ def inspecciones_dashboard():
     return render_template(
         "inspecciones_dashboard.html",
         inspecciones=inspecciones,
-        total_inspecciones=total_inspecciones,
         defectos_vencidos=defectos_vencidos,
         defectos_urgentes=defectos_urgentes,
         defectos_proximos=defectos_proximos,
