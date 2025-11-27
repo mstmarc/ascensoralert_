@@ -5205,7 +5205,7 @@ def editar_defecto(defecto_id):
 # Endpoint para actualización rápida de gestión operativa (AJAX)
 @app.route("/defectos/<int:defecto_id>/actualizar_gestion", methods=["POST"])
 @helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'update')
+@helpers.requiere_permiso('inspecciones', 'write')
 def actualizar_gestion_defecto(defecto_id):
     """Endpoint para actualización rápida de campos de gestión operativa desde el dashboard"""
     try:
