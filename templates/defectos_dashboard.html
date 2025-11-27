@@ -155,39 +155,41 @@
             width: 100%;
             border-collapse: collapse;
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             font-size: 13px;
+            margin-bottom: 15px;
         }
 
         .defectos-table thead {
-            background: #f8f9fa;
+            background: #f5f7fa;
         }
 
         .defectos-table th {
-            padding: 10px 12px;
+            padding: 8px 10px;
             text-align: left;
             font-size: 11px;
             font-weight: 700;
             color: #003366;
             text-transform: uppercase;
-            border-bottom: 2px solid #e6e6e6;
+            border-bottom: 2px solid #e0e4e8;
+            letter-spacing: 0.3px;
         }
 
         .defectos-table td {
-            padding: 12px;
+            padding: 10px;
             border-bottom: 1px solid #f0f0f0;
             color: #333;
-            vertical-align: top;
+            vertical-align: middle;
         }
 
         .defectos-table tbody tr {
-            transition: background 0.2s;
+            transition: background 0.15s ease;
         }
 
         .defectos-table tbody tr:hover {
-            background: #f8f9fa;
+            background: #fafbfc;
         }
 
         .defecto-codigo {
@@ -200,21 +202,22 @@
 
         .defecto-descripcion {
             color: #1a1a1a;
-            line-height: 1.4;
+            line-height: 1.5;
             font-size: 13px;
+            font-weight: 500;
         }
 
         .defecto-maquina {
             font-weight: 600;
             color: #003366;
-            font-size: 13px;
-            margin-bottom: 3px;
+            font-size: 12px;
+            margin-bottom: 2px;
         }
 
         .defecto-direccion {
-            color: #666;
-            font-size: 12px;
-            line-height: 1.3;
+            color: #6c757d;
+            font-size: 11px;
+            line-height: 1.4;
         }
 
         /* Badges */
@@ -590,13 +593,12 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 250px;">Descripción</th>
-                            <th style="width: 60px;">Calif.</th>
-                            <th>Máquina / Ubicación</th>
-                            <th style="width: 130px;">Técnico / Material / Stock</th>
-                            <th style="width: 95px;">Fecha Límite</th>
-                            <th style="width: 90px;">Días Vencidos</th>
-                            <th style="width: 120px;">Acciones</th>
+                            <th>Descripción</th>
+                            <th style="width: 70px;">Calif.</th>
+                            <th style="width: 200px;">Máquina / Ubicación</th>
+                            <th style="width: 100px;">Fecha Límite</th>
+                            <th style="width: 100px;">Días Vencidos</th>
+                            <th style="width: 130px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -613,29 +615,6 @@
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
-                            </td>
-                            <td style="font-size: 11px;">
-                                <div style="margin-bottom: 3px;">
-                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
-                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
-                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
-                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                                <div style="margin-bottom: 3px;">
-                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
-                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
-                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                                <div>
-                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
-                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
-                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
-                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
-                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-vencido">⚠️ {{ defecto.dias_restantes|abs }} días</span></td>
