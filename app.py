@@ -3717,73 +3717,16 @@ def inspecciones_dashboard():
     if response.status_code == 200:
         inspecciones = response.json()
 
-    # Obtener defectos para calcular urgencias
-    response_defectos = requests.get(
-        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?select=*&estado=eq.PENDIENTE&order=fecha_limite.asc",
-        headers=HEADERS
-    )
-
-    defectos_pendientes = []
-    if response_defectos.status_code == 200:
-        defectos_pendientes = response_defectos.json()
-
-    # Obtener materiales especiales pendientes
-    response_materiales = requests.get(
-        f"{SUPABASE_URL}/rest/v1/materiales_especiales?select=*&estado=neq.INSTALADO&order=fecha_limite.asc",
-        headers=HEADERS
-    )
-
-    materiales_pendientes = []
-    if response_materiales.status_code == 200:
-        materiales_pendientes = response_materiales.json()
-
-    # Calcular alertas y estadísticas
+    # Calcular alertas y estadísticas basadas en inspecciones
     hoy = date.today()
     alertas_criticas = []
     alertas_urgentes = []
     alertas_proximas = []
+    alertas_normales = []  # Inspecciones sin urgencia
 
-    # Procesar defectos
-    for defecto in defectos_pendientes:
-        if defecto.get('fecha_limite'):
-            try:
-                fecha_limite = datetime.strptime(defecto['fecha_limite'].split('T')[0], '%Y-%m-%d').date()
-                dias_restantes = (fecha_limite - hoy).days
-
-                defecto['dias_restantes'] = dias_restantes
-
-                if dias_restantes < 0:
-                    alertas_criticas.append(('defecto', defecto))
-                elif dias_restantes <= 15:
-                    alertas_urgentes.append(('defecto', defecto))
-                elif dias_restantes <= 30:
-                    alertas_proximas.append(('defecto', defecto))
-            except:
-                pass
-
-    # Procesar materiales
-    for material in materiales_pendientes:
-        if material.get('fecha_limite'):
-            try:
-                fecha_limite = datetime.strptime(material['fecha_limite'].split('T')[0], '%Y-%m-%d').date()
-                dias_restantes = (fecha_limite - hoy).days
-
-                material['dias_restantes'] = dias_restantes
-
-                if dias_restantes < 0:
-                    alertas_criticas.append(('material', material))
-                elif dias_restantes <= 15:
-                    alertas_urgentes.append(('material', material))
-                elif dias_restantes <= 30:
-                    alertas_proximas.append(('material', material))
-            except:
-                pass
-
-    # Gestión de defectos pendientes por fecha límite
+    # Procesar inspecciones - categorizar según urgencia de segunda inspección
     # La fecha_segunda_inspeccion es la FECHA LÍMITE para tener los defectos solucionados
     # SOLO alertar si NO se ha realizado la 2ª inspección (fecha_segunda_realizada es NULL)
-    alertas_normales = []  # Inspecciones sin urgencia de defectos
-
     for inspeccion in inspecciones:
         # Categorizar según urgencia para solucionar defectos antes de la fecha límite
         if inspeccion.get('fecha_segunda_realizada'):
