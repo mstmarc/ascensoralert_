@@ -112,12 +112,17 @@
             padding: 20px;
             transition: all 0.2s;
             position: relative;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
         }
 
         .defecto-card:hover {
             border-color: #003366;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-decoration: none;
         }
 
         /* Header de la tarjeta con calificación */
@@ -142,7 +147,7 @@
             color: #1a1a1a;
             font-size: 14px;
             line-height: 1.5;
-            margin-bottom: 15px;
+            margin-bottom: 0;
             font-weight: 500;
         }
 
@@ -151,10 +156,11 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 0;
             padding: 12px;
             background: #f8f9fa;
             border-radius: 8px;
+            margin-top: 15px;
         }
 
         .defecto-info-item {
@@ -178,7 +184,7 @@
         .defecto-badges {
             display: flex;
             gap: 8px;
-            margin-bottom: 15px;
+            margin-top: 12px;
             flex-wrap: wrap;
         }
 
@@ -190,63 +196,6 @@
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-        }
-
-        /* Acciones de la tarjeta */
-        .defecto-acciones {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn-icon {
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-ver {
-            background: #003366;
-            color: white;
-        }
-
-        .btn-ver:hover {
-            background: #002244;
-        }
-
-        .btn-editar {
-            background: #0066cc;
-            color: white;
-        }
-
-        .btn-editar:hover {
-            background: #0052a3;
-        }
-
-        .btn-subsanar {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-subsanar:hover {
-            background: #218838;
-        }
-
-        .btn-eliminar {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-eliminar:hover {
-            background: #c82333;
         }
 
         /* Badge de urgencia mejorado */
@@ -519,7 +468,7 @@
             {% if defectos %}
                 <div class="defectos-grid">
                     {% for defecto in defectos %}
-                    <div class="defecto-card">
+                    <a href="/defectos/{{ defecto.id }}" class="defecto-card">
                         <!-- Header con calificación -->
                         <div class="defecto-card-header">
                             <span class="defecto-calificacion badge-{{ defecto.calificacion|lower }}">
@@ -578,30 +527,7 @@
                                 <span class="defecto-info-value">{{ defecto.estado }}</span>
                             </div>
                         </div>
-
-                        <!-- Acciones -->
-                        <div class="defecto-acciones">
-                            <a href="/defectos/{{ defecto.id }}" class="btn-icon btn-ver" title="Ver detalle completo">
-                                👁️ Ver
-                            </a>
-                            <a href="/defectos/{{ defecto.id }}/editar" class="btn-icon btn-editar" title="Editar defecto">
-                                ✏️ Editar
-                            </a>
-                            {% if defecto.estado == 'PENDIENTE' %}
-                            <form method="POST" action="/defectos/{{ defecto.id }}/subsanar" style="display: inline;">
-                                <button type="submit" class="btn-icon btn-subsanar" title="Marcar como subsanado">
-                                    ✅ Subsanar
-                                </button>
-                            </form>
-                            {% endif %}
-                            <a href="/defectos/{{ defecto.id }}/eliminar"
-                               class="btn-icon btn-eliminar"
-                               onclick="return confirm('¿Eliminar este defecto?')"
-                               title="Eliminar defecto">
-                                🗑️
-                            </a>
-                        </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
             {% else %}
