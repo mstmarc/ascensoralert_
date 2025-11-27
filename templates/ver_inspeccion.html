@@ -481,21 +481,11 @@
                                 {% endif %}
                             </span>
 
-                            <!-- Badge de urgencia -->
+                            <!-- Badge de estado -->
                             {% if defecto.estado == 'SUBSANADO' %}
                                 <span class="urgencia-badge urgencia-subsanado">✅ SUBSANADO</span>
                             {% else %}
-                                <span class="urgencia-badge urgencia-{{ defecto.urgencia|lower }}">
-                                    {% if defecto.urgencia == 'VENCIDO' %}
-                                        ⚠️ VENCIDO
-                                    {% elif defecto.urgencia == 'URGENTE' %}
-                                        ⏰ URGENTE
-                                    {% elif defecto.urgencia == 'PROXIMO' %}
-                                        📅 PRÓXIMO
-                                    {% else %}
-                                        ✓ NORMAL
-                                    {% endif %}
-                                </span>
+                                <span class="urgencia-badge" style="background: #fff3cd; color: #856404;">⏱️ PENDIENTE</span>
                             {% endif %}
                         </div>
 
