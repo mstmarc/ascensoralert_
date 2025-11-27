@@ -52,74 +52,6 @@
             margin: 0;
         }
 
-        /* Resumen compacto */
-        .resumen-compacto {
-            background: #f8f9fa;
-            border-left: 4px solid #003366;
-            padding: 15px 20px;
-            margin-bottom: 30px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .resumen-texto {
-            font-size: 16px;
-            color: #333;
-        }
-
-        .resumen-texto strong {
-            color: #003366;
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .resumen-desglose {
-            display: flex;
-            gap: 25px;
-            flex-wrap: wrap;
-        }
-
-        .resumen-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-
-        .resumen-item .label {
-            color: #666;
-        }
-
-        .resumen-item .valor {
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
-        .resumen-item.vencido .valor {
-            background: #fee;
-            color: #dc3545;
-        }
-
-        .resumen-item.urgente .valor {
-            background: #fff8e1;
-            color: #f57c00;
-        }
-
-        .resumen-item.proximo .valor {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .resumen-item.normal .valor {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
         /* Sección de defectos */
         .defectos-section {
             margin-bottom: 30px;
@@ -387,37 +319,37 @@
             background: #f8f9fa;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 25px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
 
         .filtros-titulo {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             color: #003366;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .filtros-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
         }
 
         .filtro-item label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .filtro-item select {
             width: 100%;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             background: white;
             cursor: pointer;
@@ -436,18 +368,18 @@
         }
 
         .filtros-acciones {
-            margin-top: 15px;
+            margin-top: 10px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .filtros-acciones .btn-filtrar {
             background: #003366;
             color: white;
-            padding: 8px 16px;
+            padding: 6px 14px;
             border: none;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
@@ -463,10 +395,10 @@
         .filtros-acciones .boton-limpiar-filtros {
             background: #6c757d;
             color: white;
-            padding: 8px 16px;
+            padding: 6px 14px;
             border: none;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
@@ -511,31 +443,6 @@
                 {% endfor %}
               {% endif %}
             {% endwith %}
-
-            <!-- Resumen compacto -->
-            <div class="resumen-compacto">
-                <div class="resumen-texto">
-                    <strong>{{ total_pendientes }}</strong> defectos pendientes de solucionar
-                </div>
-                <div class="resumen-desglose">
-                    <div class="resumen-item vencido">
-                        <span class="label">Vencidos:</span>
-                        <span class="valor">{{ defectos_vencidos|length }}</span>
-                    </div>
-                    <div class="resumen-item urgente">
-                        <span class="label">Urgentes (≤15d):</span>
-                        <span class="valor">{{ defectos_urgentes|length }}</span>
-                    </div>
-                    <div class="resumen-item proximo">
-                        <span class="label">Próximos (≤30d):</span>
-                        <span class="valor">{{ defectos_proximos|length }}</span>
-                    </div>
-                    <div class="resumen-item normal">
-                        <span class="label">Normales:</span>
-                        <span class="valor">{{ defectos_normales|length }}</span>
-                    </div>
-                </div>
-            </div>
 
             <!-- Filtros -->
             <div class="filtros-container">
