@@ -476,37 +476,16 @@
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_criticas %}
-                        {% if tipo == 'defectos' %}
-                            <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-critica">
-                                <span class="alerta-badge alerta-badge-critica">PLAZO VENCIDO</span>
-                                <div class="alerta-maquina">{{ item.maquina }}</div>
-                                <div class="alerta-info">
-                                    <div class="alerta-info-item">
-                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
-                                    </div>
+                        <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-critica">
+                            <span class="alerta-badge alerta-badge-critica">PLAZO VENCIDO</span>
+                            <div class="alerta-maquina">{{ item.maquina }}</div>
+                            <div class="alerta-info">
+                                <div class="alerta-info-item">
+                                    <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                 </div>
-                                <div class="alerta-dias critica">⚠️ Venció hace {{ item.dias_hasta_segunda|abs }} días</div>
-                            </a>
-                        {% else %}
-                            <div class="alerta-card alerta-critica">
-                                <span class="alerta-badge alerta-badge-critica">
-                                    {% if tipo == 'defecto' %}DEFECTO{% elif tipo == 'material' %}MATERIAL{% endif %}
-                                </span>
-
-                                {% if tipo == 'defecto' %}
-                                    <div class="alerta-maquina">{{ item.descripcion }}</div>
-                                    <div class="alerta-dias critica">⚠️ Vencido hace {{ item.dias_restantes|abs }} días</div>
-                                {% elif tipo == 'material' %}
-                                    <div class="alerta-maquina">{{ item.tipo }}</div>
-                                    <div class="alerta-info">
-                                        <div class="alerta-info-item">
-                                            <strong>Cliente:</strong> <span>{{ item.cliente_nombre }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="alerta-dias critica">⚠️ Vencido hace {{ item.dias_restantes|abs }} días</div>
-                                {% endif %}
                             </div>
-                        {% endif %}
+                            <div class="alerta-dias critica">⚠️ Venció hace {{ item.dias_hasta_segunda|abs }} días</div>
+                        </a>
                     {% endfor %}
                 </div>
             </div>
@@ -521,37 +500,16 @@
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_urgentes %}
-                        {% if tipo == 'defectos' %}
-                            <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-urgente">
-                                <span class="alerta-badge alerta-badge-urgente">URGENTE</span>
-                                <div class="alerta-maquina">{{ item.maquina }}</div>
-                                <div class="alerta-info">
-                                    <div class="alerta-info-item">
-                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
-                                    </div>
+                        <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-urgente">
+                            <span class="alerta-badge alerta-badge-urgente">URGENTE</span>
+                            <div class="alerta-maquina">{{ item.maquina }}</div>
+                            <div class="alerta-info">
+                                <div class="alerta-info-item">
+                                    <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                 </div>
-                                <div class="alerta-dias urgente">⏰ Quedan {{ item.dias_hasta_segunda }} días</div>
-                            </a>
-                        {% else %}
-                            <div class="alerta-card alerta-urgente">
-                                <span class="alerta-badge alerta-badge-urgente">
-                                    {% if tipo == 'defecto' %}DEFECTO{% elif tipo == 'material' %}MATERIAL{% endif %}
-                                </span>
-
-                                {% if tipo == 'defecto' %}
-                                    <div class="alerta-maquina">{{ item.descripcion }}</div>
-                                    <div class="alerta-dias urgente">⏰ Quedan {{ item.dias_restantes }} días</div>
-                                {% elif tipo == 'material' %}
-                                    <div class="alerta-maquina">{{ item.tipo }}</div>
-                                    <div class="alerta-info">
-                                        <div class="alerta-info-item">
-                                            <strong>Cliente:</strong> <span>{{ item.cliente_nombre }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="alerta-dias urgente">⏰ Quedan {{ item.dias_restantes }} días</div>
-                                {% endif %}
                             </div>
-                        {% endif %}
+                            <div class="alerta-dias urgente">⏰ Quedan {{ item.dias_hasta_segunda }} días</div>
+                        </a>
                     {% endfor %}
                 </div>
             </div>
@@ -566,37 +524,16 @@
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_proximas %}
-                        {% if tipo == 'defectos' %}
-                            <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-proxima">
-                                <span class="alerta-badge alerta-badge-proxima">PRÓXIMO</span>
-                                <div class="alerta-maquina">{{ item.maquina }}</div>
-                                <div class="alerta-info">
-                                    <div class="alerta-info-item">
-                                        <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
-                                    </div>
+                        <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-proxima">
+                            <span class="alerta-badge alerta-badge-proxima">PRÓXIMO</span>
+                            <div class="alerta-maquina">{{ item.maquina }}</div>
+                            <div class="alerta-info">
+                                <div class="alerta-info-item">
+                                    <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                 </div>
-                                <div class="alerta-dias proxima">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
-                            </a>
-                        {% else %}
-                            <div class="alerta-card alerta-proxima">
-                                <span class="alerta-badge alerta-badge-proxima">
-                                    {% if tipo == 'defecto' %}DEFECTO{% elif tipo == 'material' %}MATERIAL{% endif %}
-                                </span>
-
-                                {% if tipo == 'defecto' %}
-                                    <div class="alerta-maquina">{{ item.descripcion }}</div>
-                                    <div class="alerta-dias proxima">📅 Quedan {{ item.dias_restantes }} días</div>
-                                {% elif tipo == 'material' %}
-                                    <div class="alerta-maquina">{{ item.tipo }}</div>
-                                    <div class="alerta-info">
-                                        <div class="alerta-info-item">
-                                            <strong>Cliente:</strong> <span>{{ item.cliente_nombre }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="alerta-dias proxima">📅 Quedan {{ item.dias_restantes }} días</div>
-                                {% endif %}
                             </div>
-                        {% endif %}
+                            <div class="alerta-dias proxima">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
+                        </a>
                     {% endfor %}
                 </div>
             </div>
