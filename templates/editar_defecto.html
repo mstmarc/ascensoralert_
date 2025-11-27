@@ -227,7 +227,10 @@
                                id="fecha_limite"
                                name="fecha_limite"
                                value="{{ defecto.fecha_limite.split('T')[0] if defecto.fecha_limite else '' }}"
+                               readonly
+                               style="background-color: #f0f0f0; cursor: not-allowed;"
                                required>
+                        <p class="help-text">Se calcula automáticamente al cambiar el plazo</p>
                     </div>
                 </div>
 
@@ -340,6 +343,9 @@
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 
     <script>
+        // Fecha de inspección desde el backend
+        const fechaInspeccion = '{{ defecto.inspeccion.fecha_inspeccion.split("T")[0] if defecto.inspeccion and defecto.inspeccion.fecha_inspeccion else "" }}';
+
         // Mostrar/ocultar campo de fecha de subsanación según el estado
         function toggleFechaSubsanacion() {
             const estado = document.getElementById('estado').value;
@@ -358,9 +364,30 @@
             }
         }
 
+        // Calcular fecha límite basada en plazo
+        function calcularFechaLimite() {
+            if (!fechaInspeccion) return;
+
+            const plazoMeses = parseInt(document.getElementById('plazo_meses').value);
+            if (!plazoMeses) return;
+
+            const fecha = new Date(fechaInspeccion + 'T00:00:00');
+            fecha.setMonth(fecha.getMonth() + plazoMeses);
+
+            const fechaLimiteStr = fecha.toISOString().split('T')[0];
+            document.getElementById('fecha_limite').value = fechaLimiteStr;
+        }
+
         // Ejecutar al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             toggleFechaSubsanacion();
+
+            // Agregar listener al campo de plazo
+            const plazoInput = document.getElementById('plazo_meses');
+            if (plazoInput) {
+                plazoInput.addEventListener('change', calcularFechaLimite);
+                plazoInput.addEventListener('input', calcularFechaLimite);
+            }
         });
     </script>
 </body>
