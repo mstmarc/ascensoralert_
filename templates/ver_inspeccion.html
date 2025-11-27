@@ -97,30 +97,166 @@
         .badge-dg { background: #fff8e1; color: #f57c00; }
         .badge-dmg { background: #fee; color: #c62828; }
 
-        .defectos-table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Grid de tarjetas de defectos */
+        .defectos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
             margin-top: 20px;
+        }
+
+        .defecto-card {
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+            position: relative;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
+        }
+
+        .defecto-card:hover {
+            border-color: #003366;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-decoration: none;
+        }
+
+        /* Header de la tarjeta con calificación */
+        .defecto-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 12px;
+        }
+
+        .defecto-calificacion {
+            font-size: 18px;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        /* Descripción del defecto */
+        .defecto-descripcion {
+            color: #1a1a1a;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+
+        /* Información de fecha y urgencia */
+        .defecto-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .defecto-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-size: 13px;
         }
 
-        .defectos-table th {
-            background: #f8f9fa;
-            color: #333;
+        .defecto-info-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .defecto-info-value {
+            color: #1a1a1a;
             font-weight: 700;
-            text-align: left;
-            padding: 12px;
-            border-bottom: 2px solid #ddd;
         }
 
-        .defectos-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            vertical-align: top;
+        /* Badges especiales */
+        .defecto-badges {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
         }
 
-        .defectos-table tr:hover {
-            background: #f8f9fa;
+        .badge-especial {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Badge de urgencia mejorado */
+        .urgencia-badge {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .urgencia-vencido {
+            background: #fee;
+            color: #c62828;
+            border: 2px solid #c62828;
+        }
+
+        .urgencia-urgente {
+            background: #fff8e1;
+            color: #f57c00;
+            border: 2px solid #f57c00;
+        }
+
+        .urgencia-proximo {
+            background: #fff8e1;
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+
+        .urgencia-normal {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .urgencia-subsanado {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        /* Mensaje cuando no hay defectos */
+        .no-defectos {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .no-defectos-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .defectos-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .btn-actions {
@@ -330,57 +466,66 @@
             </h2>
 
             {% if defectos %}
-                <table class="defectos-table">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th style="width: 80px;">Calificación</th>
-                            <th style="width: 110px;">Fecha Límite</th>
-                            <th style="width: 100px;">Urgencia</th>
-                            <th style="width: 90px;">Estado</th>
-                            <th style="width: 120px;">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for defecto in defectos %}
-                        <tr>
-                            <td>
-                                {{ defecto.descripcion }}
-                                {% if defecto.es_cortina %}
-                                    <span class="badge" style="background: #e3f2fd; color: #1565c0; margin-left: 8px;">CORTINA</span>
+                <div class="defectos-grid">
+                    {% for defecto in defectos %}
+                    <a href="/defectos/{{ defecto.id }}" class="defecto-card">
+                        <!-- Header con calificación -->
+                        <div class="defecto-card-header">
+                            <span class="defecto-calificacion badge-{{ defecto.calificacion|lower }}">
+                                {% if defecto.calificacion == 'DL' %}
+                                    🔵 LEVE
+                                {% elif defecto.calificacion == 'DG' %}
+                                    🟡 GRAVE
+                                {% elif defecto.calificacion == 'DMG' %}
+                                    🔴 MUY GRAVE
                                 {% endif %}
-                                {% if defecto.es_pesacarga %}
-                                    <span class="badge" style="background: #e3f2fd; color: #1565c0; margin-left: 8px;">PESACARGA</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
-                            </td>
-                            <td>{{ defecto.fecha_limite|format_fecha }}</td>
-                            <td>
-                                {% if defecto.estado == 'SUBSANADO' %}
-                                    <span class="badge badge-subsanado">✅ SUBSANADO</span>
-                                {% else %}
-                                    <span class="badge" style="background: #fff3cd; color: #856404;">⏱️ PENDIENTE</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ defecto.estado }}</td>
-                            <td>
-                                <a href="/defectos/{{ defecto.id }}" class="btn-primary btn-sm" title="Ver detalle completo">👁️ Ver</a>
-                                <a href="/defectos/{{ defecto.id }}/editar" class="btn-primary btn-sm" title="Editar defecto">✏️ Editar</a>
-                                {% if defecto.estado == 'PENDIENTE' %}
-                                <form method="POST" action="/defectos/{{ defecto.id }}/subsanar" style="display: inline;">
-                                    <button type="submit" class="btn-primary btn-sm" title="Marcar como subsanado">✅</button>
-                                </form>
-                                {% endif %}
-                                <a href="/defectos/{{ defecto.id }}/eliminar" class="btn-danger btn-sm" onclick="return confirm('¿Eliminar este defecto?')" title="Eliminar defecto">🗑️</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </span>
+
+                            <!-- Badge de estado -->
+                            {% if defecto.estado == 'SUBSANADO' %}
+                                <span class="urgencia-badge urgencia-subsanado">✅ SUBSANADO</span>
+                            {% else %}
+                                <span class="urgencia-badge" style="background: #fff3cd; color: #856404;">⏱️ PENDIENTE</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="defecto-descripcion">
+                            {{ defecto.descripcion }}
+                        </div>
+
+                        <!-- Badges especiales (cortina/pesacarga) -->
+                        {% if defecto.es_cortina or defecto.es_pesacarga %}
+                        <div class="defecto-badges">
+                            {% if defecto.es_cortina %}
+                                <span class="badge-especial">🪟 CORTINA</span>
+                            {% endif %}
+                            {% if defecto.es_pesacarga %}
+                                <span class="badge-especial">⚖️ PESACARGA</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Información -->
+                        <div class="defecto-info">
+                            <div class="defecto-info-item">
+                                <span class="defecto-info-label">Fecha Límite:</span>
+                                <span class="defecto-info-value">{{ defecto.fecha_limite|format_fecha }}</span>
+                            </div>
+                            <div class="defecto-info-item">
+                                <span class="defecto-info-label">Estado:</span>
+                                <span class="defecto-info-value">{{ defecto.estado }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
             {% else %}
-                <p style="color: #999; text-align: center; padding: 30px;">No hay defectos registrados</p>
+                <div class="no-defectos">
+                    <div class="no-defectos-icon">✓</div>
+                    <p style="font-size: 16px; font-weight: 600; margin: 0;">No hay defectos registrados</p>
+                    <p style="font-size: 14px; margin: 8px 0 0 0;">Esta inspección no tiene defectos detectados</p>
+                </div>
             {% endif %}
         </div>
 
