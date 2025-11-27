@@ -327,7 +327,10 @@
 
         <!-- Información del Defecto -->
         <div class="info-section">
-            <h3>Información del Defecto</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e6e6e6;">
+                <h3 style="margin: 0; padding: 0; border: none;">Información del Defecto</h3>
+                <a href="/defectos/{{ defecto.id }}/editar" class="button" style="padding: 8px 16px; font-size: 13px;">✏️ Editar</a>
+            </div>
 
             <div class="info-item">
                 <div class="info-label">Descripción</div>
@@ -560,8 +563,6 @@
 
         <!-- Botones de Acción -->
         <div class="action-buttons">
-            <a href="/defectos/{{ defecto.id }}/editar" class="button">✏️ Editar Defecto</a>
-
             {% if defecto.estado == 'PENDIENTE' %}
             <form method="POST" action="/defectos/{{ defecto.id }}/subsanar" style="display: inline;">
                 <button type="submit" class="button btn-success" onclick="return confirm('¿Marcar este defecto como subsanado?')">
