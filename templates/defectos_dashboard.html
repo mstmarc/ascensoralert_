@@ -186,10 +186,12 @@
 
         .defectos-table tbody tr {
             transition: background 0.15s ease;
+            cursor: pointer;
         }
 
         .defectos-table tbody tr:hover {
-            background: #fafbfc;
+            background: #f0f4f8;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .defecto-codigo {
@@ -598,12 +600,11 @@
                             <th style="width: 200px;">Máquina / Ubicación</th>
                             <th style="width: 100px;">Fecha Límite</th>
                             <th style="width: 100px;">Días Vencidos</th>
-                            <th style="width: 130px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for defecto in defectos_vencidos %}
-                        <tr>
+                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                             <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -618,10 +619,6 @@
                             </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-vencido">⚠️ {{ defecto.dias_restantes|abs }} días</span></td>
-                            <td>
-                                <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
-                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
-                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -639,18 +636,16 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 250px;">Descripción</th>
-                            <th style="width: 60px;">Calif.</th>
-                            <th>Máquina / Ubicación</th>
-                            <th style="width: 130px;">Técnico / Material / Stock</th>
-                            <th style="width: 95px;">Fecha Límite</th>
-                            <th style="width: 90px;">Días Restantes</th>
-                            <th style="width: 120px;">Acciones</th>
+                            <th>Descripción</th>
+                            <th style="width: 70px;">Calif.</th>
+                            <th style="width: 200px;">Máquina / Ubicación</th>
+                            <th style="width: 100px;">Fecha Límite</th>
+                            <th style="width: 100px;">Días Restantes</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for defecto in defectos_urgentes %}
-                        <tr>
+                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                             <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -663,35 +658,8 @@
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
-                            <td style="font-size: 11px;">
-                                <div style="margin-bottom: 3px;">
-                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
-                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
-                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
-                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                                <div style="margin-bottom: 3px;">
-                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
-                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
-                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                                <div>
-                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
-                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
-                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
-                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
-                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                            </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-urgente">⏰ {{ defecto.dias_restantes }} días</span></td>
-                            <td>
-                                <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
-                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
-                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -709,18 +677,16 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 250px;">Descripción</th>
-                            <th style="width: 60px;">Calif.</th>
-                            <th>Máquina / Ubicación</th>
-                            <th style="width: 130px;">Técnico / Material / Stock</th>
-                            <th style="width: 95px;">Fecha Límite</th>
-                            <th style="width: 90px;">Días Restantes</th>
-                            <th style="width: 120px;">Acciones</th>
+                            <th>Descripción</th>
+                            <th style="width: 70px;">Calif.</th>
+                            <th style="width: 200px;">Máquina / Ubicación</th>
+                            <th style="width: 100px;">Fecha Límite</th>
+                            <th style="width: 100px;">Días Restantes</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for defecto in defectos_proximos %}
-                        <tr>
+                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                             <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -733,35 +699,8 @@
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
-                            <td style="font-size: 11px;">
-                                <div style="margin-bottom: 3px;">
-                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
-                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
-                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
-                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                                <div style="margin-bottom: 3px;">
-                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
-                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
-                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                                <div>
-                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
-                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
-                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
-                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
-                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                            </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-proximo">📆 {{ defecto.dias_restantes }} días</span></td>
-                            <td>
-                                <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
-                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
-                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -779,18 +718,16 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 250px;">Descripción</th>
-                            <th style="width: 60px;">Calif.</th>
-                            <th>Máquina / Ubicación</th>
-                            <th style="width: 130px;">Técnico / Material / Stock</th>
-                            <th style="width: 95px;">Fecha Límite</th>
-                            <th style="width: 90px;">Días Restantes</th>
-                            <th style="width: 120px;">Acciones</th>
+                            <th>Descripción</th>
+                            <th style="width: 70px;">Calif.</th>
+                            <th style="width: 200px;">Máquina / Ubicación</th>
+                            <th style="width: 100px;">Fecha Límite</th>
+                            <th style="width: 100px;">Días Restantes</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for defecto in defectos_normales %}
-                        <tr>
+                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                             <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -803,35 +740,8 @@
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
-                            <td style="font-size: 11px;">
-                                <div style="margin-bottom: 3px;">
-                                    {% if defecto.tecnico_asignado == 'sergio' %}👷 Sergio
-                                    {% elif defecto.tecnico_asignado == 'guimi' %}👷 Guimi
-                                    {% elif defecto.tecnico_asignado == 'tenerife' %}✈️ Tenerife
-                                    {% elif defecto.tecnico_asignado == 'subcontrata' %}🏢 Subcon.
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                                <div style="margin-bottom: 3px;">
-                                    {% if defecto.gestion_material == 'comprar' %}🛒 Comprar
-                                    {% elif defecto.gestion_material == 'pedir_tenerife' %}✈️ Pedir
-                                    {% elif defecto.gestion_material == 'no_necesita' %}✅ No necesita
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                                <div>
-                                    {% if defecto.estado_stock == 'en_stock' %}✅ Stock
-                                    {% elif defecto.estado_stock == 'por_pedir' %}📋 Por pedir
-                                    {% elif defecto.estado_stock == 'pedido' %}📦 Pedido
-                                    {% elif defecto.estado_stock == 'recibido' %}📥 Recibido
-                                    {% elif defecto.estado_stock == 'instalado' %}✔️ Instalado
-                                    {% else %}<span style="color: #999;">-</span>{% endif %}
-                                </div>
-                            </td>
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td><span class="urgencia-normal">✓ {{ defecto.dias_restantes }} días</span></td>
-                            <td>
-                                <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
-                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
-                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -857,17 +767,15 @@
                         <table class="defectos-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 100px;">Código</th>
-                                    <th style="width: 300px;">Descripción</th>
-                                    <th style="width: 70px;">Calificación</th>
-                                    <th>Máquina / Ubicación</th>
+                                    <th>Descripción</th>
+                                    <th style="width: 70px;">Calif.</th>
+                                    <th style="width: 200px;">Máquina / Ubicación</th>
                                     <th style="width: 120px;">Fecha Subsanación</th>
-                                    <th style="width: 140px;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for defecto in defectos_subsanados %}
-                                <tr>
+                                <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                                     <td>
                                         <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                         {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
@@ -881,10 +789,6 @@
                                         <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                                     </td>
                                     <td>{{ defecto.fecha_subsanacion|format_fecha if defecto.fecha_subsanacion else '-' }}</td>
-                                    <td>
-                                        <a href="/defectos/{{ defecto.id }}" class="btn btn-link btn-sm">👁️ Detalle</a>
-                                <a href="/defectos/{{ defecto.id }}/editar" class="btn btn-link btn-sm">✏️</a>
-                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
