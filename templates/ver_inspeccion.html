@@ -359,9 +359,9 @@
                             <td>{{ defecto.fecha_limite|format_fecha }}</td>
                             <td>
                                 {% if defecto.estado == 'SUBSANADO' %}
-                                    <span class="badge badge-subsanado">SUBSANADO</span>
+                                    <span class="badge badge-subsanado">✅ SUBSANADO</span>
                                 {% else %}
-                                    <span class="badge badge-{{ defecto.urgencia|lower }}">{{ defecto.urgencia }}</span>
+                                    <span class="badge" style="background: #fff3cd; color: #856404;">⏱️ PENDIENTE</span>
                                 {% endif %}
                             </td>
                             <td>{{ defecto.estado }}</td>
