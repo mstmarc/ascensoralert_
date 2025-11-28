@@ -242,6 +242,25 @@
             background: #5a6268;
         }
 
+        .btn-exportar-pdf {
+            background: #28a745;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-exportar-pdf:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
         .btn-link {
             background: transparent;
             color: #003366;
@@ -424,7 +443,10 @@
         <div class="menu">
             <div class="page-header">
                 <h2 class="page-title">📋 Planificación de Defectos Pendientes</h2>
-                <div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="exportarDefectosPDF()" class="btn btn-exportar-pdf" title="Exportar a PDF">
+                        📄 Exportar PDF
+                    </button>
                     <a href="/inspecciones" class="btn btn-secondary">Volver a Inspecciones</a>
                 </div>
             </div>
@@ -728,6 +750,28 @@
                 content.classList.add('open');
                 icon.textContent = '▲';
             }
+        }
+
+        // Función para exportar defectos a PDF respetando filtros
+        function exportarDefectosPDF() {
+            // Obtener los valores de los filtros actuales
+            const urlParams = new URLSearchParams(window.location.search);
+            const tecnico = urlParams.get('tecnico') || '';
+            const material = urlParams.get('material') || '';
+            const stock = urlParams.get('stock') || '';
+
+            // Construir URL de exportación con los filtros
+            let exportUrl = '/exportar_defectos_pdf?';
+            const params = [];
+
+            if (tecnico) params.push(`tecnico=${encodeURIComponent(tecnico)}`);
+            if (material) params.push(`material=${encodeURIComponent(material)}`);
+            if (stock) params.push(`stock=${encodeURIComponent(stock)}`);
+
+            exportUrl += params.join('&');
+
+            // Abrir URL de exportación
+            window.location.href = exportUrl;
         }
     </script>
 </body>
