@@ -3766,6 +3766,9 @@ def inspecciones_dashboard():
             inspeccion['categoria_segunda'] = 'sin-fecha'
             alertas_normales.append(('defectos', inspeccion))
 
+    # Ordenar alertas críticas: más antiguas primero (mayor tiempo vencido)
+    alertas_criticas.sort(key=lambda x: x[1].get('dias_hasta_segunda', 0))
+
     # Obtener lista de OCAs para filtros
     response_ocas = requests.get(
         f"{SUPABASE_URL}/rest/v1/ocas?select=id,nombre&activo=eq.true&order=nombre.asc",
