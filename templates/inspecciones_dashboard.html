@@ -475,80 +475,26 @@
             border-left: 4px solid #2e7d32;
         }
 
-        .lista-badge-container {
-            min-width: 120px;
+        .lista-maquina {
+            font-size: 16px;
+            font-weight: 700;
+            color: #003366;
+            margin: 0;
+            line-height: 1.4;
             display: flex;
             align-items: center;
         }
 
-        .lista-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .lista-badge-critica {
-            background: #fee;
-            color: #dc3545;
-        }
-
-        .lista-badge-urgente {
-            background: #fff8e1;
-            color: #f57c00;
-        }
-
-        .lista-badge-proxima {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .lista-badge-normal {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .lista-content {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .lista-maquina {
-            font-size: 15px;
-            font-weight: 700;
-            color: #003366;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .lista-info {
-            display: flex;
-            gap: 20px;
-            font-size: 13px;
-            color: #666;
-            flex-wrap: wrap;
-            line-height: 1.4;
-        }
-
-        .lista-info strong {
-            color: #003366;
-            font-weight: 600;
-        }
-
         .lista-urgencia {
-            min-width: 200px;
-            font-size: 13px;
+            min-width: 220px;
+            font-size: 14px;
             font-weight: 600;
             text-align: right;
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            line-height: 1.4;
+            white-space: nowrap;
         }
 
         .lista-urgencia-critica {
@@ -775,15 +721,7 @@
                     <div class="lista-container">
                         {% for tipo, item in alertas_criticas %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-critica inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
-                                <div class="lista-badge-container">
-                                    <span class="lista-badge lista-badge-critica">PLAZO VENCIDO</span>
-                                </div>
-                                <div class="lista-content">
-                                    <div class="lista-maquina">{{ item.maquina }}</div>
-                                    <div class="lista-info">
-                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
-                                    </div>
-                                </div>
+                                <div class="lista-maquina">{{ item.maquina }}</div>
                                 <div class="lista-urgencia lista-urgencia-critica">
                                     ⚠️ Venció hace {{ item.dias_hasta_segunda|abs }} días
                                 </div>
@@ -803,15 +741,7 @@
                     <div class="lista-container">
                         {% for tipo, item in alertas_urgentes %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-urgente inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
-                                <div class="lista-badge-container">
-                                    <span class="lista-badge lista-badge-urgente">ESTE MES</span>
-                                </div>
-                                <div class="lista-content">
-                                    <div class="lista-maquina">{{ item.maquina }}</div>
-                                    <div class="lista-info">
-                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
-                                    </div>
-                                </div>
+                                <div class="lista-maquina">{{ item.maquina }}</div>
                                 <div class="lista-urgencia lista-urgencia-urgente">
                                     ⏰ Quedan {{ item.dias_hasta_segunda }} días
                                 </div>
@@ -831,15 +761,7 @@
                     <div class="lista-container">
                         {% for tipo, item in alertas_proximas %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-proxima inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
-                                <div class="lista-badge-container">
-                                    <span class="lista-badge lista-badge-proxima">PRÓXIMO MES</span>
-                                </div>
-                                <div class="lista-content">
-                                    <div class="lista-maquina">{{ item.maquina }}</div>
-                                    <div class="lista-info">
-                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
-                                    </div>
-                                </div>
+                                <div class="lista-maquina">{{ item.maquina }}</div>
                                 <div class="lista-urgencia lista-urgencia-proxima">
                                     📅 Quedan {{ item.dias_hasta_segunda }} días
                                 </div>
@@ -859,27 +781,7 @@
                     <div class="lista-container">
                         {% for tipo, item in alertas_normales %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-normal inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion if item.fecha_segunda_inspeccion else item.fecha_inspeccion }}">
-                                <div class="lista-badge-container">
-                                    {% if item.fecha_segunda_realizada %}
-                                        <span class="lista-badge lista-badge-normal">✅ 2ª REALIZADA</span>
-                                    {% elif item.fecha_segunda_inspeccion %}
-                                        <span class="lista-badge lista-badge-normal">PROGRAMADA</span>
-                                    {% else %}
-                                        <span class="lista-badge lista-badge-normal">PENDIENTE</span>
-                                    {% endif %}
-                                </div>
-                                <div class="lista-content">
-                                    <div class="lista-maquina">{{ item.maquina }}</div>
-                                    <div class="lista-info">
-                                        {% if item.fecha_segunda_realizada %}
-                                            <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_realizada|format_fecha }}</span>
-                                        {% elif item.fecha_segunda_inspeccion %}
-                                            <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
-                                        {% else %}
-                                            <span><strong>1ª Inspección:</strong> {{ item.fecha_inspeccion|format_fecha }}</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
+                                <div class="lista-maquina">{{ item.maquina }}</div>
                                 <div class="lista-urgencia lista-urgencia-normal">
                                     {% if item.fecha_segunda_realizada %}
                                         ✅ 2ª Inspección realizada
