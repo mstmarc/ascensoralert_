@@ -4004,7 +4004,7 @@ def exportar_defectos_pdf():
 
         for defecto in defectos:
             # Formatear valores
-            descripcion = defecto.get('descripcion', '')[:100]  # Limitar a 100 caracteres
+            descripcion = defecto.get('descripcion', '')  # Descripción completa
             calificacion = defecto.get('calificacion', '-')
 
             # Formatear fecha de vencimiento
@@ -4026,8 +4026,8 @@ def exportar_defectos_pdf():
 
             data.append([descripcion, calificacion, vencimiento, estado, tecnico, estado_material])
 
-        # Crear tabla
-        tabla = Table(data, colWidths=[9*cm, 2*cm, 2*cm, 2.5*cm, 2.5*cm, 2.5*cm])
+        # Crear tabla (anchos: Descripción, Calificación, Vencimiento, Estado, Técnico, Estado Material)
+        tabla = Table(data, colWidths=[13*cm, 2*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
 
         # Estilo de la tabla
         estilo = TableStyle([
