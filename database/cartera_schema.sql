@@ -334,6 +334,380 @@ WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
 ORDER BY orden_prioridad ASC, p.fecha_parte ASC;
 
 -- ============================================
+-- VISTAS PARA ANÁLISIS OPERACIONAL AVANZADO
+-- ============================================
+
+-- Vista: Índice de Problemas por Máquina (para detectar ascensores críticos)
+CREATE OR REPLACE VIEW v_maquinas_problematicas AS
+SELECT
+    m.id as maquina_id,
+    m.identificador,
+    m.tipo_maquina,
+    m.estado_maquina,
+    i.nombre as instalacion_nombre,
+    i.municipio,
+    i.cliente_nombre,
+
+    -- Métricas de averías
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'AVERIA'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ) as averias_ultimo_año,
+
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'AVERIA'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '3 months'
+    ) as averias_ultimo_trimestre,
+
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'AVERIA'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '1 month'
+    ) as averias_ultimo_mes,
+
+    -- Tendencia (comparar último trimestre vs trimestre anterior)
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'AVERIA'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '3 months'
+    ) - COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'AVERIA'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '6 months'
+        AND p.fecha_parte < CURRENT_DATE - INTERVAL '3 months'
+    ) as tendencia_averias,
+
+    -- Mantenimientos realizados
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'MANTENIMIENTO'
+        AND p.estado = 'COMPLETADO'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ) as mantenimientos_realizados_año,
+
+    -- Mantenimientos pendientes/cancelados
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'MANTENIMIENTO'
+        AND p.estado IN ('PENDIENTE', 'CANCELADO')
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ) as mantenimientos_no_realizados,
+
+    -- Costes
+    COALESCE(SUM(p.coste_total) FILTER (
+        WHERE p.tipo_parte = 'AVERIA'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ), 0) as coste_averias_año,
+
+    -- Facturación pendiente
+    COALESCE(SUM(p.coste_total) FILTER (
+        WHERE p.estado = 'COMPLETADO'
+        AND p.facturado = false
+    ), 0) as facturacion_pendiente,
+
+    -- Partes pendientes actuales
+    COUNT(p.id) FILTER (
+        WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
+    ) as partes_pendientes,
+
+    COUNT(p.id) FILTER (
+        WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
+        AND p.prioridad IN ('URGENTE', 'ALTA')
+    ) as partes_pendientes_urgentes,
+
+    -- Última intervención
+    MAX(p.fecha_parte) as ultima_intervencion,
+
+    -- Días desde última intervención
+    CURRENT_DATE - MAX(p.fecha_parte) as dias_sin_intervencion,
+
+    -- Defectos de inspección pendientes
+    (SELECT COUNT(d.id)
+     FROM inspecciones insp
+     INNER JOIN defectos_inspeccion d ON insp.id = d.inspeccion_id
+     WHERE insp.maquina = m.identificador
+     AND d.estado = 'PENDIENTE'
+    ) as defectos_inspeccion_pendientes,
+
+    -- Calcular ÍNDICE DE PROBLEMA (score compuesto)
+    -- Fórmula: (averías_trimestre * 3) + (averías_mes * 5) + (partes_pendientes_urgentes * 2) + defectos_pendientes
+    (
+        (COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'AVERIA'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '3 months'
+        ) * 3)
+        +
+        (COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'AVERIA'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '1 month'
+        ) * 5)
+        +
+        (COUNT(p.id) FILTER (
+            WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
+            AND p.prioridad IN ('URGENTE', 'ALTA')
+        ) * 2)
+        +
+        (SELECT COUNT(d.id)
+         FROM inspecciones insp
+         INNER JOIN defectos_inspeccion d ON insp.id = d.inspeccion_id
+         WHERE insp.maquina = m.identificador
+         AND d.estado = 'PENDIENTE'
+        )
+    ) as indice_problema,
+
+    -- Clasificación de riesgo
+    CASE
+        WHEN (
+            (COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'AVERIA'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '3 months'
+            ) * 3)
+            +
+            (COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'AVERIA'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '1 month'
+            ) * 5)
+            +
+            (COUNT(p.id) FILTER (
+                WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
+                AND p.prioridad IN ('URGENTE', 'ALTA')
+            ) * 2)
+            +
+            (SELECT COUNT(d.id)
+             FROM inspecciones insp
+             INNER JOIN defectos_inspeccion d ON insp.id = d.inspeccion_id
+             WHERE insp.maquina = m.identificador
+             AND d.estado = 'PENDIENTE'
+            )
+        ) >= 15 THEN 'CRITICO'
+        WHEN (
+            (COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'AVERIA'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '3 months'
+            ) * 3)
+            +
+            (COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'AVERIA'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '1 month'
+            ) * 5)
+            +
+            (COUNT(p.id) FILTER (
+                WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
+                AND p.prioridad IN ('URGENTE', 'ALTA')
+            ) * 2)
+            +
+            (SELECT COUNT(d.id)
+             FROM inspecciones insp
+             INNER JOIN defectos_inspeccion d ON insp.id = d.inspeccion_id
+             WHERE insp.maquina = m.identificador
+             AND d.estado = 'PENDIENTE'
+            )
+        ) >= 8 THEN 'ALTO'
+        WHEN (
+            (COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'AVERIA'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '3 months'
+            ) * 3)
+            +
+            (COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'AVERIA'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '1 month'
+            ) * 5)
+            +
+            (COUNT(p.id) FILTER (
+                WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
+                AND p.prioridad IN ('URGENTE', 'ALTA')
+            ) * 2)
+            +
+            (SELECT COUNT(d.id)
+             FROM inspecciones insp
+             INNER JOIN defectos_inspeccion d ON insp.id = d.inspeccion_id
+             WHERE insp.maquina = m.identificador
+             AND d.estado = 'PENDIENTE'
+            )
+        ) >= 3 THEN 'MEDIO'
+        ELSE 'BAJO'
+    END as nivel_riesgo
+
+FROM maquinas_cartera m
+INNER JOIN instalaciones i ON m.instalacion_id = i.id
+LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
+GROUP BY m.id, m.identificador, m.tipo_maquina, m.estado_maquina, i.nombre, i.municipio, i.cliente_nombre;
+
+-- Vista: Análisis de Impacto Económico por Máquina
+CREATE OR REPLACE VIEW v_analisis_economico AS
+SELECT
+    m.id as maquina_id,
+    m.identificador,
+    m.tipo_maquina,
+    i.nombre as instalacion_nombre,
+    i.cliente_nombre,
+    m.tipo_contrato,
+    m.importe_mensual,
+
+    -- Ingresos anuales del contrato
+    COALESCE(m.importe_mensual * 12, 0) as ingreso_anual_contrato,
+
+    -- Costes de averías
+    COALESCE(SUM(p.coste_total) FILTER (
+        WHERE p.tipo_parte = 'AVERIA'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ), 0) as coste_averias_año,
+
+    -- Costes de mantenimiento
+    COALESCE(SUM(p.coste_total) FILTER (
+        WHERE p.tipo_parte = 'MANTENIMIENTO'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ), 0) as coste_mantenimientos_año,
+
+    -- Reparaciones facturables
+    COALESCE(SUM(p.coste_total) FILTER (
+        WHERE p.tipo_parte IN ('REPARACION', 'MODERNIZACION')
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ), 0) as facturacion_reparaciones_año,
+
+    -- Facturación pendiente (trabajo hecho no facturado)
+    COALESCE(SUM(p.coste_total) FILTER (
+        WHERE p.estado = 'COMPLETADO'
+        AND p.facturado = false
+    ), 0) as facturacion_pendiente,
+
+    -- Estimación de pérdida por partes pendientes urgentes
+    COALESCE(SUM(p.coste_total) FILTER (
+        WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
+        AND p.prioridad IN ('URGENTE', 'ALTA')
+    ), 0) as perdida_estimada_pendientes,
+
+    -- Margen estimado (ingreso contrato - costes)
+    COALESCE(m.importe_mensual * 12, 0) -
+    COALESCE(SUM(p.coste_total) FILTER (
+        WHERE p.tipo_parte IN ('AVERIA', 'MANTENIMIENTO')
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ), 0) as margen_estimado_año,
+
+    -- Rentabilidad (porcentaje)
+    CASE
+        WHEN COALESCE(m.importe_mensual * 12, 0) > 0 THEN
+            ((COALESCE(m.importe_mensual * 12, 0) -
+              COALESCE(SUM(p.coste_total) FILTER (
+                  WHERE p.tipo_parte IN ('AVERIA', 'MANTENIMIENTO')
+                  AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+              ), 0)) / (m.importe_mensual * 12)) * 100
+        ELSE NULL
+    END as rentabilidad_porcentaje
+
+FROM maquinas_cartera m
+INNER JOIN instalaciones i ON m.instalacion_id = i.id
+LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
+GROUP BY m.id, m.identificador, m.tipo_maquina, i.nombre, i.cliente_nombre,
+         m.tipo_contrato, m.importe_mensual;
+
+-- Vista: Análisis de Mantenimientos vs Averías (detectar círculos viciosos)
+CREATE OR REPLACE VIEW v_mantenimientos_vs_averias AS
+SELECT
+    m.id as maquina_id,
+    m.identificador,
+    i.nombre as instalacion_nombre,
+    i.cliente_nombre,
+
+    -- Mantenimientos programados vs realizados
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'MANTENIMIENTO'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ) as mantenimientos_totales,
+
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'MANTENIMIENTO'
+        AND p.estado = 'COMPLETADO'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ) as mantenimientos_completados,
+
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'MANTENIMIENTO'
+        AND p.estado IN ('PENDIENTE', 'CANCELADO')
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ) as mantenimientos_no_realizados,
+
+    -- Tasa de cumplimiento
+    CASE
+        WHEN COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        ) > 0 THEN
+            (COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'MANTENIMIENTO'
+                AND p.estado = 'COMPLETADO'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+            )::float /
+            COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'MANTENIMIENTO'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+            )) * 100
+        ELSE 100
+    END as tasa_cumplimiento_mantenimiento,
+
+    -- Averías después de mantenimientos no realizados
+    COUNT(p.id) FILTER (
+        WHERE p.tipo_parte = 'AVERIA'
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ) as total_averias_año,
+
+    -- Ratio de problemas (averías / mantenimientos completados)
+    CASE
+        WHEN COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.estado = 'COMPLETADO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        ) > 0 THEN
+            COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'AVERIA'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+            )::float /
+            COUNT(p.id) FILTER (
+                WHERE p.tipo_parte = 'MANTENIMIENTO'
+                AND p.estado = 'COMPLETADO'
+                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+            )
+        ELSE 999 -- Valor alto si no hay mantenimientos
+    END as ratio_averias_mantenimiento,
+
+    -- Clasificación de salud de mantenimiento
+    CASE
+        WHEN COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        ) = 0 THEN 'SIN_PLAN'
+        WHEN (COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.estado = 'COMPLETADO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        )::float /
+        NULLIF(COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        ), 0)) * 100 >= 80 THEN 'EXCELENTE'
+        WHEN (COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.estado = 'COMPLETADO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        )::float /
+        NULLIF(COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        ), 0)) * 100 >= 60 THEN 'ACEPTABLE'
+        WHEN (COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.estado = 'COMPLETADO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        )::float /
+        NULLIF(COUNT(p.id) FILTER (
+            WHERE p.tipo_parte = 'MANTENIMIENTO'
+            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+        ), 0)) * 100 >= 40 THEN 'DEFICIENTE'
+        ELSE 'CRITICO'
+    END as salud_mantenimiento
+
+FROM maquinas_cartera m
+INNER JOIN instalaciones i ON m.instalacion_id = i.id
+LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
+GROUP BY m.id, m.identificador, i.nombre, i.cliente_nombre;
+
+-- ============================================
 -- TRIGGERS PARA ACTUALIZAR updated_at
 -- ============================================
 
