@@ -765,12 +765,12 @@
                         {% for tipo, item in alertas_criticas %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-critica inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-oca="{{ item.oca.nombre|lower if item.oca else '' }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
                                 <div class="lista-badge-container">
-                                    <span class="lista-badge lista-badge-critica">VENCIDO</span>
+                                    <span class="lista-badge lista-badge-critica">PLAZO VENCIDO</span>
                                 </div>
                                 <div class="lista-content">
                                     <div class="lista-maquina">{{ item.maquina }}</div>
                                     <div class="lista-info">
-                                        <span><strong>Fecha límite:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                         {% if item.oca %}
                                         <span><strong>OCA:</strong> {{ item.oca.nombre }}</span>
                                         {% endif %}
@@ -796,12 +796,12 @@
                         {% for tipo, item in alertas_urgentes %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-urgente inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-oca="{{ item.oca.nombre|lower if item.oca else '' }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
                                 <div class="lista-badge-container">
-                                    <span class="lista-badge lista-badge-urgente">URGENTE</span>
+                                    <span class="lista-badge lista-badge-urgente">ESTE MES</span>
                                 </div>
                                 <div class="lista-content">
                                     <div class="lista-maquina">{{ item.maquina }}</div>
                                     <div class="lista-info">
-                                        <span><strong>Fecha límite:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                         {% if item.oca %}
                                         <span><strong>OCA:</strong> {{ item.oca.nombre }}</span>
                                         {% endif %}
@@ -827,12 +827,12 @@
                         {% for tipo, item in alertas_proximas %}
                             <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-proxima inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-oca="{{ item.oca.nombre|lower if item.oca else '' }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
                                 <div class="lista-badge-container">
-                                    <span class="lista-badge lista-badge-proxima">PRÓXIMO</span>
+                                    <span class="lista-badge lista-badge-proxima">PRÓXIMO MES</span>
                                 </div>
                                 <div class="lista-content">
                                     <div class="lista-maquina">{{ item.maquina }}</div>
                                     <div class="lista-info">
-                                        <span><strong>Fecha límite:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                         {% if item.oca %}
                                         <span><strong>OCA:</strong> {{ item.oca.nombre }}</span>
                                         {% endif %}
@@ -859,22 +859,22 @@
                             <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-normal inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-oca="{{ item.oca.nombre|lower if item.oca else '' }}" data-fecha="{{ item.fecha_segunda_inspeccion if item.fecha_segunda_inspeccion else item.fecha_inspeccion }}">
                                 <div class="lista-badge-container">
                                     {% if item.fecha_segunda_realizada %}
-                                        <span class="lista-badge lista-badge-normal">✅ SUBSANADO</span>
+                                        <span class="lista-badge lista-badge-normal">✅ 2ª REALIZADA</span>
                                     {% elif item.fecha_segunda_inspeccion %}
-                                        <span class="lista-badge lista-badge-normal">SIN URGENCIA</span>
+                                        <span class="lista-badge lista-badge-normal">PROGRAMADA</span>
                                     {% else %}
-                                        <span class="lista-badge lista-badge-normal">SIN FECHA</span>
+                                        <span class="lista-badge lista-badge-normal">PENDIENTE</span>
                                     {% endif %}
                                 </div>
                                 <div class="lista-content">
                                     <div class="lista-maquina">{{ item.maquina }}</div>
                                     <div class="lista-info">
                                         {% if item.fecha_segunda_realizada %}
-                                            <span><strong>Verificado:</strong> {{ item.fecha_segunda_realizada|format_fecha }}</span>
+                                            <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_realizada|format_fecha }}</span>
                                         {% elif item.fecha_segunda_inspeccion %}
-                                            <span><strong>Fecha límite:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                            <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                         {% else %}
-                                            <span><strong>Inspección:</strong> {{ item.fecha_inspeccion|format_fecha }}</span>
+                                            <span><strong>1ª Inspección:</strong> {{ item.fecha_inspeccion|format_fecha }}</span>
                                         {% endif %}
                                         {% if item.oca %}
                                         <span><strong>OCA:</strong> {{ item.oca.nombre }}</span>
@@ -883,11 +883,11 @@
                                 </div>
                                 <div class="lista-urgencia lista-urgencia-normal">
                                     {% if item.fecha_segunda_realizada %}
-                                        ✅ Defectos subsanados
+                                        ✅ 2ª Inspección realizada
                                     {% elif item.fecha_segunda_inspeccion %}
                                         📅 Quedan {{ item.dias_hasta_segunda }} días
                                     {% else %}
-                                        ⚙️ Pendiente fecha límite
+                                        ⚙️ Pendiente programar 2ª
                                     {% endif %}
                                 </div>
                             </a>
