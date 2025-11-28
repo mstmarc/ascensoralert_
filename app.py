@@ -5039,6 +5039,41 @@ def editar_defecto(defecto_id):
             flash("Descripción y calificación son obligatorios", "error")
             return redirect(f"/defectos/{defecto_id}/editar")
 
+        # Obtener el defecto actual para verificar si cambió el plazo
+        response_defecto = requests.get(
+            f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}&select=plazo_meses,inspeccion_id",
+            headers=HEADERS
+        )
+
+        if response_defecto.status_code == 200 and response_defecto.json():
+            defecto_actual = response_defecto.json()[0]
+            plazo_anterior = defecto_actual.get('plazo_meses')
+            inspeccion_id = defecto_actual.get('inspeccion_id')
+
+            # Si cambió el plazo, recalcular la fecha límite
+            if plazo_meses != plazo_anterior and inspeccion_id:
+                # Obtener fecha de inspección
+                response_insp = requests.get(
+                    f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=fecha_inspeccion",
+                    headers=HEADERS
+                )
+
+                if response_insp.status_code == 200 and response_insp.json():
+                    fecha_inspeccion = response_insp.json()[0].get('fecha_inspeccion')
+
+                    if fecha_inspeccion:
+                        try:
+                            fecha_insp_dt = datetime.strptime(fecha_inspeccion.split('T')[0], '%Y-%m-%d')
+                            # Sumar plazo en meses
+                            mes_limite = fecha_insp_dt.month + plazo_meses
+                            anio_limite = fecha_insp_dt.year + (mes_limite - 1) // 12
+                            mes_limite = ((mes_limite - 1) % 12) + 1
+
+                            fecha_limite_dt = fecha_insp_dt.replace(year=anio_limite, month=mes_limite)
+                            fecha_limite_str = fecha_limite_dt.strftime('%Y-%m-%d')
+                        except Exception as e:
+                            flash(f"Error al calcular fecha límite: {str(e)}", "error")
+
         # Preparar datos para actualizar
         datos_actualizacion = {
             "descripcion": descripcion,
@@ -5110,7 +5145,7 @@ def editar_defecto(defecto_id):
 # Endpoint para actualización rápida de gestión operativa (AJAX)
 @app.route("/defectos/<int:defecto_id>/actualizar_gestion", methods=["POST"])
 @helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'update')
+@helpers.requiere_permiso('inspecciones', 'write')
 def actualizar_gestion_defecto(defecto_id):
     """Endpoint para actualización rápida de campos de gestión operativa desde el dashboard"""
     try:

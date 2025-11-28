@@ -327,7 +327,10 @@
 
         <!-- Información del Defecto -->
         <div class="info-section">
-            <h3>Información del Defecto</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e6e6e6;">
+                <h3 style="margin: 0; padding: 0; border: none;">Información del Defecto</h3>
+                <a href="/defectos/{{ defecto.id }}/editar" class="button" style="padding: 8px 16px; font-size: 13px;">✏️ Editar</a>
+            </div>
 
             <div class="info-item">
                 <div class="info-label">Descripción</div>
@@ -408,69 +411,66 @@
         <!-- Gestión Operativa -->
         <div class="info-section">
             <h3>👷 Gestión Operativa</h3>
-            <p style="font-size: 13px; color: #666; margin-bottom: 20px;">
-                Gestiona el técnico responsable, los materiales y el estado de stock directamente desde aquí
-            </p>
 
-            <div class="info-grid">
+            <div class="info-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                 <!-- Técnico Asignado -->
-                <div class="info-item">
-                    <div class="info-label">Técnico Asignado</div>
-                    <div class="estado-display">
-                        <div class="estado-actual" id="tecnicoActual">
+                <div class="info-item" style="margin-bottom: 0;">
+                    <div class="info-label" style="font-size: 11px; margin-bottom: 6px;">Técnico</div>
+                    <div class="estado-display" style="gap: 6px;">
+                        <div class="estado-actual" id="tecnicoActual" style="padding: 8px 12px; font-size: 13px; min-height: 36px;">
                             {% if defecto.tecnico_asignado == 'sergio' %}
                                 👷 Sergio
                             {% elif defecto.tecnico_asignado == 'guimi' %}
                                 👷 Guimi
                             {% elif defecto.tecnico_asignado == 'tenerife' %}
-                                ✈️ Técnico Tenerife
+                                ✈️ Tenerife
                             {% elif defecto.tecnico_asignado == 'subcontrata' %}
-                                🏢 Subcontrata
+                                🏢 Subcon.
                             {% else %}
                                 <span style="color: #999;">Sin asignar</span>
                             {% endif %}
                         </div>
-                        <select class="cambiar-gestion" data-campo="tecnico" data-defecto-id="{{ defecto.id }}">
-                            <option value="">⚡ Cambiar técnico...</option>
+                        <select class="cambiar-gestion" data-campo="tecnico" data-defecto-id="{{ defecto.id }}" style="padding: 7px 10px; font-size: 12px;">
+                            <option value="">⚡ Cambiar...</option>
                             <option value="sergio">👷 Sergio</option>
                             <option value="guimi">👷 Guimi</option>
-                            <option value="tenerife">✈️ Técnico Tenerife</option>
-                            <option value="subcontrata">🏢 Subcontrata</option>
-                            <option value="">-- Sin asignar --</option>
+                            <option value="tenerife">✈️ Tenerife</option>
+                            <option value="subcontrata">🏢 Subcon.</option>
+                            <option value="">Sin asignar</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Gestión de Materiales -->
-                <div class="info-item">
-                    <div class="info-label">Gestión de Materiales</div>
-                    <div class="estado-display">
-                        <div class="estado-actual" id="materialActual">
+                <div class="info-item" style="margin-bottom: 0;">
+                    <div class="info-label" style="font-size: 11px; margin-bottom: 6px;">Material</div>
+                    <div class="estado-display" style="gap: 6px;">
+                        <div class="estado-actual" id="materialActual" style="padding: 8px 12px; font-size: 13px; min-height: 36px;">
                             {% if defecto.gestion_material == 'comprar' %}
-                                🛒 Comprar en Gran Canaria
+                                🛒 Comprar GC
                             {% elif defecto.gestion_material == 'pedir_tenerife' %}
-                                ✈️ Pedir a Tenerife
+                                ✈️ Pedir TF
                             {% elif defecto.gestion_material == 'no_necesita' %}
-                                ✅ No se necesita material
+                                ✅ No necesita
                             {% else %}
                                 <span style="color: #999;">Sin definir</span>
                             {% endif %}
                         </div>
-                        <select class="cambiar-gestion" data-campo="material" data-defecto-id="{{ defecto.id }}">
-                            <option value="">⚡ Cambiar gestión...</option>
-                            <option value="comprar">🛒 Comprar en Gran Canaria</option>
-                            <option value="pedir_tenerife">✈️ Pedir a Tenerife</option>
-                            <option value="no_necesita">✅ No se necesita material</option>
-                            <option value="">-- Sin definir --</option>
+                        <select class="cambiar-gestion" data-campo="material" data-defecto-id="{{ defecto.id }}" style="padding: 7px 10px; font-size: 12px;">
+                            <option value="">⚡ Cambiar...</option>
+                            <option value="comprar">🛒 Comprar GC</option>
+                            <option value="pedir_tenerife">✈️ Pedir TF</option>
+                            <option value="no_necesita">✅ No necesita</option>
+                            <option value="">Sin definir</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Estado de Stock -->
-                <div class="info-item">
-                    <div class="info-label">Estado de Stock</div>
-                    <div class="estado-display">
-                        <div class="estado-actual" id="stockActual">
+                <div class="info-item" style="margin-bottom: 0;">
+                    <div class="info-label" style="font-size: 11px; margin-bottom: 6px;">Stock</div>
+                    <div class="estado-display" style="gap: 6px;">
+                        <div class="estado-actual" id="stockActual" style="padding: 8px 12px; font-size: 13px; min-height: 36px;">
                             {% if defecto.estado_stock == 'en_stock' %}
                                 ✅ En Stock
                             {% elif defecto.estado_stock == 'por_pedir' %}
@@ -485,14 +485,14 @@
                                 <span style="color: #999;">Sin definir</span>
                             {% endif %}
                         </div>
-                        <select class="cambiar-gestion" data-campo="stock" data-defecto-id="{{ defecto.id }}">
-                            <option value="">⚡ Cambiar estado...</option>
+                        <select class="cambiar-gestion" data-campo="stock" data-defecto-id="{{ defecto.id }}" style="padding: 7px 10px; font-size: 12px;">
+                            <option value="">⚡ Cambiar...</option>
                             <option value="en_stock">✅ En Stock</option>
                             <option value="por_pedir">📋 Por Pedir</option>
                             <option value="pedido">📦 Pedido</option>
                             <option value="recibido">📥 Recibido</option>
                             <option value="instalado">✔️ Instalado</option>
-                            <option value="">-- Sin definir --</option>
+                            <option value="">Sin definir</option>
                         </select>
                     </div>
                 </div>
@@ -561,22 +561,8 @@
         </div>
         {% endif %}
 
-        <!-- Sección de gestión de materiales/productos -->
-        <div class="info-card">
-            <strong>📦 Gestión de Materiales y Productos</strong><br>
-            <p style="margin: 10px 0 15px 0; color: #666; font-size: 14px;">
-                Para solucionar este defecto, anota aquí los materiales o productos que necesitas comprar en Gran Canaria o pedir a Tenerife.
-                Puedes agregar esta información editando el defecto y añadiendo observaciones detalladas.
-            </p>
-            <p style="margin: 0; color: #666; font-size: 13px;">
-                💡 <strong>Tip:</strong> Usa las observaciones para indicar: proveedor, referencia del producto, cantidad, estado del pedido, etc.
-            </p>
-        </div>
-
         <!-- Botones de Acción -->
         <div class="action-buttons">
-            <a href="/defectos/{{ defecto.id }}/editar" class="button">✏️ Editar Defecto</a>
-
             {% if defecto.estado == 'PENDIENTE' %}
             <form method="POST" action="/defectos/{{ defecto.id }}/subsanar" style="display: inline;">
                 <button type="submit" class="button btn-success" onclick="return confirm('¿Marcar este defecto como subsanado?')">
@@ -617,14 +603,14 @@
                 tecnico: {
                     'sergio': '👷 Sergio',
                     'guimi': '👷 Guimi',
-                    'tenerife': '✈️ Técnico Tenerife',
-                    'subcontrata': '🏢 Subcontrata',
+                    'tenerife': '✈️ Tenerife',
+                    'subcontrata': '🏢 Subcon.',
                     '': '<span style="color: #999;">Sin asignar</span>'
                 },
                 material: {
-                    'comprar': '🛒 Comprar en Gran Canaria',
-                    'pedir_tenerife': '✈️ Pedir a Tenerife',
-                    'no_necesita': '✅ No se necesita material',
+                    'comprar': '🛒 Comprar GC',
+                    'pedir_tenerife': '✈️ Pedir TF',
+                    'no_necesita': '✅ No necesita',
                     '': '<span style="color: #999;">Sin definir</span>'
                 },
                 stock: {

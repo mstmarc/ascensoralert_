@@ -184,6 +184,7 @@
 
         .defectos-table tbody tr {
             transition: background 0.2s;
+            cursor: pointer;
         }
 
         .defectos-table tbody tr:hover {
@@ -593,7 +594,7 @@
                     </thead>
                     <tbody>
                         {% for defecto in defectos_vencidos %}
-                        <tr>
+                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -634,7 +635,7 @@
                     </thead>
                     <tbody>
                         {% for defecto in defectos_urgentes %}
-                        <tr>
+                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -675,7 +676,7 @@
                     </thead>
                     <tbody>
                         {% for defecto in defectos_proximos %}
-                        <tr>
+                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -716,7 +717,7 @@
                     </thead>
                     <tbody>
                         {% for defecto in defectos_normales %}
-                        <tr>
+                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -764,7 +765,7 @@
                             </thead>
                             <tbody>
                                 {% for defecto in defectos_subsanados %}
-                                <tr>
+                                <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
                                     <td>
                                         <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                         <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>

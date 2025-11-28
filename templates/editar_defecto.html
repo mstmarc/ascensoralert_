@@ -227,7 +227,10 @@
                                id="fecha_limite"
                                name="fecha_limite"
                                value="{{ defecto.fecha_limite.split('T')[0] if defecto.fecha_limite else '' }}"
+                               readonly
+                               style="background-color: #f0f0f0; cursor: not-allowed;"
                                required>
+                        <p class="help-text">Se calcula automáticamente al cambiar el plazo</p>
                     </div>
                 </div>
 
@@ -321,49 +324,6 @@
                 </div>
             </div>
 
-            <!-- Observaciones Detalladas -->
-            <div class="form-section">
-                <h3>📋 Observaciones y Detalles Adicionales</h3>
-                <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
-                    Documenta información adicional sobre materiales específicos, referencias, fechas, coordinación, etc.
-                </p>
-
-                <div style="background: #fff8e1; border-left: 4px solid #f57c00; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <strong style="color: #003366;">💡 Información útil a documentar:</strong>
-                    <ul style="margin: 10px 0 0 20px; color: #666; font-size: 13px; line-height: 1.8;">
-                        <li><strong>Materiales específicos:</strong> Modelo, referencia, proveedor exacto, cantidad</li>
-                        <li><strong>Estados:</strong> Pedido pendiente, en camino, recibido, por instalar</li>
-                        <li><strong>Fechas:</strong> Pedido realizado, recepción prevista, instalación programada</li>
-                        <li><strong>Coordinación:</strong> Acceso, horarios, contactos, instrucciones especiales</li>
-                    </ul>
-                </div>
-
-                <label for="observaciones">
-                    Observaciones y Notas Detalladas
-                </label>
-                <textarea id="observaciones"
-                          name="observaciones"
-                          style="min-height: 180px;"
-                          placeholder="Ejemplo:
-
-MATERIALES ESPECÍFICOS:
-- Producto: Cortina fotoeléctrica XYZ modelo ABC
-- Referencia/Código: REF-12345
-- Proveedor: Ferretería Central GC / Almacén Tenerife
-- Cantidad: 2 unidades
-- Estado: Pedido el 15/01/2024 / Recibido / Por instalar
-
-COORDINACIÓN:
-- Fecha programada: [dd/mm/aaaa]
-- Contacto cliente: [nombre y teléfono]
-- Horario acceso: [horario]
-- Notas especiales: [información relevante]">{{ defecto.observaciones or '' }}</textarea>
-
-                <p class="help-text">
-                    💡 <strong>Tip:</strong> Usa este campo para información detallada que complemente las selecciones anteriores
-                </p>
-            </div>
-
             <!-- Botones -->
             <div>
                 <button type="submit" class="button">💾 Guardar Cambios</button>
@@ -383,6 +343,9 @@ COORDINACIÓN:
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 
     <script>
+        // Fecha de inspección desde el backend
+        const fechaInspeccion = '{{ defecto.inspeccion.fecha_inspeccion.split("T")[0] if defecto.inspeccion and defecto.inspeccion.fecha_inspeccion else "" }}';
+
         // Mostrar/ocultar campo de fecha de subsanación según el estado
         function toggleFechaSubsanacion() {
             const estado = document.getElementById('estado').value;
@@ -401,9 +364,30 @@ COORDINACIÓN:
             }
         }
 
+        // Calcular fecha límite basada en plazo
+        function calcularFechaLimite() {
+            if (!fechaInspeccion) return;
+
+            const plazoMeses = parseInt(document.getElementById('plazo_meses').value);
+            if (!plazoMeses) return;
+
+            const fecha = new Date(fechaInspeccion + 'T00:00:00');
+            fecha.setMonth(fecha.getMonth() + plazoMeses);
+
+            const fechaLimiteStr = fecha.toISOString().split('T')[0];
+            document.getElementById('fecha_limite').value = fechaLimiteStr;
+        }
+
         // Ejecutar al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             toggleFechaSubsanacion();
+
+            // Agregar listener al campo de plazo
+            const plazoInput = document.getElementById('plazo_meses');
+            if (plazoInput) {
+                plazoInput.addEventListener('change', calcularFechaLimite);
+                plazoInput.addEventListener('input', calcularFechaLimite);
+            }
         });
     </script>
 </body>
