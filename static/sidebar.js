@@ -244,9 +244,6 @@
                 <a href="/defectos_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Dashboard de Defectos
                 </a>
-                <a href="/materiales_especiales" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Cortinas y Pesacargas
-                </a>
                 <a href="/ocas" class="sidebar-integrated-link" style="padding-left: 54px;">
                     OCAs
                 </a>
