@@ -239,13 +239,10 @@
         menuHTML += `
                 <!-- BLOQUE 3: INSPECCIONES -->
                 <a href="/inspecciones" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Inspecciones (IPOs)
+                    Inspecciones
                 </a>
                 <a href="/defectos_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Dashboard de Defectos
-                </a>
-                <a href="/ocas" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    OCAs
+                    Defectos
                 </a>
 
                 <div class="sidebar-integrated-divider"></div>`;
