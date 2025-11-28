@@ -4000,21 +4000,34 @@ def exportar_defectos_pdf():
         elementos.append(Spacer(1, 0.2*cm))
 
         # Datos de la tabla
-        data = [['Descripción', 'Calificación', 'Plazo', 'Estado', 'Técnico', 'Estado Material']]
+        data = [['Descripción', 'Calificación', 'Vencimiento', 'Estado', 'Técnico', 'Estado Material']]
 
         for defecto in defectos:
             # Formatear valores
-            descripcion = defecto.get('descripcion', '')[:100]  # Limitar a 100 caracteres
+            descripcion = defecto.get('descripcion', '')  # Descripción completa
             calificacion = defecto.get('calificacion', '-')
-            plazo = f"{defecto.get('plazo_meses', '-')} meses"
+
+            # Formatear fecha de vencimiento
+            fecha_limite = defecto.get('fecha_limite', '')
+            if fecha_limite:
+                try:
+                    # Formato: YYYY-MM-DD -> DD/MM/YYYY
+                    fecha_limpia = fecha_limite.split('T')[0] if 'T' in str(fecha_limite) else str(fecha_limite)
+                    fecha_obj = datetime.strptime(fecha_limpia, '%Y-%m-%d')
+                    vencimiento = fecha_obj.strftime('%d/%m/%Y')
+                except:
+                    vencimiento = '-'
+            else:
+                vencimiento = '-'
+
             estado = defecto.get('estado', '-')
             tecnico = defecto.get('tecnico_asignado', '-') or '-'
             estado_material = defecto.get('estado_stock', '-') or '-'
 
-            data.append([descripcion, calificacion, plazo, estado, tecnico, estado_material])
+            data.append([descripcion, calificacion, vencimiento, estado, tecnico, estado_material])
 
-        # Crear tabla
-        tabla = Table(data, colWidths=[9*cm, 2*cm, 2*cm, 2.5*cm, 2.5*cm, 2.5*cm])
+        # Crear tabla (anchos: Descripción, Calificación, Vencimiento, Estado, Técnico, Estado Material)
+        tabla = Table(data, colWidths=[13*cm, 2*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
 
         # Estilo de la tabla
         estilo = TableStyle([
