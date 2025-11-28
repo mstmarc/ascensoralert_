@@ -584,9 +584,9 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 250px;">Descripción</th>
+                            <th style="width: 180px;">Máquina / Ubicación</th>
+                            <th style="width: 280px;">Descripción</th>
                             <th style="width: 60px;">Calif.</th>
-                            <th>Máquina / Ubicación</th>
                             <th style="width: 130px;">Técnico / Material / Stock</th>
                             <th style="width: 95px;">Fecha Límite</th>
                             <th style="width: 90px;">Días Vencidos</th>
@@ -597,16 +597,16 @@
                         {% for defecto in defectos_vencidos %}
                         <tr>
                             <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                            </td>
+                            <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
                                 {% if defecto.es_pesacarga %}<span class="badge badge-material">⚖️ PESACARGA</span>{% endif %}
                             </td>
                             <td>
                                 <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
-                            </td>
-                            <td>
-                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
-                                <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
                             <td style="font-size: 11px;">
                                 <div style="margin-bottom: 3px;">
@@ -654,9 +654,9 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 250px;">Descripción</th>
+                            <th style="width: 180px;">Máquina / Ubicación</th>
+                            <th style="width: 280px;">Descripción</th>
                             <th style="width: 60px;">Calif.</th>
-                            <th>Máquina / Ubicación</th>
                             <th style="width: 130px;">Técnico / Material / Stock</th>
                             <th style="width: 95px;">Fecha Límite</th>
                             <th style="width: 90px;">Días Restantes</th>
@@ -667,16 +667,16 @@
                         {% for defecto in defectos_urgentes %}
                         <tr>
                             <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                            </td>
+                            <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
                                 {% if defecto.es_pesacarga %}<span class="badge badge-material">⚖️ PESACARGA</span>{% endif %}
                             </td>
                             <td>
                                 <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
-                            </td>
-                            <td>
-                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
-                                <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
                             <td style="font-size: 11px;">
                                 <div style="margin-bottom: 3px;">
@@ -724,9 +724,9 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 250px;">Descripción</th>
+                            <th style="width: 180px;">Máquina / Ubicación</th>
+                            <th style="width: 280px;">Descripción</th>
                             <th style="width: 60px;">Calif.</th>
-                            <th>Máquina / Ubicación</th>
                             <th style="width: 130px;">Técnico / Material / Stock</th>
                             <th style="width: 95px;">Fecha Límite</th>
                             <th style="width: 90px;">Días Restantes</th>
@@ -737,16 +737,16 @@
                         {% for defecto in defectos_proximos %}
                         <tr>
                             <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                            </td>
+                            <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
                                 {% if defecto.es_pesacarga %}<span class="badge badge-material">⚖️ PESACARGA</span>{% endif %}
                             </td>
                             <td>
                                 <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
-                            </td>
-                            <td>
-                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
-                                <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
                             <td style="font-size: 11px;">
                                 <div style="margin-bottom: 3px;">
@@ -794,9 +794,9 @@
                 <table class="defectos-table">
                     <thead>
                         <tr>
-                            <th style="width: 250px;">Descripción</th>
+                            <th style="width: 180px;">Máquina / Ubicación</th>
+                            <th style="width: 280px;">Descripción</th>
                             <th style="width: 60px;">Calif.</th>
-                            <th>Máquina / Ubicación</th>
                             <th style="width: 130px;">Técnico / Material / Stock</th>
                             <th style="width: 95px;">Fecha Límite</th>
                             <th style="width: 90px;">Días Restantes</th>
@@ -807,16 +807,16 @@
                         {% for defecto in defectos_normales %}
                         <tr>
                             <td>
+                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                            </td>
+                            <td>
                                 <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                 {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
                                 {% if defecto.es_pesacarga %}<span class="badge badge-material">⚖️ PESACARGA</span>{% endif %}
                             </td>
                             <td>
                                 <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
-                            </td>
-                            <td>
-                                <div class="defecto-maquina">{{ defecto.maquina }}</div>
-                                <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                             </td>
                             <td style="font-size: 11px;">
                                 <div style="margin-bottom: 3px;">
@@ -872,10 +872,9 @@
                         <table class="defectos-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 100px;">Código</th>
-                                    <th style="width: 300px;">Descripción</th>
+                                    <th style="width: 180px;">Máquina / Ubicación</th>
+                                    <th style="width: 350px;">Descripción</th>
                                     <th style="width: 70px;">Calificación</th>
-                                    <th>Máquina / Ubicación</th>
                                     <th style="width: 120px;">Fecha Subsanación</th>
                                     <th style="width: 140px;">Acciones</th>
                                 </tr>
@@ -884,16 +883,16 @@
                                 {% for defecto in defectos_subsanados %}
                                 <tr>
                                     <td>
+                                        <div class="defecto-maquina">{{ defecto.maquina }}</div>
+                                        <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
+                                    </td>
+                                    <td>
                                         <span class="defecto-descripcion">{{ defecto.descripcion }}</span>
                                         {% if defecto.es_cortina %}<span class="badge badge-material">🚪 CORTINA</span>{% endif %}
                                         {% if defecto.es_pesacarga %}<span class="badge badge-material">⚖️ PESACARGA</span>{% endif %}
                                     </td>
                                     <td>
                                         <span class="badge badge-{{ defecto.calificacion|lower }}">{{ defecto.calificacion }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="defecto-maquina">{{ defecto.maquina }}</div>
-                                        <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
                                     </td>
                                     <td>{{ defecto.fecha_subsanacion|format_fecha if defecto.fecha_subsanacion else '-' }}</td>
                                     <td>
