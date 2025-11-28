@@ -406,6 +406,169 @@
             color: #999;
             font-size: 15px;
         }
+
+        /* Pestañas de visualización */
+        .tab-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .tab-btn:hover {
+            color: #003366;
+            background: #f5f5f5;
+        }
+
+        .tab-btn.active {
+            color: #003366;
+            border-bottom-color: #003366;
+        }
+
+        /* Vista Lista - Tarjetas rectangulares */
+        .lista-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .lista-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #ffffff;
+            border: 1px solid #e6e6e6;
+            border-radius: 8px;
+            padding: 14px 18px;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .lista-item:hover {
+            border-color: #003366;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0, 51, 102, 0.1);
+        }
+
+        /* Colores de borde para cada tipo */
+        .lista-item.lista-critica {
+            border-left: 4px solid #dc3545;
+        }
+
+        .lista-item.lista-urgente {
+            border-left: 4px solid #ffc107;
+        }
+
+        .lista-item.lista-proxima {
+            border-left: 4px solid #4caf50;
+        }
+
+        .lista-item.lista-normal {
+            border-left: 4px solid #2e7d32;
+        }
+
+        .lista-badge-container {
+            min-width: 110px;
+        }
+
+        .lista-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lista-badge-critica {
+            background: #fee;
+            color: #dc3545;
+        }
+
+        .lista-badge-urgente {
+            background: #fff8e1;
+            color: #f57c00;
+        }
+
+        .lista-badge-proxima {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .lista-badge-normal {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .lista-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .lista-maquina {
+            font-size: 15px;
+            font-weight: 700;
+            color: #003366;
+            margin-bottom: 4px;
+        }
+
+        .lista-info {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .lista-info strong {
+            color: #003366;
+            font-weight: 600;
+        }
+
+        .lista-urgencia {
+            min-width: 180px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .lista-urgencia-critica {
+            color: #dc3545;
+        }
+
+        .lista-urgencia-urgente {
+            color: #f57c00;
+        }
+
+        .lista-urgencia-proxima {
+            color: #2e7d32;
+        }
+
+        .lista-urgencia-normal {
+            color: #2e7d32;
+        }
+
+        /* Responsive para vista lista */
+        @media (max-width: 768px) {
+            .lista-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .lista-urgencia {
+                text-align: left;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -440,6 +603,18 @@
               {% endif %}
             {% endwith %}
 
+            <!-- Pestañas de visualización -->
+            <div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #f0f0f0;">
+                <button class="tab-btn active" onclick="cambiarVista('grid')" id="tab-grid">
+                    📊 Vista Grid
+                </button>
+                <button class="tab-btn" onclick="cambiarVista('lista')" id="tab-lista">
+                    📋 Vista Lista
+                </button>
+            </div>
+
+            <!-- Contenedor de vistas -->
+            <div id="vista-grid" class="vista-container">
             <!-- Alertas Críticas -->
             {% if alertas_criticas %}
             <div class="alertas-section seccion-alerta" data-categoria="vencidas">
@@ -557,6 +732,171 @@
                 </div>
             </div>
             {% endif %}
+            </div>
+            <!-- Fin Vista Grid -->
+
+            <!-- Vista Lista -->
+            <div id="vista-lista" class="vista-container" style="display: none;">
+                <!-- Buscador -->
+                <div style="margin-bottom: 25px;">
+                    <input type="text"
+                           id="searchInput"
+                           placeholder="🔍 Buscar por máquina, fecha, OCA..."
+                           style="width: 100%;
+                                  padding: 12px 16px;
+                                  border: 2px solid #e6e6e6;
+                                  border-radius: 8px;
+                                  font-size: 14px;
+                                  font-family: 'Montserrat', sans-serif;
+                                  transition: all 0.2s;"
+                           onkeyup="filtrarInspecciones()"
+                           onfocus="this.style.borderColor='#003366'"
+                           onblur="this.style.borderColor='#e6e6e6'">
+                </div>
+
+                <!-- Alertas Críticas - Lista -->
+                {% if alertas_criticas %}
+                <div class="alertas-section seccion-alerta" data-categoria="vencidas">
+                    <div class="alertas-header">
+                        <h3 class="alertas-titulo">⚠️ Plazo Vencido - Defectos Pendientes</h3>
+                        <span class="alertas-contador">{{ alertas_criticas|length }}</span>
+                    </div>
+                    <div class="lista-container">
+                        {% for tipo, item in alertas_criticas %}
+                            <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-critica inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-oca="{{ item.oca.nombre|lower if item.oca else '' }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
+                                <div class="lista-badge-container">
+                                    <span class="lista-badge lista-badge-critica">PLAZO VENCIDO</span>
+                                </div>
+                                <div class="lista-content">
+                                    <div class="lista-maquina">{{ item.maquina }}</div>
+                                    <div class="lista-info">
+                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        {% if item.oca %}
+                                        <span><strong>OCA:</strong> {{ item.oca.nombre }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="lista-urgencia lista-urgencia-critica">
+                                    ⚠️ Venció hace {{ item.dias_hasta_segunda|abs }} días
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Alertas Urgentes - Lista -->
+                {% if alertas_urgentes %}
+                <div class="alertas-section seccion-alerta" data-categoria="este-mes">
+                    <div class="alertas-header">
+                        <h3 class="alertas-titulo">🔔 Urgentes - Defectos Este Mes</h3>
+                        <span class="alertas-contador">{{ alertas_urgentes|length }}</span>
+                    </div>
+                    <div class="lista-container">
+                        {% for tipo, item in alertas_urgentes %}
+                            <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-urgente inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-oca="{{ item.oca.nombre|lower if item.oca else '' }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
+                                <div class="lista-badge-container">
+                                    <span class="lista-badge lista-badge-urgente">ESTE MES</span>
+                                </div>
+                                <div class="lista-content">
+                                    <div class="lista-maquina">{{ item.maquina }}</div>
+                                    <div class="lista-info">
+                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        {% if item.oca %}
+                                        <span><strong>OCA:</strong> {{ item.oca.nombre }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="lista-urgencia lista-urgencia-urgente">
+                                    ⏰ Quedan {{ item.dias_hasta_segunda }} días
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Alertas Próximas - Lista -->
+                {% if alertas_proximas %}
+                <div class="alertas-section seccion-alerta" data-categoria="proximo-mes">
+                    <div class="alertas-header">
+                        <h3 class="alertas-titulo">📋 Próximos - Defectos Próximo Mes</h3>
+                        <span class="alertas-contador">{{ alertas_proximas|length }}</span>
+                    </div>
+                    <div class="lista-container">
+                        {% for tipo, item in alertas_proximas %}
+                            <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-proxima inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-oca="{{ item.oca.nombre|lower if item.oca else '' }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
+                                <div class="lista-badge-container">
+                                    <span class="lista-badge lista-badge-proxima">PRÓXIMO MES</span>
+                                </div>
+                                <div class="lista-content">
+                                    <div class="lista-maquina">{{ item.maquina }}</div>
+                                    <div class="lista-info">
+                                        <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        {% if item.oca %}
+                                        <span><strong>OCA:</strong> {{ item.oca.nombre }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="lista-urgencia lista-urgencia-proxima">
+                                    📅 Quedan {{ item.dias_hasta_segunda }} días
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Inspecciones Sin Urgencia / OK - Lista -->
+                {% if alertas_normales %}
+                <div class="alertas-section seccion-alerta" data-categoria="programadas">
+                    <div class="alertas-header">
+                        <h3 class="alertas-titulo">✅ Sin Urgencia / Defectos OK</h3>
+                        <span class="alertas-contador">{{ alertas_normales|length }}</span>
+                    </div>
+                    <div class="lista-container">
+                        {% for tipo, item in alertas_normales %}
+                            <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-normal inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-oca="{{ item.oca.nombre|lower if item.oca else '' }}" data-fecha="{{ item.fecha_segunda_inspeccion if item.fecha_segunda_inspeccion else item.fecha_inspeccion }}">
+                                <div class="lista-badge-container">
+                                    {% if item.fecha_segunda_realizada %}
+                                        <span class="lista-badge lista-badge-normal">✅ 2ª REALIZADA</span>
+                                    {% elif item.fecha_segunda_inspeccion %}
+                                        <span class="lista-badge lista-badge-normal">PROGRAMADA</span>
+                                    {% else %}
+                                        <span class="lista-badge lista-badge-normal">PENDIENTE</span>
+                                    {% endif %}
+                                </div>
+                                <div class="lista-content">
+                                    <div class="lista-maquina">{{ item.maquina }}</div>
+                                    <div class="lista-info">
+                                        {% if item.fecha_segunda_realizada %}
+                                            <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_realizada|format_fecha }}</span>
+                                        {% elif item.fecha_segunda_inspeccion %}
+                                            <span><strong>2ª Inspección:</strong> {{ item.fecha_segunda_inspeccion|format_fecha }}</span>
+                                        {% else %}
+                                            <span><strong>1ª Inspección:</strong> {{ item.fecha_inspeccion|format_fecha }}</span>
+                                        {% endif %}
+                                        {% if item.oca %}
+                                        <span><strong>OCA:</strong> {{ item.oca.nombre }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="lista-urgencia lista-urgencia-normal">
+                                    {% if item.fecha_segunda_realizada %}
+                                        ✅ 2ª Inspección realizada
+                                    {% elif item.fecha_segunda_inspeccion %}
+                                        📅 Quedan {{ item.dias_hasta_segunda }} días
+                                    {% else %}
+                                        ⚙️ Pendiente programar 2ª
+                                    {% endif %}
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <!-- Fin Vista Lista -->
 
             <br><br>
             <a href="/home" class="button">Volver al Home</a>
@@ -569,5 +909,70 @@
 
 
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+
+    <!-- JavaScript para cambio de vista y buscador -->
+    <script>
+        // Cambiar entre vista grid y lista
+        function cambiarVista(vista) {
+            const vistaGrid = document.getElementById('vista-grid');
+            const vistaLista = document.getElementById('vista-lista');
+            const tabGrid = document.getElementById('tab-grid');
+            const tabLista = document.getElementById('tab-lista');
+
+            if (vista === 'grid') {
+                vistaGrid.style.display = 'block';
+                vistaLista.style.display = 'none';
+                tabGrid.classList.add('active');
+                tabLista.classList.remove('active');
+                // Guardar preferencia
+                localStorage.setItem('vistaInspecciones', 'grid');
+            } else {
+                vistaGrid.style.display = 'none';
+                vistaLista.style.display = 'block';
+                tabGrid.classList.remove('active');
+                tabLista.classList.add('active');
+                // Guardar preferencia
+                localStorage.setItem('vistaInspecciones', 'lista');
+            }
+        }
+
+        // Restaurar vista preferida al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const vistaPreferida = localStorage.getItem('vistaInspecciones') || 'grid';
+            cambiarVista(vistaPreferida);
+        });
+
+        // Función de búsqueda
+        function filtrarInspecciones() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const items = document.querySelectorAll('#vista-lista .inspeccion-item');
+
+            items.forEach(item => {
+                const maquina = item.dataset.maquina || '';
+                const oca = item.dataset.oca || '';
+                const fecha = item.dataset.fecha || '';
+
+                const texto = maquina + ' ' + oca + ' ' + fecha;
+
+                if (texto.includes(filter)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Ocultar secciones vacías
+            const secciones = document.querySelectorAll('#vista-lista .alertas-section');
+            secciones.forEach(seccion => {
+                const itemsVisibles = seccion.querySelectorAll('.inspeccion-item:not([style*="display: none"])');
+                if (itemsVisibles.length === 0) {
+                    seccion.style.display = 'none';
+                } else {
+                    seccion.style.display = '';
+                }
+            });
+        }
+    </script>
 </body>
 </html>
