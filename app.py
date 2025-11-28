@@ -14,6 +14,12 @@ import pdfplumber
 import logging
 import sys
 import helpers
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.pdfgen import canvas
 
 # Configurar logging para que aparezca en Render
 logging.basicConfig(
@@ -3880,6 +3886,193 @@ def defectos_dashboard():
         defectos_dg=len(defectos_dg),
         defectos_dmg=len(defectos_dmg),
         todos_defectos=todos_defectos
+    )
+
+# Exportar Defectos a PDF
+@app.route("/exportar_defectos_pdf")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'read')
+def exportar_defectos_pdf():
+    """Exporta defectos a PDF en formato horizontal, agrupados por máquina"""
+
+    # Obtener todos los defectos con información de urgencia usando la vista
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/v_defectos_con_urgencia?select=*&order=fecha_limite.asc",
+        headers=HEADERS
+    )
+
+    todos_defectos = []
+    if response.status_code == 200:
+        todos_defectos = response.json()
+
+    # Aplicar filtros (mismo código que el dashboard)
+    defectos_pendientes = [d for d in todos_defectos if d.get('estado') == 'PENDIENTE']
+
+    filtro_tecnico = request.args.get('tecnico', '')
+    filtro_material = request.args.get('material', '')
+    filtro_stock = request.args.get('stock', '')
+
+    if filtro_tecnico:
+        if filtro_tecnico == 'sin_asignar':
+            defectos_pendientes = [d for d in defectos_pendientes if not d.get('tecnico_asignado')]
+        else:
+            defectos_pendientes = [d for d in defectos_pendientes if d.get('tecnico_asignado') == filtro_tecnico]
+
+    if filtro_material:
+        if filtro_material == 'sin_definir':
+            defectos_pendientes = [d for d in defectos_pendientes if not d.get('gestion_material')]
+        else:
+            defectos_pendientes = [d for d in defectos_pendientes if d.get('gestion_material') == filtro_material]
+
+    if filtro_stock:
+        if filtro_stock == 'sin_definir':
+            defectos_pendientes = [d for d in defectos_pendientes if not d.get('estado_stock')]
+        else:
+            defectos_pendientes = [d for d in defectos_pendientes if d.get('estado_stock') == filtro_stock]
+
+    # Obtener información adicional de inspecciones para enriquecer datos
+    response_insp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/inspecciones?select=id,maquina,direccion,poblacion,fecha_inspeccion,oca_id,oca:ocas(nombre)",
+        headers=HEADERS
+    )
+
+    inspecciones_dict = {}
+    if response_insp.status_code == 200:
+        inspecciones = response_insp.json()
+        for insp in inspecciones:
+            inspecciones_dict[insp['id']] = insp
+
+    # Enriquecer defectos con información de inspección
+    for defecto in defectos_pendientes:
+        insp_id = defecto.get('inspeccion_id')
+        if insp_id and insp_id in inspecciones_dict:
+            insp = inspecciones_dict[insp_id]
+            defecto['direccion'] = insp.get('direccion')
+            defecto['poblacion'] = insp.get('poblacion')
+            defecto['fecha_inspeccion'] = insp.get('fecha_inspeccion')
+            defecto['oca_nombre'] = insp.get('oca', {}).get('nombre') if insp.get('oca') else None
+
+    # Agrupar defectos por máquina
+    defectos_por_maquina = {}
+    for defecto in defectos_pendientes:
+        maquina = defecto.get('maquina', 'Sin especificar')
+        if maquina not in defectos_por_maquina:
+            defectos_por_maquina[maquina] = []
+        defectos_por_maquina[maquina].append(defecto)
+
+    # Generar PDF
+    pdf_buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        pdf_buffer,
+        pagesize=landscape(A4),
+        rightMargin=1*cm,
+        leftMargin=1*cm,
+        topMargin=1*cm,
+        bottomMargin=1*cm
+    )
+
+    # Elementos del PDF
+    elementos = []
+
+    # Logo
+    logo_path = os.path.join(os.path.dirname(__file__), 'static', 'logo-fedes-ascensores.png')
+    if os.path.exists(logo_path):
+        logo = Image(logo_path, width=4*cm, height=1.6*cm)
+        elementos.append(logo)
+        elementos.append(Spacer(1, 0.3*cm))
+
+    # Título
+    styles = getSampleStyleSheet()
+    titulo = Paragraph("<b>LISTADO DE DEFECTOS PENDIENTES</b>", styles['Title'])
+    elementos.append(titulo)
+
+    # Fecha de generación
+    fecha_hoy = datetime.now().strftime('%d/%m/%Y %H:%M')
+    fecha_texto = Paragraph(f"<i>Generado el: {fecha_hoy}</i>", styles['Normal'])
+    elementos.append(fecha_texto)
+    elementos.append(Spacer(1, 0.5*cm))
+
+    # Crear tabla para cada máquina
+    for maquina, defectos in sorted(defectos_por_maquina.items()):
+        # Encabezado de máquina
+        maquina_texto = Paragraph(f"<b>Máquina: {maquina}</b>", styles['Heading2'])
+        elementos.append(maquina_texto)
+        elementos.append(Spacer(1, 0.2*cm))
+
+        # Datos de la tabla
+        data = [['Descripción', 'Calificación', 'Plazo', 'Estado', 'Técnico', 'Estado Material']]
+
+        for defecto in defectos:
+            # Formatear valores
+            descripcion = defecto.get('descripcion', '')[:100]  # Limitar a 100 caracteres
+            calificacion = defecto.get('calificacion', '-')
+            plazo = f"{defecto.get('plazo_meses', '-')} meses"
+            estado = defecto.get('estado', '-')
+            tecnico = defecto.get('tecnico_asignado', '-') or '-'
+            estado_material = defecto.get('estado_stock', '-') or '-'
+
+            data.append([descripcion, calificacion, plazo, estado, tecnico, estado_material])
+
+        # Crear tabla
+        tabla = Table(data, colWidths=[9*cm, 2*cm, 2*cm, 2.5*cm, 2.5*cm, 2.5*cm])
+
+        # Estilo de la tabla
+        estilo = TableStyle([
+            # Encabezado
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#366092')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+            # Contenido
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (1, 1), (-1, -1), 'CENTER'),  # Centrar todo excepto descripción
+            ('ALIGN', (0, 1), (0, -1), 'LEFT'),     # Descripción alineada a la izquierda
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0f0f0')])
+        ])
+
+        # Aplicar colores según calificación
+        for i, row in enumerate(data[1:], start=1):
+            calificacion = row[1]
+            if calificacion == 'DMG':  # Muy Grave
+                estilo.add('BACKGROUND', (1, i), (1, i), colors.HexColor('#ff4444'))
+                estilo.add('TEXTCOLOR', (1, i), (1, i), colors.white)
+            elif calificacion == 'DG':  # Grave
+                estilo.add('BACKGROUND', (1, i), (1, i), colors.HexColor('#ff9900'))
+                estilo.add('TEXTCOLOR', (1, i), (1, i), colors.white)
+            elif calificacion == 'DL':  # Leve
+                estilo.add('BACKGROUND', (1, i), (1, i), colors.HexColor('#ffdd44'))
+
+        tabla.setStyle(estilo)
+        elementos.append(tabla)
+        elementos.append(Spacer(1, 0.5*cm))
+
+    # Si no hay defectos
+    if not defectos_por_maquina:
+        mensaje = Paragraph("<i>No hay defectos pendientes con los filtros aplicados.</i>", styles['Normal'])
+        elementos.append(mensaje)
+
+    # Construir PDF
+    doc.build(elementos)
+    pdf_buffer.seek(0)
+
+    # Generar nombre de archivo
+    fecha_archivo = datetime.now().strftime('%Y%m%d_%H%M')
+    nombre_archivo = f"defectos_pendientes_{fecha_archivo}.pdf"
+
+    return send_file(
+        pdf_buffer,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=nombre_archivo
     )
 
 # Nueva Inspección - Formulario
