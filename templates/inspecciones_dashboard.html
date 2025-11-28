@@ -424,9 +424,6 @@
             <div class="page-header">
                 <h2 class="page-title">Gestión de Inspecciones (IPOs)</h2>
                 <div>
-                    <a href="/defectos_dashboard" class="btn btn-secondary" style="margin-right: 10px;">Dashboard de Defectos</a>
-                    <a href="/materiales_especiales" class="btn btn-secondary" style="margin-right: 10px;">Cortinas y Pesacargas</a>
-                    <a href="/ocas" class="btn btn-secondary" style="margin-right: 10px;">Gestión de OCAs</a>
                     <a href="/inspecciones/nueva" class="btn btn-primary">+ Nueva Inspección</a>
                 </div>
             </div>
@@ -442,26 +439,6 @@
                 {% endfor %}
               {% endif %}
             {% endwith %}
-
-            <!-- Estadísticas de Gestión de Defectos -->
-            <div class="stats">
-                <div class="stat-card filtro-kpi" data-filtro="vencidas" style="cursor: pointer; border-color: #dc3545;">
-                    <h3 style="color: #dc3545;">Plazo Vencido</h3>
-                    <div class="number" style="color: #dc3545;">{{ defectos_vencidos }}</div>
-                </div>
-                <div class="stat-card filtro-kpi" data-filtro="este-mes" style="cursor: pointer; border-color: #ffc107;">
-                    <h3 style="color: #f57c00;">Urgentes (Este Mes)</h3>
-                    <div class="number" style="color: #f57c00;">{{ defectos_urgentes }}</div>
-                </div>
-                <div class="stat-card filtro-kpi" data-filtro="proximo-mes" style="cursor: pointer; border-color: #007bff;">
-                    <h3 style="color: #1565c0;">Próximos (Próx. Mes)</h3>
-                    <div class="number" style="color: #1565c0;">{{ defectos_proximos }}</div>
-                </div>
-                <div class="stat-card filtro-kpi" data-filtro="programadas" style="cursor: pointer; border-color: #28a745;">
-                    <h3 style="color: #2e7d32;">Sin Urgencia / OK</h3>
-                    <div class="number" style="color: #2e7d32;">{{ defectos_ok }}</div>
-                </div>
-            </div>
 
             <!-- Alertas Críticas -->
             {% if alertas_criticas %}
@@ -592,50 +569,5 @@
 
 
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
-
-    <!-- Filtrado de KPIs de segunda inspección -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const kpis = document.querySelectorAll('.filtro-kpi');
-            const secciones = document.querySelectorAll('.seccion-alerta');
-
-            kpis.forEach(kpi => {
-                kpi.addEventListener('click', function() {
-                    const filtro = this.dataset.filtro;
-
-                    // Remover estilo activo de todos los KPIs
-                    kpis.forEach(k => {
-                        k.style.boxShadow = '';
-                        k.style.transform = '';
-                    });
-
-                    // Si se hace click en "todas", mostrar todas las secciones
-                    if (filtro === 'todas') {
-                        secciones.forEach(seccion => {
-                            seccion.style.display = '';
-                        });
-                        // Marcar KPI como activo
-                        this.style.boxShadow = '0 4px 12px rgba(0, 51, 102, 0.2)';
-                        this.style.transform = 'translateY(-4px)';
-                        return;
-                    }
-
-                    // Filtrar secciones según categoría del KPI
-                    secciones.forEach(seccion => {
-                        const categoria = seccion.dataset.categoria;
-                        if (categoria === filtro) {
-                            seccion.style.display = '';
-                        } else {
-                            seccion.style.display = 'none';
-                        }
-                    });
-
-                    // Marcar KPI como activo
-                    this.style.boxShadow = '0 4px 12px rgba(0, 51, 102, 0.2)';
-                    this.style.transform = 'translateY(-4px)';
-                });
-            });
-        });
-    </script>
 </body>
 </html>

@@ -3766,48 +3766,6 @@ def inspecciones_dashboard():
             inspeccion['categoria_segunda'] = 'sin-fecha'
             alertas_normales.append(('defectos', inspeccion))
 
-    # Calcular estadísticas centradas en GESTIÓN DE DEFECTOS
-    # Calcular rangos de fechas
-    from datetime import timedelta
-    from calendar import monthrange
-
-    hoy = date.today()
-    primer_dia_mes = hoy.replace(day=1)
-    ultimo_dia_mes = hoy.replace(day=monthrange(hoy.year, hoy.month)[1])
-
-    # Próximo mes
-    if hoy.month == 12:
-        primer_dia_proximo = date(hoy.year + 1, 1, 1)
-        ultimo_dia_proximo = date(hoy.year + 1, 1, monthrange(hoy.year + 1, 1)[1])
-    else:
-        primer_dia_proximo = date(hoy.year, hoy.month + 1, 1)
-        ultimo_dia_proximo = date(hoy.year, hoy.month + 1, monthrange(hoy.year, hoy.month + 1)[1])
-
-    # KPIs de gestión de defectos por fecha límite
-    defectos_vencidos = 0
-    defectos_urgentes = 0
-    defectos_proximos = 0
-    defectos_ok = len(alertas_normales)  # Incluye pendientes lejanas y ya subsanados
-
-    for insp in inspecciones:
-        # Solo contar los que aún NO han pasado la 2ª inspección
-        if insp.get('fecha_segunda_realizada'):
-            continue
-
-        # Para los pendientes, analizar fecha límite
-        if insp.get('fecha_segunda_inspeccion'):
-            try:
-                fecha_limite = datetime.strptime(insp['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
-
-                if fecha_limite < hoy:
-                    defectos_vencidos += 1
-                elif primer_dia_mes <= fecha_limite <= ultimo_dia_mes:
-                    defectos_urgentes += 1
-                elif primer_dia_proximo <= fecha_limite <= ultimo_dia_proximo:
-                    defectos_proximos += 1
-            except:
-                pass
-
     # Obtener lista de OCAs para filtros
     response_ocas = requests.get(
         f"{SUPABASE_URL}/rest/v1/ocas?select=id,nombre&activo=eq.true&order=nombre.asc",
@@ -3820,10 +3778,6 @@ def inspecciones_dashboard():
     return render_template(
         "inspecciones_dashboard.html",
         inspecciones=inspecciones,
-        defectos_vencidos=defectos_vencidos,
-        defectos_urgentes=defectos_urgentes,
-        defectos_proximos=defectos_proximos,
-        defectos_ok=defectos_ok,
         alertas_criticas=alertas_criticas,
         alertas_urgentes=alertas_urgentes,
         alertas_proximas=alertas_proximas,
@@ -4047,16 +4001,6 @@ def ver_inspeccion(inspeccion_id):
         else:
             defecto['urgencia'] = 'COMPLETADO'
 
-    # Obtener materiales especiales relacionados
-    response_materiales = requests.get(
-        f"{SUPABASE_URL}/rest/v1/materiales_especiales?inspeccion_id=eq.{inspeccion_id}&order=tipo.asc",
-        headers=HEADERS
-    )
-
-    materiales = []
-    if response_materiales.status_code == 200:
-        materiales = response_materiales.json()
-
     # Calcular días hasta segunda inspección
     if inspeccion.get('fecha_segunda_inspeccion'):
         try:
@@ -4069,8 +4013,7 @@ def ver_inspeccion(inspeccion_id):
     return render_template(
         "ver_inspeccion.html",
         inspeccion=inspeccion,
-        defectos=defectos,
-        materiales=materiales
+        defectos=defectos
     )
 
 # Editar Inspección
@@ -4742,27 +4685,6 @@ def guardar_defectos_importados(inspeccion_id):
         if response.status_code in [200, 201]:
             defectos_guardados += 1
 
-            # Si es cortina o pesacarga, crear material especial
-            if es_cortina or es_pesacarga:
-                tipo_material = "CORTINA" if es_cortina else "PESACARGA"
-
-                material_data = {
-                    "tipo": tipo_material,
-                    "inspeccion_id": inspeccion_id,
-                    "cliente_nombre": insp_data.get('maquina', ''),  # Usar maquina como referencia
-                    "direccion": "",  # No disponible en inspecciones
-                    "municipio": "",  # No disponible en inspecciones
-                    "cantidad": 1,
-                    "fecha_limite": fecha_limite,
-                    "estado": "PENDIENTE"
-                }
-
-                requests.post(
-                    f"{SUPABASE_URL}/rest/v1/materiales_especiales",
-                    json=material_data,
-                    headers=HEADERS
-                )
-
     # Limpiar sesión
     session.pop(f'defectos_extraidos_{inspeccion_id}', None)
 
@@ -4842,37 +4764,6 @@ def nuevo_defecto(inspeccion_id):
 
         if response.status_code in [200, 201]:
             flash("Defecto añadido correctamente", "success")
-
-            # Si es cortina o pesacarga, crear material especial automáticamente
-            if data["es_cortina"] or data["es_pesacarga"]:
-                # Obtener info de la inspección para el material
-                response_insp_full = requests.get(
-                    f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=titular_nombre,direccion_instalacion,municipio",
-                    headers=HEADERS
-                )
-
-                if response_insp_full.status_code == 200 and response_insp_full.json():
-                    insp_data = response_insp_full.json()[0]
-
-                    tipo_material = "CORTINA" if data["es_cortina"] else "PESACARGA"
-
-                    material_data = {
-                        "tipo": tipo_material,
-                        "inspeccion_id": inspeccion_id,
-                        "cliente_nombre": insp_data.get('titular_nombre'),
-                        "direccion": insp_data.get('direccion_instalacion'),
-                        "municipio": insp_data.get('municipio'),
-                        "cantidad": 1,
-                        "fecha_limite": fecha_limite,
-                        "estado": "PENDIENTE"
-                    }
-
-                    requests.post(
-                        f"{SUPABASE_URL}/rest/v1/materiales_especiales",
-                        json=material_data,
-                        headers=HEADERS
-                    )
-
             return redirect(f"/inspecciones/ver/{inspeccion_id}")
         else:
             flash(f"Error al añadir defecto: {response.text}", "error")
@@ -4994,20 +4885,9 @@ def ver_defecto(defecto_id):
     else:
         defecto['nivel_urgencia'] = 'COMPLETADO'
 
-    # Verificar si hay materiales especiales relacionados
-    response_materiales = requests.get(
-        f"{SUPABASE_URL}/rest/v1/materiales_especiales?defecto_id=eq.{defecto_id}&select=*",
-        headers=HEADERS
-    )
-
-    materiales_relacionados = []
-    if response_materiales.status_code == 200:
-        materiales_relacionados = response_materiales.json()
-
     return render_template(
         "ver_defecto.html",
-        defecto=defecto,
-        materiales_relacionados=materiales_relacionados
+        defecto=defecto
     )
 
 # Editar defecto
@@ -5190,169 +5070,6 @@ def actualizar_gestion_defecto(defecto_id):
 
 
 # ============================================
-# MATERIALES ESPECIALES (Cortinas y Pesacargas)
-# ============================================
-
-# Dashboard de Materiales Especiales
-@app.route("/materiales_especiales")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'read')
-def materiales_especiales():
-    """Vista de todos los materiales especiales (cortinas y pesacargas)"""
-
-    # Filtros
-    filtro_tipo = request.args.get("tipo", "")
-    filtro_estado = request.args.get("estado", "")
-
-    # Construir query
-    query = f"{SUPABASE_URL}/rest/v1/materiales_especiales?select=*,inspeccion:inspecciones(rae,titular_nombre)&order=fecha_limite.asc"
-
-    if filtro_tipo:
-        query += f"&tipo=eq.{filtro_tipo}"
-
-    if filtro_estado:
-        query += f"&estado=eq.{filtro_estado}"
-
-    response = requests.get(query, headers=HEADERS)
-
-    materiales = []
-    if response.status_code == 200:
-        materiales = response.json()
-
-    # Calcular urgencia
-    hoy = date.today()
-    for material in materiales:
-        if material.get('fecha_limite') and material.get('estado') != 'INSTALADO':
-            try:
-                fecha_limite = datetime.strptime(material['fecha_limite'].split('T')[0], '%Y-%m-%d').date()
-                dias_restantes = (fecha_limite - hoy).days
-                material['dias_restantes'] = dias_restantes
-
-                if dias_restantes < 0:
-                    material['urgencia'] = 'VENCIDO'
-                elif dias_restantes <= 15:
-                    material['urgencia'] = 'URGENTE'
-                elif dias_restantes <= 30:
-                    material['urgencia'] = 'PROXIMO'
-                else:
-                    material['urgencia'] = 'NORMAL'
-            except:
-                material['urgencia'] = 'NORMAL'
-        else:
-            material['urgencia'] = 'COMPLETADO'
-
-    # Estadísticas
-    total_materiales = len(materiales)
-    pendientes = len([m for m in materiales if m.get('estado') == 'PENDIENTE'])
-    pedidos = len([m for m in materiales if m.get('estado') == 'PEDIDO'])
-    recibidos = len([m for m in materiales if m.get('estado') == 'RECIBIDO'])
-    instalados = len([m for m in materiales if m.get('estado') == 'INSTALADO'])
-
-    return render_template(
-        "materiales_especiales.html",
-        materiales=materiales,
-        total_materiales=total_materiales,
-        pendientes=pendientes,
-        pedidos=pedidos,
-        recibidos=recibidos,
-        instalados=instalados,
-        filtro_tipo=filtro_tipo,
-        filtro_estado=filtro_estado
-    )
-
-# Nuevo Material Especial (Manual)
-@app.route("/materiales_especiales/nuevo", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def nuevo_material_especial():
-    """Crear un material especial manualmente (sin inspección)"""
-
-    if request.method == "POST":
-        data = {
-            "tipo": request.form.get("tipo"),
-            "cliente_nombre": request.form.get("cliente_nombre"),
-            "direccion": request.form.get("direccion") or None,
-            "municipio": request.form.get("municipio") or None,
-            "cantidad": int(request.form.get("cantidad", 1)),
-            "fecha_limite": request.form.get("fecha_limite"),
-            "estado": "PENDIENTE",
-            "observaciones": request.form.get("observaciones") or None
-        }
-
-        # Validar
-        if not data["tipo"] or not data["cliente_nombre"] or not data["fecha_limite"]:
-            flash("Tipo, Cliente y Fecha Límite son obligatorios", "error")
-            return redirect(request.referrer)
-
-        response = requests.post(
-            f"{SUPABASE_URL}/rest/v1/materiales_especiales",
-            json=data,
-            headers=HEADERS
-        )
-
-        if response.status_code in [200, 201]:
-            flash("Material especial añadido correctamente", "success")
-            return redirect("/materiales_especiales")
-        else:
-            flash(f"Error al añadir material: {response.text}", "error")
-            return redirect(request.referrer)
-
-    # GET
-    return render_template("nuevo_material_especial.html")
-
-# Cambiar Estado de Material
-@app.route("/materiales_especiales/<int:material_id>/estado", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def cambiar_estado_material(material_id):
-    """Cambiar el estado de un material especial"""
-
-    nuevo_estado = request.form.get("estado")
-
-    data = {
-        "estado": nuevo_estado
-    }
-
-    # Guardar fecha según estado
-    if nuevo_estado == "PEDIDO":
-        data["fecha_pedido"] = date.today().isoformat()
-    elif nuevo_estado == "RECIBIDO":
-        data["fecha_recepcion"] = date.today().isoformat()
-    elif nuevo_estado == "INSTALADO":
-        data["fecha_instalacion"] = date.today().isoformat()
-
-    response = requests.patch(
-        f"{SUPABASE_URL}/rest/v1/materiales_especiales?id=eq.{material_id}",
-        json=data,
-        headers=HEADERS
-    )
-
-    if response.status_code in [200, 204]:
-        flash(f"Material marcado como {nuevo_estado}", "success")
-    else:
-        flash("Error al cambiar estado", "error")
-
-    return redirect(request.referrer)
-
-# Eliminar Material Especial
-@app.route("/materiales_especiales/<int:material_id>/eliminar")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'delete')
-def eliminar_material_especial(material_id):
-    """Eliminar un material especial"""
-
-    response = requests.delete(
-        f"{SUPABASE_URL}/rest/v1/materiales_especiales?id=eq.{material_id}",
-        headers=HEADERS
-    )
-
-    if response.status_code in [200, 204]:
-        flash("Material eliminado correctamente", "success")
-    else:
-        flash("Error al eliminar material", "error")
-
-    return redirect("/materiales_especiales")
-
 # ============================================
 # GESTIÓN DE OCAs (Organismos de Control)
 # ============================================
