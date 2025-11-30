@@ -335,10 +335,10 @@
                             <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
-                                    <strong>Máquina:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
+                                    <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
-                                    <strong>Instalación:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].instalaciones.nombre if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera and op.partes_trabajo[0].maquinas_cartera[0].instalaciones else 'N/A' }}
+                                    <strong>Instalación:</strong> {{ op.maquinas_cartera.instalaciones.nombre if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera and op.maquinas_cartera.instalaciones else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
                                     <strong>Creada:</strong> {{ op.fecha_creacion[:10] }}
@@ -368,7 +368,7 @@
                             <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
-                                    <strong>Máquina:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
+                                    <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
                                     <strong>Presup. enviado:</strong> {{ op.fecha_presupuesto_enviado[:10] if op.fecha_presupuesto_enviado else '-' }}
@@ -398,7 +398,7 @@
                             <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
-                                    <strong>Máquina:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
+                                    <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
                                     <strong>Aceptado:</strong> {{ op.fecha_aceptacion[:10] if op.fecha_aceptacion else '-' }}
@@ -428,7 +428,7 @@
                             <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
-                                    <strong>Máquina:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
+                                    <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
                                     <strong>Repuestos:</strong>
@@ -461,7 +461,7 @@
                             <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
-                                    <strong>Máquina:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
+                                    <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
                                     <strong>Listo desde:</strong> {{ op.fecha_listo_ejecutar[:10] if op.fecha_listo_ejecutar else '-' }}
@@ -491,7 +491,7 @@
                             <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
-                                    <strong>Máquina:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
+                                    <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
                                     <strong>Completado:</strong> {{ op.fecha_completado[:10] if op.fecha_completado else '-' }}
@@ -520,7 +520,7 @@
                             <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
-                                    <strong>Máquina:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
+                                    <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
                                     <strong>Facturado:</strong> {{ op.fecha_facturacion[:10] if op.fecha_facturacion else '-' }}
@@ -549,7 +549,7 @@
                             <div class="oportunidad-card" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
-                                    <strong>Máquina:</strong> {{ op.partes_trabajo[0].maquinas_cartera[0].identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
+                                    <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
                                     <strong>Motivo:</strong> {{ op.motivo_rechazo or 'No especificado' }}
