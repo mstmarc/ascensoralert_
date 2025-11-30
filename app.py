@@ -6279,6 +6279,7 @@ def cartera_ver_maquina(maquina_id):
     )
 
     if response.status_code != 200 or not response.json():
+        logger.error(f"Error al obtener máquina {maquina_id}: status={response.status_code}, response={response.text}")
         flash("Máquina no encontrada", "error")
         return redirect("/cartera")
 
@@ -6360,6 +6361,7 @@ def cartera_ver_instalacion(instalacion_id):
     )
 
     if not response.json():
+        logger.error(f"Error al obtener instalación {instalacion_id}: status={response.status_code}, response={response.text}")
         flash("Instalación no encontrada", "error")
         return redirect("/cartera")
 
