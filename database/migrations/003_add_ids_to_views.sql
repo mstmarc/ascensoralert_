@@ -1,6 +1,10 @@
 -- Migración: Agregar IDs a vistas para permitir enlaces a vistas detalladas
 -- Fecha: 2025-11-30
 
+-- Eliminar vistas existentes antes de recrearlas
+DROP VIEW IF EXISTS v_maquinas_problematicas;
+DROP VIEW IF EXISTS v_partes_con_recomendaciones;
+
 -- Actualizar vista de máquinas problemáticas para incluir instalacion_id
 CREATE OR REPLACE VIEW v_maquinas_problematicas AS
 SELECT
