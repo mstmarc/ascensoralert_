@@ -6042,6 +6042,105 @@ def cartera_importar_partes():
     return redirect("/cartera/importar")
 
 
+@app.route("/cartera/reanalizar-recomendaciones", methods=["POST"])
+@helpers.login_required
+def cartera_reanalizar_recomendaciones():
+    """Re-analizar todos los partes existentes con las nuevas palabras clave"""
+
+    try:
+        # Palabras clave actualizadas (mismo array que en importación)
+        palabras_clave_recomendacion = [
+            # Recomendaciones explícitas
+            'RECOMENDACIÓN', 'RECOMENDACION', 'RECOMIENDO', 'RECOMENDAMOS',
+            'CONVENDRÍA', 'CONVIENE', 'SERÍA CONVENIENTE', 'SE RECOMIENDA',
+            'ACONSEJABLE', 'ACONSEJO', 'SUGERENCIA', 'SUGIERO',
+
+            # Indicadores de urgencia/importancia
+            'IMPORTANTE', 'URGENTE', 'NECESARIO', 'IMPRESCINDIBLE', 'CRÍTICO',
+            'PRIORITARIO', 'INMEDIATO',
+
+            # Acciones de mantenimiento/reparación
+            'CAMBIAR', 'SUSTITUIR', 'REEMPLAZAR', 'MODERNIZAR', 'ACTUALIZAR',
+            'REVISAR', 'REPARAR', 'ARREGLAR', 'RENOVAR', 'MEJORAR',
+
+            # Temporalidad
+            'PRÓXIMAMENTE', 'PROXIMAMENTE', 'PRONTO', 'EN BREVE',
+            'PRÓXIMA REVISIÓN', 'PROXIMA REVISION',
+
+            # Estados problemáticos
+            'NO FUNCIONA', 'NO OPERA', 'INOPERATIVO', 'INOPERANTE',
+            'FALLA', 'FALLO', 'DEFECTUOSO', 'AVERIADO', 'DETERIORADO',
+            'MAL ESTADO', 'DESGASTADO', 'ROTO', 'DAÑADO',
+
+            # Componentes críticos (cuando no funcionan = oportunidad)
+            'DISPOSITIVO NO', 'COMUNICACIÓN NO', 'BIDIRECCIONAL NO',
+            'CABINA NO', 'PUERTA NO', 'BOTONERA NO',
+
+            # Oportunidades de facturación
+            'FUERA DE CONTRATO', 'NO INCLUIDO', 'ADICIONAL',
+            'PRESUPUESTO', 'COTIZAR', 'COTIZACIÓN'
+        ]
+
+        # Obtener todos los partes de trabajo
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=id,resolucion&limit=10000",
+            headers=HEADERS
+        )
+
+        if response.status_code != 200:
+            flash("Error al obtener partes de trabajo", "error")
+            return redirect("/cartera")
+
+        partes = response.json()
+
+        nuevas_recomendaciones = 0
+        partes_actualizados = 0
+
+        # Analizar cada parte
+        for parte in partes:
+            resolucion = parte.get('resolucion', '')
+
+            if not resolucion:
+                continue
+
+            tiene_recomendacion = False
+            recomendacion_extraida = None
+
+            texto_upper = str(resolucion).upper()
+            for palabra in palabras_clave_recomendacion:
+                if palabra in texto_upper:
+                    tiene_recomendacion = True
+                    recomendacion_extraida = str(resolucion)
+                    break
+
+            # Actualizar parte si cambió el estado de recomendación
+            update_data = {
+                "tiene_recomendacion": tiene_recomendacion,
+                "recomendaciones_extraidas": recomendacion_extraida if tiene_recomendacion else None
+            }
+
+            # Solo actualizar si hay cambio
+            response_update = requests.patch(
+                f"{SUPABASE_URL}/rest/v1/partes_trabajo?id=eq.{parte['id']}",
+                json=update_data,
+                headers=HEADERS
+            )
+
+            if response_update.status_code in [200, 204]:
+                partes_actualizados += 1
+                if tiene_recomendacion:
+                    nuevas_recomendaciones += 1
+
+        flash(f"Re-análisis completado: {partes_actualizados} partes actualizados", "success")
+        flash(f"{nuevas_recomendaciones} recomendaciones detectadas en total", "info")
+
+    except Exception as e:
+        flash(f"Error al re-analizar: {str(e)}", "error")
+        logger.error(f"Error en re-análisis: {str(e)}")
+
+    return redirect("/cartera")
+
+
 # ============================================
 # OPORTUNIDADES DE FACTURACIÓN
 # ============================================
