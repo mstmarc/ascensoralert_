@@ -5613,6 +5613,10 @@ def cartera_importar_equipos():
         # Leer Excel
         df = pd.read_excel(file)
 
+        # Log de columnas encontradas
+        logger.info(f"Columnas en Excel: {list(df.columns)}")
+        logger.info(f"Total de filas: {len(df)}")
+
         # Mapeo de columnas
         column_mapping = {
             'Cód. instalación': 'cod_instalacion',
@@ -5628,7 +5632,9 @@ def cartera_importar_equipos():
         missing = [col for col in required if col not in df.columns]
 
         if missing:
+            logger.error(f"Faltan columnas: {missing}. Columnas después de mapeo: {list(df.columns)}")
             flash(f"Faltan columnas requeridas: {', '.join(missing)}", "error")
+            flash(f"Columnas encontradas en Excel: {', '.join(df.columns)}", "info")
             return redirect("/cartera/importar")
 
         # Procesar instalaciones únicas
@@ -5685,6 +5691,7 @@ def cartera_importar_equipos():
                     instalacion_id = response.json()[0]['id']
                     stats['instalaciones_nuevas'] += 1
                 else:
+                    logger.error(f"Error creando instalación '{nombre}': {response.status_code} - {response.text}")
                     stats['errores'] += 1
                     continue
 
@@ -5727,6 +5734,7 @@ def cartera_importar_equipos():
             if response.status_code == 201:
                 stats['maquinas_nuevas'] += 1
             else:
+                logger.error(f"Error creando máquina '{identificador}': {response.status_code} - {response.text}")
                 stats['errores'] += 1
 
         # Mostrar resumen
