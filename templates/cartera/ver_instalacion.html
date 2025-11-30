@@ -387,12 +387,11 @@
             <div class="page-header">
                 <div class="header-left">
                     <h1>{{ instalacion.nombre }}</h1>
+                    {% if instalacion.municipio %}
                     <p class="header-subtitle">
-                        📍 {{ instalacion.direccion }}{% if instalacion.municipio %}, {{ instalacion.municipio }}{% endif %}
+                        📍 {{ instalacion.municipio }}
                     </p>
-                    <p class="header-subtitle">
-                        <strong>Código:</strong> {{ instalacion.codigo }}
-                    </p>
+                    {% endif %}
                 </div>
                 <a href="/cartera" class="btn-volver">
                     ← Volver al Dashboard
@@ -442,18 +441,6 @@
                         <div class="info-value">{{ instalacion.nombre }}</div>
                     </div>
 
-                    <div class="info-item">
-                        <div class="info-label">Código</div>
-                        <div class="info-value">{{ instalacion.codigo }}</div>
-                    </div>
-
-                    {% if instalacion.direccion %}
-                    <div class="info-item">
-                        <div class="info-label">Dirección</div>
-                        <div class="info-value">{{ instalacion.direccion }}</div>
-                    </div>
-                    {% endif %}
-
                     {% if instalacion.municipio %}
                     <div class="info-item">
                         <div class="info-label">Municipio</div>
@@ -461,19 +448,10 @@
                     </div>
                     {% endif %}
 
-                    {% if instalacion.codigo_postal %}
                     <div class="info-item">
-                        <div class="info-label">Código Postal</div>
-                        <div class="info-value">{{ instalacion.codigo_postal }}</div>
+                        <div class="info-label">Total Máquinas</div>
+                        <div class="info-value">{{ stats.total_maquinas }}</div>
                     </div>
-                    {% endif %}
-
-                    {% if instalacion.provincia %}
-                    <div class="info-item">
-                        <div class="info-label">Provincia</div>
-                        <div class="info-value">{{ instalacion.provincia }}</div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
 

@@ -6274,7 +6274,7 @@ def cartera_ver_maquina(maquina_id):
 
     # Obtener información de la máquina con instalación
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/maquinas_cartera?id=eq.{maquina_id}&select=*,instalaciones(id,codigo,nombre,direccion,municipio)",
+        f"{SUPABASE_URL}/rest/v1/maquinas_cartera?id=eq.{maquina_id}&select=*,instalaciones(id,nombre,municipio)",
         headers=HEADERS
     )
 
