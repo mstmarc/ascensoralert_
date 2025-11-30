@@ -234,32 +234,31 @@
     menuHTML += `
                 <div class="sidebar-integrated-divider"></div>`;
 
-    // BLOQUE 3: INSPECCIONES, DEFECTOS Y CARTERA (solo para admin)
-    if (tienePermiso('inspecciones', 'read') || tienePermiso('cartera', 'read')) {
+    // BLOQUE 3: INSPECCIONES (solo para admin)
+    if (tienePermiso('inspecciones', 'read')) {
         menuHTML += `
-                <!-- BLOQUE 3: INSPECCIONES, DEFECTOS Y CARTERA -->`;
-
-        if (tienePermiso('inspecciones', 'read')) {
-            menuHTML += `
+                <!-- BLOQUE 3: INSPECCIONES -->
                 <a href="/inspecciones" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Inspecciones
                 </a>
                 <a href="/defectos_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Defectos
-                </a>`;
-        }
+                </a>
 
-        if (tienePermiso('cartera', 'read')) {
-            menuHTML += `
+                <div class="sidebar-integrated-divider"></div>`;
+    }
+
+    // BLOQUE 4: CARTERA Y ANÁLISIS
+    if (tienePermiso('cartera', 'read') || tienePermiso('inspecciones', 'read')) {
+        menuHTML += `
+                <!-- BLOQUE 4: CARTERA Y ANÁLISIS -->
                 <a href="/cartera" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Cartera y Análisis
+                    📊 Cartera y Análisis
                 </a>
                 <a href="/cartera/importar" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    Importar Datos
-                </a>`;
-        }
+                    ⬆️ Importar Datos
+                </a>
 
-        menuHTML += `
                 <div class="sidebar-integrated-divider"></div>`;
     }
 
