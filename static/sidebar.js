@@ -248,6 +248,20 @@
                 <div class="sidebar-integrated-divider"></div>`;
     }
 
+    // BLOQUE 4: CARTERA Y ANÁLISIS
+    if (tienePermiso('cartera', 'read') || tienePermiso('inspecciones', 'read')) {
+        menuHTML += `
+                <!-- BLOQUE 4: CARTERA Y ANÁLISIS -->
+                <a href="/cartera" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    📊 Cartera y Análisis
+                </a>
+                <a href="/cartera/importar" class="sidebar-integrated-link" style="padding-left: 54px;">
+                    ⬆️ Importar Datos
+                </a>
+
+                <div class="sidebar-integrated-divider"></div>`;
+    }
+
     // Reportes y Configuración (siempre visible)
     menuHTML += `
                 <!-- Reportes y Configuración -->

@@ -10,6 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
+import pandas as pd
 import pdfplumber
 import logging
 import sys
@@ -5537,6 +5538,390 @@ def admin_eliminar_usuario(usuario_id):
         flash(f"Error al eliminar usuario: {response.text}", "error")
 
     return redirect("/admin/usuarios")
+
+
+# ============================================
+# CARTERA Y ANÁLISIS
+# ============================================
+
+@app.route("/cartera")
+@helpers.login_required
+def cartera_dashboard():
+    """Dashboard principal de Cartera y Análisis"""
+
+    # Obtener estadísticas generales
+    stats = {}
+
+    # Total de instalaciones
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/instalaciones?select=count",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['total_instalaciones'] = response.headers.get('Content-Range', '0').split('/')[-1]
+
+    # Total de máquinas
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/maquinas_cartera?select=count",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['total_maquinas'] = response.headers.get('Content-Range', '0').split('/')[-1]
+
+    # Total de partes
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['total_partes'] = response.headers.get('Content-Range', '0').split('/')[-1]
+
+    # Recomendaciones pendientes
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tiene_recomendacion=eq.true&oportunidad_creada=eq.false",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['recomendaciones_pendientes'] = response.headers.get('Content-Range', '0').split('/')[-1]
+
+    return render_template("cartera/dashboard.html", stats=stats)
+
+
+@app.route("/cartera/importar")
+@helpers.login_required
+def cartera_importar():
+    """Interfaz de importación de datos"""
+    return render_template("cartera/importar.html")
+
+
+@app.route("/cartera/importar_equipos", methods=["POST"])
+@helpers.login_required
+def cartera_importar_equipos():
+    """Importar instalaciones y máquinas desde Excel"""
+
+    if 'archivo_equipos' not in request.files:
+        flash("No se seleccionó ningún archivo", "error")
+        return redirect("/cartera/importar")
+
+    file = request.files['archivo_equipos']
+
+    if file.filename == '':
+        flash("No se seleccionó ningún archivo", "error")
+        return redirect("/cartera/importar")
+
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        flash("El archivo debe ser formato Excel (.xlsx o .xls)", "error")
+        return redirect("/cartera/importar")
+
+    try:
+        # Leer Excel
+        df = pd.read_excel(file)
+
+        # Mapeo de columnas
+        column_mapping = {
+            'Cód. instalación': 'cod_instalacion',
+            'Instalación': 'instalacion',
+            'Cód. máquina': 'cod_maquina',
+            'Máquina': 'maquina',
+            'Técnico': 'tecnico'
+        }
+        df.rename(columns=column_mapping, inplace=True)
+
+        # Verificar columnas requeridas
+        required = ['cod_instalacion', 'instalacion', 'cod_maquina', 'maquina']
+        missing = [col for col in required if col not in df.columns]
+
+        if missing:
+            flash(f"Faltan columnas requeridas: {', '.join(missing)}", "error")
+            return redirect("/cartera/importar")
+
+        # Procesar instalaciones únicas
+        instalaciones_unicas = df[['cod_instalacion', 'instalacion']].drop_duplicates('cod_instalacion')
+        instalaciones_map = {}
+        stats = {
+            'instalaciones_nuevas': 0,
+            'instalaciones_existentes': 0,
+            'maquinas_nuevas': 0,
+            'maquinas_existentes': 0,
+            'errores': 0
+        }
+
+        # Municipios de Gran Canaria
+        municipios_gc = [
+            'LAS PALMAS', 'TELDE', 'SANTA LUCIA', 'AGÜIMES', 'INGENIO',
+            'MOGAN', 'SAN BARTOLOME', 'SANTA BRIGIDA', 'ARUCAS', 'TEROR',
+            'GALDAR', 'AGAETE', 'VALLESECO', 'FIRGAS', 'MOYA',
+            'SANTA MARIA DE GUIA', 'VALSEQUILLO', 'VEGA DE SAN MATEO',
+            'TEJEDA', 'ALDEA DE SAN NICOLAS'
+        ]
+
+        for idx, row in instalaciones_unicas.iterrows():
+            # Limpiar nombre (quitar dirección después del guion)
+            nombre = row['instalacion'].split(' - ')[0].strip() if ' - ' in row['instalacion'] else row['instalacion'].strip()
+
+            # Extraer municipio
+            texto_upper = row['instalacion'].upper()
+            municipio = "Las Palmas de Gran Canaria"  # Default
+            for mun in municipios_gc:
+                if mun in texto_upper:
+                    municipio = mun.title()
+                    break
+
+            # Verificar si ya existe
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/instalaciones?nombre=eq.{urllib.parse.quote(nombre)}",
+                headers=HEADERS
+            )
+
+            if response.status_code == 200 and len(response.json()) > 0:
+                instalacion_id = response.json()[0]['id']
+                stats['instalaciones_existentes'] += 1
+            else:
+                # Crear nueva
+                data = {"nombre": nombre, "municipio": municipio}
+                response = requests.post(
+                    f"{SUPABASE_URL}/rest/v1/instalaciones",
+                    json=data,
+                    headers=HEADERS
+                )
+
+                if response.status_code == 201:
+                    instalacion_id = response.json()[0]['id']
+                    stats['instalaciones_nuevas'] += 1
+                else:
+                    stats['errores'] += 1
+                    continue
+
+            instalaciones_map[row['cod_instalacion']] = instalacion_id
+
+        # Procesar máquinas
+        for idx, row in df.iterrows():
+            cod_instalacion = row['cod_instalacion']
+            identificador = row['maquina'].strip()
+            codigo_maquina = row['cod_maquina'].strip() if pd.notna(row['cod_maquina']) else None
+
+            instalacion_id = instalaciones_map.get(cod_instalacion)
+            if not instalacion_id:
+                stats['errores'] += 1
+                continue
+
+            # Verificar si la máquina ya existe
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/maquinas_cartera?identificador=eq.{urllib.parse.quote(identificador)}",
+                headers=HEADERS
+            )
+
+            if response.status_code == 200 and len(response.json()) > 0:
+                stats['maquinas_existentes'] += 1
+                continue
+
+            # Crear nueva máquina
+            data = {
+                "instalacion_id": instalacion_id,
+                "identificador": identificador,
+                "codigo_maquina": codigo_maquina
+            }
+
+            response = requests.post(
+                f"{SUPABASE_URL}/rest/v1/maquinas_cartera",
+                json=data,
+                headers=HEADERS
+            )
+
+            if response.status_code == 201:
+                stats['maquinas_nuevas'] += 1
+            else:
+                stats['errores'] += 1
+
+        # Mostrar resumen
+        flash(f"Importación completada: {stats['instalaciones_nuevas']} instalaciones nuevas, "
+              f"{stats['maquinas_nuevas']} máquinas nuevas", "success")
+
+        if stats['instalaciones_existentes'] > 0:
+            flash(f"{stats['instalaciones_existentes']} instalaciones ya existían", "info")
+
+        if stats['maquinas_existentes'] > 0:
+            flash(f"{stats['maquinas_existentes']} máquinas ya existían", "info")
+
+        if stats['errores'] > 0:
+            flash(f"{stats['errores']} registros con errores", "warning")
+
+    except Exception as e:
+        flash(f"Error al procesar archivo: {str(e)}", "error")
+        logger.error(f"Error importando equipos: {str(e)}")
+
+    return redirect("/cartera/importar")
+
+
+@app.route("/cartera/importar_partes", methods=["POST"])
+@helpers.login_required
+def cartera_importar_partes():
+    """Importar partes de trabajo desde Excel"""
+
+    if 'archivo_partes' not in request.files:
+        flash("No se seleccionó ningún archivo", "error")
+        return redirect("/cartera/importar")
+
+    file = request.files['archivo_partes']
+
+    if file.filename == '':
+        flash("No se seleccionó ningún archivo", "error")
+        return redirect("/cartera/importar")
+
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        flash("El archivo debe ser formato Excel (.xlsx o .xls)", "error")
+        return redirect("/cartera/importar")
+
+    try:
+        # Leer Excel
+        df = pd.read_excel(file)
+
+        # Palabras clave para detectar recomendaciones
+        palabras_clave_recomendacion = [
+            'RECOMENDACIÓN', 'RECOMENDACION', 'RECOMIENDO', 'RECOMENDAMOS',
+            'CONVENDRÍA', 'CONVIENE', 'SERÍA CONVENIENTE', 'SE RECOMIENDA',
+            'IMPORTANTE', 'URGENTE', 'NECESARIO', 'CAMBIAR', 'SUSTITUIR',
+            'MODERNIZAR', 'REVISAR', 'PRÓXIMAMENTE', 'PROXIMAMENTE'
+        ]
+
+        # Cargar mapeo de tipos
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/tipos_parte_mapeo?select=*",
+            headers=HEADERS
+        )
+        mapeo_tipos = {}
+        if response.status_code == 200:
+            for row in response.json():
+                mapeo_tipos[row['tipo_original'].upper()] = row['tipo_normalizado']
+
+        # Cargar máquinas
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/maquinas_cartera?select=id,identificador",
+            headers=HEADERS
+        )
+        maquinas_map = {}
+        if response.status_code == 200:
+            for row in response.json():
+                maquinas_map[row['identificador']] = row['id']
+
+        stats = {
+            'total': len(df),
+            'insertados': 0,
+            'duplicados': 0,
+            'sin_maquina': 0,
+            'errores': 0,
+            'recomendaciones_detectadas': 0
+        }
+
+        partes_batch = []
+        batch_size = 100
+
+        for idx, row in df.iterrows():
+            # Validar columnas requeridas
+            if pd.isna(row.get('PARTE')) or pd.isna(row.get('MÁQUINA')):
+                stats['errores'] += 1
+                continue
+
+            # Mapear máquina
+            identificador_maquina = str(row['MÁQUINA']).strip()
+            maquina_id = maquinas_map.get(identificador_maquina)
+
+            if not maquina_id:
+                stats['sin_maquina'] += 1
+
+            # Mapear tipo de parte
+            tipo_original = str(row.get('TIPO PARTE', '')).strip().upper()
+            tipo_normalizado = mapeo_tipos.get(tipo_original, 'OTRO')
+
+            # Parsear fecha
+            fecha_parte = row.get('FECHA')
+            if pd.isna(fecha_parte):
+                stats['errores'] += 1
+                continue
+
+            if isinstance(fecha_parte, datetime):
+                fecha_parte_iso = fecha_parte.isoformat()
+            else:
+                try:
+                    fecha_parte_iso = pd.to_datetime(str(fecha_parte)).isoformat()
+                except:
+                    stats['errores'] += 1
+                    continue
+
+            # Detectar recomendaciones
+            resolucion = row.get('RESOLUCIÓN', '')
+            tiene_recomendacion = False
+            recomendacion_extraida = None
+
+            if pd.notna(resolucion):
+                texto_upper = str(resolucion).upper()
+                for palabra in palabras_clave_recomendacion:
+                    if palabra in texto_upper:
+                        tiene_recomendacion = True
+                        recomendacion_extraida = str(resolucion)
+                        stats['recomendaciones_detectadas'] += 1
+                        break
+
+            # Preparar datos para inserción
+            parte_data = {
+                "numero_parte": str(row['PARTE']),
+                "tipo_parte_original": str(row.get('TIPO PARTE', '')).strip(),
+                "codigo_maquina": str(row.get('CÓD. MÁQUINA', '')) if pd.notna(row.get('CÓD. MÁQUINA')) else None,
+                "maquina_texto": identificador_maquina,
+                "fecha_parte": fecha_parte_iso,
+                "codificacion_adicional": str(row.get('CODIFICACIÓN ADICIONAL', '')) if pd.notna(row.get('CODIFICACIÓN ADICIONAL')) else None,
+                "resolucion": str(resolucion) if pd.notna(resolucion) else None,
+                "maquina_id": maquina_id,
+                "tipo_parte_normalizado": tipo_normalizado,
+                "tiene_recomendacion": tiene_recomendacion,
+                "recomendaciones_extraidas": recomendacion_extraida if tiene_recomendacion else None,
+                "estado": "COMPLETADO",
+                "importado": True
+            }
+
+            partes_batch.append(parte_data)
+
+            # Insertar por lotes
+            if len(partes_batch) >= batch_size:
+                response = requests.post(
+                    f"{SUPABASE_URL}/rest/v1/partes_trabajo",
+                    json=partes_batch,
+                    headers={**HEADERS, "Prefer": "return=representation,resolution=ignore-duplicates"}
+                )
+
+                if response.status_code in [200, 201]:
+                    stats['insertados'] += len(partes_batch)
+                else:
+                    stats['errores'] += len(partes_batch)
+
+                partes_batch = []
+
+        # Insertar lote final
+        if partes_batch:
+            response = requests.post(
+                f"{SUPABASE_URL}/rest/v1/partes_trabajo",
+                json=partes_batch,
+                headers={**HEADERS, "Prefer": "return=representation,resolution=ignore-duplicates"}
+            )
+
+            if response.status_code in [200, 201]:
+                stats['insertados'] += len(partes_batch)
+            else:
+                stats['errores'] += len(partes_batch)
+
+        # Mostrar resumen
+        flash(f"Importación completada: {stats['insertados']} partes insertados de {stats['total']} procesados", "success")
+
+        if stats['recomendaciones_detectadas'] > 0:
+            flash(f"{stats['recomendaciones_detectadas']} recomendaciones detectadas automáticamente", "success")
+
+        if stats['sin_maquina'] > 0:
+            flash(f"{stats['sin_maquina']} partes sin máquina asignada (revisar identificadores)", "warning")
+
+        if stats['errores'] > 0:
+            flash(f"{stats['errores']} registros con errores", "warning")
+
+    except Exception as e:
+        flash(f"Error al procesar archivo: {str(e)}", "error")
+        logger.error(f"Error importando partes: {str(e)}")
+
+    return redirect("/cartera/importar")
 
 
 # ============================================
