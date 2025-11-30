@@ -5580,7 +5580,56 @@ def cartera_dashboard():
     )
     stats['recomendaciones_pendientes'] = response.headers.get('Content-Range', '0').split('/')[-1]
 
-    return render_template("cartera/dashboard.html", stats=stats)
+    # KPIs adicionales de análisis
+    # Averías último año
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tipo_parte_normalizado=eq.AVERIA&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['averias_anio'] = response.headers.get('Content-Range', '0').split('/')[-1]
+
+    # Mantenimientos último año
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tipo_parte_normalizado=eq.MANTENIMIENTO&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['mantenimientos_anio'] = response.headers.get('Content-Range', '0').split('/')[-1]
+
+    # Top 10 máquinas problemáticas (usando la vista)
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/v_maquinas_problematicas?select=*&order=indice_problema.desc&limit=10",
+        headers=HEADERS
+    )
+    maquinas_problematicas = response.json() if response.status_code == 200 else []
+
+    # Recomendaciones pendientes (últimas 20)
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/v_partes_con_recomendaciones?select=*&order=fecha_parte.desc&limit=20",
+        headers=HEADERS
+    )
+    recomendaciones = response.json() if response.status_code == 200 else []
+
+    # Distribución de tipos de parte (último año)
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=tipo_parte_normalizado&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}",
+        headers=HEADERS
+    )
+    if response.status_code == 200:
+        partes_data = response.json()
+        tipos_distribucion = {}
+        for parte in partes_data:
+            tipo = parte.get('tipo_parte_normalizado', 'OTRO')
+            tipos_distribucion[tipo] = tipos_distribucion.get(tipo, 0) + 1
+    else:
+        tipos_distribucion = {}
+
+    return render_template(
+        "cartera/dashboard.html",
+        stats=stats,
+        maquinas_problematicas=maquinas_problematicas,
+        recomendaciones=recomendaciones,
+        tipos_distribucion=tipos_distribucion
+    )
 
 
 @app.route("/cartera/importar")
