@@ -5992,6 +5992,229 @@ def cartera_importar_partes():
 
 
 # ============================================
+# OPORTUNIDADES DE FACTURACIÓN
+# ============================================
+
+@app.route("/cartera/oportunidades")
+@helpers.login_required
+def cartera_oportunidades():
+    """Dashboard de oportunidades de facturación"""
+
+    # Filtro por estado (opcional)
+    estado_filtro = request.args.get('estado', '')
+
+    # Query base
+    query_params = []
+    if estado_filtro:
+        query_params.append(f"estado=eq.{estado_filtro}")
+
+    query_string = "&".join(query_params) if query_params else ""
+    url = f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?select=*,maquinas_cartera(identificador,instalaciones(nombre))&order=created_at.desc"
+    if query_string:
+        url += f"&{query_string}"
+
+    response = requests.get(url, headers=HEADERS)
+    oportunidades = response.json() if response.status_code == 200 else []
+
+    # Agrupar por estado para vista Kanban
+    oportunidades_por_estado = {
+        'DETECTADA': [],
+        'PRESUPUESTO_ENVIADO': [],
+        'ACEPTADO': [],
+        'PENDIENTE_REPUESTO': [],
+        'LISTO_EJECUTAR': [],
+        'COMPLETADO': [],
+        'FACTURADO': [],
+        'RECHAZADO': []
+    }
+
+    for opp in oportunidades:
+        estado = opp.get('estado', 'DETECTADA')
+        if estado in oportunidades_por_estado:
+            oportunidades_por_estado[estado].append(opp)
+
+    # Estadísticas
+    stats = {
+        'total': len(oportunidades),
+        'detectadas': len(oportunidades_por_estado['DETECTADA']),
+        'en_proceso': len(oportunidades_por_estado['PRESUPUESTO_ENVIADO']) + len(oportunidades_por_estado['ACEPTADO']) + len(oportunidades_por_estado['PENDIENTE_REPUESTO']) + len(oportunidades_por_estado['LISTO_EJECUTAR']),
+        'completadas': len(oportunidades_por_estado['COMPLETADO']),
+        'facturadas': len(oportunidades_por_estado['FACTURADO']),
+        'rechazadas': len(oportunidades_por_estado['RECHAZADO'])
+    }
+
+    return render_template(
+        "cartera/oportunidades.html",
+        oportunidades_por_estado=oportunidades_por_estado,
+        stats=stats,
+        estado_filtro=estado_filtro
+    )
+
+
+@app.route("/cartera/oportunidades/crear/<int:parte_id>", methods=["GET", "POST"])
+@helpers.login_required
+def cartera_crear_oportunidad(parte_id):
+    """Crear oportunidad desde una recomendación"""
+
+    if request.method == "GET":
+        # Obtener datos del parte
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?id=eq.{parte_id}&select=*,maquinas_cartera(id,identificador,instalaciones(nombre))",
+            headers=HEADERS
+        )
+
+        if response.status_code != 200 or not response.json():
+            flash("Parte no encontrado", "error")
+            return redirect("/cartera")
+
+        parte = response.json()[0]
+
+        return render_template("cartera/crear_oportunidad.html", parte=parte)
+
+    else:  # POST
+        # Obtener datos del formulario
+        titulo = request.form.get('titulo')
+        descripcion = request.form.get('descripcion')
+        tipo = request.form.get('tipo')
+        prioridad = request.form.get('prioridad', 'MEDIA')
+        repuestos = request.form.get('repuestos')
+
+        # Obtener maquina_id del parte
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?id=eq.{parte_id}&select=maquina_id",
+            headers=HEADERS
+        )
+
+        if response.status_code != 200 or not response.json():
+            flash("Error al obtener datos del parte", "error")
+            return redirect("/cartera/oportunidades")
+
+        maquina_id = response.json()[0]['maquina_id']
+
+        # Crear oportunidad
+        oportunidad_data = {
+            "maquina_id": maquina_id,
+            "parte_origen_id": parte_id,
+            "titulo": titulo,
+            "descripcion_tecnica": descripcion,
+            "tipo": tipo,
+            "estado": "DETECTADA",
+            "prioridad_comercial": prioridad,
+            "repuestos_necesarios": repuestos if repuestos else None,
+            "created_by": session.get("usuario_email", "sistema")
+        }
+
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion",
+            json=oportunidad_data,
+            headers=HEADERS
+        )
+
+        if response.status_code == 201:
+            oportunidad_id = response.json()[0]['id']
+
+            # Marcar parte como oportunidad creada
+            requests.patch(
+                f"{SUPABASE_URL}/rest/v1/partes_trabajo?id=eq.{parte_id}",
+                json={"oportunidad_creada": True, "oportunidad_id": oportunidad_id, "recomendacion_revisada": True},
+                headers=HEADERS
+            )
+
+            flash("Oportunidad creada exitosamente", "success")
+            return redirect(f"/cartera/oportunidades/{oportunidad_id}")
+        else:
+            logger.error(f"Error creando oportunidad: {response.status_code} - {response.text}")
+            flash("Error al crear oportunidad", "error")
+            return redirect("/cartera/oportunidades")
+
+
+@app.route("/cartera/oportunidades/<int:oportunidad_id>")
+@helpers.login_required
+def cartera_ver_oportunidad(oportunidad_id):
+    """Ver detalle de oportunidad"""
+
+    # Obtener oportunidad con datos relacionados
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?id=eq.{oportunidad_id}&select=*,maquinas_cartera(identificador,codigo_maquina,instalaciones(nombre,municipio)),partes_trabajo(numero_parte,fecha_parte,resolucion,recomendaciones_extraidas)",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Oportunidad no encontrada", "error")
+        return redirect("/cartera/oportunidades")
+
+    oportunidad = response.json()[0]
+
+    return render_template("cartera/ver_oportunidad.html", oportunidad=oportunidad)
+
+
+@app.route("/cartera/oportunidades/<int:oportunidad_id>/actualizar", methods=["POST"])
+@helpers.login_required
+def cartera_actualizar_oportunidad(oportunidad_id):
+    """Actualizar estado y datos de oportunidad"""
+
+    # Obtener datos del formulario
+    accion = request.form.get('accion')
+
+    update_data = {}
+
+    if accion == 'cambiar_estado':
+        nuevo_estado = request.form.get('estado')
+        update_data['estado'] = nuevo_estado
+
+        # Actualizar fechas según el estado
+        if nuevo_estado == 'PRESUPUESTO_ENVIADO':
+            update_data['fecha_envio_presupuesto'] = date.today().isoformat()
+            update_data['numero_presupuesto_erp'] = request.form.get('numero_presupuesto')
+            update_data['importe_presupuestado'] = request.form.get('importe')
+        elif nuevo_estado == 'ACEPTADO':
+            update_data['fecha_aceptacion'] = date.today().isoformat()
+            update_data['fecha_respuesta_cliente'] = date.today().isoformat()
+        elif nuevo_estado == 'RECHAZADO':
+            update_data['fecha_rechazo'] = date.today().isoformat()
+            update_data['fecha_respuesta_cliente'] = date.today().isoformat()
+            update_data['motivo_rechazo'] = request.form.get('motivo_rechazo')
+        elif nuevo_estado == 'COMPLETADO':
+            update_data['fecha_completado'] = date.today().isoformat()
+            update_data['importe_final'] = request.form.get('importe_final')
+        elif nuevo_estado == 'FACTURADO':
+            update_data['facturado'] = True
+            update_data['fecha_factura'] = date.today().isoformat()
+            update_data['numero_factura'] = request.form.get('numero_factura')
+
+    elif accion == 'actualizar_repuestos':
+        update_data['estado_repuestos'] = request.form.get('estado_repuestos')
+        update_data['proveedor'] = request.form.get('proveedor')
+        update_data['coste_repuestos'] = request.form.get('coste_repuestos')
+
+        if request.form.get('estado_repuestos') == 'SOLICITADO':
+            update_data['fecha_solicitud_repuesto'] = date.today().isoformat()
+        elif request.form.get('estado_repuestos') == 'RECIBIDO':
+            update_data['fecha_recepcion_repuesto'] = date.today().isoformat()
+
+    elif accion == 'actualizar_notas':
+        update_data['notas'] = request.form.get('notas')
+
+    # Actualizar timestamp
+    update_data['updated_at'] = datetime.now().isoformat()
+
+    # Ejecutar actualización
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?id=eq.{oportunidad_id}",
+        json=update_data,
+        headers=HEADERS
+    )
+
+    if response.status_code == 200:
+        flash("Oportunidad actualizada correctamente", "success")
+    else:
+        logger.error(f"Error actualizando oportunidad: {response.status_code} - {response.text}")
+        flash("Error al actualizar oportunidad", "error")
+
+    return redirect(f"/cartera/oportunidades/{oportunidad_id}")
+
+
+# ============================================
 # CIERRE
 # ============================================
 

@@ -289,9 +289,14 @@
             <!-- Encabezado de página -->
             <div class="page-header">
                 <h1>📊 Cartera y Análisis</h1>
-                <a href="/cartera/importar" class="btn-importar">
-                    ⬆️ Importar Datos
-                </a>
+                <div style="display: flex; gap: 10px;">
+                    <a href="/cartera/oportunidades" class="btn-importar" style="background: #28a745;">
+                        💰 Oportunidades
+                    </a>
+                    <a href="/cartera/importar" class="btn-importar">
+                        ⬆️ Importar Datos
+                    </a>
+                </div>
             </div>
 
             <!-- Mensajes flash -->
@@ -403,6 +408,7 @@
                                         <th>Máquina</th>
                                         <th>Instalación</th>
                                         <th>Recomendación</th>
+                                        <th style="text-align: center; width: 150px;">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -413,6 +419,12 @@
                                             <td><strong>{{ rec.maquina_identificador }}</strong></td>
                                             <td>{{ rec.instalacion_nombre }}</td>
                                             <td style="max-width: 400px;">{{ rec.recomendaciones_extraidas[:150] }}...</td>
+                                            <td style="text-align: center;">
+                                                <a href="/cartera/oportunidades/crear/{{ rec.id }}"
+                                                   style="display: inline-block; padding: 6px 12px; background: #28a745; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                                    💰 Crear Oportunidad
+                                                </a>
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>

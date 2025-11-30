@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Oportunidad</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <style>
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e6f2ff;
+        }
+
+        .form-header h1 {
+            font-size: 28px;
+            color: #003366;
+            margin-bottom: 10px;
+        }
+
+        .info-box {
+            background: #e6f2ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #366092;
+        }
+
+        .info-box h3 {
+            color: #003366;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #003366;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #366092;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e6f2ff;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                margin: 20px 10px;
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        main {
+            max-width: none !important;
+            padding: 30px !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="form-container">
+            <div class="form-header">
+                <h1>💰 Crear Oportunidad de Facturación</h1>
+                <p style="color: #666;">A partir de recomendación técnica detectada</p>
+            </div>
+
+            <!-- Información del parte origen -->
+            <div class="info-box">
+                <h3>📋 Parte de Trabajo Origen</h3>
+                <p><strong>N° Parte:</strong> {{ parte.numero_parte }}</p>
+                <p><strong>Máquina:</strong> {{ parte.maquinas_cartera[0].identificador if parte.maquinas_cartera else parte.maquina_texto }}</p>
+                <p><strong>Instalación:</strong> {{ parte.maquinas_cartera[0].instalaciones.nombre if parte.maquinas_cartera and parte.maquinas_cartera[0].instalaciones else 'N/A' }}</p>
+                <p><strong>Fecha:</strong> {{ parte.fecha_parte[:10] }}</p>
+                <p style="margin-top: 10px;"><strong>Recomendación detectada:</strong></p>
+                <p style="background: white; padding: 10px; border-radius: 4px; margin-top: 5px;">
+                    {{ parte.recomendaciones_extraidas }}
+                </p>
+            </div>
+
+            <!-- Formulario -->
+            <form method="POST">
+                <div class="form-group">
+                    <label for="titulo">Título de la Oportunidad <span class="required">*</span></label>
+                    <input type="text" id="titulo" name="titulo" required
+                           placeholder="Ej: Sustitución de puertas automáticas"
+                           value="{{ parte.recomendaciones_extraidas[:100] }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo">Tipo de Trabajo <span class="required">*</span></label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="REPARACION">Reparación</option>
+                        <option value="MEJORA">Mejora</option>
+                        <option value="MODERNIZACION">Modernización</option>
+                        <option value="SUSTITUCION">Sustitución de Componente</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción Técnica Detallada <span class="required">*</span></label>
+                    <textarea id="descripcion" name="descripcion" required
+                              placeholder="Describe el trabajo a realizar, componentes afectados, etc.">{{ parte.resolucion }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="prioridad">Prioridad Comercial</label>
+                    <select id="prioridad" name="prioridad">
+                        <option value="BAJA">Baja</option>
+                        <option value="MEDIA" selected>Media</option>
+                        <option value="ALTA">Alta</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="repuestos">Repuestos Necesarios (Estimación)</label>
+                    <textarea id="repuestos" name="repuestos"
+                              placeholder="Lista los repuestos que estimas necesarios para este trabajo..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        ✅ Crear Oportunidad
+                    </button>
+                    <a href="/cartera" class="btn btn-secondary">
+                        ❌ Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>

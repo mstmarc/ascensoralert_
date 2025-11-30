@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ oportunidad.titulo }} - Oportunidad</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <style>
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .detalle-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .header-left h1 {
+            font-size: 24px;
+            color: #003366;
+            margin: 0 0 10px 0;
+        }
+
+        .estado-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .estado-DETECTADA { background: #fff3cd; color: #856404; }
+        .estado-PRESUPUESTO_ENVIADO { background: #cfe2ff; color: #084298; }
+        .estado-ACEPTADO { background: #d1e7dd; color: #0f5132; }
+        .estado-PENDIENTE_REPUESTO { background: #fff3cd; color: #997404; }
+        .estado-LISTO_EJECUTAR { background: #d1e7dd; color: #0a3622; }
+        .estado-COMPLETADO { background: #d1e7dd; color: #0f5132; }
+        .estado-FACTURADO { background: #d1e7dd; color: #0f5132; }
+        .estado-RECHAZADO { background: #f8d7da; color: #842029; }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-volver:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* Layout de 2 columnas */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-card h2 {
+            font-size: 18px;
+            color: #003366;
+            margin: 0 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e6f2ff;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #003366;
+            min-width: 140px;
+            font-size: 13px;
+        }
+
+        .info-value {
+            color: #666;
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .badge-inline {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-REPARACION { background: #e3f2fd; color: #1976d2; }
+        .badge-MEJORA { background: #f3e5f5; color: #7b1fa2; }
+        .badge-MODERNIZACION { background: #e8f5e9; color: #388e3c; }
+        .badge-SUSTITUCION { background: #fff3e0; color: #e65100; }
+
+        .badge-ALTA { background: #ffebee; color: #c62828; }
+        .badge-MEDIA { background: #fff9c4; color: #f57f17; }
+        .badge-BAJA { background: #e8f5e9; color: #2e7d32; }
+
+        /* Timeline de estados */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e0e0e0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 3px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #e0e0e0;
+        }
+
+        .timeline-item.completed::before {
+            background: #28a745;
+            box-shadow: 0 0 0 2px #28a745;
+        }
+
+        .timeline-label {
+            font-weight: 600;
+            color: #003366;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .timeline-date {
+            color: #666;
+            font-size: 12px;
+        }
+
+        /* Acciones de cambio de estado */
+        .acciones-estado {
+            margin-top: 25px;
+        }
+
+        .acciones-estado h3 {
+            font-size: 14px;
+            color: #003366;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .btn-action {
+            display: inline-block;
+            padding: 10px 18px;
+            margin: 5px 5px 5px 0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0069d9;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        /* Formularios inline */
+        .form-inline {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #003366;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Repuestos */
+        .repuestos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .repuesto-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .repuesto-card .icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .repuesto-card .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #003366;
+            margin-bottom: 5px;
+        }
+
+        .repuesto-card .status {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .repuesto-card.has-items {
+            background: #d1e7dd;
+            border: 2px solid #badbcc;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .repuestos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .detalle-container {
+                padding: 15px 10px;
+            }
+
+            .page-header {
+                flex-direction: column;
+            }
+
+            .header-left h1 {
+                font-size: 20px;
+            }
+
+            .info-row {
+                flex-direction: column;
+            }
+
+            .info-label {
+                min-width: auto;
+                margin-bottom: 5px;
+            }
+
+            .btn-action {
+                display: block;
+                width: 100%;
+                margin: 8px 0;
+                text-align: center;
+            }
+        }
+
+        main {
+            max-width: none !important;
+            padding: 30px !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="detalle-container">
+            <!-- Encabezado -->
+            <div class="page-header">
+                <div class="header-left">
+                    <span class="estado-badge estado-{{ oportunidad.estado }}">
+                        {{ oportunidad.estado.replace('_', ' ') }}
+                    </span>
+                    <h1>{{ oportunidad.titulo }}</h1>
+                    <p style="color: #666; font-size: 14px; margin: 0;">
+                        Creada el {{ oportunidad.fecha_creacion[:10] }}
+                    </p>
+                </div>
+                <a href="/cartera/oportunidades" class="btn-volver">
+                    ← Volver a Oportunidades
+                </a>
+            </div>
+
+            <!-- Mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background: {% if category == 'success' %}#d4edda{% elif category == 'error' %}#f8d7da{% elif category == 'warning' %}#fff3cd{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'error' %}#721c24{% elif category == 'warning' %}#856404{% else %}#0c5460{% endif %};">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Grid de 2 columnas -->
+            <div class="content-grid">
+                <!-- Columna izquierda: Información principal -->
+                <div>
+                    <!-- Información General -->
+                    <div class="section-card">
+                        <h2>📋 Información General</h2>
+
+                        <div class="info-row">
+                            <div class="info-label">Tipo de Trabajo:</div>
+                            <div class="info-value">
+                                <span class="badge-inline badge-{{ oportunidad.tipo_trabajo }}">
+                                    {{ oportunidad.tipo_trabajo }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Prioridad:</div>
+                            <div class="info-value">
+                                <span class="badge-inline badge-{{ oportunidad.prioridad }}">
+                                    {{ oportunidad.prioridad }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Descripción:</div>
+                            <div class="info-value">{{ oportunidad.descripcion_detallada }}</div>
+                        </div>
+
+                        {% if oportunidad.estimacion_repuestos %}
+                        <div class="info-row">
+                            <div class="info-label">Estimación Repuestos:</div>
+                            <div class="info-value">{{ oportunidad.estimacion_repuestos }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if oportunidad.notas_internas %}
+                        <div class="info-row">
+                            <div class="info-label">Notas Internas:</div>
+                            <div class="info-value" style="white-space: pre-wrap;">{{ oportunidad.notas_internas }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if oportunidad.estado == 'RECHAZADO' and oportunidad.motivo_rechazo %}
+                        <div class="info-row">
+                            <div class="info-label">Motivo Rechazo:</div>
+                            <div class="info-value" style="color: #dc3545;">{{ oportunidad.motivo_rechazo }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Información de Máquina e Instalación -->
+                    <div class="section-card" style="margin-top: 25px;">
+                        <h2>🛗 Máquina e Instalación</h2>
+
+                        {% if oportunidad.partes_trabajo and oportunidad.partes_trabajo[0].maquinas_cartera %}
+                            {% set maquina = oportunidad.partes_trabajo[0].maquinas_cartera[0] %}
+                            {% set instalacion = maquina.instalaciones %}
+
+                            <div class="info-row">
+                                <div class="info-label">Máquina:</div>
+                                <div class="info-value"><strong>{{ maquina.identificador }}</strong></div>
+                            </div>
+
+                            {% if maquina.tecnico_asignado %}
+                            <div class="info-row">
+                                <div class="info-label">Técnico Asignado:</div>
+                                <div class="info-value">{{ maquina.tecnico_asignado }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if instalacion %}
+                            <div class="info-row">
+                                <div class="info-label">Instalación:</div>
+                                <div class="info-value">{{ instalacion.nombre }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Código Instalación:</div>
+                                <div class="info-value">{{ instalacion.codigo }}</div>
+                            </div>
+
+                            {% if instalacion.municipio %}
+                            <div class="info-row">
+                                <div class="info-label">Municipio:</div>
+                                <div class="info-value">{{ instalacion.municipio }}</div>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <p style="color: #999; text-align: center;">No hay información de máquina disponible</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Parte de Trabajo Origen -->
+                    {% if oportunidad.partes_trabajo %}
+                    <div class="section-card" style="margin-top: 25px;">
+                        <h2>📄 Parte de Trabajo Origen</h2>
+
+                        {% for parte in oportunidad.partes_trabajo %}
+                        <div style="{% if not loop.first %}margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;{% endif %}">
+                            <div class="info-row">
+                                <div class="info-label">N° Parte:</div>
+                                <div class="info-value"><strong>{{ parte.numero_parte }}</strong></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Tipo:</div>
+                                <div class="info-value">{{ parte.tipo_parte_normalizado or parte.tipo_parte }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Fecha:</div>
+                                <div class="info-value">{{ parte.fecha_parte[:10] }}</div>
+                            </div>
+
+                            {% if parte.recomendaciones_extraidas %}
+                            <div class="info-row">
+                                <div class="info-label">Recomendación:</div>
+                                <div class="info-value" style="background: #fff3cd; padding: 10px; border-radius: 6px;">
+                                    {{ parte.recomendaciones_extraidas }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if parte.resolucion %}
+                            <div class="info-row">
+                                <div class="info-label">Resolución:</div>
+                                <div class="info-value" style="white-space: pre-wrap; font-size: 12px;">{{ parte.resolucion }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Repuestos -->
+                    <div class="section-card" style="margin-top: 25px;">
+                        <h2>📦 Estado de Repuestos</h2>
+
+                        <div class="repuestos-grid">
+                            <div class="repuesto-card {% if oportunidad.repuestos_local %}has-items{% endif %}">
+                                <div class="icon">🏠</div>
+                                <div class="label">Local (Lanzarote)</div>
+                                <div class="status">
+                                    {% if oportunidad.repuestos_local %}
+                                        {{ oportunidad.repuestos_local }}
+                                    {% else %}
+                                        No especificado
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="repuesto-card {% if oportunidad.repuestos_tenerife %}has-items{% endif %}">
+                                <div class="icon">🌴</div>
+                                <div class="label">Tenerife</div>
+                                <div class="status">
+                                    {% if oportunidad.repuestos_tenerife %}
+                                        {{ oportunidad.repuestos_tenerife }}
+                                    {% else %}
+                                        No especificado
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="repuesto-card {% if oportunidad.repuestos_externos %}has-items{% endif %}">
+                                <div class="icon">🌍</div>
+                                <div class="label">Externos</div>
+                                <div class="status">
+                                    {% if oportunidad.repuestos_externos %}
+                                        {{ oportunidad.repuestos_externos }}
+                                    {% else %}
+                                        No especificado
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario actualizar repuestos -->
+                        <div class="form-inline">
+                            <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar">
+                                <input type="hidden" name="accion" value="actualizar_repuestos">
+
+                                <div class="form-group">
+                                    <label for="repuestos_local">Repuestos Local:</label>
+                                    <textarea id="repuestos_local" name="repuestos_local">{{ oportunidad.repuestos_local or '' }}</textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="repuestos_tenerife">Repuestos Tenerife:</label>
+                                    <textarea id="repuestos_tenerife" name="repuestos_tenerife">{{ oportunidad.repuestos_tenerife or '' }}</textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="repuestos_externos">Repuestos Externos:</label>
+                                    <textarea id="repuestos_externos" name="repuestos_externos">{{ oportunidad.repuestos_externos or '' }}</textarea>
+                                </div>
+
+                                <button type="submit" class="btn-action btn-primary">
+                                    💾 Guardar Repuestos
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Notas Internas -->
+                    <div class="section-card" style="margin-top: 25px;">
+                        <h2>📝 Notas Internas</h2>
+
+                        <div class="form-inline">
+                            <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar">
+                                <input type="hidden" name="accion" value="actualizar_notas">
+
+                                <div class="form-group">
+                                    <textarea id="notas_internas" name="notas_internas" placeholder="Añade observaciones, seguimiento, etc.">{{ oportunidad.notas_internas or '' }}</textarea>
+                                </div>
+
+                                <button type="submit" class="btn-action btn-primary">
+                                    💾 Guardar Notas
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha: Timeline y acciones -->
+                <div>
+                    <!-- Timeline de Estados -->
+                    <div class="section-card">
+                        <h2>⏱️ Seguimiento</h2>
+
+                        <div class="timeline">
+                            <div class="timeline-item completed">
+                                <div class="timeline-label">Detectada</div>
+                                <div class="timeline-date">{{ oportunidad.fecha_creacion[:10] }}</div>
+                            </div>
+
+                            <div class="timeline-item {% if oportunidad.fecha_presupuesto_enviado %}completed{% endif %}">
+                                <div class="timeline-label">Presupuesto Enviado</div>
+                                <div class="timeline-date">
+                                    {% if oportunidad.fecha_presupuesto_enviado %}
+                                        {{ oportunidad.fecha_presupuesto_enviado[:10] }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="timeline-item {% if oportunidad.fecha_aceptacion %}completed{% endif %}">
+                                <div class="timeline-label">Aceptado por Cliente</div>
+                                <div class="timeline-date">
+                                    {% if oportunidad.fecha_aceptacion %}
+                                        {{ oportunidad.fecha_aceptacion[:10] }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="timeline-item {% if oportunidad.fecha_listo_ejecutar %}completed{% endif %}">
+                                <div class="timeline-label">Listo para Ejecutar</div>
+                                <div class="timeline-date">
+                                    {% if oportunidad.fecha_listo_ejecutar %}
+                                        {{ oportunidad.fecha_listo_ejecutar[:10] }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="timeline-item {% if oportunidad.fecha_completado %}completed{% endif %}">
+                                <div class="timeline-label">Trabajo Completado</div>
+                                <div class="timeline-date">
+                                    {% if oportunidad.fecha_completado %}
+                                        {{ oportunidad.fecha_completado[:10] }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="timeline-item {% if oportunidad.fecha_facturacion %}completed{% endif %}">
+                                <div class="timeline-label">Facturado</div>
+                                <div class="timeline-date">
+                                    {% if oportunidad.fecha_facturacion %}
+                                        {{ oportunidad.fecha_facturacion[:10] }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones de cambio de estado -->
+                    <div class="section-card" style="margin-top: 25px;">
+                        <h2>⚡ Acciones</h2>
+
+                        <div class="acciones-estado">
+                            <h3>Cambiar Estado:</h3>
+
+                            {% if oportunidad.estado == 'DETECTADA' %}
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="PRESUPUESTO_ENVIADO">
+                                    <button type="submit" class="btn-action btn-success">
+                                        📤 Marcar Presupuesto Enviado
+                                    </button>
+                                </form>
+
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="RECHAZADO">
+                                    <button type="submit" class="btn-action btn-danger">
+                                        ❌ Rechazar
+                                    </button>
+                                </form>
+
+                            {% elif oportunidad.estado == 'PRESUPUESTO_ENVIADO' %}
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="ACEPTADO">
+                                    <button type="submit" class="btn-action btn-success">
+                                        ✅ Marcar como Aceptado
+                                    </button>
+                                </form>
+
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="RECHAZADO">
+                                    <button type="submit" class="btn-action btn-danger">
+                                        ❌ Rechazar
+                                    </button>
+                                </form>
+
+                            {% elif oportunidad.estado == 'ACEPTADO' %}
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="PENDIENTE_REPUESTO">
+                                    <button type="submit" class="btn-action btn-warning">
+                                        📦 Marcar Pendiente Repuesto
+                                    </button>
+                                </form>
+
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="LISTO_EJECUTAR">
+                                    <button type="submit" class="btn-action btn-success">
+                                        🚀 Marcar Listo para Ejecutar
+                                    </button>
+                                </form>
+
+                            {% elif oportunidad.estado == 'PENDIENTE_REPUESTO' %}
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="LISTO_EJECUTAR">
+                                    <button type="submit" class="btn-action btn-success">
+                                        🚀 Marcar Listo para Ejecutar
+                                    </button>
+                                </form>
+
+                            {% elif oportunidad.estado == 'LISTO_EJECUTAR' %}
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="COMPLETADO">
+                                    <button type="submit" class="btn-action btn-success">
+                                        🎯 Marcar como Completado
+                                    </button>
+                                </form>
+
+                            {% elif oportunidad.estado == 'COMPLETADO' %}
+                                <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar" style="display: inline;">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="nuevo_estado" value="FACTURADO">
+                                    <button type="submit" class="btn-action btn-success">
+                                        💵 Marcar como Facturado
+                                    </button>
+                                </form>
+
+                            {% elif oportunidad.estado == 'FACTURADO' %}
+                                <p style="color: #28a745; font-weight: 600; text-align: center;">
+                                    ✅ Oportunidad completada y facturada
+                                </p>
+
+                            {% elif oportunidad.estado == 'RECHAZADO' %}
+                                <div class="form-inline">
+                                    <form method="POST" action="/cartera/oportunidades/{{ oportunidad.id }}/actualizar">
+                                        <input type="hidden" name="accion" value="cambiar_estado">
+                                        <input type="hidden" name="nuevo_estado" value="DETECTADA">
+
+                                        <div class="form-group">
+                                            <label for="motivo_rechazo">Motivo del Rechazo:</label>
+                                            <textarea id="motivo_rechazo" name="motivo_rechazo" readonly>{{ oportunidad.motivo_rechazo or 'No especificado' }}</textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn-action btn-primary">
+                                            🔄 Reactivar Oportunidad
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>
