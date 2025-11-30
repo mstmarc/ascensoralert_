@@ -173,8 +173,8 @@
             <div class="info-box">
                 <h3>📋 Parte de Trabajo Origen</h3>
                 <p><strong>N° Parte:</strong> {{ parte.numero_parte }}</p>
-                <p><strong>Máquina:</strong> {{ parte.maquinas_cartera[0].identificador if parte.maquinas_cartera else parte.maquina_texto }}</p>
-                <p><strong>Instalación:</strong> {{ parte.maquinas_cartera[0].instalaciones.nombre if parte.maquinas_cartera and parte.maquinas_cartera[0].instalaciones else 'N/A' }}</p>
+                <p><strong>Máquina:</strong> {{ parte.maquinas_cartera.identificador if parte.maquinas_cartera else parte.maquina_texto }}</p>
+                <p><strong>Instalación:</strong> {{ parte.maquinas_cartera.instalaciones.nombre if parte.maquinas_cartera and parte.maquinas_cartera.instalaciones else 'N/A' }}</p>
                 <p><strong>Fecha:</strong> {{ parte.fecha_parte[:10] }}</p>
                 <p style="margin-top: 10px;"><strong>Recomendación detectada:</strong></p>
                 <p style="background: white; padding: 10px; border-radius: 4px; margin-top: 5px;">

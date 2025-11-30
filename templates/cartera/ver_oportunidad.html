@@ -469,8 +469,8 @@
                     <div class="section-card" style="margin-top: 25px;">
                         <h2>🛗 Máquina e Instalación</h2>
 
-                        {% if oportunidad.partes_trabajo and oportunidad.partes_trabajo[0].maquinas_cartera %}
-                            {% set maquina = oportunidad.partes_trabajo[0].maquinas_cartera[0] %}
+                        {% if oportunidad.maquinas_cartera %}
+                            {% set maquina = oportunidad.maquinas_cartera %}
                             {% set instalacion = maquina.instalaciones %}
 
                             <div class="info-row">

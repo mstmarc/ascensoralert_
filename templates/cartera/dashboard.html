@@ -418,7 +418,7 @@
                                             <td>{{ rec.numero_parte }}</td>
                                             <td><strong>{{ rec.maquina_identificador }}</strong></td>
                                             <td>{{ rec.instalacion_nombre }}</td>
-                                            <td style="max-width: 400px;">{{ rec.recomendaciones_extraidas[:150] }}...</td>
+                                            <td style="max-width: 500px; white-space: normal; word-wrap: break-word; line-height: 1.4;">{{ rec.recomendaciones_extraidas }}</td>
                                             <td style="text-align: center;">
                                                 <a href="/cartera/oportunidades/crear/{{ rec.id }}"
                                                    style="display: inline-block; padding: 6px 12px; background: #28a745; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
