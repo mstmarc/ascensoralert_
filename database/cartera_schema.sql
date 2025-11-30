@@ -283,7 +283,9 @@ SELECT
     p.fecha_parte,
     p.resolucion,
     p.recomendaciones_extraidas,
+    p.maquina_id,
     m.identificador as maquina_identificador,
+    m.instalacion_id,
     i.nombre as instalacion_nombre,
     i.municipio
 FROM partes_trabajo p
@@ -303,11 +305,11 @@ CREATE OR REPLACE VIEW v_maquinas_problematicas AS
 SELECT
     m.id as maquina_id,
     m.identificador,
-    
-    
+    m.instalacion_id,
+
     i.nombre as instalacion_nombre,
     i.municipio,
-    
+
 
     -- Métricas de averías
     COUNT(p.id) FILTER (
@@ -488,7 +490,7 @@ SELECT
 FROM maquinas_cartera m
 INNER JOIN instalaciones i ON m.instalacion_id = i.id
 LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
-GROUP BY m.id, m.identificador,   i.nombre, i.municipio;
+GROUP BY m.id, m.identificador, m.instalacion_id, i.nombre, i.municipio;
 
 -- ============================================
 -- FOREIGN KEYS ADICIONALES (después de crear todas las tablas)
