@@ -420,10 +420,17 @@
                                             <td>{{ rec.instalacion_nombre }}</td>
                                             <td style="max-width: 500px; white-space: normal; word-wrap: break-word; line-height: 1.4;">{{ rec.recomendaciones_extraidas }}</td>
                                             <td style="text-align: center;">
-                                                <a href="/cartera/oportunidades/crear/{{ rec.id }}"
-                                                   style="display: inline-block; padding: 6px 12px; background: #28a745; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                                                    💰 Crear Oportunidad
-                                                </a>
+                                                <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                                    <a href="/cartera/oportunidades/crear/{{ rec.id }}"
+                                                       style="display: inline-block; padding: 6px 12px; background: #28a745; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                                                        💰 Crear Oportunidad
+                                                    </a>
+                                                    <form method="POST" action="/cartera/recomendaciones/{{ rec.id }}/descartar" style="margin: 0;" onsubmit="return confirm('¿Descartar esta recomendación? No se creará ninguna oportunidad.');">
+                                                        <button type="submit" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                                                            ❌ Descartar
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     {% endfor %}
