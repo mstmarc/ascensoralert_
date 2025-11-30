@@ -5602,12 +5602,37 @@ def cartera_dashboard():
     )
     maquinas_problematicas = response.json() if response.status_code == 200 else []
 
-    # Recomendaciones pendientes (últimas 20)
+    # Recomendaciones pendientes con paginación
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 20))
+    offset = (page - 1) * per_page
+
+    # Obtener total de recomendaciones para calcular páginas
+    response_count = requests.get(
+        f"{SUPABASE_URL}/rest/v1/v_partes_con_recomendaciones?select=count",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    total_recomendaciones = int(response_count.headers.get('Content-Range', '0').split('/')[-1])
+    total_pages = (total_recomendaciones + per_page - 1) // per_page  # Ceiling division
+
+    # Obtener recomendaciones de la página actual
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/v_partes_con_recomendaciones?select=*&order=fecha_parte.desc&limit=20",
+        f"{SUPABASE_URL}/rest/v1/v_partes_con_recomendaciones?select=*&order=fecha_parte.desc&limit={per_page}&offset={offset}",
         headers=HEADERS
     )
     recomendaciones = response.json() if response.status_code == 200 else []
+
+    # Información de paginación
+    pagination = {
+        'page': page,
+        'per_page': per_page,
+        'total': total_recomendaciones,
+        'total_pages': total_pages,
+        'has_prev': page > 1,
+        'has_next': page < total_pages,
+        'prev_page': page - 1 if page > 1 else None,
+        'next_page': page + 1 if page < total_pages else None
+    }
 
     # Distribución de tipos de parte (último año)
     response = requests.get(
@@ -5628,7 +5653,8 @@ def cartera_dashboard():
         stats=stats,
         maquinas_problematicas=maquinas_problematicas,
         recomendaciones=recomendaciones,
-        tipos_distribucion=tipos_distribucion
+        tipos_distribucion=tipos_distribucion,
+        pagination=pagination
     )
 
 

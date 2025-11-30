@@ -437,6 +437,52 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Paginación -->
+                        {% if pagination.total_pages > 1 %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <div style="color: #666; font-size: 13px;">
+                                Mostrando {{ ((pagination.page - 1) * pagination.per_page) + 1 }} - {{ [pagination.page * pagination.per_page, pagination.total]|min }} de {{ pagination.total }} recomendaciones
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                {% if pagination.has_prev %}
+                                    <a href="/cartera?page=1" style="padding: 8px 12px; background: white; border: 2px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #003366; font-weight: 600; font-size: 13px;">
+                                        « Primera
+                                    </a>
+                                    <a href="/cartera?page={{ pagination.prev_page }}" style="padding: 8px 12px; background: white; border: 2px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #003366; font-weight: 600; font-size: 13px;">
+                                        ‹ Anterior
+                                    </a>
+                                {% else %}
+                                    <span style="padding: 8px 12px; background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 6px; color: #999; font-weight: 600; font-size: 13px;">
+                                        « Primera
+                                    </span>
+                                    <span style="padding: 8px 12px; background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 6px; color: #999; font-weight: 600; font-size: 13px;">
+                                        ‹ Anterior
+                                    </span>
+                                {% endif %}
+
+                                <span style="padding: 8px 16px; background: #003366; color: white; border-radius: 6px; font-weight: 600; font-size: 13px;">
+                                    Página {{ pagination.page }} de {{ pagination.total_pages }}
+                                </span>
+
+                                {% if pagination.has_next %}
+                                    <a href="/cartera?page={{ pagination.next_page }}" style="padding: 8px 12px; background: white; border: 2px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #003366; font-weight: 600; font-size: 13px;">
+                                        Siguiente ›
+                                    </a>
+                                    <a href="/cartera?page={{ pagination.total_pages }}" style="padding: 8px 12px; background: white; border: 2px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #003366; font-weight: 600; font-size: 13px;">
+                                        Última »
+                                    </a>
+                                {% else %}
+                                    <span style="padding: 8px 12px; background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 6px; color: #999; font-weight: 600; font-size: 13px;">
+                                        Siguiente ›
+                                    </span>
+                                    <span style="padding: 8px 12px; background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 6px; color: #999; font-weight: 600; font-size: 13px;">
+                                        Última »
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
                     {% else %}
                         <p style="color: #666; text-align: center; padding: 20px;">
                             ✅ No hay recomendaciones pendientes de revisar
