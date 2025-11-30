@@ -393,7 +393,7 @@
                     </span>
                     <h1>{{ oportunidad.titulo }}</h1>
                     <p style="color: #666; font-size: 14px; margin: 0;">
-                        Creada el {{ oportunidad.fecha_creacion[:10] }}
+                        Creada el {{ oportunidad.created_at[:10] }}
                     </p>
                 </div>
                 <a href="/cartera/oportunidades" class="btn-volver">
@@ -423,8 +423,8 @@
                         <div class="info-row">
                             <div class="info-label">Tipo de Trabajo:</div>
                             <div class="info-value">
-                                <span class="badge-inline badge-{{ oportunidad.tipo_trabajo }}">
-                                    {{ oportunidad.tipo_trabajo }}
+                                <span class="badge-inline badge-{{ oportunidad.tipo }}">
+                                    {{ oportunidad.tipo }}
                                 </span>
                             </div>
                         </div>
@@ -432,8 +432,8 @@
                         <div class="info-row">
                             <div class="info-label">Prioridad:</div>
                             <div class="info-value">
-                                <span class="badge-inline badge-{{ oportunidad.prioridad }}">
-                                    {{ oportunidad.prioridad }}
+                                <span class="badge-inline badge-{{ oportunidad.prioridad_comercial }}">
+                                    {{ oportunidad.prioridad_comercial }}
                                 </span>
                             </div>
                         </div>
@@ -648,14 +648,14 @@
                         <div class="timeline">
                             <div class="timeline-item completed">
                                 <div class="timeline-label">Detectada</div>
-                                <div class="timeline-date">{{ oportunidad.fecha_creacion[:10] }}</div>
+                                <div class="timeline-date">{{ oportunidad.created_at[:10] }}</div>
                             </div>
 
-                            <div class="timeline-item {% if oportunidad.fecha_presupuesto_enviado %}completed{% endif %}">
+                            <div class="timeline-item {% if oportunidad.fecha_envio_presupuesto %}completed{% endif %}">
                                 <div class="timeline-label">Presupuesto Enviado</div>
                                 <div class="timeline-date">
-                                    {% if oportunidad.fecha_presupuesto_enviado %}
-                                        {{ oportunidad.fecha_presupuesto_enviado[:10] }}
+                                    {% if oportunidad.fecha_envio_presupuesto %}
+                                        {{ oportunidad.fecha_envio_presupuesto[:10] }}
                                     {% else %}
                                         Pendiente
                                     {% endif %}
@@ -673,11 +673,11 @@
                                 </div>
                             </div>
 
-                            <div class="timeline-item {% if oportunidad.fecha_listo_ejecutar %}completed{% endif %}">
+                            <div class="timeline-item {% if oportunidad.fecha_programada_ejecucion %}completed{% endif %}">
                                 <div class="timeline-label">Listo para Ejecutar</div>
                                 <div class="timeline-date">
-                                    {% if oportunidad.fecha_listo_ejecutar %}
-                                        {{ oportunidad.fecha_listo_ejecutar[:10] }}
+                                    {% if oportunidad.fecha_programada_ejecucion %}
+                                        {{ oportunidad.fecha_programada_ejecucion[:10] }}
                                     {% else %}
                                         Pendiente
                                     {% endif %}
@@ -695,11 +695,11 @@
                                 </div>
                             </div>
 
-                            <div class="timeline-item {% if oportunidad.fecha_facturacion %}completed{% endif %}">
+                            <div class="timeline-item {% if oportunidad.fecha_factura %}completed{% endif %}">
                                 <div class="timeline-label">Facturado</div>
                                 <div class="timeline-date">
-                                    {% if oportunidad.fecha_facturacion %}
-                                        {{ oportunidad.fecha_facturacion[:10] }}
+                                    {% if oportunidad.fecha_factura %}
+                                        {{ oportunidad.fecha_factura[:10] }}
                                     {% else %}
                                         Pendiente
                                     {% endif %}

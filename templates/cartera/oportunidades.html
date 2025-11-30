@@ -332,7 +332,7 @@
                     </div>
                     {% if oportunidades_por_estado['DETECTADA'] %}
                         {% for op in oportunidades_por_estado['DETECTADA'] %}
-                            <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
+                            <div class="oportunidad-card prioridad-{{ op.prioridad_comercial }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
@@ -341,11 +341,11 @@
                                     <strong>Instalación:</strong> {{ op.maquinas_cartera.instalaciones.nombre if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera and op.maquinas_cartera.instalaciones else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
-                                    <strong>Creada:</strong> {{ op.fecha_creacion[:10] }}
+                                    <strong>Creada:</strong> {{ op.created_at[:10] }}
                                 </div>
                                 <div class="card-badges">
-                                    <span class="badge badge-tipo">{{ op.tipo_trabajo }}</span>
-                                    <span class="badge badge-prioridad-{{ op.prioridad }}">{{ op.prioridad }}</span>
+                                    <span class="badge badge-tipo">{{ op.tipo }}</span>
+                                    <span class="badge badge-prioridad-{{ op.prioridad_comercial }}">{{ op.prioridad_comercial }}</span>
                                 </div>
                             </div>
                         {% endfor %}
@@ -365,17 +365,17 @@
                     </div>
                     {% if oportunidades_por_estado['PRESUPUESTO_ENVIADO'] %}
                         {% for op in oportunidades_por_estado['PRESUPUESTO_ENVIADO'] %}
-                            <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
+                            <div class="oportunidad-card prioridad-{{ op.prioridad_comercial }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
-                                    <strong>Presup. enviado:</strong> {{ op.fecha_presupuesto_enviado[:10] if op.fecha_presupuesto_enviado else '-' }}
+                                    <strong>Presup. enviado:</strong> {{ op.fecha_envio_presupuesto[:10] if op.fecha_envio_presupuesto else '-' }}
                                 </div>
                                 <div class="card-badges">
-                                    <span class="badge badge-tipo">{{ op.tipo_trabajo }}</span>
-                                    <span class="badge badge-prioridad-{{ op.prioridad }}">{{ op.prioridad }}</span>
+                                    <span class="badge badge-tipo">{{ op.tipo }}</span>
+                                    <span class="badge badge-prioridad-{{ op.prioridad_comercial }}">{{ op.prioridad_comercial }}</span>
                                 </div>
                             </div>
                         {% endfor %}
@@ -395,7 +395,7 @@
                     </div>
                     {% if oportunidades_por_estado['ACEPTADO'] %}
                         {% for op in oportunidades_por_estado['ACEPTADO'] %}
-                            <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
+                            <div class="oportunidad-card prioridad-{{ op.prioridad_comercial }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
@@ -404,8 +404,8 @@
                                     <strong>Aceptado:</strong> {{ op.fecha_aceptacion[:10] if op.fecha_aceptacion else '-' }}
                                 </div>
                                 <div class="card-badges">
-                                    <span class="badge badge-tipo">{{ op.tipo_trabajo }}</span>
-                                    <span class="badge badge-prioridad-{{ op.prioridad }}">{{ op.prioridad }}</span>
+                                    <span class="badge badge-tipo">{{ op.tipo }}</span>
+                                    <span class="badge badge-prioridad-{{ op.prioridad_comercial }}">{{ op.prioridad_comercial }}</span>
                                 </div>
                             </div>
                         {% endfor %}
@@ -425,7 +425,7 @@
                     </div>
                     {% if oportunidades_por_estado['PENDIENTE_REPUESTO'] %}
                         {% for op in oportunidades_por_estado['PENDIENTE_REPUESTO'] %}
-                            <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
+                            <div class="oportunidad-card prioridad-{{ op.prioridad_comercial }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
@@ -437,8 +437,8 @@
                                     {% if op.repuestos_externos %}🌍{% endif %}
                                 </div>
                                 <div class="card-badges">
-                                    <span class="badge badge-tipo">{{ op.tipo_trabajo }}</span>
-                                    <span class="badge badge-prioridad-{{ op.prioridad }}">{{ op.prioridad }}</span>
+                                    <span class="badge badge-tipo">{{ op.tipo }}</span>
+                                    <span class="badge badge-prioridad-{{ op.prioridad_comercial }}">{{ op.prioridad_comercial }}</span>
                                 </div>
                             </div>
                         {% endfor %}
@@ -458,17 +458,17 @@
                     </div>
                     {% if oportunidades_por_estado['LISTO_EJECUTAR'] %}
                         {% for op in oportunidades_por_estado['LISTO_EJECUTAR'] %}
-                            <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
+                            <div class="oportunidad-card prioridad-{{ op.prioridad_comercial }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
-                                    <strong>Listo desde:</strong> {{ op.fecha_listo_ejecutar[:10] if op.fecha_listo_ejecutar else '-' }}
+                                    <strong>Listo desde:</strong> {{ op.fecha_programada_ejecucion[:10] if op.fecha_programada_ejecucion else '-' }}
                                 </div>
                                 <div class="card-badges">
-                                    <span class="badge badge-tipo">{{ op.tipo_trabajo }}</span>
-                                    <span class="badge badge-prioridad-{{ op.prioridad }}">{{ op.prioridad }}</span>
+                                    <span class="badge badge-tipo">{{ op.tipo }}</span>
+                                    <span class="badge badge-prioridad-{{ op.prioridad_comercial }}">{{ op.prioridad_comercial }}</span>
                                 </div>
                             </div>
                         {% endfor %}
@@ -488,7 +488,7 @@
                     </div>
                     {% if oportunidades_por_estado['COMPLETADO'] %}
                         {% for op in oportunidades_por_estado['COMPLETADO'] %}
-                            <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
+                            <div class="oportunidad-card prioridad-{{ op.prioridad_comercial }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
@@ -497,7 +497,7 @@
                                     <strong>Completado:</strong> {{ op.fecha_completado[:10] if op.fecha_completado else '-' }}
                                 </div>
                                 <div class="card-badges">
-                                    <span class="badge badge-tipo">{{ op.tipo_trabajo }}</span>
+                                    <span class="badge badge-tipo">{{ op.tipo }}</span>
                                 </div>
                             </div>
                         {% endfor %}
@@ -517,16 +517,16 @@
                     </div>
                     {% if oportunidades_por_estado['FACTURADO'] %}
                         {% for op in oportunidades_por_estado['FACTURADO'] %}
-                            <div class="oportunidad-card prioridad-{{ op.prioridad }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
+                            <div class="oportunidad-card prioridad-{{ op.prioridad_comercial }}" onclick="location.href='/cartera/oportunidades/{{ op.id }}'">
                                 <div class="card-titulo">{{ op.titulo }}</div>
                                 <div class="card-meta">
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
-                                    <strong>Facturado:</strong> {{ op.fecha_facturacion[:10] if op.fecha_facturacion else '-' }}
+                                    <strong>Facturado:</strong> {{ op.fecha_factura[:10] if op.fecha_factura else '-' }}
                                 </div>
                                 <div class="card-badges">
-                                    <span class="badge badge-tipo">{{ op.tipo_trabajo }}</span>
+                                    <span class="badge badge-tipo">{{ op.tipo }}</span>
                                 </div>
                             </div>
                         {% endfor %}
@@ -555,7 +555,7 @@
                                     <strong>Motivo:</strong> {{ op.motivo_rechazo or 'No especificado' }}
                                 </div>
                                 <div class="card-badges">
-                                    <span class="badge badge-tipo">{{ op.tipo_trabajo }}</span>
+                                    <span class="badge badge-tipo">{{ op.tipo }}</span>
                                 </div>
                             </div>
                         {% endfor %}
