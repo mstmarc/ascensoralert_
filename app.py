@@ -6186,7 +6186,7 @@ def cartera_ver_oportunidad(oportunidad_id):
 
     # Obtener oportunidad con datos relacionados
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?id=eq.{oportunidad_id}&select=*,maquinas_cartera(identificador,codigo_maquina,instalaciones(nombre,municipio)),partes_trabajo(numero_parte,fecha_parte,resolucion,recomendaciones_extraidas)",
+        f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?id=eq.{oportunidad_id}&select=*,maquinas_cartera(identificador,codigo_maquina,tecnico_asignado,instalaciones(nombre,municipio)),partes_trabajo:parte_origen_id(numero_parte,fecha_parte,tipo_parte,tipo_parte_normalizado,resolucion,recomendaciones_extraidas)",
         headers=HEADERS
     )
 
@@ -6265,6 +6265,183 @@ def cartera_actualizar_oportunidad(oportunidad_id):
         flash("Error al actualizar oportunidad", "error")
 
     return redirect(f"/cartera/oportunidades/{oportunidad_id}")
+
+
+@app.route("/cartera/maquina/<int:maquina_id>")
+@helpers.login_required
+def cartera_ver_maquina(maquina_id):
+    """Vista detallada de una máquina"""
+
+    # Obtener información de la máquina con instalación
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/maquinas_cartera?id=eq.{maquina_id}&select=*,instalaciones(id,codigo,nombre,direccion,municipio)",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Máquina no encontrada", "error")
+        return redirect("/cartera")
+
+    maquina = response.json()[0]
+
+    # Obtener historial de partes de trabajo
+    response_partes = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?maquina_id=eq.{maquina_id}&select=*&order=fecha_parte.desc&limit=50",
+        headers=HEADERS
+    )
+    partes = response_partes.json() if response_partes.status_code == 200 else []
+
+    # Estadísticas
+    stats = {}
+
+    # Total de partes
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?maquina_id=eq.{maquina_id}&select=count",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['total_partes'] = int(response.headers.get('Content-Range', '0').split('/')[-1])
+
+    # Averías
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?maquina_id=eq.{maquina_id}&tipo_parte_normalizado=eq.AVERIA&select=count",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['total_averias'] = int(response.headers.get('Content-Range', '0').split('/')[-1])
+
+    # Mantenimientos
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?maquina_id=eq.{maquina_id}&tipo_parte_normalizado=eq.MANTENIMIENTO&select=count",
+        headers={**HEADERS, "Prefer": "count=exact"}
+    )
+    stats['total_mantenimientos'] = int(response.headers.get('Content-Range', '0').split('/')[-1])
+
+    # Recomendaciones
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?maquina_id=eq.{maquina_id}&tiene_recomendacion=eq.true&select=*&order=fecha_parte.desc",
+        headers=HEADERS
+    )
+    recomendaciones = response.json() if response.status_code == 200 else []
+    stats['total_recomendaciones'] = len(recomendaciones)
+
+    # Oportunidades
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?maquina_id=eq.{maquina_id}&select=*&order=created_at.desc",
+        headers=HEADERS
+    )
+    oportunidades = response.json() if response.status_code == 200 else []
+    stats['total_oportunidades'] = len(oportunidades)
+
+    # Distribución de tipos de parte
+    tipos_distribucion = {}
+    for parte in partes:
+        tipo = parte.get('tipo_parte_normalizado', 'OTRO')
+        tipos_distribucion[tipo] = tipos_distribucion.get(tipo, 0) + 1
+
+    return render_template(
+        "cartera/ver_maquina.html",
+        maquina=maquina,
+        stats=stats,
+        partes=partes,
+        recomendaciones=recomendaciones,
+        oportunidades=oportunidades,
+        tipos_distribucion=tipos_distribucion
+    )
+
+
+@app.route("/cartera/instalacion/<int:instalacion_id>")
+@helpers.login_required
+def cartera_ver_instalacion(instalacion_id):
+    """Vista detallada de una instalación"""
+
+    # Obtener información de la instalación
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/instalaciones?id=eq.{instalacion_id}&select=*",
+        headers=HEADERS
+    )
+
+    if not response.json():
+        flash("Instalación no encontrada", "error")
+        return redirect("/cartera")
+
+    instalacion = response.json()[0]
+
+    # Obtener todas las máquinas de esta instalación
+    response_maquinas = requests.get(
+        f"{SUPABASE_URL}/rest/v1/maquinas_cartera?instalacion_id=eq.{instalacion_id}&select=*&order=identificador.asc",
+        headers=HEADERS
+    )
+    maquinas = response_maquinas.json()
+
+    # Obtener IDs de máquinas para consultas agregadas
+    maquina_ids = [m['id'] for m in maquinas]
+
+    # Calcular estadísticas agregadas de todas las máquinas
+    stats = {
+        'total_maquinas': len(maquinas),
+        'total_partes': 0,
+        'total_averias': 0,
+        'total_mantenimientos': 0,
+        'total_recomendaciones': 0,
+        'total_oportunidades': 0
+    }
+
+    # Obtener todos los partes de todas las máquinas (últimos 100 de toda la instalación)
+    partes = []
+    if maquina_ids:
+        maquina_ids_str = ','.join(map(str, maquina_ids))
+        response_partes = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?maquina_id=in.({maquina_ids_str})&select=*,maquinas_cartera(identificador)&order=fecha_parte.desc&limit=100",
+            headers=HEADERS
+        )
+        partes = response_partes.json()
+
+        # Calcular estadísticas
+        stats['total_partes'] = len(partes)
+        stats['total_averias'] = sum(1 for p in partes if p.get('tipo_parte_normalizado') == 'AVERÍA')
+        stats['total_mantenimientos'] = sum(1 for p in partes if p.get('tipo_parte_normalizado') == 'CONSERVACIÓN')
+
+        # Obtener recomendaciones
+        response_rec = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?maquina_id=in.({maquina_ids_str})&tiene_recomendacion=eq.true&select=*,maquinas_cartera(identificador)&order=fecha_parte.desc",
+            headers=HEADERS
+        )
+        recomendaciones = response_rec.json()
+        stats['total_recomendaciones'] = len(recomendaciones)
+
+        # Obtener oportunidades
+        response_op = requests.get(
+            f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?maquina_id=in.({maquina_ids_str})&select=*,maquinas_cartera(identificador)&order=created_at.desc",
+            headers=HEADERS
+        )
+        oportunidades = response_op.json()
+        stats['total_oportunidades'] = len(oportunidades)
+    else:
+        recomendaciones = []
+        oportunidades = []
+
+    # Calcular distribución de tipos de partes
+    tipos_distribucion = {}
+    for parte in partes:
+        tipo = parte.get('tipo_parte_normalizado', 'OTRO')
+        tipos_distribucion[tipo] = tipos_distribucion.get(tipo, 0) + 1
+
+    # Calcular estadísticas por máquina para tabla
+    for maquina in maquinas:
+        maquina_partes = [p for p in partes if p['maquina_id'] == maquina['id']]
+        maquina['total_partes'] = len(maquina_partes)
+        maquina['total_averias'] = sum(1 for p in maquina_partes if p.get('tipo_parte_normalizado') == 'AVERÍA')
+        maquina['total_recomendaciones'] = sum(1 for p in maquina_partes if p.get('tiene_recomendacion') == True)
+
+    return render_template(
+        "cartera/ver_instalacion.html",
+        instalacion=instalacion,
+        maquinas=maquinas,
+        stats=stats,
+        partes=partes,
+        recomendaciones=recomendaciones,
+        oportunidades=oportunidades,
+        tipos_distribucion=tipos_distribucion
+    )
 
 
 # ============================================
