@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS instalaciones (
 );
 
 -- Índices para Instalaciones
-CREATE INDEX idx_instalaciones_nombre ON instalaciones(nombre);
-CREATE INDEX idx_instalaciones_municipio ON instalaciones(municipio);
+CREATE INDEX IF NOT EXISTS idx_instalaciones_nombre ON instalaciones(nombre);
+CREATE INDEX IF NOT EXISTS idx_instalaciones_municipio ON instalaciones(municipio);
 
 -- Tabla 2: Máquinas de Cartera (Ascensores) - SIMPLIFICADA
 -- ============================================
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS maquinas_cartera (
 );
 
 -- Índices para Máquinas
-CREATE INDEX idx_maquinas_instalacion ON maquinas_cartera(instalacion_id);
-CREATE INDEX idx_maquinas_identificador ON maquinas_cartera(identificador);
+CREATE INDEX IF NOT EXISTS idx_maquinas_instalacion ON maquinas_cartera(instalacion_id);
+CREATE INDEX IF NOT EXISTS idx_maquinas_identificador ON maquinas_cartera(identificador);
 
 -- Tabla 3: Partes de Trabajo (Historial de Intervenciones)
 -- ============================================
@@ -97,18 +97,18 @@ CREATE TABLE IF NOT EXISTS partes_trabajo (
 );
 
 -- Índices para Partes de Trabajo
-CREATE INDEX idx_partes_numero ON partes_trabajo(numero_parte);
-CREATE INDEX idx_partes_maquina ON partes_trabajo(maquina_id);
-CREATE INDEX idx_partes_tipo_original ON partes_trabajo(tipo_parte_original);
-CREATE INDEX idx_partes_tipo_normalizado ON partes_trabajo(tipo_parte_normalizado);
-CREATE INDEX idx_partes_fecha ON partes_trabajo(fecha_parte DESC);
-CREATE INDEX idx_partes_estado ON partes_trabajo(estado);
-CREATE INDEX idx_partes_prioridad ON partes_trabajo(prioridad) WHERE estado != 'COMPLETADO';
-CREATE INDEX idx_partes_facturado ON partes_trabajo(facturado) WHERE facturado = false;
-CREATE INDEX idx_partes_recomendacion ON partes_trabajo(tiene_recomendacion) WHERE tiene_recomendacion = true;
-CREATE INDEX idx_partes_recomendacion_no_revisada ON partes_trabajo(recomendacion_revisada) WHERE tiene_recomendacion = true AND recomendacion_revisada = false;
-CREATE INDEX idx_partes_oportunidad ON partes_trabajo(oportunidad_id) WHERE oportunidad_id IS NOT NULL;
-CREATE INDEX idx_partes_maquina_texto ON partes_trabajo(maquina_texto); -- Para búsquedas durante importación
+CREATE INDEX IF NOT EXISTS idx_partes_numero ON partes_trabajo(numero_parte);
+CREATE INDEX IF NOT EXISTS idx_partes_maquina ON partes_trabajo(maquina_id);
+CREATE INDEX IF NOT EXISTS idx_partes_tipo_original ON partes_trabajo(tipo_parte_original);
+CREATE INDEX IF NOT EXISTS idx_partes_tipo_normalizado ON partes_trabajo(tipo_parte_normalizado);
+CREATE INDEX IF NOT EXISTS idx_partes_fecha ON partes_trabajo(fecha_parte DESC);
+CREATE INDEX IF NOT EXISTS idx_partes_estado ON partes_trabajo(estado);
+CREATE INDEX IF NOT EXISTS idx_partes_prioridad ON partes_trabajo(prioridad) WHERE estado != 'COMPLETADO';
+CREATE INDEX IF NOT EXISTS idx_partes_facturado ON partes_trabajo(facturado) WHERE facturado = false;
+CREATE INDEX IF NOT EXISTS idx_partes_recomendacion ON partes_trabajo(tiene_recomendacion) WHERE tiene_recomendacion = true;
+CREATE INDEX IF NOT EXISTS idx_partes_recomendacion_no_revisada ON partes_trabajo(recomendacion_revisada) WHERE tiene_recomendacion = true AND recomendacion_revisada = false;
+CREATE INDEX IF NOT EXISTS idx_partes_oportunidad ON partes_trabajo(oportunidad_id) WHERE oportunidad_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_partes_maquina_texto ON partes_trabajo(maquina_texto); -- Para búsquedas durante importación
 
 -- Tabla 4: Mapeo de Tipos de Parte (para normalización)
 -- ============================================
@@ -209,15 +209,15 @@ CREATE TABLE IF NOT EXISTS oportunidades_facturacion (
 );
 
 -- Índices para Oportunidades de Facturación
-CREATE INDEX idx_oportunidades_maquina ON oportunidades_facturacion(maquina_id);
-CREATE INDEX idx_oportunidades_parte_origen ON oportunidades_facturacion(parte_origen_id);
-CREATE INDEX idx_oportunidades_estado ON oportunidades_facturacion(estado);
-CREATE INDEX idx_oportunidades_fecha_envio ON oportunidades_facturacion(fecha_envio_presupuesto);
-CREATE INDEX idx_oportunidades_pendientes ON oportunidades_facturacion(estado)
+CREATE INDEX IF NOT EXISTS idx_oportunidades_maquina ON oportunidades_facturacion(maquina_id);
+CREATE INDEX IF NOT EXISTS idx_oportunidades_parte_origen ON oportunidades_facturacion(parte_origen_id);
+CREATE INDEX IF NOT EXISTS idx_oportunidades_estado ON oportunidades_facturacion(estado);
+CREATE INDEX IF NOT EXISTS idx_oportunidades_fecha_envio ON oportunidades_facturacion(fecha_envio_presupuesto);
+CREATE INDEX IF NOT EXISTS idx_oportunidades_pendientes ON oportunidades_facturacion(estado)
     WHERE estado IN ('DETECTADA', 'PRESUPUESTO_ENVIADO', 'ACEPTADO', 'PENDIENTE_REPUESTO');
-CREATE INDEX idx_oportunidades_repuesto ON oportunidades_facturacion(estado_repuestos);
-CREATE INDEX idx_oportunidades_facturado ON oportunidades_facturacion(facturado) WHERE facturado = false;
-CREATE INDEX idx_oportunidades_prioridad ON oportunidades_facturacion(prioridad_comercial);
+CREATE INDEX IF NOT EXISTS idx_oportunidades_repuesto ON oportunidades_facturacion(estado_repuestos);
+CREATE INDEX IF NOT EXISTS idx_oportunidades_facturado ON oportunidades_facturacion(facturado) WHERE facturado = false;
+CREATE INDEX IF NOT EXISTS idx_oportunidades_prioridad ON oportunidades_facturacion(prioridad_comercial);
 
 -- ============================================
 -- VISTAS ÚTILES PARA DASHBOARDS Y ANÁLISIS
@@ -494,6 +494,9 @@ GROUP BY m.id, m.identificador,   i.nombre, i.municipio;
 -- FOREIGN KEYS ADICIONALES (después de crear todas las tablas)
 -- ============================================
 -- Resolver dependencia circular entre partes_trabajo y oportunidades_facturacion
+
+-- Eliminar constraint si existe antes de crearla
+ALTER TABLE IF EXISTS partes_trabajo DROP CONSTRAINT IF EXISTS fk_partes_oportunidad;
 
 ALTER TABLE partes_trabajo
 ADD CONSTRAINT fk_partes_oportunidad
