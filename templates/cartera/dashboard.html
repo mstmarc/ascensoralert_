@@ -371,8 +371,16 @@
                                 <tbody>
                                     {% for maquina in maquinas_problematicas %}
                                         <tr>
-                                            <td><strong>{{ maquina.identificador }}</strong></td>
-                                            <td>{{ maquina.instalacion_nombre }}</td>
+                                            <td>
+                                                <a href="/cartera/maquina/{{ maquina.maquina_id }}" style="color: #366092; text-decoration: none; font-weight: 600;">
+                                                    {{ maquina.identificador }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="/cartera/instalacion/{{ maquina.instalacion_id }}" style="color: #366092; text-decoration: none;">
+                                                    {{ maquina.instalacion_nombre }}
+                                                </a>
+                                            </td>
                                             <td>{{ maquina.municipio or '-' }}</td>
                                             <td style="text-align: center;">{{ maquina.averias_ultimo_año or 0 }}</td>
                                             <td style="text-align: center;">{{ maquina.averias_ultimo_trimestre or 0 }}</td>
@@ -416,8 +424,16 @@
                                         <tr>
                                             <td>{{ rec.fecha_parte[:10] }}</td>
                                             <td>{{ rec.numero_parte }}</td>
-                                            <td><strong>{{ rec.maquina_identificador }}</strong></td>
-                                            <td>{{ rec.instalacion_nombre }}</td>
+                                            <td>
+                                                <a href="/cartera/maquina/{{ rec.maquina_id }}" style="color: #366092; text-decoration: none; font-weight: 600;">
+                                                    {{ rec.maquina_identificador }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="/cartera/instalacion/{{ rec.instalacion_id }}" style="color: #366092; text-decoration: none;">
+                                                    {{ rec.instalacion_nombre }}
+                                                </a>
+                                            </td>
                                             <td style="max-width: 500px; white-space: normal; word-wrap: break-word; line-height: 1.4;">{{ rec.recomendaciones_extraidas }}</td>
                                             <td style="text-align: center;">
                                                 <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
