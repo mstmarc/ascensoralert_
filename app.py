@@ -5617,15 +5617,25 @@ def cartera_importar_equipos():
         logger.info(f"Columnas en Excel: {list(df.columns)}")
         logger.info(f"Total de filas: {len(df)}")
 
-        # Mapeo de columnas
-        column_mapping = {
-            'Cód. instalación': 'cod_instalacion',
-            'Instalación': 'instalacion',
-            'Cód. máquina': 'cod_maquina',
-            'Máquina': 'maquina',
-            'Técnico': 'tecnico'
-        }
+        # Mapeo de columnas (flexible con mayúsculas/minúsculas y acentos)
+        column_mapping = {}
+        for col in df.columns:
+            col_lower = col.lower().strip()
+            if 'instalación' in col_lower or 'instalacion' in col_lower:
+                if 'cód' in col_lower or 'cod' in col_lower:
+                    column_mapping[col] = 'cod_instalacion'
+                else:
+                    column_mapping[col] = 'instalacion'
+            elif 'máquina' in col_lower or 'maquina' in col_lower:
+                if 'cód' in col_lower or 'cod' in col_lower:
+                    column_mapping[col] = 'cod_maquina'
+                else:
+                    column_mapping[col] = 'maquina'
+            elif 'tecnico' in col_lower or 'técnico' in col_lower:
+                column_mapping[col] = 'tecnico'
+
         df.rename(columns=column_mapping, inplace=True)
+        logger.info(f"Columnas después de mapeo: {list(df.columns)}")
 
         # Verificar columnas requeridas
         required = ['cod_instalacion', 'instalacion', 'cod_maquina', 'maquina']
