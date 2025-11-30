@@ -5867,10 +5867,35 @@ def cartera_importar_partes():
 
         # Palabras clave para detectar recomendaciones
         palabras_clave_recomendacion = [
+            # Recomendaciones explícitas
             'RECOMENDACIÓN', 'RECOMENDACION', 'RECOMIENDO', 'RECOMENDAMOS',
             'CONVENDRÍA', 'CONVIENE', 'SERÍA CONVENIENTE', 'SE RECOMIENDA',
-            'IMPORTANTE', 'URGENTE', 'NECESARIO', 'CAMBIAR', 'SUSTITUIR',
-            'MODERNIZAR', 'REVISAR', 'PRÓXIMAMENTE', 'PROXIMAMENTE'
+            'ACONSEJABLE', 'ACONSEJO', 'SUGERENCIA', 'SUGIERO',
+
+            # Indicadores de urgencia/importancia
+            'IMPORTANTE', 'URGENTE', 'NECESARIO', 'IMPRESCINDIBLE', 'CRÍTICO',
+            'PRIORITARIO', 'INMEDIATO',
+
+            # Acciones de mantenimiento/reparación
+            'CAMBIAR', 'SUSTITUIR', 'REEMPLAZAR', 'MODERNIZAR', 'ACTUALIZAR',
+            'REVISAR', 'REPARAR', 'ARREGLAR', 'RENOVAR', 'MEJORAR',
+
+            # Temporalidad
+            'PRÓXIMAMENTE', 'PROXIMAMENTE', 'PRONTO', 'EN BREVE',
+            'PRÓXIMA REVISIÓN', 'PROXIMA REVISION',
+
+            # Estados problemáticos
+            'NO FUNCIONA', 'NO OPERA', 'INOPERATIVO', 'INOPERANTE',
+            'FALLA', 'FALLO', 'DEFECTUOSO', 'AVERIADO', 'DETERIORADO',
+            'MAL ESTADO', 'DESGASTADO', 'ROTO', 'DAÑADO',
+
+            # Componentes críticos (cuando no funcionan = oportunidad)
+            'DISPOSITIVO NO', 'COMUNICACIÓN NO', 'BIDIRECCIONAL NO',
+            'CABINA NO', 'PUERTA NO', 'BOTONERA NO',
+
+            # Oportunidades de facturación
+            'FUERA DE CONTRATO', 'NO INCLUIDO', 'ADICIONAL',
+            'PRESUPUESTO', 'COTIZAR', 'COTIZACIÓN'
         ]
 
         # Cargar mapeo de tipos
