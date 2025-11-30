@@ -5573,9 +5573,9 @@ def cartera_dashboard():
     )
     stats['total_partes'] = response.headers.get('Content-Range', '0').split('/')[-1]
 
-    # Recomendaciones pendientes
+    # Recomendaciones pendientes (no revisadas y sin oportunidad creada)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tiene_recomendacion=eq.true&oportunidad_creada=eq.false",
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tiene_recomendacion=eq.true&recomendacion_revisada=eq.false&oportunidad_creada=eq.false",
         headers={**HEADERS, "Prefer": "count=exact"}
     )
     stats['recomendaciones_pendientes'] = response.headers.get('Content-Range', '0').split('/')[-1]
@@ -6126,6 +6126,31 @@ def cartera_crear_oportunidad(parte_id):
             logger.error(f"Error creando oportunidad: {response.status_code} - {response.text}")
             flash("Error al crear oportunidad", "error")
             return redirect("/cartera/oportunidades")
+
+
+@app.route("/cartera/recomendaciones/<int:parte_id>/descartar", methods=["POST"])
+@helpers.login_required
+def cartera_descartar_recomendacion(parte_id):
+    """Descartar una recomendación sin crear oportunidad"""
+
+    # Marcar recomendación como revisada pero sin crear oportunidad
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/partes_trabajo?id=eq.{parte_id}",
+        json={
+            "recomendacion_revisada": True,
+            "oportunidad_creada": False,
+            "oportunidad_id": None
+        },
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Recomendación descartada", "success")
+    else:
+        logger.error(f"Error descartando recomendación: {response.status_code} - {response.text}")
+        flash("Error al descartar recomendación", "error")
+
+    return redirect("/cartera")
 
 
 @app.route("/cartera/oportunidades/<int:oportunidad_id>")
