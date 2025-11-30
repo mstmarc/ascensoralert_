@@ -6225,6 +6225,8 @@ def cartera_actualizar_oportunidad(oportunidad_id):
             update_data['fecha_rechazo'] = date.today().isoformat()
             update_data['fecha_respuesta_cliente'] = date.today().isoformat()
             update_data['motivo_rechazo'] = request.form.get('motivo_rechazo')
+        elif nuevo_estado == 'LISTO_EJECUTAR':
+            update_data['fecha_programada_ejecucion'] = date.today().isoformat()
         elif nuevo_estado == 'COMPLETADO':
             update_data['fecha_completado'] = date.today().isoformat()
             update_data['importe_final'] = request.form.get('importe_final')

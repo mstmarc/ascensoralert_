@@ -371,7 +371,7 @@
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
-                                    <strong>Presup. enviado:</strong> {{ op.fecha_presupuesto_enviado[:10] if op.fecha_presupuesto_enviado else '-' }}
+                                    <strong>Presup. enviado:</strong> {{ op.fecha_envio_presupuesto[:10] if op.fecha_envio_presupuesto else '-' }}
                                 </div>
                                 <div class="card-badges">
                                     <span class="badge badge-tipo">{{ op.tipo }}</span>
@@ -464,7 +464,7 @@
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
-                                    <strong>Listo desde:</strong> {{ op.fecha_listo_ejecutar[:10] if op.fecha_listo_ejecutar else '-' }}
+                                    <strong>Listo desde:</strong> {{ op.fecha_programada_ejecucion[:10] if op.fecha_programada_ejecucion else '-' }}
                                 </div>
                                 <div class="card-badges">
                                     <span class="badge badge-tipo">{{ op.tipo }}</span>
@@ -523,7 +523,7 @@
                                     <strong>Máquina:</strong> {{ op.maquinas_cartera.identificador if op.partes_trabajo and op.partes_trabajo[0].maquinas_cartera else 'N/A' }}
                                 </div>
                                 <div class="card-meta">
-                                    <strong>Facturado:</strong> {{ op.fecha_facturacion[:10] if op.fecha_facturacion else '-' }}
+                                    <strong>Facturado:</strong> {{ op.fecha_factura[:10] if op.fecha_factura else '-' }}
                                 </div>
                                 <div class="card-badges">
                                     <span class="badge badge-tipo">{{ op.tipo }}</span>
