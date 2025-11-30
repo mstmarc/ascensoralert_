@@ -3,95 +3,43 @@
 -- AscensorAlert - Fedes Ascensores
 -- ============================================
 
--- Tabla 1: Instalaciones (Edificios/Comunidades)
+-- Tabla 1: Instalaciones (Edificios/Comunidades) - SIMPLIFICADA
 -- ============================================
+-- NOTA: Datos completos están en el ERP. Esto es solo para identificación y agrupación.
 CREATE TABLE IF NOT EXISTS instalaciones (
     id SERIAL PRIMARY KEY,
 
-    -- Identificación
-    referencia VARCHAR(100), -- Código interno de referencia
+    -- Identificación mínima (para importación y agrupación)
     nombre VARCHAR(255) NOT NULL, -- Nombre del edificio/comunidad
-
-    -- Ubicación
-    direccion TEXT NOT NULL,
-    municipio VARCHAR(100),
-    codigo_postal VARCHAR(10),
-    provincia VARCHAR(100) DEFAULT 'Las Palmas',
-
-    -- Cliente/Contacto
-    cliente_nombre VARCHAR(255),
-    cliente_cif VARCHAR(20),
-    contacto_nombre VARCHAR(255),
-    contacto_telefono VARCHAR(50),
-    contacto_email VARCHAR(255),
-
-    -- Información adicional
-    administrador VARCHAR(255), -- Administrador de fincas
-    numero_viviendas INTEGER,
-    observaciones TEXT,
-
-    -- Estado
-    activo BOOLEAN DEFAULT true,
+    municipio VARCHAR(100), -- Para filtros y agrupación en análisis
 
     -- Auditoría
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(100)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Índices para Instalaciones
-CREATE INDEX idx_instalaciones_referencia ON instalaciones(referencia);
+CREATE INDEX idx_instalaciones_nombre ON instalaciones(nombre);
 CREATE INDEX idx_instalaciones_municipio ON instalaciones(municipio);
-CREATE INDEX idx_instalaciones_cliente ON instalaciones(cliente_nombre);
-CREATE INDEX idx_instalaciones_activo ON instalaciones(activo) WHERE activo = true;
 
--- Tabla 2: Máquinas de Cartera (Ascensores)
+-- Tabla 2: Máquinas de Cartera (Ascensores) - SIMPLIFICADA
 -- ============================================
+-- NOTA: Datos completos están en el ERP. Esto es solo para identificación y enlace con partes/inspecciones.
 CREATE TABLE IF NOT EXISTS maquinas_cartera (
     id SERIAL PRIMARY KEY,
 
     -- Relación con instalación
     instalacion_id INTEGER NOT NULL REFERENCES instalaciones(id) ON DELETE RESTRICT,
 
-    -- Identificación (enlaza con inspecciones.maquina)
-    identificador VARCHAR(100) NOT NULL UNIQUE, -- Este campo enlaza con inspecciones.maquina
-    rae VARCHAR(100), -- Registro de Aparatos Elevadores
-
-    -- Datos técnicos
-    tipo_maquina VARCHAR(100), -- Ascensor, Montacargas, Plataforma, etc.
-    marca VARCHAR(100),
-    modelo VARCHAR(100),
-    año_instalacion INTEGER,
-    numero_serie VARCHAR(100),
-    capacidad_kg INTEGER,
-    capacidad_personas INTEGER,
-    numero_paradas INTEGER,
-
-    -- Contrato
-    tipo_contrato VARCHAR(100), -- MANTENIMIENTO_INTEGRAL, SOLO_AVERIAS, INSPECCION, etc.
-    fecha_inicio_contrato DATE,
-    fecha_fin_contrato DATE,
-    importe_mensual DECIMAL(10,2),
-
-    -- Estado
-    estado_maquina VARCHAR(50) DEFAULT 'OPERATIVA', -- OPERATIVA, PARADA, AVERIADA, BAJA
-    observaciones TEXT,
-    activo BOOLEAN DEFAULT true,
+    -- Identificación (CLAVE: enlaza con inspecciones.maquina y partes_trabajo.maquina_texto)
+    identificador VARCHAR(255) NOT NULL UNIQUE, -- Ej: "MANUEL ALEMAN ALAMO 2. PAR"
 
     -- Auditoría
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(100)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Índices para Máquinas
 CREATE INDEX idx_maquinas_instalacion ON maquinas_cartera(instalacion_id);
 CREATE INDEX idx_maquinas_identificador ON maquinas_cartera(identificador);
-CREATE INDEX idx_maquinas_rae ON maquinas_cartera(rae);
-CREATE INDEX idx_maquinas_tipo ON maquinas_cartera(tipo_maquina);
-CREATE INDEX idx_maquinas_contrato_fin ON maquinas_cartera(fecha_fin_contrato);
-CREATE INDEX idx_maquinas_activo ON maquinas_cartera(activo) WHERE activo = true;
-CREATE INDEX idx_maquinas_estado ON maquinas_cartera(estado_maquina);
 
 -- Tabla 3: Partes de Trabajo (Historial de Intervenciones)
 -- ============================================
@@ -271,179 +219,77 @@ CREATE INDEX idx_oportunidades_prioridad ON oportunidades_facturacion(prioridad_
 -- ============================================
 -- VISTAS ÚTILES PARA DASHBOARDS Y ANÁLISIS
 -- ============================================
+-- NOTA: Vistas simplificadas enfocadas en análisis de partes de trabajo
+-- Datos de gestión (contratos, clientes, etc.) están en el ERP
 
--- Vista: Instalaciones con resumen de máquinas
-CREATE OR REPLACE VIEW v_instalaciones_completas AS
-SELECT
-    i.*,
-    COUNT(m.id) as total_maquinas,
-    COUNT(m.id) FILTER (WHERE m.activo = true) as maquinas_activas,
-    COUNT(m.id) FILTER (WHERE m.estado_maquina = 'OPERATIVA') as maquinas_operativas,
-    COUNT(m.id) FILTER (WHERE m.estado_maquina = 'AVERIADA') as maquinas_averiadas,
-    MIN(m.fecha_fin_contrato) as contrato_proximo_vencimiento,
-    -- Contar inspecciones pendientes de segunda
-    (SELECT COUNT(DISTINCT insp.id)
-     FROM maquinas_cartera mc
-     INNER JOIN inspecciones insp ON mc.identificador = insp.maquina
-     WHERE mc.instalacion_id = i.id
-     AND insp.fecha_segunda_inspeccion IS NOT NULL
-     AND insp.fecha_segunda_realizada IS NULL
-     AND insp.fecha_segunda_inspeccion < CURRENT_DATE
-    ) as inspecciones_vencidas,
-    -- Contar partes pendientes
-    (SELECT COUNT(p.id)
-     FROM maquinas_cartera mc
-     INNER JOIN partes_trabajo p ON mc.id = p.maquina_id
-     WHERE mc.instalacion_id = i.id
-     AND p.estado IN ('PENDIENTE', 'EN_PROCESO')
-    ) as partes_pendientes
-FROM instalaciones i
-LEFT JOIN maquinas_cartera m ON i.id = m.instalacion_id
-GROUP BY i.id;
-
--- Vista: Máquinas con información completa
-CREATE OR REPLACE VIEW v_maquinas_completas AS
-SELECT
-    m.*,
-    i.nombre as instalacion_nombre,
-    i.direccion as instalacion_direccion,
-    i.municipio as instalacion_municipio,
-    i.cliente_nombre,
-    -- Última inspección
-    (SELECT MAX(fecha_inspeccion)
-     FROM inspecciones insp
-     WHERE insp.maquina = m.identificador
-    ) as ultima_inspeccion,
-    -- Próxima segunda inspección
-    (SELECT MIN(fecha_segunda_inspeccion)
-     FROM inspecciones insp
-     WHERE insp.maquina = m.identificador
-     AND fecha_segunda_realizada IS NULL
-     AND fecha_segunda_inspeccion >= CURRENT_DATE
-    ) as proxima_segunda_inspeccion,
-    -- Defectos pendientes
-    (SELECT COUNT(d.id)
-     FROM inspecciones insp
-     INNER JOIN defectos_inspeccion d ON insp.id = d.inspeccion_id
-     WHERE insp.maquina = m.identificador
-     AND d.estado = 'PENDIENTE'
-    ) as defectos_pendientes,
-    -- Partes de trabajo
-    (SELECT COUNT(p.id)
-     FROM partes_trabajo p
-     WHERE p.maquina_id = m.id
-     AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ) as partes_ultimo_año,
-    (SELECT COUNT(p.id)
-     FROM partes_trabajo p
-     WHERE p.maquina_id = m.id
-     AND p.tipo_parte_normalizado = 'AVERIA'
-     AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ) as averias_ultimo_año,
-    (SELECT COUNT(p.id)
-     FROM partes_trabajo p
-     WHERE p.maquina_id = m.id
-     AND p.estado IN ('PENDIENTE', 'EN_PROCESO')
-    ) as partes_pendientes,
-    -- Última intervención
-    (SELECT MAX(fecha_parte)
-     FROM partes_trabajo p
-     WHERE p.maquina_id = m.id
-    ) as ultima_intervencion,
-    -- Estado del contrato
-    CASE
-        WHEN m.fecha_fin_contrato IS NULL THEN 'SIN_FECHA'
-        WHEN m.fecha_fin_contrato < CURRENT_DATE THEN 'VENCIDO'
-        WHEN m.fecha_fin_contrato <= CURRENT_DATE + INTERVAL '30 days' THEN 'PROXIMO_VENCIMIENTO'
-        WHEN m.fecha_fin_contrato <= CURRENT_DATE + INTERVAL '60 days' THEN 'VENCIMIENTO_CERCANO'
-        ELSE 'VIGENTE'
-    END as estado_contrato
-FROM maquinas_cartera m
-INNER JOIN instalaciones i ON m.instalacion_id = i.id;
-
--- Vista: Partes de trabajo con información completa
-CREATE OR REPLACE VIEW v_partes_completos AS
-SELECT
-    p.*,
-    m.identificador as maquina_identificador,
-    m.tipo_maquina,
-    i.nombre as instalacion_nombre,
-    i.direccion as instalacion_direccion,
-    i.municipio,
-    i.cliente_nombre,
-    -- Cálculo de días pendientes
-    CASE
-        WHEN p.estado IN ('PENDIENTE', 'EN_PROCESO') THEN
-            CURRENT_DATE - p.fecha_parte
-        ELSE NULL
-    END as dias_pendiente,
-    -- Nivel de urgencia
-    CASE
-        WHEN p.estado NOT IN ('PENDIENTE', 'EN_PROCESO') THEN 'COMPLETADO'
-        WHEN p.prioridad = 'URGENTE' THEN 'URGENTE'
-        WHEN p.prioridad = 'ALTA' THEN 'ALTA'
-        WHEN p.fecha_parte < CURRENT_DATE - INTERVAL '7 days' THEN 'ATRASADO'
-        ELSE 'NORMAL'
-    END as nivel_urgencia
-FROM partes_trabajo p
-INNER JOIN maquinas_cartera m ON p.maquina_id = m.id
-INNER JOIN instalaciones i ON m.instalacion_id = i.id;
-
--- Vista: Análisis de averías por máquina
-CREATE OR REPLACE VIEW v_analisis_averias AS
+-- Vista: Resumen de partes por máquina
+CREATE OR REPLACE VIEW v_resumen_partes_maquina AS
 SELECT
     m.id as maquina_id,
     m.identificador,
-    m.tipo_maquina,
     i.nombre as instalacion_nombre,
     i.municipio,
-    -- Averías del año actual
+
+    -- Total de partes
+    COUNT(p.id) as total_partes,
+    COUNT(p.id) FILTER (WHERE p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months') as partes_ultimo_año,
+
+    -- Por tipo normalizado
+    COUNT(p.id) FILTER (WHERE p.tipo_parte_normalizado = 'AVERIA') as total_averias,
+    COUNT(p.id) FILTER (WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO') as total_mantenimientos,
+    COUNT(p.id) FILTER (WHERE p.tipo_parte_normalizado = 'REPARACION') as total_reparaciones,
+
+    -- Averías recientes
     COUNT(p.id) FILTER (
         WHERE p.tipo_parte_normalizado = 'AVERIA'
-        AND EXTRACT(YEAR FROM p.fecha_parte) = EXTRACT(YEAR FROM CURRENT_DATE)
-    ) as averias_año_actual,
-    -- Averías del año anterior
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
+    ) as averias_ultimo_año,
     COUNT(p.id) FILTER (
         WHERE p.tipo_parte_normalizado = 'AVERIA'
-        AND EXTRACT(YEAR FROM p.fecha_parte) = EXTRACT(YEAR FROM CURRENT_DATE) - 1
-    ) as averias_año_anterior,
-    -- Tiempo promedio de resolución (en horas)
-    AVG(p.tiempo_empleado) FILTER (
-        WHERE p.tipo_parte_normalizado = 'AVERIA' AND p.tiempo_empleado IS NOT NULL
-    ) / 60.0 as tiempo_medio_resolucion_horas,
-    -- Coste total de averías año actual
-    SUM(p.coste_total) FILTER (
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '3 months'
+    ) as averias_ultimo_trimestre,
+    COUNT(p.id) FILTER (
         WHERE p.tipo_parte_normalizado = 'AVERIA'
-        AND EXTRACT(YEAR FROM p.fecha_parte) = EXTRACT(YEAR FROM CURRENT_DATE)
-    ) as coste_averias_año_actual,
-    -- Última avería
-    MAX(p.fecha_parte) FILTER (WHERE p.tipo_parte_normalizado = 'AVERIA') as ultima_averia,
-    -- Total de intervenciones
-    COUNT(p.id) as total_intervenciones
+        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '1 month'
+    ) as averias_ultimo_mes,
+
+    -- Última intervención
+    MAX(p.fecha_parte) as ultima_intervencion,
+    CURRENT_DATE - MAX(p.fecha_parte) as dias_sin_intervencion,
+
+    -- Recomendaciones
+    COUNT(p.id) FILTER (WHERE p.tiene_recomendacion = true) as total_recomendaciones,
+    COUNT(p.id) FILTER (
+        WHERE p.tiene_recomendacion = true AND p.recomendacion_revisada = false
+    ) as recomendaciones_pendientes,
+
+    -- Oportunidades
+    COUNT(p.id) FILTER (WHERE p.oportunidad_creada = true) as total_oportunidades_creadas
+
 FROM maquinas_cartera m
 INNER JOIN instalaciones i ON m.instalacion_id = i.id
 LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
-GROUP BY m.id, m.identificador, m.tipo_maquina, i.nombre, i.municipio;
+GROUP BY m.id, m.identificador, i.nombre, i.municipio;
 
--- Vista: Resumen de partes pendientes
-CREATE OR REPLACE VIEW v_partes_pendientes AS
+-- Vista: Partes con recomendaciones pendientes de revisar
+CREATE OR REPLACE VIEW v_partes_con_recomendaciones AS
 SELECT
-    p.*,
+    p.id,
+    p.numero_parte,
+    p.tipo_parte_original,
+    p.fecha_parte,
+    p.resolucion,
+    p.recomendaciones_extraidas,
     m.identificador as maquina_identificador,
     i.nombre as instalacion_nombre,
-    i.municipio,
-    CURRENT_DATE - p.fecha_parte as dias_pendiente,
-    CASE
-        WHEN p.prioridad = 'URGENTE' THEN 1
-        WHEN p.prioridad = 'ALTA' THEN 2
-        WHEN CURRENT_DATE - p.fecha_parte > 7 THEN 3
-        ELSE 4
-    END as orden_prioridad
+    i.municipio
 FROM partes_trabajo p
 INNER JOIN maquinas_cartera m ON p.maquina_id = m.id
 INNER JOIN instalaciones i ON m.instalacion_id = i.id
-WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
-ORDER BY orden_prioridad ASC, p.fecha_parte ASC;
+WHERE p.tiene_recomendacion = true
+AND p.recomendacion_revisada = false
+AND p.oportunidad_creada = false
+ORDER BY p.fecha_parte DESC;
 
 -- ============================================
 -- VISTAS PARA ANÁLISIS OPERACIONAL AVANZADO
@@ -454,11 +300,11 @@ CREATE OR REPLACE VIEW v_maquinas_problematicas AS
 SELECT
     m.id as maquina_id,
     m.identificador,
-    m.tipo_maquina,
-    m.estado_maquina,
+    
+    
     i.nombre as instalacion_nombre,
     i.municipio,
-    i.cliente_nombre,
+    
 
     -- Métricas de averías
     COUNT(p.id) FILTER (
@@ -639,243 +485,5 @@ SELECT
 FROM maquinas_cartera m
 INNER JOIN instalaciones i ON m.instalacion_id = i.id
 LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
-GROUP BY m.id, m.identificador, m.tipo_maquina, m.estado_maquina, i.nombre, i.municipio, i.cliente_nombre;
+GROUP BY m.id, m.identificador,   i.nombre, i.municipio;
 
--- Vista: Análisis de Impacto Económico por Máquina
-CREATE OR REPLACE VIEW v_analisis_economico AS
-SELECT
-    m.id as maquina_id,
-    m.identificador,
-    m.tipo_maquina,
-    i.nombre as instalacion_nombre,
-    i.cliente_nombre,
-    m.tipo_contrato,
-    m.importe_mensual,
-
-    -- Ingresos anuales del contrato
-    COALESCE(m.importe_mensual * 12, 0) as ingreso_anual_contrato,
-
-    -- Costes de averías
-    COALESCE(SUM(p.coste_total) FILTER (
-        WHERE p.tipo_parte_normalizado = 'AVERIA'
-        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ), 0) as coste_averias_año,
-
-    -- Costes de mantenimiento
-    COALESCE(SUM(p.coste_total) FILTER (
-        WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ), 0) as coste_mantenimientos_año,
-
-    -- Reparaciones facturables
-    COALESCE(SUM(p.coste_total) FILTER (
-        WHERE p.tipo_parte_normalizado IN ('REPARACION', 'MODERNIZACION')
-        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ), 0) as facturacion_reparaciones_año,
-
-    -- Facturación pendiente (trabajo hecho no facturado)
-    COALESCE(SUM(p.coste_total) FILTER (
-        WHERE p.estado = 'COMPLETADO'
-        AND p.facturado = false
-    ), 0) as facturacion_pendiente,
-
-    -- Estimación de pérdida por partes pendientes urgentes
-    COALESCE(SUM(p.coste_total) FILTER (
-        WHERE p.estado IN ('PENDIENTE', 'EN_PROCESO')
-        AND p.prioridad IN ('URGENTE', 'ALTA')
-    ), 0) as perdida_estimada_pendientes,
-
-    -- Margen estimado (ingreso contrato - costes)
-    COALESCE(m.importe_mensual * 12, 0) -
-    COALESCE(SUM(p.coste_total) FILTER (
-        WHERE p.tipo_parte_normalizado IN ('AVERIA', 'MANTENIMIENTO')
-        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ), 0) as margen_estimado_año,
-
-    -- Rentabilidad (porcentaje)
-    CASE
-        WHEN COALESCE(m.importe_mensual * 12, 0) > 0 THEN
-            ((COALESCE(m.importe_mensual * 12, 0) -
-              COALESCE(SUM(p.coste_total) FILTER (
-                  WHERE p.tipo_parte_normalizado IN ('AVERIA', 'MANTENIMIENTO')
-                  AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-              ), 0)) / (m.importe_mensual * 12)) * 100
-        ELSE NULL
-    END as rentabilidad_porcentaje
-
-FROM maquinas_cartera m
-INNER JOIN instalaciones i ON m.instalacion_id = i.id
-LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
-GROUP BY m.id, m.identificador, m.tipo_maquina, i.nombre, i.cliente_nombre,
-         m.tipo_contrato, m.importe_mensual;
-
--- Vista: Análisis de Mantenimientos vs Averías (detectar círculos viciosos)
-CREATE OR REPLACE VIEW v_mantenimientos_vs_averias AS
-SELECT
-    m.id as maquina_id,
-    m.identificador,
-    i.nombre as instalacion_nombre,
-    i.cliente_nombre,
-
-    -- Mantenimientos programados vs realizados
-    COUNT(p.id) FILTER (
-        WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ) as mantenimientos_totales,
-
-    COUNT(p.id) FILTER (
-        WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-        AND p.estado = 'COMPLETADO'
-        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ) as mantenimientos_completados,
-
-    COUNT(p.id) FILTER (
-        WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-        AND p.estado IN ('PENDIENTE', 'CANCELADO')
-        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ) as mantenimientos_no_realizados,
-
-    -- Tasa de cumplimiento
-    CASE
-        WHEN COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        ) > 0 THEN
-            (COUNT(p.id) FILTER (
-                WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-                AND p.estado = 'COMPLETADO'
-                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-            )::float /
-            COUNT(p.id) FILTER (
-                WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-            )) * 100
-        ELSE 100
-    END as tasa_cumplimiento_mantenimiento,
-
-    -- Averías después de mantenimientos no realizados
-    COUNT(p.id) FILTER (
-        WHERE p.tipo_parte_normalizado = 'AVERIA'
-        AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-    ) as total_averias_año,
-
-    -- Ratio de problemas (averías / mantenimientos completados)
-    CASE
-        WHEN COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.estado = 'COMPLETADO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        ) > 0 THEN
-            COUNT(p.id) FILTER (
-                WHERE p.tipo_parte_normalizado = 'AVERIA'
-                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-            )::float /
-            COUNT(p.id) FILTER (
-                WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-                AND p.estado = 'COMPLETADO'
-                AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-            )
-        ELSE 999 -- Valor alto si no hay mantenimientos
-    END as ratio_averias_mantenimiento,
-
-    -- Clasificación de salud de mantenimiento
-    CASE
-        WHEN COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        ) = 0 THEN 'SIN_PLAN'
-        WHEN (COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.estado = 'COMPLETADO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        )::float /
-        NULLIF(COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        ), 0)) * 100 >= 80 THEN 'EXCELENTE'
-        WHEN (COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.estado = 'COMPLETADO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        )::float /
-        NULLIF(COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        ), 0)) * 100 >= 60 THEN 'ACEPTABLE'
-        WHEN (COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.estado = 'COMPLETADO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        )::float /
-        NULLIF(COUNT(p.id) FILTER (
-            WHERE p.tipo_parte_normalizado = 'MANTENIMIENTO'
-            AND p.fecha_parte >= CURRENT_DATE - INTERVAL '12 months'
-        ), 0)) * 100 >= 40 THEN 'DEFICIENTE'
-        ELSE 'CRITICO'
-    END as salud_mantenimiento
-
-FROM maquinas_cartera m
-INNER JOIN instalaciones i ON m.instalacion_id = i.id
-LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
-GROUP BY m.id, m.identificador, i.nombre, i.cliente_nombre;
-
--- ============================================
--- TRIGGERS PARA ACTUALIZAR updated_at
--- ============================================
-
--- Trigger para instalaciones
-DROP TRIGGER IF EXISTS update_instalaciones_updated_at ON instalaciones;
-CREATE TRIGGER update_instalaciones_updated_at
-    BEFORE UPDATE ON instalaciones
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Trigger para maquinas_cartera
-DROP TRIGGER IF EXISTS update_maquinas_updated_at ON maquinas_cartera;
-CREATE TRIGGER update_maquinas_updated_at
-    BEFORE UPDATE ON maquinas_cartera
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Trigger para partes_trabajo
-DROP TRIGGER IF EXISTS update_partes_updated_at ON partes_trabajo;
-CREATE TRIGGER update_partes_updated_at
-    BEFORE UPDATE ON partes_trabajo
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Trigger para oportunidades_facturacion
-DROP TRIGGER IF EXISTS update_oportunidades_updated_at ON oportunidades_facturacion;
-CREATE TRIGGER update_oportunidades_updated_at
-    BEFORE UPDATE ON oportunidades_facturacion
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================
--- COMENTARIOS Y DOCUMENTACIÓN
--- ============================================
-
-COMMENT ON TABLE instalaciones IS 'Instalaciones (edificios/comunidades) de la cartera de Gran Canaria';
-COMMENT ON TABLE maquinas_cartera IS 'Máquinas (ascensores) de la cartera - enlaza con inspecciones.maquina por campo identificador';
-COMMENT ON TABLE partes_trabajo IS 'Historial de partes de trabajo importados desde Excel - mantenimientos, averías, reparaciones, etc.';
-COMMENT ON TABLE tipos_parte_mapeo IS 'Mapeo de tipos de parte originales del Excel a tipos normalizados para análisis';
-COMMENT ON TABLE oportunidades_facturacion IS 'Oportunidades de facturación detectadas desde recomendaciones técnicas';
-
-COMMENT ON COLUMN maquinas_cartera.identificador IS 'Identificador único que enlaza con inspecciones.maquina y partes_trabajo.maquina_texto';
-COMMENT ON COLUMN partes_trabajo.numero_parte IS 'Número de parte del Excel (ej: 2024000022) - UNIQUE';
-COMMENT ON COLUMN partes_trabajo.tipo_parte_original IS 'Tipo tal cual viene del Excel: CONSERVACIÓN, AVERÍA, GUARDIA AVISO, etc.';
-COMMENT ON COLUMN partes_trabajo.tipo_parte_normalizado IS 'Tipo normalizado para análisis: MANTENIMIENTO, AVERIA, REPARACION, INCIDENCIA, MODERNIZACION, INSPECCION';
-COMMENT ON COLUMN partes_trabajo.maquina_texto IS 'Campo MÁQUINA del Excel - es el identificador (ej: MANUEL ALEMAN ALAMO 2. PAR)';
-COMMENT ON COLUMN partes_trabajo.codigo_maquina IS 'Campo CÓD. MÁQUINA del Excel - solo informativo (ej: FGC060-1/10)';
-COMMENT ON COLUMN partes_trabajo.resolucion IS 'Campo RESOLUCIÓN del Excel - descripción completa del trabajo y recomendaciones del técnico';
-COMMENT ON COLUMN partes_trabajo.tiene_recomendacion IS 'Detectado automáticamente si RESOLUCIÓN contiene recomendaciones técnicas';
-COMMENT ON COLUMN partes_trabajo.estado IS 'Valores: COMPLETADO (default al importar), PENDIENTE, EN_PROCESO, CANCELADO';
-COMMENT ON COLUMN partes_trabajo.prioridad IS 'Valores: BAJA, NORMAL, ALTA, URGENTE';
-
-COMMENT ON COLUMN oportunidades_facturacion.estado IS 'Valores: DETECTADA, PRESUPUESTO_ENVIADO, ACEPTADO, RECHAZADO, PENDIENTE_REPUESTO, LISTO_EJECUTAR, COMPLETADO, FACTURADO';
-COMMENT ON COLUMN oportunidades_facturacion.estado_repuestos IS 'Valores: DISPONIBLE_LOCAL, SOLICITAR_TENERIFE, COMPRAR_EXTERNO, SOLICITADO, RECIBIDO';
-COMMENT ON COLUMN oportunidades_facturacion.numero_presupuesto_erp IS 'Número de presupuesto generado en el ERP externo de la empresa';
-
--- ============================================
--- FIN DEL SCRIPT
--- ============================================
