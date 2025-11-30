@@ -31,7 +31,10 @@ CREATE TABLE IF NOT EXISTS maquinas_cartera (
     instalacion_id INTEGER NOT NULL REFERENCES instalaciones(id) ON DELETE RESTRICT,
 
     -- Identificación (CLAVE: enlaza con inspecciones.maquina y partes_trabajo.maquina_texto)
-    identificador VARCHAR(255) NOT NULL UNIQUE, -- Ej: "MANUEL ALEMAN ALAMO 2. PAR"
+    identificador VARCHAR(255) NOT NULL UNIQUE, -- Ej: "MONTACOCHES (CONCESIONARIO JAGUAR)"
+
+    -- Código de máquina (informativo, para referencia con ERP)
+    codigo_maquina VARCHAR(100), -- Ej: "V301F8817", "FGC160/2/0"
 
     -- Auditoría
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
