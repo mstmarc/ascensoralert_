@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS partes_trabajo (
 
     -- Oportunidades de facturación
     oportunidad_creada BOOLEAN DEFAULT false,
-    oportunidad_id INTEGER REFERENCES oportunidades_facturacion(id) ON DELETE SET NULL,
+    oportunidad_id INTEGER, -- FK se agregará después de crear oportunidades_facturacion
 
     -- Gestión adicional (campos que tú gestionas manualmente o calculas)
     estado VARCHAR(50) DEFAULT 'COMPLETADO', -- COMPLETADO (default al importar), PENDIENTE, EN_PROCESO, CANCELADO
@@ -489,4 +489,13 @@ FROM maquinas_cartera m
 INNER JOIN instalaciones i ON m.instalacion_id = i.id
 LEFT JOIN partes_trabajo p ON m.id = p.maquina_id
 GROUP BY m.id, m.identificador,   i.nombre, i.municipio;
+
+-- ============================================
+-- FOREIGN KEYS ADICIONALES (después de crear todas las tablas)
+-- ============================================
+-- Resolver dependencia circular entre partes_trabajo y oportunidades_facturacion
+
+ALTER TABLE partes_trabajo
+ADD CONSTRAINT fk_partes_oportunidad
+FOREIGN KEY (oportunidad_id) REFERENCES oportunidades_facturacion(id) ON DELETE SET NULL;
 
