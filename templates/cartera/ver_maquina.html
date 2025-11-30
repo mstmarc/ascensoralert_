@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ maquina.identificador }} - Detalle Máquina</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <style>
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .detalle-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            color: #003366;
+            margin: 0 0 5px 0;
+        }
+
+        .header-left .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-volver:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #366092;
+        }
+
+        .stat-card.averias {
+            border-left-color: #dc3545;
+        }
+
+        .stat-card.mantenimientos {
+            border-left-color: #28a745;
+        }
+
+        .stat-card.recomendaciones {
+            border-left-color: #ffc107;
+        }
+
+        .stat-card.oportunidades {
+            border-left-color: #17a2b8;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #003366;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .section-card h2 {
+            font-size: 18px;
+            color: #003366;
+            margin: 0 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e6f2ff;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #003366;
+            min-width: 140px;
+            font-size: 13px;
+        }
+
+        .info-value {
+            color: #666;
+            font-size: 13px;
+            flex: 1;
+        }
+
+        /* Tabla de partes */
+        .partes-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .partes-table thead {
+            background: #f8f9fa;
+        }
+
+        .partes-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #003366;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .partes-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .partes-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-averia {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-mantenimiento {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-reparacion {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-inspeccion {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        .badge-incidencia {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .badge-modernizacion {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        /* Chart */
+        .chart-container {
+            margin-top: 20px;
+        }
+
+        .chart-bar {
+            margin-bottom: 15px;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .chart-label-left {
+            font-weight: 600;
+            color: #003366;
+        }
+
+        .chart-label-right {
+            color: #666;
+        }
+
+        .chart-bar-bg {
+            height: 24px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #366092, #5a8ac4);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            opacity: 0.3;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .detalle-container {
+                padding: 15px 10px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .partes-table {
+                font-size: 11px;
+            }
+
+            .partes-table th,
+            .partes-table td {
+                padding: 8px;
+            }
+        }
+
+        main {
+            max-width: none !important;
+            padding: 30px !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="detalle-container">
+            <!-- Encabezado -->
+            <div class="page-header">
+                <div class="header-left">
+                    <h1>🛗 {{ maquina.identificador }}</h1>
+                    {% if maquina.instalaciones %}
+                        <p class="subtitle">{{ maquina.instalaciones.nombre }} - {{ maquina.instalaciones.municipio or 'Sin municipio' }}</p>
+                    {% endif %}
+                </div>
+                <a href="/cartera" class="btn-volver">
+                    ← Volver al Dashboard
+                </a>
+            </div>
+
+            <!-- Mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background: {% if category == 'success' %}#d4edda{% elif category == 'error' %}#f8d7da{% elif category == 'warning' %}#fff3cd{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'error' %}#721c24{% elif category == 'warning' %}#856404{% else %}#0c5460{% endif %};">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number">{{ stats.total_partes }}</div>
+                    <div class="label">Total Partes</div>
+                </div>
+                <div class="stat-card averias">
+                    <div class="number">{{ stats.total_averias }}</div>
+                    <div class="label">Averías</div>
+                </div>
+                <div class="stat-card mantenimientos">
+                    <div class="number">{{ stats.total_mantenimientos }}</div>
+                    <div class="label">Mantenimientos</div>
+                </div>
+                <div class="stat-card recomendaciones">
+                    <div class="number">{{ stats.total_recomendaciones }}</div>
+                    <div class="label">Recomendaciones</div>
+                </div>
+                <div class="stat-card oportunidades">
+                    <div class="number">{{ stats.total_oportunidades }}</div>
+                    <div class="label">Oportunidades</div>
+                </div>
+            </div>
+
+            <!-- Contenido -->
+            <div class="content-grid">
+                <!-- Información General -->
+                <div class="section-card">
+                    <h2>📋 Información General</h2>
+
+                    <div class="info-row">
+                        <div class="info-label">Identificador:</div>
+                        <div class="info-value"><strong>{{ maquina.identificador }}</strong></div>
+                    </div>
+
+                    {% if maquina.codigo_maquina %}
+                    <div class="info-row">
+                        <div class="info-label">Código Máquina:</div>
+                        <div class="info-value">{{ maquina.codigo_maquina }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if maquina.tipo_maquina %}
+                    <div class="info-row">
+                        <div class="info-label">Tipo:</div>
+                        <div class="info-value">{{ maquina.tipo_maquina }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if maquina.tecnico_asignado %}
+                    <div class="info-row">
+                        <div class="info-label">Técnico Asignado:</div>
+                        <div class="info-value">{{ maquina.tecnico_asignado }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if maquina.en_cartera is not none %}
+                    <div class="info-row">
+                        <div class="info-label">Estado:</div>
+                        <div class="info-value">
+                            {% if maquina.en_cartera %}
+                                <span style="color: #28a745; font-weight: 600;">✅ En Cartera</span>
+                            {% else %}
+                                <span style="color: #dc3545; font-weight: 600;">❌ Fuera de Cartera</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Instalación -->
+                {% if maquina.instalaciones %}
+                <div class="section-card">
+                    <h2>🏢 Instalación</h2>
+
+                    <div class="info-row">
+                        <div class="info-label">Nombre:</div>
+                        <div class="info-value"><strong>{{ maquina.instalaciones.nombre }}</strong></div>
+                    </div>
+
+                    {% if maquina.instalaciones.codigo %}
+                    <div class="info-row">
+                        <div class="info-label">Código:</div>
+                        <div class="info-value">{{ maquina.instalaciones.codigo }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if maquina.instalaciones.direccion %}
+                    <div class="info-row">
+                        <div class="info-label">Dirección:</div>
+                        <div class="info-value">{{ maquina.instalaciones.direccion }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if maquina.instalaciones.municipio %}
+                    <div class="info-row">
+                        <div class="info-label">Municipio:</div>
+                        <div class="info-value">{{ maquina.instalaciones.municipio }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div style="margin-top: 15px;">
+                        <a href="/cartera/instalacion/{{ maquina.instalaciones.id }}" style="display: inline-block; padding: 8px 16px; background: #366092; color: white; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600;">
+                            Ver Detalle Instalación →
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Distribución de Tipos -->
+            {% if tipos_distribucion %}
+            <div class="section-card">
+                <h2>📊 Distribución de Tipos de Parte</h2>
+                <div class="chart-container">
+                    {% set max_value = tipos_distribucion.values()|max %}
+                    {% for tipo, cantidad in tipos_distribucion.items()|sort(attribute='1', reverse=true) %}
+                        <div class="chart-bar">
+                            <div class="chart-label">
+                                <span class="chart-label-left">{{ tipo }}</span>
+                                <span class="chart-label-right">{{ cantidad }} partes</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill" style="width: {{ (cantidad / max_value * 100)|round }}%;">
+                                    {{ (cantidad / stats.total_partes * 100)|round(1) }}%
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Oportunidades -->
+            {% if oportunidades %}
+            <div class="section-card">
+                <h2>💰 Oportunidades de Facturación</h2>
+                <table class="partes-table">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Estado</th>
+                            <th>Tipo</th>
+                            <th>Creada</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for opp in oportunidades %}
+                            <tr>
+                                <td><strong>{{ opp.titulo }}</strong></td>
+                                <td>{{ opp.estado.replace('_', ' ') }}</td>
+                                <td>{{ opp.tipo }}</td>
+                                <td>{{ opp.created_at[:10] }}</td>
+                                <td>
+                                    <a href="/cartera/oportunidades/{{ opp.id }}" style="color: #366092; text-decoration: none; font-weight: 600;">
+                                        Ver →
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Recomendaciones -->
+            {% if recomendaciones %}
+            <div class="section-card">
+                <h2>⚠️ Recomendaciones Detectadas</h2>
+                <table class="partes-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>N° Parte</th>
+                            <th>Recomendación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in recomendaciones %}
+                            <tr>
+                                <td>{{ rec.fecha_parte[:10] }}</td>
+                                <td>{{ rec.numero_parte }}</td>
+                                <td>{{ rec.recomendaciones_extraidas }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Historial de Partes -->
+            <div class="section-card">
+                <h2>📝 Historial de Partes de Trabajo (Últimos 50)</h2>
+                {% if partes %}
+                    <table class="partes-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>N° Parte</th>
+                                <th>Tipo</th>
+                                <th>Resolución</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for parte in partes %}
+                                <tr>
+                                    <td>{{ parte.fecha_parte[:10] }}</td>
+                                    <td><strong>{{ parte.numero_parte }}</strong></td>
+                                    <td>
+                                        {% set tipo = parte.tipo_parte_normalizado or 'OTRO' %}
+                                        <span class="badge badge-{{ tipo|lower }}">{{ tipo }}</span>
+                                    </td>
+                                    <td>{{ (parte.resolucion[:80] + '...') if parte.resolucion and parte.resolucion|length > 80 else (parte.resolucion or '-') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>No hay partes de trabajo registrados para esta máquina</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>
