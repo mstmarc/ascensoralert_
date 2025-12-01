@@ -3784,9 +3784,9 @@ def inspecciones_dashboard():
     if response_ocas.status_code == 200:
         ocas = response_ocas.json()
 
-    # Obtener defectos de todas las inspecciones para contar pendientes
+    # Obtener defectos de todas las inspecciones para contar pendientes por plazo
     response_defectos = requests.get(
-        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?select=inspeccion_id,estado",
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?select=inspeccion_id,estado,plazo_meses",
         headers=HEADERS
     )
 
@@ -3796,11 +3796,23 @@ def inspecciones_dashboard():
         for defecto in defectos:
             insp_id = defecto.get('inspeccion_id')
             if insp_id not in defectos_por_inspeccion:
-                defectos_por_inspeccion[insp_id] = {'total': 0, 'pendientes': 0}
+                defectos_por_inspeccion[insp_id] = {
+                    'total': 0,
+                    'pendientes': 0,
+                    'plazo_6_pendientes': 0,   # 6 meses
+                    'plazo_12_pendientes': 0   # 12 meses
+                }
 
             defectos_por_inspeccion[insp_id]['total'] += 1
+
             if defecto.get('estado') == 'PENDIENTE':
                 defectos_por_inspeccion[insp_id]['pendientes'] += 1
+
+                plazo = defecto.get('plazo_meses')
+                if plazo == 6:
+                    defectos_por_inspeccion[insp_id]['plazo_6_pendientes'] += 1
+                elif plazo == 12:
+                    defectos_por_inspeccion[insp_id]['plazo_12_pendientes'] += 1
 
     # Agregar contador de defectos a cada inspección
     for inspeccion in inspecciones:
@@ -3808,9 +3820,13 @@ def inspecciones_dashboard():
         if insp_id in defectos_por_inspeccion:
             inspeccion['defectos_total'] = defectos_por_inspeccion[insp_id]['total']
             inspeccion['defectos_pendientes'] = defectos_por_inspeccion[insp_id]['pendientes']
+            inspeccion['defectos_plazo_6'] = defectos_por_inspeccion[insp_id]['plazo_6_pendientes']
+            inspeccion['defectos_plazo_12'] = defectos_por_inspeccion[insp_id]['plazo_12_pendientes']
         else:
             inspeccion['defectos_total'] = 0
             inspeccion['defectos_pendientes'] = 0
+            inspeccion['defectos_plazo_6'] = 0
+            inspeccion['defectos_plazo_12'] = 0
 
     return render_template(
         "inspecciones_dashboard.html",

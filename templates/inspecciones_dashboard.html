@@ -590,7 +590,17 @@
                                 </div>
                                 {% if item.defectos_total > 0 %}
                                 <div class="alerta-info-item">
-                                    <strong>Defectos:</strong> <span class="badge-defectos-pendientes">{{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total</span>
+                                    <strong>Defectos:</strong>
+                                    <span class="badge-defectos-pendientes">
+                                        {% if item.defectos_plazo_6 > 0 or item.defectos_plazo_12 > 0 %}
+                                            {% if item.defectos_plazo_6 > 0 %}<span style="color: #dc3545; font-weight: 700;">{{ item.defectos_plazo_6 }} (6m)</span>{% endif %}
+                                            {% if item.defectos_plazo_6 > 0 and item.defectos_plazo_12 > 0 %} + {% endif %}
+                                            {% if item.defectos_plazo_12 > 0 %}<span style="color: #ff9900; font-weight: 700;">{{ item.defectos_plazo_12 }} (12m)</span>{% endif %}
+                                            / {{ item.defectos_total }} total
+                                        {% else %}
+                                            {{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total
+                                        {% endif %}
+                                    </span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -619,7 +629,17 @@
                                 </div>
                                 {% if item.defectos_total > 0 %}
                                 <div class="alerta-info-item">
-                                    <strong>Defectos:</strong> <span class="badge-defectos-pendientes">{{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total</span>
+                                    <strong>Defectos:</strong>
+                                    <span class="badge-defectos-pendientes">
+                                        {% if item.defectos_plazo_6 > 0 or item.defectos_plazo_12 > 0 %}
+                                            {% if item.defectos_plazo_6 > 0 %}<span style="color: #dc3545; font-weight: 700;">{{ item.defectos_plazo_6 }} (6m)</span>{% endif %}
+                                            {% if item.defectos_plazo_6 > 0 and item.defectos_plazo_12 > 0 %} + {% endif %}
+                                            {% if item.defectos_plazo_12 > 0 %}<span style="color: #ff9900; font-weight: 700;">{{ item.defectos_plazo_12 }} (12m)</span>{% endif %}
+                                            / {{ item.defectos_total }} total
+                                        {% else %}
+                                            {{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total
+                                        {% endif %}
+                                    </span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -648,7 +668,17 @@
                                 </div>
                                 {% if item.defectos_total > 0 %}
                                 <div class="alerta-info-item">
-                                    <strong>Defectos:</strong> <span class="badge-defectos-pendientes">{{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total</span>
+                                    <strong>Defectos:</strong>
+                                    <span class="badge-defectos-pendientes">
+                                        {% if item.defectos_plazo_6 > 0 or item.defectos_plazo_12 > 0 %}
+                                            {% if item.defectos_plazo_6 > 0 %}<span style="color: #dc3545; font-weight: 700;">{{ item.defectos_plazo_6 }} (6m)</span>{% endif %}
+                                            {% if item.defectos_plazo_6 > 0 and item.defectos_plazo_12 > 0 %} + {% endif %}
+                                            {% if item.defectos_plazo_12 > 0 %}<span style="color: #ff9900; font-weight: 700;">{{ item.defectos_plazo_12 }} (12m)</span>{% endif %}
+                                            / {{ item.defectos_total }} total
+                                        {% else %}
+                                            {{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total
+                                        {% endif %}
+                                    </span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -693,7 +723,17 @@
                                 {% endif %}
                                 {% if item.defectos_total > 0 %}
                                 <div class="alerta-info-item">
-                                    <strong>Defectos:</strong> <span class="badge-defectos-pendientes">{{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total</span>
+                                    <strong>Defectos:</strong>
+                                    <span class="badge-defectos-pendientes">
+                                        {% if item.defectos_plazo_6 > 0 or item.defectos_plazo_12 > 0 %}
+                                            {% if item.defectos_plazo_6 > 0 %}<span style="color: #dc3545; font-weight: 700;">{{ item.defectos_plazo_6 }} (6m)</span>{% endif %}
+                                            {% if item.defectos_plazo_6 > 0 and item.defectos_plazo_12 > 0 %} + {% endif %}
+                                            {% if item.defectos_plazo_12 > 0 %}<span style="color: #ff9900; font-weight: 700;">{{ item.defectos_plazo_12 }} (12m)</span>{% endif %}
+                                            / {{ item.defectos_total }} total
+                                        {% else %}
+                                            {{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total
+                                        {% endif %}
+                                    </span>
                                 </div>
                                 {% endif %}
                             </div>
