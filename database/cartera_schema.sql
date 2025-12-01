@@ -36,6 +36,11 @@ CREATE TABLE IF NOT EXISTS maquinas_cartera (
     -- Código de máquina (informativo, para referencia con ERP)
     codigo_maquina VARCHAR(100), -- Ej: "V301F8817", "FGC160/2/0"
 
+    -- Estado de cartera
+    en_cartera BOOLEAN DEFAULT TRUE, -- TRUE = En cartera activa, FALSE = Fuera de cartera
+    fecha_salida_cartera DATE, -- Fecha en que salió de cartera
+    motivo_salida TEXT, -- Razón: Cliente cambió empresa, contrato finalizado, etc.
+
     -- Auditoría
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
