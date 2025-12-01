@@ -588,6 +588,21 @@
                                 <div class="alerta-info-item">
                                     <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                 </div>
+                                {% if item.defectos_total > 0 %}
+                                <div class="alerta-info-item">
+                                    <strong>Defectos:</strong>
+                                    <span class="badge-defectos-pendientes">
+                                        {% if item.defectos_plazo_6 > 0 or item.defectos_plazo_12 > 0 %}
+                                            {% if item.defectos_plazo_6 > 0 %}<span style="color: #dc3545; font-weight: 700;">{{ item.defectos_plazo_6 }} (6m)</span>{% endif %}
+                                            {% if item.defectos_plazo_6 > 0 and item.defectos_plazo_12 > 0 %} + {% endif %}
+                                            {% if item.defectos_plazo_12 > 0 %}<span style="color: #ff9900; font-weight: 700;">{{ item.defectos_plazo_12 }} (12m)</span>{% endif %}
+                                            / {{ item.defectos_total }} total
+                                        {% else %}
+                                            {{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endif %}
                             </div>
                             <div class="alerta-dias critica">⚠️ Venció hace {{ item.dias_hasta_segunda|abs }} días</div>
                         </a>
@@ -612,6 +627,21 @@
                                 <div class="alerta-info-item">
                                     <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                 </div>
+                                {% if item.defectos_total > 0 %}
+                                <div class="alerta-info-item">
+                                    <strong>Defectos:</strong>
+                                    <span class="badge-defectos-pendientes">
+                                        {% if item.defectos_plazo_6 > 0 or item.defectos_plazo_12 > 0 %}
+                                            {% if item.defectos_plazo_6 > 0 %}<span style="color: #dc3545; font-weight: 700;">{{ item.defectos_plazo_6 }} (6m)</span>{% endif %}
+                                            {% if item.defectos_plazo_6 > 0 and item.defectos_plazo_12 > 0 %} + {% endif %}
+                                            {% if item.defectos_plazo_12 > 0 %}<span style="color: #ff9900; font-weight: 700;">{{ item.defectos_plazo_12 }} (12m)</span>{% endif %}
+                                            / {{ item.defectos_total }} total
+                                        {% else %}
+                                            {{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endif %}
                             </div>
                             <div class="alerta-dias urgente">⏰ Quedan {{ item.dias_hasta_segunda }} días</div>
                         </a>
@@ -636,6 +666,21 @@
                                 <div class="alerta-info-item">
                                     <strong>Fecha límite:</strong> <span>{{ item.fecha_segunda_inspeccion|format_fecha }}</span>
                                 </div>
+                                {% if item.defectos_total > 0 %}
+                                <div class="alerta-info-item">
+                                    <strong>Defectos:</strong>
+                                    <span class="badge-defectos-pendientes">
+                                        {% if item.defectos_plazo_6 > 0 or item.defectos_plazo_12 > 0 %}
+                                            {% if item.defectos_plazo_6 > 0 %}<span style="color: #dc3545; font-weight: 700;">{{ item.defectos_plazo_6 }} (6m)</span>{% endif %}
+                                            {% if item.defectos_plazo_6 > 0 and item.defectos_plazo_12 > 0 %} + {% endif %}
+                                            {% if item.defectos_plazo_12 > 0 %}<span style="color: #ff9900; font-weight: 700;">{{ item.defectos_plazo_12 }} (12m)</span>{% endif %}
+                                            / {{ item.defectos_total }} total
+                                        {% else %}
+                                            {{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endif %}
                             </div>
                             <div class="alerta-dias proxima">📅 Quedan {{ item.dias_hasta_segunda }} días</div>
                         </a>
@@ -675,6 +720,21 @@
                                     <div class="alerta-info-item">
                                         <strong>Inspección:</strong> <span>{{ item.fecha_inspeccion|format_fecha }}</span>
                                     </div>
+                                {% endif %}
+                                {% if item.defectos_total > 0 %}
+                                <div class="alerta-info-item">
+                                    <strong>Defectos:</strong>
+                                    <span class="badge-defectos-pendientes">
+                                        {% if item.defectos_plazo_6 > 0 or item.defectos_plazo_12 > 0 %}
+                                            {% if item.defectos_plazo_6 > 0 %}<span style="color: #dc3545; font-weight: 700;">{{ item.defectos_plazo_6 }} (6m)</span>{% endif %}
+                                            {% if item.defectos_plazo_6 > 0 and item.defectos_plazo_12 > 0 %} + {% endif %}
+                                            {% if item.defectos_plazo_12 > 0 %}<span style="color: #ff9900; font-weight: 700;">{{ item.defectos_plazo_12 }} (12m)</span>{% endif %}
+                                            / {{ item.defectos_total }} total
+                                        {% else %}
+                                            {{ item.defectos_pendientes }} pendientes / {{ item.defectos_total }} total
+                                        {% endif %}
+                                    </span>
+                                </div>
                                 {% endif %}
                             </div>
                             {% if item.fecha_segunda_realizada %}

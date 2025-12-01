@@ -563,13 +563,18 @@
 
         <!-- Botones de Acción -->
         <div class="action-buttons">
-            {% if defecto.estado == 'PENDIENTE' %}
-            <form method="POST" action="/defectos/{{ defecto.id }}/subsanar" style="display: inline;">
-                <button type="submit" class="button btn-success" onclick="return confirm('¿Marcar este defecto como subsanado?')">
-                    ✅ Marcar como Subsanado
+            <!-- Botón Toggle Subsanar/Revertir -->
+            <form method="POST" action="/defectos/{{ defecto.id }}/{% if defecto.estado == 'PENDIENTE' %}subsanar{% else %}revertir{% endif %}" style="display: inline;">
+                <button type="submit"
+                        class="button {% if defecto.estado == 'PENDIENTE' %}btn-success{% else %}btn-warning{% endif %}"
+                        onclick="return confirm('{% if defecto.estado == 'PENDIENTE' %}¿Marcar este defecto como subsanado?{% else %}¿Revertir este defecto a pendiente?{% endif %}')">
+                    {% if defecto.estado == 'PENDIENTE' %}
+                        ✅ Marcar como Subsanado
+                    {% else %}
+                        ↩️ Marcar como Pendiente
+                    {% endif %}
                 </button>
             </form>
-            {% endif %}
 
             <a href="/defectos_dashboard" class="button btn-secondary">Volver al Dashboard</a>
 
