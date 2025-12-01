@@ -569,6 +569,12 @@
                     ✅ Marcar como Subsanado
                 </button>
             </form>
+            {% elif defecto.estado == 'SUBSANADO' %}
+            <form method="POST" action="/defectos/{{ defecto.id }}/revertir" style="display: inline;">
+                <button type="submit" class="button btn-warning" onclick="return confirm('¿Revertir este defecto a pendiente?')">
+                    ↩️ Revertir a Pendiente
+                </button>
+            </form>
             {% endif %}
 
             <a href="/defectos_dashboard" class="button btn-secondary">Volver al Dashboard</a>

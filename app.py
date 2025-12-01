@@ -3784,6 +3784,34 @@ def inspecciones_dashboard():
     if response_ocas.status_code == 200:
         ocas = response_ocas.json()
 
+    # Obtener defectos de todas las inspecciones para contar pendientes
+    response_defectos = requests.get(
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?select=inspeccion_id,estado",
+        headers=HEADERS
+    )
+
+    defectos_por_inspeccion = {}
+    if response_defectos.status_code == 200:
+        defectos = response_defectos.json()
+        for defecto in defectos:
+            insp_id = defecto.get('inspeccion_id')
+            if insp_id not in defectos_por_inspeccion:
+                defectos_por_inspeccion[insp_id] = {'total': 0, 'pendientes': 0}
+
+            defectos_por_inspeccion[insp_id]['total'] += 1
+            if defecto.get('estado') == 'PENDIENTE':
+                defectos_por_inspeccion[insp_id]['pendientes'] += 1
+
+    # Agregar contador de defectos a cada inspección
+    for inspeccion in inspecciones:
+        insp_id = inspeccion.get('id')
+        if insp_id in defectos_por_inspeccion:
+            inspeccion['defectos_total'] = defectos_por_inspeccion[insp_id]['total']
+            inspeccion['defectos_pendientes'] = defectos_por_inspeccion[insp_id]['pendientes']
+        else:
+            inspeccion['defectos_total'] = 0
+            inspeccion['defectos_pendientes'] = 0
+
     return render_template(
         "inspecciones_dashboard.html",
         inspecciones=inspecciones,
@@ -5003,6 +5031,31 @@ def subsanar_defecto(defecto_id):
         flash("Defecto marcado como subsanado", "success")
     else:
         flash("Error al actualizar defecto", "error")
+
+    return redirect(request.referrer)
+
+# Revertir Defecto Subsanado
+@app.route("/defectos/<int:defecto_id>/revertir", methods=["POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
+def revertir_defecto(defecto_id):
+    """Revertir un defecto subsanado a estado pendiente"""
+
+    data = {
+        "estado": "PENDIENTE",
+        "fecha_subsanacion": None
+    }
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?id=eq.{defecto_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Defecto revertido a pendiente", "success")
+    else:
+        flash("Error al revertir defecto", "error")
 
     return redirect(request.referrer)
 
