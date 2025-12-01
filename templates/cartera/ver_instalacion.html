@@ -631,6 +631,7 @@
                             <th>N° Parte</th>
                             <th>Tipo</th>
                             <th>Resolución</th>
+                            <th style="text-align: center;">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -653,6 +654,13 @@
                             </td>
                             <td style="max-width: 400px; white-space: normal; word-wrap: break-word;">
                                 {{ parte.resolucion[:100] + '...' if parte.resolucion and parte.resolucion|length > 100 else (parte.resolucion or '-') }}
+                            </td>
+                            <td style="text-align: center;">
+                                <a href="/cartera/oportunidades/crear/{{ parte.id }}"
+                                   style="display: inline-block; padding: 4px 10px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; font-size: 11px; font-weight: 600;"
+                                   title="Crear oportunidad desde este parte">
+                                    💰 Crear
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
