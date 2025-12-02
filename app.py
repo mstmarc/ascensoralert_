@@ -6640,6 +6640,362 @@ def cartera_ver_instalacion(instalacion_id):
 
 
 # ============================================
+# MÓDULO DE ANALÍTICA AVANZADA V2
+# Sistema de Alertas y Gestión Predictiva
+# ============================================
+
+@app.route("/cartera/v2")
+@helpers.login_required
+def cartera_dashboard_v2():
+    """Dashboard V2 con sistema de alertas y estado semafórico"""
+
+    # Obtener alertas críticas pendientes
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=*,maquinas_cartera(identificador,instalaciones(nombre))&estado=in.(PENDIENTE,EN_REVISION)&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=10",
+        headers=HEADERS
+    )
+    alertas_criticas = response.json() if response.status_code == 200 else []
+
+    # Obtener resumen de alertas por tipo
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=tipo_alerta,nivel_urgencia,estado",
+        headers=HEADERS
+    )
+    todas_alertas = response.json() if response.status_code == 200 else []
+
+    alertas_stats = {
+        'total': len(todas_alertas),
+        'pendientes': sum(1 for a in todas_alertas if a['estado'] in ['PENDIENTE', 'EN_REVISION']),
+        'urgentes': sum(1 for a in todas_alertas if a['nivel_urgencia'] == 'URGENTE' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
+        'altas': sum(1 for a in todas_alertas if a['nivel_urgencia'] == 'ALTA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
+        'fallas_repetidas': sum(1 for a in todas_alertas if a['tipo_alerta'] == 'FALLA_REPETIDA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
+        'recomendaciones_ignoradas': sum(1 for a in todas_alertas if a['tipo_alerta'] == 'RECOMENDACION_IGNORADA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
+        'mantenimientos_omitidos': sum(1 for a in todas_alertas if 'MANTENIMIENTO_OMITIDO' in a['tipo_alerta'] and a['estado'] in ['PENDIENTE', 'EN_REVISION'])
+    }
+
+    # Obtener máquinas por estado semafórico
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/v_estado_maquinas_semaforico?select=*&order=estado_semaforico.asc,averias_mes.desc",
+        headers=HEADERS
+    )
+    maquinas_semaforico = response.json() if response.status_code == 200 else []
+
+    semaforico_stats = {
+        'criticas': sum(1 for m in maquinas_semaforico if m['estado_semaforico'] == 'CRITICO'),
+        'inestables': sum(1 for m in maquinas_semaforico if m['estado_semaforico'] == 'INESTABLE'),
+        'seguimiento': sum(1 for m in maquinas_semaforico if m['estado_semaforico'] == 'SEGUIMIENTO'),
+        'estables': sum(1 for m in maquinas_semaforico if m['estado_semaforico'] == 'ESTABLE')
+    }
+
+    # Top 5 máquinas críticas
+    maquinas_criticas = [m for m in maquinas_semaforico if m['estado_semaforico'] == 'CRITICO'][:5]
+
+    # Obtener instalaciones con mayor riesgo
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/v_riesgo_instalaciones?select=*&order=indice_riesgo_instalacion.desc&limit=5",
+        headers=HEADERS
+    )
+    instalaciones_riesgo = response.json() if response.status_code == 200 else []
+
+    # Obtener cálculo de pérdidas
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/v_perdidas_por_pendientes?select=*",
+        headers=HEADERS
+    )
+    perdidas = response.json()[0] if response.status_code == 200 and response.json() else {}
+
+    # Pendientes técnicos activos
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/pendientes_tecnicos?select=*&estado=in.(PENDIENTE,ASIGNADO,EN_CURSO,BLOQUEADO)&order=nivel_urgencia.desc,created_at.desc&limit=10",
+        headers=HEADERS
+    )
+    pendientes_tecnicos = response.json() if response.status_code == 200 else []
+
+    return render_template(
+        "cartera/dashboard_v2.html",
+        alertas_criticas=alertas_criticas,
+        alertas_stats=alertas_stats,
+        maquinas_criticas=maquinas_criticas,
+        semaforico_stats=semaforico_stats,
+        instalaciones_riesgo=instalaciones_riesgo,
+        perdidas=perdidas,
+        pendientes_tecnicos=pendientes_tecnicos
+    )
+
+
+@app.route("/cartera/v2/ejecutar-detectores", methods=["POST"])
+@helpers.login_required
+def ejecutar_detectores_alertas():
+    """Ejecutar detectores de alertas manualmente"""
+
+    try:
+        # Importar y ejecutar detectores
+        import detectores_alertas
+        total_alertas = detectores_alertas.ejecutar_todos_los_detectores()
+
+        flash(f"Detectores ejecutados exitosamente. {total_alertas} alertas nuevas generadas.", "success")
+    except Exception as e:
+        logger.error(f"Error ejecutando detectores: {str(e)}")
+        flash(f"Error al ejecutar detectores: {str(e)}", "error")
+
+    return redirect("/cartera/v2")
+
+
+@app.route("/cartera/v2/alertas")
+@helpers.login_required
+def ver_todas_alertas():
+    """Ver todas las alertas con filtros"""
+
+    # Filtros
+    estado_filtro = request.args.get('estado', '')
+    tipo_filtro = request.args.get('tipo', '')
+    urgencia_filtro = request.args.get('urgencia', '')
+
+    # Construir query
+    query_params = ["select=*,maquinas_cartera(identificador,instalaciones(nombre))"]
+
+    if estado_filtro:
+        query_params.append(f"estado=eq.{estado_filtro}")
+    if tipo_filtro:
+        query_params.append(f"tipo_alerta=eq.{tipo_filtro}")
+    if urgencia_filtro:
+        query_params.append(f"nivel_urgencia=eq.{urgencia_filtro}")
+
+    query_params.append("order=fecha_deteccion.desc")
+
+    url = f"{SUPABASE_URL}/rest/v1/alertas_automaticas?{'&'.join(query_params)}"
+
+    response = requests.get(url, headers=HEADERS)
+    alertas = response.json() if response.status_code == 200 else []
+
+    return render_template(
+        "cartera/alertas.html",
+        alertas=alertas,
+        estado_filtro=estado_filtro,
+        tipo_filtro=tipo_filtro,
+        urgencia_filtro=urgencia_filtro
+    )
+
+
+@app.route("/cartera/v2/alerta/<int:alerta_id>")
+@helpers.login_required
+def ver_detalle_alerta(alerta_id):
+    """Ver detalle de una alerta"""
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?id=eq.{alerta_id}&select=*,maquinas_cartera(id,identificador,instalaciones(nombre)),componentes_criticos(nombre,familia)",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Alerta no encontrada", "error")
+        return redirect("/cartera/v2/alertas")
+
+    alerta = response.json()[0]
+
+    return render_template("cartera/detalle_alerta.html", alerta=alerta)
+
+
+@app.route("/cartera/v2/alerta/<int:alerta_id>/resolver", methods=["POST"])
+@helpers.login_required
+def resolver_alerta(alerta_id):
+    """Marcar alerta como resuelta"""
+
+    accion = request.form.get('accion')  # OPORTUNIDAD, TRABAJO_PROGRAMADO, RESUELTA, DESCARTADA
+    notas = request.form.get('notas')
+
+    data = {
+        "fecha_resolucion": datetime.now().isoformat(),
+        "revisada_por": session.get("usuario_email", "usuario"),
+        "notas_resolucion": notas
+    }
+
+    if accion == 'OPORTUNIDAD':
+        data['estado'] = 'OPORTUNIDAD_CREADA'
+    elif accion == 'TRABAJO':
+        data['estado'] = 'TRABAJO_PROGRAMADO'
+    elif accion == 'RESUELTA':
+        data['estado'] = 'RESUELTA'
+    elif accion == 'DESCARTADA':
+        data['estado'] = 'DESCARTADA'
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?id=eq.{alerta_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Alerta actualizada correctamente", "success")
+    else:
+        flash("Error al actualizar alerta", "error")
+
+    return redirect("/cartera/v2/alertas")
+
+
+@app.route("/cartera/v2/pendientes-tecnicos")
+@helpers.login_required
+def ver_pendientes_tecnicos():
+    """Vista de backlog técnico para Sergio"""
+
+    # Filtros
+    estado_filtro = request.args.get('estado', '')
+    urgencia_filtro = request.args.get('urgencia', '')
+    asignado_filtro = request.args.get('asignado', '')
+
+    # Construir query
+    query_params = ["select=*,maquinas_cartera(identificador,instalaciones(nombre))"]
+
+    if estado_filtro:
+        query_params.append(f"estado=eq.{estado_filtro}")
+    else:
+        # Por defecto, solo activos
+        query_params.append("estado=in.(PENDIENTE,ASIGNADO,EN_CURSO,BLOQUEADO)")
+
+    if urgencia_filtro:
+        query_params.append(f"nivel_urgencia=eq.{urgencia_filtro}")
+    if asignado_filtro:
+        query_params.append(f"asignado_a=eq.{asignado_filtro}")
+
+    query_params.append("order=nivel_urgencia.desc,created_at.desc")
+
+    url = f"{SUPABASE_URL}/rest/v1/pendientes_tecnicos?{'&'.join(query_params)}"
+
+    response = requests.get(url, headers=HEADERS)
+    pendientes = response.json() if response.status_code == 200 else []
+
+    # Agrupar por urgencia
+    pendientes_por_urgencia = {
+        'URGENTE': [p for p in pendientes if p['nivel_urgencia'] == 'URGENTE'],
+        'ALTA': [p for p in pendientes if p['nivel_urgencia'] == 'ALTA'],
+        'MEDIA': [p for p in pendientes if p['nivel_urgencia'] == 'MEDIA'],
+        'BAJA': [p for p in pendientes if p['nivel_urgencia'] == 'BAJA']
+    }
+
+    # Estadísticas
+    stats = {
+        'total': len(pendientes),
+        'urgentes': len(pendientes_por_urgencia['URGENTE']),
+        'altas': len(pendientes_por_urgencia['ALTA']),
+        'medias': len(pendientes_por_urgencia['MEDIA']),
+        'bajas': len(pendientes_por_urgencia['BAJA'])
+    }
+
+    return render_template(
+        "cartera/pendientes_tecnicos.html",
+        pendientes=pendientes,
+        pendientes_por_urgencia=pendientes_por_urgencia,
+        stats=stats,
+        estado_filtro=estado_filtro,
+        urgencia_filtro=urgencia_filtro,
+        asignado_filtro=asignado_filtro
+    )
+
+
+@app.route("/cartera/v2/pendiente/<int:pendiente_id>/actualizar", methods=["POST"])
+@helpers.login_required
+def actualizar_pendiente_tecnico(pendiente_id):
+    """Actualizar estado de un pendiente técnico"""
+
+    estado = request.form.get('estado')
+    notas = request.form.get('notas')
+    asignado = request.form.get('asignado_a')
+
+    data = {
+        "updated_at": datetime.now().isoformat()
+    }
+
+    if estado:
+        data['estado'] = estado
+        if estado == 'COMPLETADO':
+            data['fecha_completado'] = datetime.now().isoformat()
+    if notas:
+        data['notas_ejecucion'] = notas
+    if asignado:
+        data['asignado_a'] = asignado
+        if not data.get('fecha_asignacion'):
+            data['fecha_asignacion'] = datetime.now().isoformat()
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/pendientes_tecnicos?id=eq.{pendiente_id}",
+        json=data,
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Pendiente técnico actualizado", "success")
+    else:
+        flash("Error al actualizar pendiente técnico", "error")
+
+    return redirect("/cartera/v2/pendientes-tecnicos")
+
+
+@app.route("/cartera/v2/alerta/<int:alerta_id>/crear-trabajo-tecnico", methods=["POST"])
+@helpers.login_required
+def crear_trabajo_desde_alerta(alerta_id):
+    """Crear pendiente técnico desde una alerta"""
+
+    # Obtener datos de la alerta
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?id=eq.{alerta_id}&select=*",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200 or not response.json():
+        flash("Alerta no encontrada", "error")
+        return redirect("/cartera/v2/alertas")
+
+    alerta = response.json()[0]
+
+    # Crear pendiente técnico
+    tipo_trabajo_map = {
+        'FALLA_REPETIDA': 'REPARACION_CRITICA',
+        'RECOMENDACION_IGNORADA': 'COMPONENTE_RECOMENDADO',
+        'MANTENIMIENTO_OMITIDO': 'MANTENIMIENTO_PENDIENTE',
+        'MANTENIMIENTO_OMITIDO_CON_AVERIAS': 'MANTENIMIENTO_PENDIENTE'
+    }
+
+    pendiente_data = {
+        "maquina_id": alerta['maquina_id'],
+        "instalacion_id": alerta['instalacion_id'],
+        "alerta_id": alerta_id,
+        "tipo_trabajo": tipo_trabajo_map.get(alerta['tipo_alerta'], 'SEGUIMIENTO_TECNICO'),
+        "nivel_urgencia": alerta['nivel_urgencia'],
+        "titulo": alerta['titulo'],
+        "descripcion_tecnica": alerta['descripcion'],
+        "estado": "PENDIENTE",
+        "created_by": session.get("usuario_email", "sistema")
+    }
+
+    response = requests.post(
+        f"{SUPABASE_URL}/rest/v1/pendientes_tecnicos",
+        json=pendiente_data,
+        headers=HEADERS
+    )
+
+    if response.status_code == 201:
+        pendiente_id = response.json()[0]['id']
+
+        # Actualizar alerta
+        requests.patch(
+            f"{SUPABASE_URL}/rest/v1/alertas_automaticas?id=eq.{alerta_id}",
+            json={
+                "estado": "TRABAJO_PROGRAMADO",
+                "pendiente_tecnico_id": pendiente_id,
+                "fecha_revision": datetime.now().isoformat(),
+                "revisada_por": session.get("usuario_email", "usuario")
+            },
+            headers=HEADERS
+        )
+
+        flash("Trabajo técnico creado exitosamente", "success")
+        return redirect("/cartera/v2/pendientes-tecnicos")
+    else:
+        flash("Error al crear trabajo técnico", "error")
+        return redirect(f"/cartera/v2/alerta/{alerta_id}")
+
+
+# ============================================
 # CIERRE
 # ============================================
 
