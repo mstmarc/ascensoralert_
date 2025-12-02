@@ -3,7 +3,9 @@
 -- Sistema de Alertas Predictivas
 -- Fecha: 2025-01-02
 -- ============================================
--- IMPORTANTE: Ejecutar esta migración DESPUÉS de tener cartera_schema.sql aplicado
+-- IMPORTANTE: Ejecutar AMBOS archivos en orden:
+-- 1. psql -U postgres -d ascensoralert -f database/cartera_schema_v2.sql
+-- 2. psql -U postgres -d ascensoralert -f database/migrations/005_analitica_avanzada_v2.sql
 
 -- Verificar que las tablas base existen
 DO $$
@@ -17,8 +19,14 @@ BEGIN
 END
 $$;
 
--- Ejecutar schema v2
-\i ../cartera_schema_v2.sql
+-- Verificar que las tablas V2 existen (deben ejecutarse desde cartera_schema_v2.sql primero)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_tables WHERE tablename = 'componentes_criticos') THEN
+        RAISE EXCEPTION 'Tablas V2 no existen. Ejecuta primero: psql -U postgres -d ascensoralert -f database/cartera_schema_v2.sql';
+    END IF;
+END
+$$;
 
 -- Log de migración
 CREATE TABLE IF NOT EXISTS schema_migrations (
