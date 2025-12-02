@@ -6310,7 +6310,7 @@ def cartera_ver_oportunidad(oportunidad_id):
 
     # Obtener oportunidad con datos relacionados
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?id=eq.{oportunidad_id}&select=*,maquinas_cartera(identificador,codigo_maquina,tecnico_asignado,instalaciones(nombre,municipio)),partes_trabajo:parte_origen_id(numero_parte,fecha_parte,tipo_parte,tipo_parte_normalizado,resolucion,recomendaciones_extraidas)",
+        f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?id=eq.{oportunidad_id}&select=*,maquinas_cartera(identificador,codigo_maquina,instalaciones(nombre,municipio)),partes_trabajo:parte_origen_id(numero_parte,fecha_parte,tipo_parte,tipo_parte_normalizado,resolucion,recomendaciones_extraidas)",
         headers=HEADERS
     )
 
