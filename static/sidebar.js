@@ -184,7 +184,7 @@
     if (tienePermiso('clientes', 'write')) {
         crearBloque += `
                 <a href="/formulario_lead" class="sidebar-integrated-link">
-                    Visita a Instalación
+                    Nueva Instalación
                 </a>`;
     }
     if (tienePermiso('administradores', 'write')) {
