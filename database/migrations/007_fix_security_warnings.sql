@@ -319,6 +319,14 @@ $$;
 -- PARTE 5: REGISTRAR MIGRACIÓN
 -- ============================================
 
+-- Crear tabla de control de migraciones si no existe
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    id SERIAL PRIMARY KEY,
+    version VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO schema_migrations (version, description) VALUES
     ('007', 'Corrección de Warnings - search_path en funciones y mover extensiones a schema dedicado')
 ON CONFLICT (version) DO NOTHING;
