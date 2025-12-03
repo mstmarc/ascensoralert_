@@ -693,9 +693,9 @@ def ejecutar_todos_los_detectores():
         total_alertas += detectar_recomendaciones_ignoradas()
         logger.info("")
 
-        # Detector 3: Mantenimientos omitidos
-        total_alertas += detectar_mantenimientos_omitidos()
-        logger.info("")
+        # Detector 3: Mantenimientos omitidos (DESACTIVADO - periodicidad no prioritaria)
+        # total_alertas += detectar_mantenimientos_omitidos()
+        # logger.info("")
 
         # Detector 4: Instalaciones críticas
         total_alertas += detectar_instalaciones_criticas()
