@@ -937,6 +937,14 @@ USING (true);
 -- PARTE 4: REGISTRAR MIGRACIÓN
 -- ============================================
 
+-- Crear tabla de control de migraciones si no existe
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    id SERIAL PRIMARY KEY,
+    version VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO schema_migrations (version, description) VALUES
     ('006', 'Corrección de Seguridad - Quitar SECURITY DEFINER de vistas y habilitar RLS en tablas')
 ON CONFLICT (version) DO NOTHING;
