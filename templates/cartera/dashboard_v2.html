@@ -5,24 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analítica Avanzada V2 - AscensorAlert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* === ESTILO PROFESIONAL 2025 - INSPIRADO EN MI AGENDA === */
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: #ffffff;
-            line-height: 1.5;
-        }
+        /* === DASHBOARD V2 - ESTILOS ESPECÍFICOS === */
 
         .v2-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 30px 20px;
-            font-family: 'Montserrat', sans-serif;
         }
 
-        /* HEADER */
+        /* HEADER DE PÁGINA */
         .page-header {
             margin-bottom: 30px;
             border-bottom: 2px solid #f0f0f0;
@@ -53,65 +47,6 @@
         .header-actions form {
             display: inline-block;
             margin: 0;
-        }
-
-        /* BOTONES */
-        .btn {
-            display: inline-block;
-            padding: 8px 14px;
-            background: #003c80;
-            color: white;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 13px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .btn:hover {
-            background: #002f66;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .btn-primary {
-            background: #003c80;
-        }
-
-        .btn-primary:hover {
-            background: #002f66;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .btn-success {
-            background: #28a745;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
         }
 
         /* Alertas Críticas Banner */
