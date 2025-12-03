@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analítica Avanzada V2 - AscensorAlert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=7">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* === ESTILO PROFESIONAL 2025 - INSPIRADO EN MI AGENDA === */
@@ -45,9 +44,15 @@
 
         .header-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-top: 15px;
             flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .header-actions form {
+            display: inline-block;
+            margin: 0;
         }
 
         /* BOTONES */
@@ -523,7 +528,7 @@
                 <p class="subtitle">Sistema de Alertas Predictivas y Gestión Inteligente</p>
                 <div class="header-actions">
                     <a href="/cartera" class="btn btn-secondary">← Dashboard V1</a>
-                    <form method="POST" action="/cartera/v2/ejecutar-detectores" style="display: inline;">
+                    <form method="POST" action="/cartera/v2/ejecutar-detectores">
                         <button type="submit" class="btn btn-success">Ejecutar Detectores</button>
                     </form>
                     <a href="/cartera/v2/alertas" class="btn btn-primary">Ver Todas las Alertas</a>
