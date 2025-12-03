@@ -65,8 +65,6 @@ $$;
 -- PASO 3: RESTAURAR VISTAS CON SECURITY DEFINER (Estado Original)
 -- ============================================
 
-RAISE NOTICE '👁️  RESTAURANDO VISTAS AL ESTADO ORIGINAL...';
-
 -- Vista: v_estado_maquinas_semaforico (CON SECURITY DEFINER)
 DROP VIEW IF EXISTS v_estado_maquinas_semaforico CASCADE;
 
@@ -236,8 +234,6 @@ GROUP BY
 -- ============================================
 -- PASO 4: RESTAURAR FUNCIONES (Sin SET search_path)
 -- ============================================
-
-RAISE NOTICE '🔧 RESTAURANDO FUNCIONES AL ESTADO ORIGINAL...';
 
 -- Función: buscar_clientes_sin_acentos (SIN search_path fijo)
 CREATE OR REPLACE FUNCTION buscar_clientes_sin_acentos(termino_busqueda text)
