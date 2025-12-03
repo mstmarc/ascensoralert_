@@ -131,6 +131,6 @@ END
 $$;
 
 -- Registrar esta migración
-INSERT INTO schema_migrations (version, name, executed_at)
-VALUES ('012', 'rollback_all_security_changes', NOW())
+INSERT INTO schema_migrations (version, executed_at)
+VALUES ('012', NOW())
 ON CONFLICT (version) DO NOTHING;
