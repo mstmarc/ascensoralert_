@@ -6669,8 +6669,7 @@ def cartera_dashboard_v2():
         'urgentes': sum(1 for a in todas_alertas if a['nivel_urgencia'] == 'URGENTE' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
         'altas': sum(1 for a in todas_alertas if a['nivel_urgencia'] == 'ALTA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
         'fallas_repetidas': sum(1 for a in todas_alertas if a['tipo_alerta'] == 'FALLA_REPETIDA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
-        'recomendaciones_ignoradas': sum(1 for a in todas_alertas if a['tipo_alerta'] == 'RECOMENDACION_IGNORADA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
-        'mantenimientos_omitidos': sum(1 for a in todas_alertas if 'MANTENIMIENTO_OMITIDO' in a['tipo_alerta'] and a['estado'] in ['PENDIENTE', 'EN_REVISION'])
+        'recomendaciones_ignoradas': sum(1 for a in todas_alertas if a['tipo_alerta'] == 'RECOMENDACION_IGNORADA' and a['estado'] in ['PENDIENTE', 'EN_REVISION'])
     }
 
     # Obtener máquinas por estado semafórico
@@ -6950,9 +6949,7 @@ def crear_trabajo_desde_alerta(alerta_id):
     # Crear pendiente técnico
     tipo_trabajo_map = {
         'FALLA_REPETIDA': 'REPARACION_CRITICA',
-        'RECOMENDACION_IGNORADA': 'COMPONENTE_RECOMENDADO',
-        'MANTENIMIENTO_OMITIDO': 'MANTENIMIENTO_PENDIENTE',
-        'MANTENIMIENTO_OMITIDO_CON_AVERIAS': 'MANTENIMIENTO_PENDIENTE'
+        'RECOMENDACION_IGNORADA': 'COMPONENTE_RECOMENDADO'
     }
 
     pendiente_data = {
