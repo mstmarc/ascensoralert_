@@ -22,7 +22,7 @@ BEGIN
         EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
                       func_record.proname,
                       func_record.argtypes);
-        RAISE NOTICE 'Eliminada función: %(%)', func_record.proname, func_record.argtypes;
+        RAISE NOTICE 'Eliminada función: % con argumentos: %', func_record.proname, func_record.argtypes;
     END LOOP;
 END
 $$;
@@ -41,7 +41,7 @@ BEGIN
         EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
                       func_record.proname,
                       func_record.argtypes);
-        RAISE NOTICE 'Eliminada función: %(%)', func_record.proname, func_record.argtypes;
+        RAISE NOTICE 'Eliminada función: % con argumentos: %', func_record.proname, func_record.argtypes;
     END LOOP;
 END
 $$;
