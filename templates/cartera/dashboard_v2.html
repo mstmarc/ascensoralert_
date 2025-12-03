@@ -179,14 +179,6 @@
             margin: 10px 0;
         }
 
-        .kpi-card.urgente .number {
-            color: #dc3545;
-        }
-
-        .kpi-card.alta .number {
-            color: #ff9800;
-        }
-
         .kpi-card .label {
             font-size: 12px;
             color: #666;
@@ -266,30 +258,6 @@
             border-left: 4px solid #43a047;
         }
 
-        .semaforico-item .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-
-        .semaforico-item.critico .status-indicator {
-            background: #d32f2f;
-        }
-
-        .semaforico-item.inestable .status-indicator {
-            background: #f57c00;
-        }
-
-        .semaforico-item.seguimiento .status-indicator {
-            background: #f9a825;
-        }
-
-        .semaforico-item.estable .status-indicator {
-            background: #43a047;
-        }
-
         .semaforico-item .count {
             font-size: 28px;
             font-weight: 700;
@@ -366,18 +334,18 @@
         }
 
         .badge.urgente {
-            background: #dc3545;
-            color: white;
+            background: #fee;
+            color: #c62828;
         }
 
         .badge.alta {
-            background: #ff9800;
-            color: white;
+            background: #fff3e0;
+            color: #e65100;
         }
 
         .badge.media {
-            background: #ffc107;
-            color: #333;
+            background: #fffde7;
+            color: #f57f17;
         }
 
         .alerta-item .meta {
@@ -406,7 +374,7 @@
             font-size: 42px;
             font-weight: 700;
             margin: 15px 0;
-            color: #ff9800;
+            color: #003366;
         }
 
         .perdidas-detail {
@@ -466,7 +434,7 @@
         .instalacion-item .iri {
             font-size: 24px;
             font-weight: 700;
-            color: #dc3545;
+            color: #003366;
         }
 
         .instalacion-item .badge-riesgo {
@@ -478,13 +446,13 @@
         }
 
         .badge-riesgo.critico {
-            background: #dc3545;
-            color: white;
+            background: #fee;
+            color: #c62828;
         }
 
         .badge-riesgo.alto {
-            background: #ff9800;
-            color: white;
+            background: #fff3e0;
+            color: #e65100;
         }
 
         /* Tabla de pendientes técnicos */
@@ -676,22 +644,18 @@
                         <h3>Estado Semafórico de Máquinas</h3>
                         <div class="semaforico-grid">
                             <div class="semaforico-item critico">
-                                <div class="status-indicator"></div>
                                 <div class="count">{{ semaforico_stats.criticas or 0 }}</div>
                                 <div class="label">Críticas</div>
                             </div>
                             <div class="semaforico-item inestable">
-                                <div class="status-indicator"></div>
                                 <div class="count">{{ semaforico_stats.inestables or 0 }}</div>
                                 <div class="label">Inestables</div>
                             </div>
                             <div class="semaforico-item seguimiento">
-                                <div class="status-indicator"></div>
                                 <div class="count">{{ semaforico_stats.seguimiento or 0 }}</div>
                                 <div class="label">Seguimiento</div>
                             </div>
                             <div class="semaforico-item estable">
-                                <div class="status-indicator"></div>
                                 <div class="count">{{ semaforico_stats.estables or 0 }}</div>
                                 <div class="label">Estables</div>
                             </div>
