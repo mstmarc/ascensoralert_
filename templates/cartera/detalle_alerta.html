@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Alerta - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=7">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            color: #003366;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #366092;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #003366;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin: 0 0 20px 0;
+            color: #003366;
+            font-size: 18px;
+            font-weight: 700;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .badge.urgente {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge.alta {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge.media {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .badge.baja {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge.estado {
+            background: #e9ecef;
+            color: #003366;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .info-item .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #003366;
+        }
+
+        .descripcion {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            line-height: 1.8;
+            color: #495057;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+
+        .datos-tecnicos {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #495057;
+            overflow-x: auto;
+        }
+
+        .actions-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .actions-section h3 {
+            margin: 0 0 15px 0;
+            color: #003366;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .action-btn {
+            width: 100%;
+            margin-bottom: 10px;
+            text-align: left;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .action-btn:hover {
+            transform: translateX(5px);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .alert-urgente {
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            background: #fff5f5;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .alert-urgente h3 {
+            color: #dc3545;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+
+        @media (max-width: 968px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main>
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1>Detalle de Alerta #{{ alerta.id }}</h1>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="/cartera/v2/alertas" class="btn btn-secondary">← Volver a Alertas</a>
+                    <a href="/cartera/v2" class="btn btn-secondary">Dashboard V2</a>
+                </div>
+            </div>
+
+            <!-- Mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background: {% if category == 'success' %}#d4edda{% elif category == 'error' %}#f8d7da{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'error' %}#721c24{% else %}#0c5460{% endif %};">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Banner de urgencia -->
+            {% if alerta.nivel_urgencia == 'URGENTE' and alerta.estado in ['PENDIENTE', 'EN_REVISION'] %}
+            <div class="alert-urgente">
+                <h3>ALERTA URGENTE</h3>
+                <p style="margin: 0; color: #721c24;">Esta alerta requiere atención inmediata. Por favor, revísala y toma acción lo antes posible.</p>
+            </div>
+            {% endif %}
+
+            <div class="content-grid">
+                <!-- Columna principal -->
+                <div>
+                    <!-- Información General -->
+                    <div class="section">
+                        <h2>Información General</h2>
+
+                        <div style="margin-bottom: 15px;">
+                            <span class="badge {{ alerta.nivel_urgencia.lower() }}">{{ alerta.nivel_urgencia }}</span>
+                            <span class="badge estado">{{ alerta.estado.replace('_', ' ') }}</span>
+                            <span class="badge" style="background: #6c757d; color: white;">{{ alerta.tipo_alerta.replace('_', ' ') }}</span>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="label">Fecha de Detección</div>
+                                <div class="value">{{ alerta.fecha_deteccion[:10] }}</div>
+                            </div>
+                            {% if alerta.fecha_resolucion %}
+                            <div class="info-item">
+                                <div class="label">Fecha de Resolución</div>
+                                <div class="value">{{ alerta.fecha_resolucion[:10] }}</div>
+                            </div>
+                            {% endif %}
+                            {% if alerta.revisada_por %}
+                            <div class="info-item">
+                                <div class="label">Revisada Por</div>
+                                <div class="value">{{ alerta.revisada_por }}</div>
+                            </div>
+                            {% endif %}
+                            {% if alerta.componente_id and alerta.componentes_criticos %}
+                            <div class="info-item">
+                                <div class="label">Componente Afectado</div>
+                                <div class="value">{{ alerta.componentes_criticos.nombre }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Máquina/Instalación -->
+                    {% if alerta.maquinas_cartera %}
+                    <div class="section">
+                        <h2>Máquina e Instalación</h2>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="label">Máquina</div>
+                                <div class="value">{{ alerta.maquinas_cartera.identificador }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">Instalación</div>
+                                <div class="value">{{ alerta.maquinas_cartera.instalaciones.nombre }}</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <a href="/cartera/maquina/{{ alerta.maquina_id }}" class="btn btn-primary">Ver Ficha de Máquina →</a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Descripción -->
+                    <div class="section">
+                        <h2>Descripción del Problema</h2>
+                        <div class="descripcion">{{ alerta.descripcion }}</div>
+                    </div>
+
+                    <!-- Datos de Detección -->
+                    {% if alerta.datos_deteccion %}
+                    <div class="section">
+                        <h2>Datos Técnicos de Detección</h2>
+                        <div class="datos-tecnicos">{{ alerta.datos_deteccion | tojson(indent=2) }}</div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Notas de Resolución -->
+                    {% if alerta.notas_resolucion %}
+                    <div class="section">
+                        <h2>Notas de Resolución</h2>
+                        <div class="descripcion">{{ alerta.notas_resolucion }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar de acciones -->
+                <div>
+                    {% if alerta.estado in ['PENDIENTE', 'EN_REVISION'] %}
+                    <div class="actions-section">
+                        <h3>Acciones Disponibles</h3>
+
+                        <form method="POST" action="/cartera/v2/alerta/{{ alerta.id }}/resolver" onsubmit="return confirm('¿Estás seguro de realizar esta acción?')">
+                            <div class="form-group">
+                                <label>Notas (opcional)</label>
+                                <textarea name="notas" placeholder="Describe qué acción se tomó..."></textarea>
+                            </div>
+
+                            <button type="submit" name="accion" value="OPORTUNIDAD" class="btn btn-success action-btn">
+                                <span>Convertir en Oportunidad</span>
+                                <span>→</span>
+                            </button>
+
+                            <button type="submit" name="accion" value="TRABAJO" class="btn btn-primary action-btn">
+                                <span>Programar Trabajo Técnico</span>
+                                <span>→</span>
+                            </button>
+
+                            <button type="submit" name="accion" value="RESUELTA" class="btn btn-success action-btn">
+                                <span>Marcar como Resuelta</span>
+                                <span>→</span>
+                            </button>
+
+                            <button type="submit" name="accion" value="DESCARTADA" class="btn btn-secondary action-btn">
+                                <span>Descartar Alerta</span>
+                                <span>→</span>
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="actions-section">
+                        <h3>Estado de la Alerta</h3>
+                        <div style="padding: 15px; background: #e9ecef; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Esta alerta está en estado:</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #003366;">{{ alerta.estado.replace('_', ' ') }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Enlaces rápidos -->
+                    <div class="section">
+                        <h2>Enlaces Rápidos</h2>
+                        <a href="/cartera/v2/alertas" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">Ver Todas las Alertas</a>
+                        <a href="/cartera/v2" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">Dashboard V2</a>
+                        {% if alerta.maquinas_cartera %}
+                        <a href="/cartera/maquina/{{ alerta.maquina_id }}" class="btn btn-secondary" style="width: 100%;">Ficha de Máquina</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>
