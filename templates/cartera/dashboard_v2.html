@@ -129,6 +129,15 @@
             text-align: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             border-left: 4px solid #366092;
+            display: block;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
         }
 
         .kpi-card.urgente {
@@ -516,30 +525,30 @@
 
             <!-- KPIs de Alertas -->
             <div class="alertas-kpis">
-                <div class="kpi-card urgente">
+                <a href="/cartera/v2/alertas?urgencia=URGENTE&estado=PENDIENTE" class="kpi-card urgente">
                     <div class="label">Urgentes</div>
                     <div class="number">{{ alertas_stats.urgentes or 0 }}</div>
-                </div>
-                <div class="kpi-card alta">
+                </a>
+                <a href="/cartera/v2/alertas?urgencia=ALTA&estado=PENDIENTE" class="kpi-card alta">
                     <div class="label">Alta Prioridad</div>
                     <div class="number">{{ alertas_stats.altas or 0 }}</div>
-                </div>
-                <div class="kpi-card">
+                </a>
+                <a href="/cartera/v2/alertas?estado=PENDIENTE" class="kpi-card">
                     <div class="label">Pendientes</div>
                     <div class="number">{{ alertas_stats.pendientes or 0 }}</div>
-                </div>
-                <div class="kpi-card">
+                </a>
+                <a href="/cartera/v2/alertas?tipo=FALLA_REPETIDA&estado=PENDIENTE" class="kpi-card">
                     <div class="label">Fallas Repetidas</div>
                     <div class="number">{{ alertas_stats.fallas_repetidas or 0 }}</div>
-                </div>
-                <div class="kpi-card">
+                </a>
+                <a href="/cartera/v2/alertas?tipo=RECOMENDACION_IGNORADA&estado=PENDIENTE" class="kpi-card">
                     <div class="label">Recomendaciones Ignoradas</div>
                     <div class="number">{{ alertas_stats.recomendaciones_ignoradas or 0 }}</div>
-                </div>
-                <div class="kpi-card">
+                </a>
+                <a href="/cartera/v2/alertas?tipo=MANTENIMIENTO_OMITIDO&estado=PENDIENTE" class="kpi-card">
                     <div class="label">Mantenimientos Omitidos</div>
                     <div class="number">{{ alertas_stats.mantenimientos_omitidos or 0 }}</div>
-                </div>
+                </a>
             </div>
 
             <!-- Grid principal -->
