@@ -899,7 +899,7 @@ WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Permitir solo lectura a administradores_backup_20251028" ON administradores_backup_20251028;
 CREATE POLICY "Permitir solo lectura a administradores_backup_20251028"
-ON administradores_backup_20251028FOR SELECT
+ON administradores_backup_20251028 FOR SELECT
 TO authenticated
 USING (true);
 
