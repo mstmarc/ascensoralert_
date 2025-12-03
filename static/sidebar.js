@@ -252,7 +252,7 @@
                     Cartera y Análisis
                 </a>
                 <a href="/cartera/v2" class="sidebar-integrated-link" style="padding-left: 54px;">
-                    🚀 Analítica Avanzada V2
+                    Analítica Avanzada V2
                 </a>
                 <a href="/cartera/importar" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Importar Datos
