@@ -184,26 +184,20 @@ ON CONFLICT (version) DO NOTHING;
 
 DO $$
 BEGIN
-    RAISE NOTICE '';
     RAISE NOTICE '✅ Migración 009 completada exitosamente';
-    RAISE NOTICE '';
     RAISE NOTICE '🔒 CORRECCIONES APLICADAS:';
     RAISE NOTICE '   ✓ Eliminadas todas las versiones anteriores de funciones de búsqueda';
     RAISE NOTICE '   ✓ Recreadas 2 funciones con SET search_path TO (sintaxis explícita)';
     RAISE NOTICE '   ✓ Verificado que search_path está configurado correctamente';
-    RAISE NOTICE '';
     RAISE NOTICE '🔧 FUNCIONES CORREGIDAS:';
     RAISE NOTICE '   1. buscar_clientes_sin_acentos';
     RAISE NOTICE '   2. buscar_administradores_sin_acentos';
-    RAISE NOTICE '';
     RAISE NOTICE '⚠️  SIGUIENTE PASO:';
     RAISE NOTICE '   Ejecutar el linter de Supabase - debería mostrar 0 warnings';
-    RAISE NOTICE '';
     RAISE NOTICE '✨ Si aún aparecen warnings:';
     RAISE NOTICE '   Las funciones pueden estar en otro schema o tener firma diferente';
     RAISE NOTICE '   Ejecutar: SELECT proname, nspname, proconfig FROM pg_proc p';
     RAISE NOTICE '             JOIN pg_namespace n ON p.pronamespace = n.oid';
     RAISE NOTICE '             WHERE proname LIKE ''buscar_%sin_acentos'';';
-    RAISE NOTICE '';
 END
 $$;
