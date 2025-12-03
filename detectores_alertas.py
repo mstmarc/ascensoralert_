@@ -501,6 +501,176 @@ def detectar_mantenimientos_omitidos():
 
 
 # ============================================
+# DETECTOR 4: INSTALACIONES CRÍTICAS
+# ============================================
+
+def detectar_instalaciones_criticas():
+    """
+    Detecta instalaciones completas en estado crítico
+    - 2+ máquinas en estado CRITICO, o
+    - 5+ averías en los últimos 30 días
+    Genera alertas de tipo INSTALACION_CRITICA
+    """
+    logger.info("🔍 Detector 4: Analizando instalaciones críticas...")
+
+    # Obtener todas las instalaciones con máquinas activas
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/instalaciones?select=id,nombre,municipio",
+        headers=HEADERS
+    )
+
+    if response.status_code != 200:
+        logger.error(f"Error obteniendo instalaciones: {response.status_code}")
+        return 0
+
+    instalaciones = response.json()
+    logger.info(f"   Analizando {len(instalaciones)} instalaciones...")
+
+    alertas_creadas = 0
+    fecha_limite_30 = (datetime.now() - timedelta(days=30)).isoformat()
+
+    for instalacion in instalaciones:
+        instalacion_id = instalacion['id']
+        instalacion_nombre = instalacion['nombre']
+
+        # Obtener máquinas en estado CRITICO de esta instalación
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/v_estado_maquinas_semaforico",
+            params={
+                "select": "maquina_id,estado_semaforico",
+                "instalacion_id": f"eq.{instalacion_id}",
+                "estado_semaforico": "eq.CRITICO"
+            },
+            headers=HEADERS
+        )
+
+        maquinas_criticas = 0
+        if response.status_code == 200:
+            maquinas_criticas = len(response.json())
+
+        # Contar averías totales en la instalación (últimos 30 días)
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo",
+            params={
+                "select": "id,maquinas_cartera!inner(instalacion_id)",
+                "tipo_parte_normalizado": "eq.AVERIA",
+                "fecha_parte": f"gte.{fecha_limite_30}",
+                "maquinas_cartera.instalacion_id": f"eq.{instalacion_id}"
+            },
+            headers=HEADERS
+        )
+
+        averias_mes = 0
+        if response.status_code == 200:
+            averias_mes = len(response.json())
+
+        # Evaluar si cumple criterios de instalación crítica
+        es_critica = False
+        criterio = ""
+
+        if maquinas_criticas >= 2:
+            es_critica = True
+            criterio = f"{maquinas_criticas} máquinas en estado CRÍTICO"
+        elif averias_mes >= 5:
+            es_critica = True
+            criterio = f"{averias_mes} averías en los últimos 30 días"
+
+        if not es_critica:
+            continue
+
+        # Verificar si ya existe alerta activa para esta instalación
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/alertas_automaticas",
+            params={
+                "instalacion_id": f"eq.{instalacion_id}",
+                "tipo_alerta": "eq.INSTALACION_CRITICA",
+                "estado": f"in.(PENDIENTE,EN_REVISION)",
+                "maquina_id": "is.null"  # Alertas de instalación no tienen maquina_id
+            },
+            headers=HEADERS
+        )
+
+        if response.status_code == 200 and len(response.json()) > 0:
+            logger.info(f"   ↻ Ya existe alerta activa para {instalacion_nombre}")
+            continue
+
+        # Obtener lista de máquinas críticas para el detalle
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/v_estado_maquinas_semaforico",
+            params={
+                "select": "identificador,estado_semaforico,averias_mes",
+                "instalacion_id": f"eq.{instalacion_id}",
+                "estado_semaforico": "eq.CRITICO"
+            },
+            headers=HEADERS
+        )
+
+        maquinas_criticas_lista = []
+        if response.status_code == 200:
+            maquinas_criticas_lista = response.json()
+
+        # Crear alerta de instalación crítica
+        titulo = f"🏢 INSTALACIÓN CRÍTICA: {instalacion_nombre}"
+        descripcion = f"""La instalación '{instalacion_nombre}' ({instalacion.get('municipio', 'N/A')}) está en estado CRÍTICO.
+
+⚠️ CRITERIO DE DETECCIÓN: {criterio}
+
+📊 MÉTRICAS:
+• Máquinas en estado crítico: {maquinas_criticas}
+• Averías totales (último mes): {averias_mes}
+"""
+
+        if maquinas_criticas_lista:
+            descripcion += f"\n🛗 MÁQUINAS CRÍTICAS:\n"
+            for maq in maquinas_criticas_lista[:5]:  # Mostrar máximo 5
+                descripcion += f"   • {maq['identificador']} - {maq['averias_mes']} averías este mes\n"
+            if len(maquinas_criticas_lista) > 5:
+                descripcion += f"   ... y {len(maquinas_criticas_lista) - 5} más\n"
+
+        descripcion += f"""
+🚨 ACCIÓN RECOMENDADA:
+• Revisión urgente de toda la instalación
+• Priorizar recursos técnicos en esta ubicación
+• Contactar con administrador de la comunidad
+• Evaluar si requiere plan de mantenimiento especial
+
+💰 RIESGO: Alta probabilidad de múltiples averías simultáneas y sobrecarga del equipo técnico.
+"""
+
+        alerta_data = {
+            "maquina_id": None,  # Alerta a nivel de instalación, no de máquina
+            "instalacion_id": instalacion_id,
+            "tipo_alerta": "INSTALACION_CRITICA",
+            "nivel_urgencia": "URGENTE",
+            "titulo": titulo,
+            "descripcion": descripcion,
+            "datos_deteccion": {
+                "maquinas_criticas": maquinas_criticas,
+                "averias_ultimo_mes": averias_mes,
+                "criterio": criterio,
+                "maquinas_criticas_ids": [m['identificador'] for m in maquinas_criticas_lista]
+            },
+            "estado": "PENDIENTE",
+            "fecha_deteccion": datetime.now().isoformat()
+        }
+
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/alertas_automaticas",
+            json=alerta_data,
+            headers=HEADERS
+        )
+
+        if response.status_code == 201:
+            alertas_creadas += 1
+            logger.info(f"   ✓ Alerta creada: {titulo} [URGENTE]")
+        else:
+            logger.error(f"   ✗ Error creando alerta: {response.text}")
+
+    logger.info(f"   📊 Total alertas de instalaciones críticas: {alertas_creadas}")
+    return alertas_creadas
+
+
+# ============================================
 # FUNCIÓN PRINCIPAL
 # ============================================
 
@@ -525,6 +695,10 @@ def ejecutar_todos_los_detectores():
 
         # Detector 3: Mantenimientos omitidos
         total_alertas += detectar_mantenimientos_omitidos()
+        logger.info("")
+
+        # Detector 4: Instalaciones críticas
+        total_alertas += detectar_instalaciones_criticas()
         logger.info("")
 
     except Exception as e:
