@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todas las Alertas - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=7">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            color: #003366;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .page-header .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #366092;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #003366;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .filters-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .filters-section h3 {
+            margin: 0 0 15px 0;
+            color: #003366;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #003366;
+            background: white;
+        }
+
+        .alertas-list {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .alertas-list h3 {
+            margin: 0 0 20px 0;
+            color: #003366;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-item .label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .stat-item .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #003366;
+        }
+
+        .alerta-card {
+            padding: 20px;
+            border-left: 4px solid #dc3545;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .alerta-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .alerta-card.alta {
+            border-left-color: #ff9800;
+        }
+
+        .alerta-card.media {
+            border-left-color: #ffc107;
+        }
+
+        .alerta-card.baja {
+            border-left-color: #28a745;
+        }
+
+        .alerta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .alerta-titulo {
+            font-weight: 700;
+            color: #003366;
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+
+        .badge.urgente {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge.alta {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge.media {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .badge.baja {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge.estado {
+            background: #e9ecef;
+            color: #003366;
+        }
+
+        .alerta-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .alerta-descripcion {
+            font-size: 14px;
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            max-height: 4.8em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .alerta-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .alerta-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo" class="logo">
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main>
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1>Todas las Alertas</h1>
+                    <p class="subtitle">Gestión y seguimiento de alertas automáticas</p>
+                </div>
+                <div>
+                    <a href="/cartera/v2" class="btn btn-secondary">← Volver al Dashboard</a>
+                </div>
+            </div>
+
+            <!-- Mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background: {% if category == 'success' %}#d4edda{% elif category == 'error' %}#f8d7da{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'error' %}#721c24{% else %}#0c5460{% endif %};">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Filtros -->
+            <div class="filters-section">
+                <h3>Filtros</h3>
+                <form method="GET" action="/cartera/v2/alertas">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label>Estado</label>
+                            <select name="estado" onchange="this.form.submit()">
+                                <option value="">Todos</option>
+                                <option value="PENDIENTE" {% if estado_filtro == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+                                <option value="EN_REVISION" {% if estado_filtro == 'EN_REVISION' %}selected{% endif %}>En Revisión</option>
+                                <option value="RESUELTA" {% if estado_filtro == 'RESUELTA' %}selected{% endif %}>Resuelta</option>
+                                <option value="DESCARTADA" {% if estado_filtro == 'DESCARTADA' %}selected{% endif %}>Descartada</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Tipo de Alerta</label>
+                            <select name="tipo" onchange="this.form.submit()">
+                                <option value="">Todos</option>
+                                <option value="FALLA_REPETIDA" {% if tipo_filtro == 'FALLA_REPETIDA' %}selected{% endif %}>Falla Repetida</option>
+                                <option value="RECOMENDACION_IGNORADA" {% if tipo_filtro == 'RECOMENDACION_IGNORADA' %}selected{% endif %}>Recomendación Ignorada</option>
+                                <option value="MANTENIMIENTO_OMITIDO" {% if tipo_filtro == 'MANTENIMIENTO_OMITIDO' %}selected{% endif %}>Mantenimiento Omitido</option>
+                                <option value="INSTALACION_CRITICA" {% if tipo_filtro == 'INSTALACION_CRITICA' %}selected{% endif %}>Instalación Crítica</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Urgencia</label>
+                            <select name="urgencia" onchange="this.form.submit()">
+                                <option value="">Todos</option>
+                                <option value="URGENTE" {% if urgencia_filtro == 'URGENTE' %}selected{% endif %}>Urgente</option>
+                                <option value="ALTA" {% if urgencia_filtro == 'ALTA' %}selected{% endif %}>Alta</option>
+                                <option value="MEDIA" {% if urgencia_filtro == 'MEDIA' %}selected{% endif %}>Media</option>
+                                <option value="BAJA" {% if urgencia_filtro == 'BAJA' %}selected{% endif %}>Baja</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <a href="/cartera/v2/alertas" class="btn btn-secondary" style="padding: 8px 12px;">Limpiar Filtros</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Estadísticas rápidas -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="label">Total:</span>
+                    <span class="value">{{ alertas|length }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Urgentes:</span>
+                    <span class="value" style="color: #dc3545;">{{ alertas|selectattr('nivel_urgencia', 'equalto', 'URGENTE')|list|length }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Pendientes:</span>
+                    <span class="value" style="color: #ff9800;">{{ alertas|selectattr('estado', 'equalto', 'PENDIENTE')|list|length }}</span>
+                </div>
+            </div>
+
+            <!-- Lista de alertas -->
+            <div class="alertas-list">
+                <h3>Alertas ({{ alertas|length }})</h3>
+
+                {% if alertas %}
+                    {% for alerta in alertas %}
+                    <div class="alerta-card {{ alerta.nivel_urgencia.lower() }}">
+                        <div class="alerta-header">
+                            <div class="alerta-titulo">{{ alerta.titulo }}</div>
+                            <div style="display: flex; gap: 8px;">
+                                <span class="badge {{ alerta.nivel_urgencia.lower() }}">{{ alerta.nivel_urgencia }}</span>
+                                <span class="badge estado">{{ alerta.estado.replace('_', ' ') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="alerta-meta">
+                            {% if alerta.maquinas_cartera %}
+                            <div class="meta-item">
+                                <strong>Máquina:</strong> {{ alerta.maquinas_cartera.identificador }}
+                            </div>
+                            <div class="meta-item">
+                                <strong>Instalación:</strong> {{ alerta.maquinas_cartera.instalaciones.nombre }}
+                            </div>
+                            {% endif %}
+                            <div class="meta-item">
+                                <strong>Tipo:</strong> {{ alerta.tipo_alerta.replace('_', ' ') }}
+                            </div>
+                            <div class="meta-item">
+                                <strong>Detectado:</strong> {{ alerta.fecha_deteccion[:10] }}
+                            </div>
+                        </div>
+
+                        <div class="alerta-descripcion">
+                            {{ alerta.descripcion[:200] }}{% if alerta.descripcion|length > 200 %}...{% endif %}
+                        </div>
+
+                        <div class="alerta-actions">
+                            <a href="/cartera/v2/alerta/{{ alerta.id }}" class="btn btn-primary" style="font-size: 13px; padding: 8px 16px;">Ver Detalle →</a>
+                            {% if alerta.maquinas_cartera %}
+                            <a href="/cartera/maquina/{{ alerta.maquina_id }}" class="btn btn-secondary" style="font-size: 13px; padding: 8px 16px;">Ver Máquina</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3>No se encontraron alertas</h3>
+                        <p>No hay alertas que coincidan con los filtros seleccionados.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+</body>
+</html>
