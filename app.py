@@ -6649,16 +6649,16 @@ def cartera_ver_instalacion(instalacion_id):
 def cartera_dashboard_v2():
     """Dashboard V2 con sistema de alertas y estado semafórico"""
 
-    # Obtener alertas críticas pendientes
+    # Obtener alertas críticas pendientes (EXCLUIR MANTENIMIENTO)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=*,maquinas_cartera(identificador,instalaciones(nombre))&estado=in.(PENDIENTE,EN_REVISION)&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=10",
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=*,maquinas_cartera(identificador,instalaciones(nombre))&estado=in.(PENDIENTE,EN_REVISION)&tipo_alerta=not.like.%MANTENIMIENTO%&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=10",
         headers=HEADERS
     )
     alertas_criticas = response.json() if response.status_code == 200 else []
 
-    # Obtener resumen de alertas por tipo
+    # Obtener resumen de alertas por tipo (EXCLUIR MANTENIMIENTO)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=tipo_alerta,nivel_urgencia,estado",
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=tipo_alerta,nivel_urgencia,estado&tipo_alerta=not.like.%MANTENIMIENTO%",
         headers=HEADERS
     )
     todas_alertas = response.json() if response.status_code == 200 else []
@@ -6757,6 +6757,9 @@ def ver_todas_alertas():
         query_params.append(f"estado=eq.{estado_filtro}")
     if tipo_filtro:
         query_params.append(f"tipo_alerta=eq.{tipo_filtro}")
+    else:
+        # Si no se filtra por tipo específico, excluir MANTENIMIENTO
+        query_params.append("tipo_alerta=not.like.%MANTENIMIENTO%")
     if urgencia_filtro:
         query_params.append(f"nivel_urgencia=eq.{urgencia_filtro}")
 
