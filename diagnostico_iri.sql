@@ -1,11 +1,13 @@
 -- ============================================
 -- SCRIPT DE DIAGNÓSTICO DEL IRI
 -- Verificar por qué no aparecen máquinas en el IRI
+-- Compatible con ejecución directa SQL
 -- ============================================
 
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 1: Estado de Instalaciones'
-\echo '=========================================='
+-- DIAGNÓSTICO 1: Estado de Instalaciones
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 1: Estado de Instalaciones' as info;
+SELECT '========================================' as info;
 
 SELECT
     'Total instalaciones' as metrica,
@@ -24,10 +26,11 @@ SELECT
 FROM instalaciones
 WHERE en_cartera = false OR en_cartera IS NULL;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 2: Estado de Máquinas'
-\echo '=========================================='
+-- DIAGNÓSTICO 2: Estado de Máquinas
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 2: Estado de Máquinas' as info;
+SELECT '========================================' as info;
 
 SELECT
     'Total máquinas' as metrica,
@@ -46,10 +49,11 @@ SELECT
 FROM maquinas_cartera
 WHERE en_cartera = false OR en_cartera IS NULL;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 3: Máquinas EN cartera por instalación'
-\echo '=========================================='
+-- DIAGNÓSTICO 3: Máquinas EN cartera por instalación
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 3: Máquinas EN cartera por instalación' as info;
+SELECT '========================================' as info;
 
 SELECT
     i.id,
@@ -65,19 +69,22 @@ GROUP BY i.id, i.nombre, i.municipio, i.en_cartera
 ORDER BY total_maquinas DESC
 LIMIT 20;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 4: Verificar Vista v_riesgo_instalaciones'
-\echo '=========================================='
+-- DIAGNÓSTICO 4: Verificar Vista v_riesgo_instalaciones
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 4: Verificar Vista v_riesgo_instalaciones' as info;
+SELECT '========================================' as info;
 
 SELECT
-    COUNT(*) as total_instalaciones_con_iri
+    'Total instalaciones con IRI calculado' as metrica,
+    COUNT(*) as cantidad
 FROM v_riesgo_instalaciones;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 5: Top 10 Instalaciones por IRI (actual)'
-\echo '=========================================='
+-- DIAGNÓSTICO 5: Top 10 Instalaciones por IRI (actual)
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 5: Top 10 Instalaciones por IRI (actual)' as info;
+SELECT '========================================' as info;
 
 SELECT
     instalacion_nombre,
@@ -94,10 +101,11 @@ FROM v_riesgo_instalaciones
 ORDER BY indice_riesgo_instalacion DESC
 LIMIT 10;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 6: Distribución de IRI'
-\echo '=========================================='
+-- DIAGNÓSTICO 6: Distribución de IRI
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 6: Distribución de IRI' as info;
+SELECT '========================================' as info;
 
 SELECT
     nivel_riesgo_instalacion,
@@ -115,10 +123,11 @@ ORDER BY
         WHEN 'BAJO' THEN 4
     END;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 7: Estadísticas de Averías Recientes'
-\echo '=========================================='
+-- DIAGNÓSTICO 7: Estadísticas de Averías Recientes
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 7: Estadísticas de Averías Recientes' as info;
+SELECT '========================================' as info;
 
 SELECT
     'Máquinas con averías en último mes' as metrica,
@@ -154,10 +163,11 @@ WHERE m.en_cartera = true
 AND i.en_cartera = true
 AND p.id IS NULL;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 8: Estado Semafórico de Máquinas'
-\echo '=========================================='
+-- DIAGNÓSTICO 8: Estado Semafórico de Máquinas
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 8: Estado Semafórico de Máquinas' as info;
+SELECT '========================================' as info;
 
 SELECT
     estado_semaforico,
@@ -172,10 +182,11 @@ ORDER BY
         WHEN 'ESTABLE' THEN 4
     END;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 9: Alertas Activas'
-\echo '=========================================='
+-- DIAGNÓSTICO 9: Alertas Activas
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 9: Alertas Activas' as info;
+SELECT '========================================' as info;
 
 SELECT
     'Total alertas activas' as metrica,
@@ -209,10 +220,11 @@ AND a.tipo_alerta = 'FALLA_REPETIDA'
 AND m.en_cartera = true
 AND i.en_cartera = true;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 10: Pendientes Técnicos'
-\echo '=========================================='
+-- DIAGNÓSTICO 10: Pendientes Técnicos
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 10: Pendientes Técnicos' as info;
+SELECT '========================================' as info;
 
 SELECT
     nivel_urgencia,
@@ -229,10 +241,11 @@ ORDER BY
         WHEN 'BAJA' THEN 4
     END;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 11: Índice de Problema por Máquina (Top 20)'
-\echo '=========================================='
+-- DIAGNÓSTICO 11: Índice de Problema por Máquina (Top 20)
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 11: Índice de Problema por Máquina (Top 20)' as info;
+SELECT '========================================' as info;
 
 SELECT
     identificador,
@@ -247,10 +260,11 @@ FROM v_maquinas_problematicas
 ORDER BY indice_problema DESC
 LIMIT 20;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 12: Instalaciones SIN datos (IRI = 0 o muy bajo)'
-\echo '=========================================='
+-- DIAGNÓSTICO 12: Instalaciones SIN datos (IRI = 0 o muy bajo)
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 12: Instalaciones SIN datos (IRI bajo)' as info;
+SELECT '========================================' as info;
 
 SELECT
     instalacion_nombre,
@@ -267,20 +281,21 @@ WHERE indice_riesgo_instalacion < 5
 ORDER BY total_maquinas DESC
 LIMIT 10;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 13: Componentes del IRI - Desglose Detallado'
-\echo '=========================================='
+-- DIAGNÓSTICO 13: Componentes del IRI - Desglose Detallado
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 13: Componentes del IRI' as info;
+SELECT '========================================' as info;
 
 SELECT
     instalacion_nombre,
     municipio,
     -- Componente 1: Promedio índice (30%)
-    ROUND((COALESCE(promedio_indice_problema, 0) * 2) * 0.30, 2) as componente_indice,
+    ROUND((COALESCE(promedio_indice_problema, 0) * 2) * 0.30, 2) as comp_indice,
     -- Componente 2: Máquinas críticas (40%)
-    ROUND((maquinas_criticas * 20 + maquinas_inestables * 10) * 0.40, 2) as componente_maquinas,
+    ROUND((maquinas_criticas * 20 + maquinas_inestables * 10) * 0.40, 2) as comp_maquinas,
     -- Componente 3: Alertas y pendientes (30%)
-    ROUND((pendientes_urgentes * 8 + alertas_activas * 5) * 0.30, 2) as componente_alertas,
+    ROUND((pendientes_urgentes * 8 + alertas_activas * 5) * 0.30, 2) as comp_alertas,
     -- Total
     indice_riesgo_instalacion as iri_total,
     nivel_riesgo_instalacion
@@ -288,10 +303,11 @@ FROM v_riesgo_instalaciones
 ORDER BY indice_riesgo_instalacion DESC
 LIMIT 10;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO 14: Simulación IRI con Umbrales Ajustados'
-\echo '=========================================='
+-- DIAGNÓSTICO 14: Simulación IRI con Umbrales Ajustados
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO 14: Simulación con Nuevos Umbrales' as info;
+SELECT '========================================' as info;
 
 SELECT
     instalacion_nombre,
@@ -316,15 +332,15 @@ FROM v_riesgo_instalaciones
 ORDER BY indice_riesgo_instalacion DESC
 LIMIT 20;
 
-\echo ''
-\echo '=========================================='
-\echo 'DIAGNÓSTICO COMPLETADO'
-\echo '=========================================='
-\echo ''
-\echo 'CONCLUSIONES:'
-\echo '1. Si "Total instalaciones EN cartera" = 0 → REACTIVAR INSTALACIONES'
-\echo '2. Si "Total máquinas EN cartera" = 0 → REACTIVAR MÁQUINAS'
-\echo '3. Si IRI máximo < 25 → AJUSTAR UMBRALES (bajar de 25 a 15 para ALTO)'
-\echo '4. Si no hay alertas activas → EJECUTAR DETECTORES'
-\echo '5. Si no hay averías recientes → VERIFICAR IMPORTACIÓN DE DATOS'
-\echo ''
+-- RESUMEN FINAL
+SELECT '' as info;
+SELECT '========================================' as info;
+SELECT 'DIAGNÓSTICO COMPLETADO' as info;
+SELECT '========================================' as info;
+SELECT '' as info;
+SELECT 'CONCLUSIONES POSIBLES:' as info;
+SELECT '1. Si Total instalaciones EN cartera = 0 → REACTIVAR INSTALACIONES' as recomendacion;
+SELECT '2. Si Total máquinas EN cartera = 0 → REACTIVAR MÁQUINAS' as recomendacion;
+SELECT '3. Si IRI máximo < 25 → AJUSTAR UMBRALES (aplicar migración 011)' as recomendacion;
+SELECT '4. Si no hay alertas activas → EJECUTAR DETECTORES' as recomendacion;
+SELECT '5. Si no hay averías recientes → VERIFICAR IMPORTACIÓN DE DATOS' as recomendacion;
