@@ -6757,6 +6757,9 @@ def ver_todas_alertas():
         query_params.append(f"estado=eq.{estado_filtro}")
     if tipo_filtro:
         query_params.append(f"tipo_alerta=eq.{tipo_filtro}")
+    else:
+        # Si no se filtra por tipo específico, excluir MANTENIMIENTO
+        query_params.append("tipo_alerta=not.like.%MANTENIMIENTO%")
     if urgencia_filtro:
         query_params.append(f"nivel_urgencia=eq.{urgencia_filtro}")
 
