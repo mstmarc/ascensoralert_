@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Predictiva - AscensorAlert</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* === ESTILO PROFESIONAL 2025 === */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            line-height: 1.5;
+        }
+
+        main {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 30px 20px !important;
+            background: #ffffff;
+        }
+
+        /* HEADER DE PÁGINA */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #003366;
+            margin: 0 0 5px 0;
+        }
+
+        .page-header .subtitle {
+            font-size: 14px;
+            color: #555555;
+            font-weight: 500;
+        }
+
+        /* BOTONES */
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #003c80;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            border-radius: 0;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #444;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        /* GRID DE ESTADÍSTICAS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-left: 4px solid #003366;
+            padding: 20px;
+        }
+
+        .stat-card.critico {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .stat-card.urgente {
+            border-left-color: #ff9800;
+            background: #fff8f0;
+        }
+
+        .stat-card.ahorro {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #003366;
+            margin: 0;
+        }
+
+        .stat-card.critico .value {
+            color: #dc3545;
+        }
+
+        .stat-card.urgente .value {
+            color: #ff9800;
+        }
+
+        .stat-card.ahorro .value {
+            color: #28a745;
+        }
+
+        /* SECCIONES */
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #003366;
+            margin: 0;
+        }
+
+        /* TABLAS */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        table thead {
+            background: #f8f9fa;
+        }
+
+        table th {
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: #003366;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #003366;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .badge-critico {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-urgente {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge-atencion {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .badge-normal {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .badge-excelente {
+            background: #28a745;
+            color: white;
+        }
+
+        /* BARRA DE SALUD */
+        .health-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .health-bar-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .health-bar-fill.critico {
+            background: #dc3545;
+        }
+
+        .health-bar-fill.malo {
+            background: #ff9800;
+        }
+
+        .health-bar-fill.regular {
+            background: #ffc107;
+        }
+
+        .health-bar-fill.bueno {
+            background: #17a2b8;
+        }
+
+        .health-bar-fill.excelente {
+            background: #28a745;
+        }
+
+        /* ALERTAS */
+        .alert-item {
+            background: white;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .alert-item.critica {
+            border-left-color: #dc3545;
+        }
+
+        .alert-item h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #003366;
+        }
+
+        .alert-item p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .alert-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* COMPONENTES */
+        .component-item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .component-name {
+            font-weight: 600;
+            color: #003366;
+        }
+
+        .component-stats {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ÍCONOS DE ESTADO */
+        .icono-estado {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .icono-critico {
+            background: #dc3545;
+        }
+
+        .icono-urgente {
+            background: #ff9800;
+        }
+
+        .icono-atencion {
+            background: #ffc107;
+        }
+
+        .icono-normal {
+            background: #17a2b8;
+        }
+
+        .icono-excelente {
+            background: #28a745;
+        }
+
+        /* VACÍO */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            table th, table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <main>
+        <!-- HEADER -->
+        <div class="page-header">
+            <div>
+                <h1>🤖 Análisis Predictivo con IA</h1>
+                <p class="subtitle">Sistema inteligente de predicción de averías en ascensores</p>
+            </div>
+            <div>
+                <a href="/cartera/ia/alertas" class="btn">Ver Alertas</a>
+                <a href="/cartera/v2" class="btn btn-secondary">Volver a Analytics</a>
+            </div>
+        </div>
+
+        <!-- ESTADÍSTICAS GENERALES -->
+        <div class="stats-grid">
+            <div class="stat-card critico">
+                <h3>Máquinas Críticas</h3>
+                <p class="value">{{ stats.maquinas_criticas }}</p>
+            </div>
+            <div class="stat-card urgente">
+                <h3>Máquinas Urgentes</h3>
+                <p class="value">{{ stats.maquinas_urgentes }}</p>
+            </div>
+            <div class="stat-card urgente">
+                <h3>Alertas Críticas/Urgentes</h3>
+                <p class="value">{{ stats.alertas_criticas }}</p>
+            </div>
+            <div class="stat-card ahorro">
+                <h3>Ahorro Potencial</h3>
+                <p class="value">{{ "{:,.0f}".format(stats.ahorro_potencial_total) }}€</p>
+            </div>
+        </div>
+
+        <!-- MÁQUINAS CON PEOR SALUD -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🔴 Máquinas con Mayor Riesgo (Top 20)</h2>
+                <a href="/cartera/ia/alertas" class="btn btn-success">Ver Todas las Alertas</a>
+            </div>
+
+            {% if maquinas %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Máquina</th>
+                        <th>Instalación</th>
+                        <th>Salud</th>
+                        <th>Tendencia</th>
+                        <th>Componente en Riesgo</th>
+                        <th>Probabilidad</th>
+                        <th>Días Estimados</th>
+                        <th>Ahorro Potencial</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in maquinas %}
+                    <tr>
+                        <td>
+                            {% if m.estado_general == 'CRITICO' %}
+                                <span class="badge badge-critico">CRÍTICO</span>
+                            {% elif m.estado_general == 'URGENTE' %}
+                                <span class="badge badge-urgente">URGENTE</span>
+                            {% elif m.estado_general == 'ATENCION' %}
+                                <span class="badge badge-atencion">ATENCIÓN</span>
+                            {% elif m.estado_general == 'NORMAL' %}
+                                <span class="badge badge-normal">NORMAL</span>
+                            {% else %}
+                                <span class="badge badge-excelente">EXCELENTE</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ m.maquina or 'N/A' }}</strong></td>
+                        <td>{{ m.instalacion or 'N/A' }}</td>
+                        <td>
+                            <div>
+                                <strong>{{ m.puntuacion_salud or 0 }}/100</strong>
+                                <div class="health-bar">
+                                    {% set salud = m.puntuacion_salud or 0 %}
+                                    {% if salud >= 80 %}
+                                        <div class="health-bar-fill excelente" style="width: {{ salud }}%"></div>
+                                    {% elif salud >= 60 %}
+                                        <div class="health-bar-fill bueno" style="width: {{ salud }}%"></div>
+                                    {% elif salud >= 40 %}
+                                        <div class="health-bar-fill regular" style="width: {{ salud }}%"></div>
+                                    {% elif salud >= 20 %}
+                                        <div class="health-bar-fill malo" style="width: {{ salud }}%"></div>
+                                    {% else %}
+                                        <div class="health-bar-fill critico" style="width: {{ salud }}%"></div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if m.tendencia == 'CRITICA' %}
+                                <span style="color: #dc3545;">📉 CRÍTICA</span>
+                            {% elif m.tendencia == 'DETERIORANDO' %}
+                                <span style="color: #ff9800;">📉 Deteriorando</span>
+                            {% elif m.tendencia == 'ESTABLE' %}
+                                <span style="color: #17a2b8;">➡️ Estable</span>
+                            {% elif m.tendencia == 'MEJORANDO' %}
+                                <span style="color: #28a745;">📈 Mejorando</span>
+                            {% else %}
+                                <span>-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ m.componente_riesgo_1 or 'N/A' }}</td>
+                        <td>
+                            {% if m.probabilidad_fallo_1 %}
+                                <strong style="color: {% if m.probabilidad_fallo_1 >= 70 %}#dc3545{% elif m.probabilidad_fallo_1 >= 40 %}#ff9800{% else %}#666{% endif %}">
+                                    {{ "{:.0f}".format(m.probabilidad_fallo_1) }}%
+                                </strong>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if m.dias_estimados_fallo_1 %}
+                                <span style="color: {% if m.dias_estimados_fallo_1 <= 30 %}#dc3545{% elif m.dias_estimados_fallo_1 <= 60 %}#ff9800{% else %}#666{% endif %}">
+                                    {{ m.dias_estimados_fallo_1 }} días
+                                </span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if m.ahorro_potencial %}
+                                <strong style="color: #28a745;">{{ "{:,.0f}".format(m.ahorro_potencial) }}€</strong>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/cartera/ia/prediccion/{{ m.maquina_id }}" class="btn" style="padding: 4px 8px; font-size: 11px;">
+                                Ver Detalle
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <h3>No hay predicciones generadas aún</h3>
+                <p>Ejecuta el sistema de análisis de IA para generar predicciones de las máquinas.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ALERTAS CRÍTICAS ACTIVAS -->
+        <div class="section">
+            <div class="section-header">
+                <h2>⚠️ Alertas Predictivas Activas</h2>
+                <a href="/cartera/ia/alertas" class="btn">Ver Todas</a>
+            </div>
+
+            {% if alertas %}
+                {% for alerta in alertas[:10] %}
+                <div class="alert-item {% if alerta.nivel_urgencia in ['CRITICA', 'URGENTE'] %}critica{% endif %}">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <h4>
+                                <span class="badge {% if alerta.nivel_urgencia == 'CRITICA' %}badge-critico{% elif alerta.nivel_urgencia == 'URGENTE' %}badge-urgente{% elif alerta.nivel_urgencia == 'ALTA' %}badge-atencion{% else %}badge-normal{% endif %}">
+                                    {{ alerta.nivel_urgencia }}
+                                </span>
+                                {{ alerta.titulo }}
+                            </h4>
+                            <p>{{ alerta.descripcion[:150] }}{% if alerta.descripcion|length > 150 %}...{% endif %}</p>
+                            <div class="alert-meta">
+                                <span>📅 {{ alerta.fecha_deteccion|format_fecha }}</span>
+                                <span>🔧 {{ alerta.componente_afectado or 'N/A' }}</span>
+                                {% if alerta.probabilidad_fallo %}
+                                <span>📊 Probabilidad: {{ "{:.0f}".format(alerta.probabilidad_fallo) }}%</span>
+                                {% endif %}
+                                {% if alerta.ahorro_estimado %}
+                                <span style="color: #28a745;">💰 Ahorro: {{ "{:,.0f}".format(alerta.ahorro_estimado) }}€</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <a href="/cartera/ia/alerta/{{ alerta.id }}" class="btn" style="padding: 6px 12px; font-size: 12px;">
+                                Ver Detalle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <h3>✅ No hay alertas activas</h3>
+                <p>El sistema no ha detectado riesgos que requieran atención inmediata.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- COMPONENTES MÁS PROBLEMÁTICOS -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🔧 Componentes Más Problemáticos</h2>
+                <a href="/cartera/ia/componentes" class="btn">Ver Análisis Completo</a>
+            </div>
+
+            {% if componentes %}
+                {% for comp in componentes[:10] %}
+                <div class="component-item">
+                    <div>
+                        <span class="component-name">{{ comp.componente_principal }}</span>
+                    </div>
+                    <div class="component-stats">
+                        <span>{{ comp.total_fallos }} fallos</span>
+                        <span style="margin-left: 15px;">{{ "{:.1f}".format(comp.fallos_por_maquina) }} fallos/máquina</span>
+                        {% if comp.prob_recurrencia_promedio %}
+                        <span style="margin-left: 15px; color: #ff9800;">{{ "{:.0f}".format(comp.prob_recurrencia_promedio) }}% recurrencia</span>
+                        {% endif %}
+                        {% if comp.coste_promedio %}
+                        <span style="margin-left: 15px; color: #dc3545;">{{ "{:,.0f}".format(comp.coste_promedio) }}€ promedio</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <h3>No hay datos de componentes analizados</h3>
+                <p>Ejecuta el análisis de IA en los partes de trabajo para obtener información sobre componentes.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ROI DEL SISTEMA -->
+        {% if roi_data %}
+        <div class="section">
+            <div class="section-header">
+                <h2>📈 ROI del Sistema de IA (Últimos 6 Meses)</h2>
+                <a href="/cartera/ia/metricas" class="btn">Ver Métricas Detalladas</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Predicciones</th>
+                        <th>Acertadas</th>
+                        <th>Tasa de Acierto</th>
+                        <th>Ahorro Real</th>
+                        <th>Ahorro Potencial</th>
+                        <th>Confianza</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for roi in roi_data %}
+                    <tr>
+                        <td><strong>{{ roi.mes[:7] }}</strong></td>
+                        <td>{{ roi.predicciones_generadas }}</td>
+                        <td>{{ roi.predicciones_acertadas }}</td>
+                        <td>
+                            <strong style="color: {% if roi.tasa_acierto >= 75 %}#28a745{% elif roi.tasa_acierto >= 50 %}#ff9800{% else %}#dc3545{% endif %}">
+                                {{ "{:.1f}".format(roi.tasa_acierto) }}%
+                            </strong>
+                        </td>
+                        <td>
+                            {% if roi.ahorro_real %}
+                                <strong style="color: #28a745;">{{ "{:,.0f}".format(roi.ahorro_real) }}€</strong>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if roi.ahorro_potencial %}
+                                {{ "{:,.0f}".format(roi.ahorro_potencial) }}€
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ "{:.0f}".format(roi.confianza_promedio) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+    </main>
+
+    {% include 'footer.html' %}
+</body>
+</html>
