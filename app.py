@@ -6649,16 +6649,16 @@ def cartera_ver_instalacion(instalacion_id):
 def cartera_dashboard_v2():
     """Dashboard V2 con sistema de alertas y estado semafórico"""
 
-    # Obtener alertas críticas pendientes
+    # Obtener alertas críticas pendientes (EXCLUIR MANTENIMIENTO)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=*,maquinas_cartera(identificador,instalaciones(nombre))&estado=in.(PENDIENTE,EN_REVISION)&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=10",
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=*,maquinas_cartera(identificador,instalaciones(nombre))&estado=in.(PENDIENTE,EN_REVISION)&tipo_alerta=not.like.%MANTENIMIENTO%&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=10",
         headers=HEADERS
     )
     alertas_criticas = response.json() if response.status_code == 200 else []
 
-    # Obtener resumen de alertas por tipo
+    # Obtener resumen de alertas por tipo (EXCLUIR MANTENIMIENTO)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=tipo_alerta,nivel_urgencia,estado",
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=tipo_alerta,nivel_urgencia,estado&tipo_alerta=not.like.%MANTENIMIENTO%",
         headers=HEADERS
     )
     todas_alertas = response.json() if response.status_code == 200 else []
@@ -6669,8 +6669,7 @@ def cartera_dashboard_v2():
         'urgentes': sum(1 for a in todas_alertas if a['nivel_urgencia'] == 'URGENTE' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
         'altas': sum(1 for a in todas_alertas if a['nivel_urgencia'] == 'ALTA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
         'fallas_repetidas': sum(1 for a in todas_alertas if a['tipo_alerta'] == 'FALLA_REPETIDA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
-        'recomendaciones_ignoradas': sum(1 for a in todas_alertas if a['tipo_alerta'] == 'RECOMENDACION_IGNORADA' and a['estado'] in ['PENDIENTE', 'EN_REVISION']),
-        'mantenimientos_omitidos': sum(1 for a in todas_alertas if 'MANTENIMIENTO_OMITIDO' in a['tipo_alerta'] and a['estado'] in ['PENDIENTE', 'EN_REVISION'])
+        'recomendaciones_ignoradas': sum(1 for a in todas_alertas if a['tipo_alerta'] == 'RECOMENDACION_IGNORADA' and a['estado'] in ['PENDIENTE', 'EN_REVISION'])
     }
 
     # Obtener máquinas por estado semafórico
