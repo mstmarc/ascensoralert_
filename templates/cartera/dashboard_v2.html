@@ -8,12 +8,38 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* === DASHBOARD V2 - ESTILOS ESPECÍFICOS === */
+        /* HEADER CENTRADO */
+        header .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-        .v2-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px 20px;
+        header .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* === ESTILO PROFESIONAL 2025 === */
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #ffffff;
+            line-height: 1.5;
+        }
+
+        main {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 30px 20px !important;
+            background: #ffffff;
+        }
+
+        main .menu {
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
         }
 
         /* HEADER DE PÁGINA */
@@ -27,7 +53,7 @@
             font-size: 24px;
             font-weight: 700;
             color: #003366;
-            margin: 0 0 10px 0;
+            margin-bottom: 10px;
         }
 
         .page-header .subtitle {
@@ -49,7 +75,50 @@
             margin: 0;
         }
 
-        /* Alertas Críticas Banner */
+        /* BOTONES */
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #003c80;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn:hover {
+            background: #002f66;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* ALERTAS BANNER */
         .alertas-banner {
             background: transparent;
             border: 1px solid #e6e6e6;
@@ -72,15 +141,7 @@
             font-size: 14px;
         }
 
-        /* Grid principal */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        /* KPIs de alertas */
+        /* KPIs DE ALERTAS */
         .alertas-kpis {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -91,8 +152,8 @@
         .kpi-card {
             background: transparent;
             border: 1px solid #e6e6e6;
-            padding: 20px;
             border-radius: 8px;
+            padding: 20px;
             text-align: center;
             display: block;
             text-decoration: none;
@@ -112,13 +173,6 @@
             border-left: 4px solid #ff9800;
         }
 
-        .kpi-card .number {
-            font-size: 36px;
-            font-weight: 700;
-            color: #003366;
-            margin: 10px 0;
-        }
-
         .kpi-card .label {
             font-size: 12px;
             color: #666;
@@ -126,7 +180,22 @@
             font-weight: 600;
         }
 
-        /* Secciones */
+        .kpi-card .number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #003366;
+            margin: 10px 0;
+        }
+
+        /* GRID PRINCIPAL */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* SECCIONES */
         .estado-section {
             margin-bottom: 35px;
         }
@@ -147,72 +216,7 @@
             margin: 0;
         }
 
-        /* Semáforo de máquinas */
-        .semaforico-box {
-            background: transparent;
-            border: 1px solid #e6e6e6;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .semaforico-box h3 {
-            margin: 0 0 15px 0;
-            color: #003366;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .semaforico-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .semaforico-item {
-            padding: 16px;
-            border-radius: 8px;
-            text-align: center;
-            background: transparent;
-            border: 1px solid #e6e6e6;
-            transition: all 0.2s;
-        }
-
-        .semaforico-item:hover {
-            border-color: #003366;
-        }
-
-        .semaforico-item.critico {
-            border-left: 4px solid #d32f2f;
-        }
-
-        .semaforico-item.inestable {
-            border-left: 4px solid #f57c00;
-        }
-
-        .semaforico-item.seguimiento {
-            border-left: 4px solid #f9a825;
-        }
-
-        .semaforico-item.estable {
-            border-left: 4px solid #43a047;
-        }
-
-        .semaforico-item .count {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 8px 0;
-            color: #003366;
-        }
-
-        .semaforico-item .label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: #666;
-        }
-
-        /* Lista de alertas */
+        /* LISTA DE ALERTAS */
         .alertas-list {
             background: transparent;
             border: 1px solid #e6e6e6;
@@ -229,9 +233,10 @@
         }
 
         .alerta-item {
-            padding: 16px;
+            background: transparent;
             border: 1px solid #e6e6e6;
             border-radius: 8px;
+            padding: 16px;
             margin-bottom: 12px;
             transition: all 0.2s;
         }
@@ -293,7 +298,72 @@
             color: #666;
         }
 
-        /* Pérdidas */
+        /* SEMÁFORO DE MÁQUINAS */
+        .semaforico-box {
+            background: transparent;
+            border: 1px solid #e6e6e6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .semaforico-box h3 {
+            margin: 0 0 15px 0;
+            color: #003366;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .semaforico-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .semaforico-item {
+            background: transparent;
+            border: 1px solid #e6e6e6;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .semaforico-item:hover {
+            border-color: #003366;
+        }
+
+        .semaforico-item.critico {
+            border-left: 4px solid #d32f2f;
+        }
+
+        .semaforico-item.inestable {
+            border-left: 4px solid #f57c00;
+        }
+
+        .semaforico-item.seguimiento {
+            border-left: 4px solid #f9a825;
+        }
+
+        .semaforico-item.estable {
+            border-left: 4px solid #43a047;
+        }
+
+        .semaforico-item .count {
+            font-size: 28px;
+            font-weight: 700;
+            color: #003366;
+            margin: 8px 0;
+        }
+
+        .semaforico-item .label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        /* PÉRDIDAS */
         .perdidas-box {
             background: transparent;
             border: 1px solid #e6e6e6;
@@ -333,7 +403,7 @@
             text-align: left;
         }
 
-        /* Instalaciones de riesgo */
+        /* INSTALACIONES DE RIESGO */
         .instalaciones-riesgo {
             background: transparent;
             border: 1px solid #e6e6e6;
@@ -350,14 +420,14 @@
         }
 
         .instalacion-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
             background: transparent;
             border: 1px solid #e6e6e6;
             border-radius: 8px;
+            padding: 16px;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             transition: all 0.2s;
         }
 
@@ -395,7 +465,7 @@
             color: #e65100;
         }
 
-        /* Tabla de pendientes técnicos */
+        /* TABLA DE PENDIENTES */
         .pendientes-table {
             width: 100%;
             border-collapse: collapse;
@@ -422,7 +492,19 @@
             background: #f8f9fa;
         }
 
-        /* Responsive */
+        /* RESPONSIVE */
+        @media (min-width: 768px) {
+            .alertas-kpis {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .alertas-kpis {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
         @media (max-width: 1200px) {
             .main-grid {
                 grid-template-columns: 1fr;
@@ -430,10 +512,6 @@
         }
 
         @media (max-width: 768px) {
-            .v2-container {
-                padding: 15px 10px;
-            }
-
             .alertas-kpis {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -456,8 +534,8 @@
 
     <!-- Contenido principal -->
     <main>
-        <div class="v2-container">
-            <!-- Page Header -->
+        <div class="menu">
+            <!-- HEADER DE PÁGINA -->
             <div class="page-header">
                 <h1>Analítica Avanzada V2</h1>
                 <p class="subtitle">Sistema de Alertas Predictivas y Gestión Inteligente</p>
@@ -466,7 +544,7 @@
                     <form method="POST" action="/cartera/v2/ejecutar-detectores">
                         <button type="submit" class="btn btn-success">Ejecutar Detectores</button>
                     </form>
-                    <a href="/cartera/v2/alertas" class="btn btn-primary">Ver Todas las Alertas</a>
+                    <a href="/cartera/v2/alertas" class="btn">Ver Todas las Alertas</a>
                 </div>
             </div>
 
@@ -484,7 +562,7 @@
             <!-- Banner de alertas críticas -->
             {% if alertas_stats.urgentes > 0 %}
             <div class="alertas-banner">
-                <h2>ATENCIÓN: {{ alertas_stats.urgentes }} Alerta{{ 's' if alertas_stats.urgentes > 1 }} Urgente{{ 's' if alertas_stats.urgentes > 1 }}</h2>
+                <h2>⚠️ ATENCIÓN: {{ alertas_stats.urgentes }} Alerta{{ 's' if alertas_stats.urgentes > 1 }} Urgente{{ 's' if alertas_stats.urgentes > 1 }}</h2>
                 <p>Requieren acción inmediata. Revisa las alertas a continuación y toma medidas antes de que se agraven.</p>
             </div>
             {% endif %}
@@ -534,7 +612,7 @@
                                     {{ alerta.fecha_deteccion[:10] }}
                                 </div>
                                 <div style="margin-top: 10px;">
-                                    <a href="/cartera/v2/alerta/{{ alerta.id }}" class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;">Ver Detalle →</a>
+                                    <a href="/cartera/v2/alerta/{{ alerta.id }}" class="btn btn-sm">Ver Detalle →</a>
                                 </div>
                             </div>
                             {% endfor %}
@@ -565,7 +643,7 @@
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <span class="badge-riesgo critico">CRÍTICO</span>
-                                    <a href="/cartera/maquina/{{ maquina.maquina_id }}" class="btn btn-primary" style="font-size: 11px; padding: 5px 10px;">Ver →</a>
+                                    <a href="/cartera/maquina/{{ maquina.maquina_id }}" class="btn btn-sm">Ver →</a>
                                 </div>
                             </div>
                             {% endfor %}
@@ -673,7 +751,7 @@
                                 <td><span style="padding: 4px 8px; background: #e9ecef; border-radius: 6px; font-size: 11px; font-weight: 600;">{{ pend.estado }}</span></td>
                                 <td>{{ pend.asignado_a or '-' }}</td>
                                 <td style="text-align: center;">
-                                    <a href="/cartera/maquina/{{ pend.maquina_id }}" class="btn btn-primary" style="font-size: 11px; padding: 5px 10px;">Ver Máquina</a>
+                                    <a href="/cartera/maquina/{{ pend.maquina_id }}" class="btn btn-sm">Ver Máquina</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -686,9 +764,12 @@
                 {% endif %}
 
                 <div style="text-align: center; margin-top: 15px;">
-                    <a href="/cartera/v2/pendientes-tecnicos" class="btn btn-primary">Ver Todos los Pendientes →</a>
+                    <a href="/cartera/v2/pendientes-tecnicos" class="btn">Ver Todos los Pendientes →</a>
                 </div>
             </div>
+
+            <br>
+            <a href="/home" class="btn">Volver al Home</a>
         </div>
     </main>
 
