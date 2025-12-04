@@ -5621,48 +5621,69 @@ def cartera_dashboard():
     # Obtener estadísticas generales
     stats = {}
 
-    # Total de instalaciones
+    # Total de instalaciones (solo en cartera)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/instalaciones?select=count",
+        f"{SUPABASE_URL}/rest/v1/instalaciones?select=count&en_cartera=eq.true",
         headers={**HEADERS, "Prefer": "count=exact"}
     )
     stats['total_instalaciones'] = response.headers.get('Content-Range', '0').split('/')[-1]
 
-    # Total de máquinas
+    # Total de máquinas (solo en cartera)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/maquinas_cartera?select=count",
+        f"{SUPABASE_URL}/rest/v1/maquinas_cartera?select=count&en_cartera=eq.true",
         headers={**HEADERS, "Prefer": "count=exact"}
     )
     stats['total_maquinas'] = response.headers.get('Content-Range', '0').split('/')[-1]
 
-    # Total de partes
+    # Obtener IDs de máquinas en cartera para filtrar partes
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count",
-        headers={**HEADERS, "Prefer": "count=exact"}
+        f"{SUPABASE_URL}/rest/v1/maquinas_cartera?select=id&en_cartera=eq.true",
+        headers=HEADERS
     )
-    stats['total_partes'] = response.headers.get('Content-Range', '0').split('/')[-1]
+    maquinas_en_cartera = response.json() if response.status_code == 200 else []
+    maquina_ids_cartera = [m['id'] for m in maquinas_en_cartera]
+    maquina_ids_str = ','.join(map(str, maquina_ids_cartera)) if maquina_ids_cartera else '0'
 
-    # Recomendaciones pendientes (no revisadas y sin oportunidad creada)
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tiene_recomendacion=eq.true&recomendacion_revisada=eq.false&oportunidad_creada=eq.false",
-        headers={**HEADERS, "Prefer": "count=exact"}
-    )
-    stats['recomendaciones_pendientes'] = response.headers.get('Content-Range', '0').split('/')[-1]
+    # Total de partes (solo de máquinas en cartera)
+    if maquina_ids_cartera:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&maquina_id=in.({maquina_ids_str})",
+            headers={**HEADERS, "Prefer": "count=exact"}
+        )
+        stats['total_partes'] = response.headers.get('Content-Range', '0').split('/')[-1]
+    else:
+        stats['total_partes'] = '0'
+
+    # Recomendaciones pendientes (solo de máquinas en cartera)
+    if maquina_ids_cartera:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tiene_recomendacion=eq.true&recomendacion_revisada=eq.false&oportunidad_creada=eq.false&maquina_id=in.({maquina_ids_str})",
+            headers={**HEADERS, "Prefer": "count=exact"}
+        )
+        stats['recomendaciones_pendientes'] = response.headers.get('Content-Range', '0').split('/')[-1]
+    else:
+        stats['recomendaciones_pendientes'] = '0'
 
     # KPIs adicionales de análisis
-    # Averías último año
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tipo_parte_normalizado=eq.AVERIA&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}",
-        headers={**HEADERS, "Prefer": "count=exact"}
-    )
-    stats['averias_anio'] = response.headers.get('Content-Range', '0').split('/')[-1]
+    # Averías último año (solo de máquinas en cartera)
+    if maquina_ids_cartera:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tipo_parte_normalizado=eq.AVERIA&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}&maquina_id=in.({maquina_ids_str})",
+            headers={**HEADERS, "Prefer": "count=exact"}
+        )
+        stats['averias_anio'] = response.headers.get('Content-Range', '0').split('/')[-1]
+    else:
+        stats['averias_anio'] = '0'
 
-    # Mantenimientos último año
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tipo_parte_normalizado=eq.MANTENIMIENTO&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}",
-        headers={**HEADERS, "Prefer": "count=exact"}
-    )
-    stats['mantenimientos_anio'] = response.headers.get('Content-Range', '0').split('/')[-1]
+    # Mantenimientos último año (solo de máquinas en cartera)
+    if maquina_ids_cartera:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=count&tipo_parte_normalizado=eq.MANTENIMIENTO&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}&maquina_id=in.({maquina_ids_str})",
+            headers={**HEADERS, "Prefer": "count=exact"}
+        )
+        stats['mantenimientos_anio'] = response.headers.get('Content-Range', '0').split('/')[-1]
+    else:
+        stats['mantenimientos_anio'] = '0'
 
     # Top 10 máquinas problemáticas (usando la vista)
     response = requests.get(
@@ -5703,17 +5724,20 @@ def cartera_dashboard():
         'next_page': page + 1 if page < total_pages else None
     }
 
-    # Distribución de tipos de parte (último año)
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=tipo_parte_normalizado&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}",
-        headers=HEADERS
-    )
-    if response.status_code == 200:
-        partes_data = response.json()
-        tipos_distribucion = {}
-        for parte in partes_data:
-            tipo = parte.get('tipo_parte_normalizado', 'OTRO')
-            tipos_distribucion[tipo] = tipos_distribucion.get(tipo, 0) + 1
+    # Distribución de tipos de parte (último año, solo de máquinas en cartera)
+    if maquina_ids_cartera:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=tipo_parte_normalizado&fecha_parte=gte.{(datetime.now() - timedelta(days=365)).isoformat()}&maquina_id=in.({maquina_ids_str})",
+            headers=HEADERS
+        )
+        if response.status_code == 200:
+            partes_data = response.json()
+            tipos_distribucion = {}
+            for parte in partes_data:
+                tipo = parte.get('tipo_parte_normalizado', 'OTRO')
+                tipos_distribucion[tipo] = tipos_distribucion.get(tipo, 0) + 1
+        else:
+            tipos_distribucion = {}
     else:
         tipos_distribucion = {}
 
@@ -6222,15 +6246,16 @@ def cartera_oportunidades():
     # Filtro por estado (opcional)
     estado_filtro = request.args.get('estado', '')
 
-    # Query base
-    query_params = []
+    # Query base (filtrar solo oportunidades de máquinas en cartera)
+    query_params = ["select=*,maquinas_cartera!inner(identificador,en_cartera,instalaciones!inner(nombre,en_cartera))"]
+    query_params.append("maquinas_cartera.en_cartera=eq.true")
+    query_params.append("maquinas_cartera.instalaciones.en_cartera=eq.true")
+
     if estado_filtro:
         query_params.append(f"estado=eq.{estado_filtro}")
 
-    query_string = "&".join(query_params) if query_params else ""
-    url = f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?select=*,maquinas_cartera(identificador,instalaciones(nombre))&order=created_at.desc"
-    if query_string:
-        url += f"&{query_string}"
+    query_params.append("order=created_at.desc")
+    url = f"{SUPABASE_URL}/rest/v1/oportunidades_facturacion?{'&'.join(query_params)}"
 
     response = requests.get(url, headers=HEADERS)
     oportunidades = response.json() if response.status_code == 200 else []
@@ -6717,16 +6742,16 @@ def cartera_reactivar_instalacion(instalacion_id):
 def cartera_dashboard_v2():
     """Dashboard V2 con sistema de alertas y estado semafórico"""
 
-    # Obtener alertas críticas pendientes (EXCLUIR MANTENIMIENTO)
+    # Obtener alertas críticas pendientes (EXCLUIR MANTENIMIENTO y solo máquinas en cartera)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=*,maquinas_cartera(identificador,instalaciones(nombre))&estado=in.(PENDIENTE,EN_REVISION)&tipo_alerta=not.like.%MANTENIMIENTO%&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=10",
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=*,maquinas_cartera!inner(identificador,en_cartera,instalaciones!inner(nombre,en_cartera))&maquinas_cartera.en_cartera=eq.true&maquinas_cartera.instalaciones.en_cartera=eq.true&estado=in.(PENDIENTE,EN_REVISION)&tipo_alerta=not.like.%MANTENIMIENTO%&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=10",
         headers=HEADERS
     )
     alertas_criticas = response.json() if response.status_code == 200 else []
 
-    # Obtener resumen de alertas por tipo (EXCLUIR MANTENIMIENTO)
+    # Obtener resumen de alertas por tipo (EXCLUIR MANTENIMIENTO y solo máquinas en cartera)
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=tipo_alerta,nivel_urgencia,estado&tipo_alerta=not.like.%MANTENIMIENTO%",
+        f"{SUPABASE_URL}/rest/v1/alertas_automaticas?select=tipo_alerta,nivel_urgencia,estado,maquinas_cartera!inner(en_cartera,instalaciones!inner(en_cartera))&maquinas_cartera.en_cartera=eq.true&maquinas_cartera.instalaciones.en_cartera=eq.true&tipo_alerta=not.like.%MANTENIMIENTO%",
         headers=HEADERS
     )
     todas_alertas = response.json() if response.status_code == 200 else []
@@ -6818,8 +6843,10 @@ def ver_todas_alertas():
     tipo_filtro = request.args.get('tipo', '')
     urgencia_filtro = request.args.get('urgencia', '')
 
-    # Construir query
-    query_params = ["select=*,maquinas_cartera(identificador,instalaciones(nombre))"]
+    # Construir query (filtrar solo máquinas en cartera)
+    query_params = ["select=*,maquinas_cartera!inner(identificador,en_cartera,instalaciones!inner(nombre,en_cartera))"]
+    query_params.append("maquinas_cartera.en_cartera=eq.true")
+    query_params.append("maquinas_cartera.instalaciones.en_cartera=eq.true")
 
     if estado_filtro:
         query_params.append(f"estado=eq.{estado_filtro}")
