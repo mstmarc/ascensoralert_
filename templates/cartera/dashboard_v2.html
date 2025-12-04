@@ -122,7 +122,6 @@
         .alertas-banner {
             background: transparent;
             border: 1px solid #e6e6e6;
-            border-left: 4px solid #dc3545;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 30px;
@@ -132,7 +131,7 @@
             margin: 0 0 10px 0;
             font-size: 18px;
             font-weight: 700;
-            color: #dc3545;
+            color: #003366;
         }
 
         .alertas-banner p {
@@ -163,14 +162,6 @@
 
         .kpi-card:hover {
             border-color: #003366;
-        }
-
-        .kpi-card.urgente {
-            border-left: 4px solid #dc3545;
-        }
-
-        .kpi-card.alta {
-            border-left: 4px solid #ff9800;
         }
 
         .kpi-card .label {
@@ -245,18 +236,6 @@
             border-color: #003366;
         }
 
-        .alerta-item.urgente {
-            border-left: 4px solid #dc3545;
-        }
-
-        .alerta-item.alta {
-            border-left: 4px solid #ff9800;
-        }
-
-        .alerta-item.media {
-            border-left: 4px solid #ffc107;
-        }
-
         .alerta-item .alerta-header {
             display: flex;
             justify-content: space-between;
@@ -278,19 +257,11 @@
             text-transform: uppercase;
         }
 
-        .badge.urgente {
-            background: #fee;
-            color: #c62828;
-        }
-
-        .badge.alta {
-            background: #fff3e0;
-            color: #e65100;
-        }
-
+        .badge.urgente,
+        .badge.alta,
         .badge.media {
-            background: #fffde7;
-            color: #f57f17;
+            background: #f0f0f0;
+            color: #666;
         }
 
         .alerta-item .meta {
@@ -333,22 +304,6 @@
             border-color: #003366;
         }
 
-        .semaforico-item.critico {
-            border-left: 4px solid #d32f2f;
-        }
-
-        .semaforico-item.inestable {
-            border-left: 4px solid #f57c00;
-        }
-
-        .semaforico-item.seguimiento {
-            border-left: 4px solid #f9a825;
-        }
-
-        .semaforico-item.estable {
-            border-left: 4px solid #43a047;
-        }
-
         .semaforico-item .count {
             font-size: 28px;
             font-weight: 700;
@@ -367,7 +322,6 @@
         .perdidas-box {
             background: transparent;
             border: 1px solid #e6e6e6;
-            border-left: 4px solid #ff9800;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -455,14 +409,10 @@
             text-transform: uppercase;
         }
 
-        .badge-riesgo.critico {
-            background: #fee;
-            color: #c62828;
-        }
-
+        .badge-riesgo.critico,
         .badge-riesgo.alto {
-            background: #fff3e0;
-            color: #e65100;
+            background: #f0f0f0;
+            color: #666;
         }
 
         /* TABLA DE PENDIENTES */
