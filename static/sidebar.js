@@ -173,7 +173,7 @@
     // Construir menú dinámicamente según permisos
     let menuHTML = `
                 <!-- Inicio -->
-                <a href="/home" class="sidebar-integrated-link">
+                <a href="/home" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Inicio
                 </a>
 
@@ -183,13 +183,13 @@
     let crearBloque = '';
     if (tienePermiso('clientes', 'write')) {
         crearBloque += `
-                <a href="/formulario_lead" class="sidebar-integrated-link">
+                <a href="/formulario_lead" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Nueva Instalación
                 </a>`;
     }
     if (tienePermiso('administradores', 'write')) {
         crearBloque += `
-                <a href="/visita_administrador" class="sidebar-integrated-link">
+                <a href="/visita_administrador" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Visita a Administrador
                 </a>`;
     }
