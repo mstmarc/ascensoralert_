@@ -6639,6 +6639,74 @@ def cartera_ver_instalacion(instalacion_id):
     )
 
 
+@app.route("/cartera/instalacion/<int:instalacion_id>/dar-baja", methods=["POST"])
+@helpers.login_required
+def cartera_dar_baja_instalacion(instalacion_id):
+    """Dar de baja una instalación"""
+
+    # Obtener datos del formulario
+    fecha_baja = request.form.get('fecha_baja')
+    motivo = request.form.get('motivo')
+
+    if not fecha_baja or not motivo:
+        flash("Debe proporcionar fecha y motivo de baja", "error")
+        return redirect(f"/cartera/instalacion/{instalacion_id}")
+
+    # Actualizar instalación
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/instalaciones?id=eq.{instalacion_id}",
+        json={
+            "en_cartera": False,
+            "fecha_salida_cartera": fecha_baja,
+            "motivo_salida": motivo
+        },
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        # También marcar todas las máquinas de esta instalación como fuera de cartera
+        requests.patch(
+            f"{SUPABASE_URL}/rest/v1/maquinas_cartera?instalacion_id=eq.{instalacion_id}",
+            json={
+                "en_cartera": False,
+                "fecha_salida_cartera": fecha_baja,
+                "motivo_salida": f"Instalación dada de baja: {motivo}"
+            },
+            headers=HEADERS
+        )
+        flash("Instalación dada de baja correctamente", "success")
+    else:
+        logger.error(f"Error al dar de baja instalación: {response.status_code} - {response.text}")
+        flash("Error al dar de baja la instalación", "error")
+
+    return redirect(f"/cartera/instalacion/{instalacion_id}")
+
+
+@app.route("/cartera/instalacion/<int:instalacion_id>/reactivar", methods=["POST"])
+@helpers.login_required
+def cartera_reactivar_instalacion(instalacion_id):
+    """Reactivar una instalación dada de baja"""
+
+    # Actualizar instalación
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/instalaciones?id=eq.{instalacion_id}",
+        json={
+            "en_cartera": True,
+            "fecha_salida_cartera": None,
+            "motivo_salida": None
+        },
+        headers=HEADERS
+    )
+
+    if response.status_code in [200, 204]:
+        flash("Instalación reactivada correctamente", "success")
+    else:
+        logger.error(f"Error al reactivar instalación: {response.status_code} - {response.text}")
+        flash("Error al reactivar la instalación", "error")
+
+    return redirect(f"/cartera/instalacion/{instalacion_id}")
+
+
 # ============================================
 # MÓDULO DE ANALÍTICA AVANZADA V2
 # Sistema de Alertas y Gestión Predictiva

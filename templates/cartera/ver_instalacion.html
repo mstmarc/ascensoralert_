@@ -370,6 +370,198 @@
             max-width: none !important;
             padding: 30px !important;
         }
+
+        /* Alert de baja */
+        .alert-baja {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .alert-baja h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .alert-baja p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .alert-baja .fecha-baja {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* Botones de acción */
+        .btn-dar-baja {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-dar-baja:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-reactivar {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-reactivar:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #003366;
+            font-size: 22px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #003366;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input[type="date"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        .btn-submit {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-submit:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -393,10 +585,32 @@
                     </p>
                     {% endif %}
                 </div>
-                <a href="/cartera" class="btn-volver">
-                    ← Volver al Dashboard
-                </a>
+                <div style="display: flex; gap: 10px;">
+                    {% if instalacion.en_cartera == False %}
+                    <form action="/cartera/instalacion/{{ instalacion.id }}/reactivar" method="POST" style="margin: 0;">
+                        <button type="submit" class="btn-reactivar" onclick="return confirm('¿Está seguro que desea reactivar esta instalación?')">
+                            ✓ Reactivar Instalación
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="btn-dar-baja" onclick="abrirModalBaja()">
+                        ⚠ Dar de Baja
+                    </button>
+                    {% endif %}
+                    <a href="/cartera" class="btn-volver">
+                        ← Volver al Dashboard
+                    </a>
+                </div>
             </div>
+
+            <!-- Alerta de instalación dada de baja -->
+            {% if instalacion.en_cartera == False %}
+            <div class="alert-baja">
+                <h3>⚠️ Instalación Fuera de Cartera</h3>
+                <p><strong>Fecha de baja:</strong> <span class="fecha-baja">{{ instalacion.fecha_salida_cartera or 'No especificada' }}</span></p>
+                <p><strong>Motivo:</strong> {{ instalacion.motivo_salida or 'No especificado' }}</p>
+            </div>
+            {% endif %}
 
             <!-- Grid de Estadísticas -->
             <div class="stats-grid">
@@ -670,6 +884,60 @@
             {% endif %}
         </div>
     </main>
+
+    <!-- Modal de dar de baja -->
+    <div id="modalBaja" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="cerrarModalBaja()">&times;</span>
+                <h2>⚠ Dar de Baja Instalación</h2>
+            </div>
+            <form action="/cartera/instalacion/{{ instalacion.id }}/dar-baja" method="POST">
+                <div class="form-group">
+                    <label for="fecha_baja">Fecha de Baja <span style="color: red;">*</span></label>
+                    <input type="date" id="fecha_baja" name="fecha_baja" required max="{{ hoy }}">
+                </div>
+                <div class="form-group">
+                    <label for="motivo">Motivo de Baja <span style="color: red;">*</span></label>
+                    <textarea id="motivo" name="motivo" required placeholder="Ej: Cliente cambió de empresa de mantenimiento, Contrato finalizado, etc."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="cerrarModalBaja()">Cancelar</button>
+                    <button type="submit" class="btn-submit">Confirmar Baja</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Establecer fecha de hoy como máximo
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha_baja').max = hoy;
+        document.getElementById('fecha_baja').value = hoy;
+
+        function abrirModalBaja() {
+            document.getElementById('modalBaja').style.display = 'block';
+        }
+
+        function cerrarModalBaja() {
+            document.getElementById('modalBaja').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalBaja');
+            if (event.target == modal) {
+                cerrarModalBaja();
+            }
+        }
+
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarModalBaja();
+            }
+        });
+    </script>
 
     <script>
         window.userPermissions = {{ permisos_usuario_json | safe }};
