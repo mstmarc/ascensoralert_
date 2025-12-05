@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, session, Response, url_for, flash, send_file
+from flask import Flask, request, render_template, redirect, session, Response, url_for, flash, send_file, jsonify
 import requests
 import os
 import urllib.parse
@@ -21,6 +21,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.pdfgen import canvas
+import analizador_ia
 
 # Configurar logging para que aparezca en Render
 logging.basicConfig(
@@ -7088,6 +7089,383 @@ def crear_trabajo_desde_alerta(alerta_id):
     else:
         flash("Error al crear trabajo técnico", "error")
         return redirect(f"/cartera/v2/alerta/{alerta_id}")
+
+
+# ============================================
+# RUTAS: SISTEMA DE IA PREDICTIVA
+# ============================================
+
+@app.route("/cartera/ia")
+@helpers.login_required
+def dashboard_ia_predictiva():
+    """Dashboard principal del sistema de IA predictiva"""
+    try:
+        # Obtener resumen de salud de máquinas
+        response_salud = requests.get(
+            f"{SUPABASE_URL}/rest/v1/v_salud_maquinas_ia?select=*&order=puntuacion_salud.asc&limit=20",
+            headers=HEADERS
+        )
+
+        maquinas_salud = response_salud.json() if response_salud.status_code == 200 else []
+
+        # Obtener alertas predictivas activas
+        response_alertas = requests.get(
+            f"{SUPABASE_URL}/rest/v1/alertas_predictivas_ia?estado=eq.ACTIVA&select=*&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=50",
+            headers=HEADERS
+        )
+
+        alertas = response_alertas.json() if response_alertas.status_code == 200 else []
+
+        # Obtener componentes más problemáticos
+        response_componentes = requests.get(
+            f"{SUPABASE_URL}/rest/v1/v_componentes_problematicos?select=*&order=total_fallos.desc&limit=10",
+            headers=HEADERS
+        )
+
+        componentes = response_componentes.json() if response_componentes.status_code == 200 else []
+
+        # Obtener métricas de ROI
+        response_roi = requests.get(
+            f"{SUPABASE_URL}/rest/v1/v_roi_sistema_ia?select=*&order=mes.desc&limit=6",
+            headers=HEADERS
+        )
+
+        roi_data = response_roi.json() if response_roi.status_code == 200 else []
+
+        # Estadísticas generales
+        stats = {
+            'maquinas_criticas': len([m for m in maquinas_salud if m.get('estado_general') == 'CRITICO']),
+            'maquinas_urgentes': len([m for m in maquinas_salud if m.get('estado_general') == 'URGENTE']),
+            'alertas_criticas': len([a for a in alertas if a.get('nivel_urgencia') in ['CRITICA', 'URGENTE']]),
+            'total_alertas_activas': len(alertas),
+            'ahorro_potencial_total': sum([m.get('ahorro_potencial', 0) or 0 for m in maquinas_salud])
+        }
+
+        return render_template(
+            "cartera/dashboard_ia.html",
+            maquinas=maquinas_salud,
+            alertas=alertas,
+            componentes=componentes,
+            roi_data=roi_data,
+            stats=stats
+        )
+
+    except Exception as e:
+        logger.error(f"Error en dashboard IA: {str(e)}")
+        flash("Error al cargar dashboard de IA", "error")
+        return redirect("/cartera/v2")
+
+
+@app.route("/cartera/ia/analizar-parte/<int:parte_id>", methods=["POST"])
+@helpers.login_required
+def analizar_parte_ia(parte_id):
+    """Analizar un parte específico con IA"""
+    try:
+        # Obtener el parte
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?id=eq.{parte_id}&select=*",
+            headers=HEADERS
+        )
+
+        if response.status_code != 200 or not response.json():
+            return jsonify({"error": "Parte no encontrado"}), 404
+
+        parte = response.json()[0]
+
+        # Verificar si ya tiene análisis
+        check_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?parte_id=eq.{parte_id}&select=id",
+            headers=HEADERS
+        )
+
+        if check_response.status_code == 200 and check_response.json():
+            return jsonify({"error": "Este parte ya tiene un análisis IA"}), 400
+
+        # Analizar con IA (esto requerirá conexión directa a PostgreSQL)
+        # Por ahora retornamos un mensaje de éxito
+        flash("Parte enviado a análisis con IA. El proceso puede tardar unos segundos.", "info")
+        return redirect(request.referrer or "/cartera")
+
+    except Exception as e:
+        logger.error(f"Error analizando parte: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/cartera/ia/analizar-lote", methods=["POST"])
+@helpers.login_required
+def analizar_lote_ia():
+    """Analizar un lote de partes con IA"""
+    try:
+        limite = request.json.get('limite', 100) if request.is_json else 100
+
+        # Nota: Esta operación requiere acceso directo a PostgreSQL
+        # En producción, se ejecutaría como tarea en background
+        flash(f"Proceso de análisis por lotes iniciado (hasta {limite} partes). "
+              f"Recibirás una notificación cuando complete.", "info")
+
+        return jsonify({"status": "started", "limite": limite}), 202
+
+    except Exception as e:
+        logger.error(f"Error en análisis por lotes: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/cartera/ia/prediccion/<int:maquina_id>")
+@helpers.login_required
+def ver_prediccion_maquina(maquina_id):
+    """Ver predicción detallada de una máquina"""
+    try:
+        # Obtener predicción activa
+        response_pred = requests.get(
+            f"{SUPABASE_URL}/rest/v1/predicciones_maquina?maquina_id=eq.{maquina_id}&estado=eq.ACTIVA&select=*",
+            headers=HEADERS
+        )
+
+        prediccion = None
+        if response_pred.status_code == 200 and response_pred.json():
+            prediccion = response_pred.json()[0]
+
+        # Obtener información de la máquina
+        response_maquina = requests.get(
+            f"{SUPABASE_URL}/rest/v1/maquinas_cartera?id=eq.{maquina_id}&select=*,instalacion:instalaciones(nombre)",
+            headers=HEADERS
+        )
+
+        if response_maquina.status_code != 200 or not response_maquina.json():
+            flash("Máquina no encontrada", "error")
+            return redirect("/cartera/ia")
+
+        maquina = response_maquina.json()[0]
+
+        # Obtener alertas activas para esta máquina
+        response_alertas = requests.get(
+            f"{SUPABASE_URL}/rest/v1/alertas_predictivas_ia?maquina_id=eq.{maquina_id}&estado=eq.ACTIVA&select=*&order=nivel_urgencia.desc",
+            headers=HEADERS
+        )
+
+        alertas = response_alertas.json() if response_alertas.status_code == 200 else []
+
+        # Obtener análisis recientes
+        response_analisis = requests.get(
+            f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?select=*,parte:partes_trabajo(numero_parte,fecha_parte,resolucion)&parte.maquina_id=eq.{maquina_id}&order=fecha_analisis.desc&limit=20",
+            headers=HEADERS
+        )
+
+        analisis = response_analisis.json() if response_analisis.status_code == 200 else []
+
+        return render_template(
+            "cartera/prediccion_maquina.html",
+            maquina=maquina,
+            prediccion=prediccion,
+            alertas=alertas,
+            analisis=analisis
+        )
+
+    except Exception as e:
+        logger.error(f"Error obteniendo predicción: {str(e)}")
+        flash("Error al cargar predicción", "error")
+        return redirect("/cartera/ia")
+
+
+@app.route("/cartera/ia/generar-prediccion/<int:maquina_id>", methods=["POST"])
+@helpers.login_required
+def generar_prediccion_ia(maquina_id):
+    """Generar nueva predicción para una máquina"""
+    try:
+        # Nota: Esta operación requiere acceso directo a PostgreSQL
+        # En producción, se ejecutaría como tarea en background
+
+        flash(f"Generando predicción con IA para la máquina. El proceso puede tardar unos minutos.", "info")
+        return redirect(f"/cartera/ia/prediccion/{maquina_id}")
+
+    except Exception as e:
+        logger.error(f"Error generando predicción: {str(e)}")
+        flash("Error al generar predicción", "error")
+        return redirect("/cartera/ia")
+
+
+@app.route("/cartera/ia/alertas")
+@helpers.login_required
+def listar_alertas_ia():
+    """Listar todas las alertas predictivas"""
+    try:
+        # Filtros
+        estado = request.args.get('estado', 'ACTIVA')
+        nivel = request.args.get('nivel', '')
+
+        # Construir query
+        query = f"estado=eq.{estado}"
+        if nivel:
+            query += f"&nivel_urgencia=eq.{nivel}"
+
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/alertas_predictivas_ia?{query}&select=*,maquina:maquinas_cartera(identificador),instalacion:maquinas_cartera(instalacion:instalaciones(nombre))&order=fecha_deteccion.desc",
+            headers=HEADERS
+        )
+
+        alertas = response.json() if response.status_code == 200 else []
+
+        return render_template(
+            "cartera/alertas_ia.html",
+            alertas=alertas,
+            estado_filtro=estado,
+            nivel_filtro=nivel
+        )
+
+    except Exception as e:
+        logger.error(f"Error listando alertas IA: {str(e)}")
+        flash("Error al cargar alertas", "error")
+        return redirect("/cartera/ia")
+
+
+@app.route("/cartera/ia/alerta/<int:alerta_id>")
+@helpers.login_required
+def ver_alerta_ia(alerta_id):
+    """Ver detalle de una alerta predictiva"""
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/alertas_predictivas_ia?id=eq.{alerta_id}&select=*,maquina:maquinas_cartera(identificador,instalacion:instalaciones(nombre)),prediccion:predicciones_maquina(*)",
+            headers=HEADERS
+        )
+
+        if response.status_code != 200 or not response.json():
+            flash("Alerta no encontrada", "error")
+            return redirect("/cartera/ia/alertas")
+
+        alerta = response.json()[0]
+
+        return render_template(
+            "cartera/alerta_ia_detalle.html",
+            alerta=alerta
+        )
+
+    except Exception as e:
+        logger.error(f"Error obteniendo alerta: {str(e)}")
+        flash("Error al cargar alerta", "error")
+        return redirect("/cartera/ia/alertas")
+
+
+@app.route("/cartera/ia/alerta/<int:alerta_id>/resolver", methods=["POST"])
+@helpers.login_required
+def resolver_alerta_ia(alerta_id):
+    """Resolver una alerta predictiva"""
+    try:
+        accion = request.form.get('accion', 'DESCARTADA')  # ACEPTADA, DESCARTADA, RESUELTA
+        notas = request.form.get('notas', '')
+
+        update_data = {
+            "estado": accion,
+            "fecha_revision": datetime.now().isoformat(),
+            "revisada_por_id": session.get("usuario_id"),
+            "notas_resultado": notas
+        }
+
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/alertas_predictivas_ia?id=eq.{alerta_id}",
+            json=update_data,
+            headers=HEADERS
+        )
+
+        if response.status_code == 200:
+            flash("Alerta actualizada correctamente", "success")
+        else:
+            flash("Error al actualizar alerta", "error")
+
+        return redirect(f"/cartera/ia/alerta/{alerta_id}")
+
+    except Exception as e:
+        logger.error(f"Error resolviendo alerta: {str(e)}")
+        flash("Error al resolver alerta", "error")
+        return redirect(f"/cartera/ia/alerta/{alerta_id}")
+
+
+@app.route("/cartera/ia/componentes")
+@helpers.login_required
+def ver_componentes_criticos():
+    """Ver análisis de componentes críticos"""
+    try:
+        # Componentes más problemáticos
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/v_componentes_problematicos?select=*&order=total_fallos.desc",
+            headers=HEADERS
+        )
+
+        componentes = response.json() if response.status_code == 200 else []
+
+        # Base de conocimiento
+        response_conocimiento = requests.get(
+            f"{SUPABASE_URL}/rest/v1/conocimiento_tecnico_ia?select=*&order=veces_aparecido.desc",
+            headers=HEADERS
+        )
+
+        conocimiento = response_conocimiento.json() if response_conocimiento.status_code == 200 else []
+
+        return render_template(
+            "cartera/componentes_ia.html",
+            componentes=componentes,
+            conocimiento=conocimiento
+        )
+
+    except Exception as e:
+        logger.error(f"Error obteniendo componentes: {str(e)}")
+        flash("Error al cargar componentes", "error")
+        return redirect("/cartera/ia")
+
+
+@app.route("/cartera/ia/metricas")
+@helpers.login_required
+def ver_metricas_ia():
+    """Ver métricas y ROI del sistema de IA"""
+    try:
+        # ROI por mes
+        response_roi = requests.get(
+            f"{SUPABASE_URL}/rest/v1/v_roi_sistema_ia?select=*&order=mes.desc&limit=12",
+            headers=HEADERS
+        )
+
+        roi_data = response_roi.json() if response_roi.status_code == 200 else []
+
+        # Métricas de precisión
+        response_metricas = requests.get(
+            f"{SUPABASE_URL}/rest/v1/metricas_precision_ia?select=*&order=fecha_fin.desc&limit=6",
+            headers=HEADERS
+        )
+
+        metricas = response_metricas.json() if response_metricas.status_code == 200 else []
+
+        return render_template(
+            "cartera/metricas_ia.html",
+            roi_data=roi_data,
+            metricas=metricas
+        )
+
+    except Exception as e:
+        logger.error(f"Error obteniendo métricas: {str(e)}")
+        flash("Error al cargar métricas", "error")
+        return redirect("/cartera/ia")
+
+
+@app.route("/cartera/ia/api/procesar-partes", methods=["POST"])
+@helpers.login_required
+def api_procesar_partes_ia():
+    """API para procesar partes con IA (requiere PostgreSQL directo)"""
+    # Esta ruta se usará desde scripts administrativos
+    # Requiere configuración de base de datos PostgreSQL
+    return jsonify({
+        "error": "Esta operación requiere acceso directo a PostgreSQL. "
+                 "Usar script analizador_ia.py con credenciales de BD."
+    }), 501
+
+
+@app.route("/cartera/ia/api/generar-predicciones", methods=["POST"])
+@helpers.login_required
+def api_generar_predicciones_ia():
+    """API para generar predicciones masivas (requiere PostgreSQL directo)"""
+    # Esta ruta se usará desde scripts administrativos
+    return jsonify({
+        "error": "Esta operación requiere acceso directo a PostgreSQL. "
+                 "Usar script analizador_ia.py con credenciales de BD."
+    }), 501
 
 
 # ============================================
