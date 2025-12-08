@@ -7716,11 +7716,10 @@ def ejecutar_analisis_web():
 
             todos_partes = response.json()
 
-            # Filtrar: averías con resolución, sin analizar (TODOS LOS AÑOS)
+            # Filtrar: TODOS los partes con resolución, sin analizar (cualquier tipo)
             partes = [
                 p for p in todos_partes
-                if (p.get('tipo_parte_normalizado') in ['AVERIA', 'GUARDIA AVISO', 'REPARACION', 'RESCATE'] and
-                    p.get('resolucion') and
+                if (p.get('resolucion') and  # Solo que tengan descripción
                     p['id'] not in ids_analizados)
             ]
 
