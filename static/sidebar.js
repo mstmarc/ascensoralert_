@@ -254,6 +254,12 @@
                 <a href="/cartera/v2" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Analítica Avanzada V2
                 </a>
+                <a href="/cartera/ia" class="sidebar-integrated-link" style="padding-left: 54px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    🤖 Dashboard IA
+                </a>
+                <a href="/cartera/ia/ejecutar" class="sidebar-integrated-link" style="padding-left: 54px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    🚀 Analizar con IA
+                </a>
                 <a href="/cartera/importar" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Importar Datos
                 </a>`;
