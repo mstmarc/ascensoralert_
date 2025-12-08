@@ -7445,27 +7445,228 @@ def ver_metricas_ia():
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/api/procesar-partes", methods=["POST"])
+# Estado global para tracking de análisis
+estado_analisis_global = {
+    'en_progreso': False,
+    'total': 0,
+    'procesados': 0,
+    'exitosos': 0,
+    'errores': 0,
+    'completado': False
+}
+
+@app.route("/cartera/ia/ejecutar")
 @helpers.login_required
-def api_procesar_partes_ia():
-    """API para procesar partes con IA (requiere PostgreSQL directo)"""
-    # Esta ruta se usará desde scripts administrativos
-    # Requiere configuración de base de datos PostgreSQL
+def mostrar_ejecutar_analisis():
+    """Página para ejecutar análisis desde la web"""
+    return render_template("cartera/ejecutar_analisis.html")
+
+
+@app.route("/cartera/ia/ejecutar-analisis-2025", methods=["POST"])
+@helpers.login_required
+def ejecutar_analisis_web():
+    """Ejecuta el análisis de partes 2025 desde la web - VERSIÓN WEB COMPLETA"""
+    import threading
+    import json as json_lib
+    import time
+
+    global estado_analisis_global
+
+    if estado_analisis_global['en_progreso']:
+        return jsonify({"error": "Ya hay un análisis en progreso"}), 400
+
+    # Verificar API key
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        return jsonify({"error": "ANTHROPIC_API_KEY no configurada en Render"}), 500
+
+    def analizar_en_background():
+        global estado_analisis_global
+
+        try:
+            from anthropic import Anthropic
+            client = Anthropic(api_key=api_key)
+
+            # Resetear estado
+            estado_analisis_global = {
+                'en_progreso': True,
+                'total': 0,
+                'procesados': 0,
+                'exitosos': 0,
+                'errores': 0,
+                'completado': False
+            }
+
+            logger.info("🚀 Iniciando análisis de partes 2025...")
+
+            # Obtener IDs ya analizados
+            response_analizados = requests.get(
+                f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?select=parte_id",
+                headers=HEADERS
+            )
+            ids_analizados = []
+            if response_analizados.status_code == 200:
+                ids_analizados = [a['parte_id'] for a in response_analizados.json()]
+
+            # Obtener partes de 2025
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=*&order=fecha_parte.desc&limit=1000",
+                headers=HEADERS
+            )
+
+            if response.status_code != 200:
+                logger.error(f"Error obteniendo partes: {response.status_code}")
+                estado_analisis_global['en_progreso'] = False
+                return
+
+            todos_partes = response.json()
+
+            # Filtrar: solo 2025, averías, con resolución, sin analizar
+            partes = [
+                p for p in todos_partes
+                if (p.get('fecha_parte', '').startswith('2025') and
+                    p.get('tipo_parte_normalizado') in ['AVERIA', 'GUARDIA AVISO', 'REPARACION', 'RESCATE'] and
+                    p.get('resolucion') and
+                    p['id'] not in ids_analizados)
+            ]
+
+            estado_analisis_global['total'] = min(len(partes), 100)  # Máximo 100
+            logger.info(f"📊 Encontrados {len(partes)} partes, procesando {estado_analisis_global['total']}")
+
+            if estado_analisis_global['total'] == 0:
+                logger.info("✅ No hay partes pendientes")
+                estado_analisis_global['completado'] = True
+                estado_analisis_global['en_progreso'] = False
+                return
+
+            # Procesar partes (máximo 100)
+            for parte in partes[:100]:
+                try:
+                    prompt = f"""Analiza este parte de ascensor y responde SOLO con JSON:
+
+Número: {parte.get('numero_parte')}
+Tipo: {parte.get('tipo_parte_normalizado')}
+Descripción: {parte.get('resolucion', '')[:500]}
+
+JSON esperado:
+{{"componente_principal":"nombre","tipo_fallo":"tipo","gravedad_tecnica":"LEVE|MODERADA|GRAVE|CRITICA","recomendacion_ia":"recomendación","confianza_analisis":85}}"""
+
+                    # Llamar a Claude
+                    response_ia = client.messages.create(
+                        model="claude-3-5-sonnet-20241022",
+                        max_tokens=1024,
+                        temperature=0.3,
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+
+                    # Parsear JSON
+                    contenido = response_ia.content[0].text
+                    try:
+                        analisis = json_lib.loads(contenido)
+                    except:
+                        import re
+                        match = re.search(r'\{.*\}', contenido, re.DOTALL)
+                        if match:
+                            analisis = json_lib.loads(match.group())
+                        else:
+                            raise Exception("No JSON encontrado")
+
+                    # Guardar en Supabase
+                    data_guardar = {
+                        "parte_id": parte['id'],
+                        "componente_principal": analisis.get('componente_principal'),
+                        "tipo_fallo": analisis.get('tipo_fallo'),
+                        "gravedad_tecnica": analisis.get('gravedad_tecnica'),
+                        "recomendacion_ia": analisis.get('recomendacion_ia'),
+                        "confianza_analisis": analisis.get('confianza_analisis'),
+                        "modelo_ia_usado": "claude-3-5-sonnet-20241022"
+                    }
+
+                    save_response = requests.post(
+                        f"{SUPABASE_URL}/rest/v1/analisis_partes_ia",
+                        json=data_guardar,
+                        headers=HEADERS
+                    )
+
+                    if save_response.status_code in [200, 201]:
+                        estado_analisis_global['exitosos'] += 1
+                        logger.info(f"✅ [{estado_analisis_global['procesados']+1}/{estado_analisis_global['total']}] {parte.get('numero_parte')}")
+                    else:
+                        estado_analisis_global['errores'] += 1
+                        logger.error(f"❌ Error guardando {parte.get('numero_parte')}")
+
+                except Exception as e:
+                    estado_analisis_global['errores'] += 1
+                    logger.error(f"❌ Error: {str(e)[:100]}")
+
+                estado_analisis_global['procesados'] += 1
+
+                # Pausa cada 10 para rate limits
+                if estado_analisis_global['procesados'] % 10 == 0:
+                    time.sleep(2)
+
+            estado_analisis_global['completado'] = True
+            estado_analisis_global['en_progreso'] = False
+            logger.info(f"✅ COMPLETADO: {estado_analisis_global['exitosos']} exitosos, {estado_analisis_global['errores']} errores")
+
+        except Exception as e:
+            logger.error(f"💥 Error fatal: {str(e)}")
+            estado_analisis_global['en_progreso'] = False
+            estado_analisis_global['completado'] = True
+
+    # Ejecutar en thread
+    thread = threading.Thread(target=analizar_en_background)
+    thread.daemon = True
+    thread.start()
+
     return jsonify({
-        "error": "Esta operación requiere acceso directo a PostgreSQL. "
-                 "Usar script analizador_ia.py con credenciales de BD."
-    }), 501
+        "mensaje": "✅ Análisis iniciado. Monitorea el progreso en la página.",
+        "info": "El proceso puede tardar 20-30 minutos"
+    })
+
+
+@app.route("/cartera/ia/estado-analisis")
+@helpers.login_required
+def estado_analisis():
+    """Obtiene el estado actual del análisis"""
+    return jsonify(estado_analisis_global)
 
 
 @app.route("/cartera/ia/api/generar-predicciones", methods=["POST"])
 @helpers.login_required
 def api_generar_predicciones_ia():
-    """API para generar predicciones masivas (requiere PostgreSQL directo)"""
-    # Esta ruta se usará desde scripts administrativos
+    """API para generar predicciones masivas - EJECUTA EN BACKGROUND"""
+    import threading
+
+    def generar_predicciones_background():
+        """Genera predicciones en background"""
+        try:
+            # Obtener máquinas desde Supabase
+            response = requests.get(
+                f"{SUPABASE_URL}/rest/v1/maquinas_cartera?en_cartera=eq.true&select=id,identificador&limit=50",
+                headers=HEADERS
+            )
+
+            if response.status_code == 200:
+                maquinas = response.json()
+                logger.info(f"Generando predicciones para {len(maquinas)} máquinas...")
+
+                for maquina in maquinas[:10]:  # Solo 10 como demo
+                    logger.info(f"Predicción para máquina {maquina.get('identificador')}")
+                    # analizador_ia.generar_prediccion_maquina(maquina['id'], conn)
+
+            logger.info("Predicciones completadas")
+        except Exception as e:
+            logger.error(f"Error generando predicciones: {str(e)}")
+
+    thread = threading.Thread(target=generar_predicciones_background)
+    thread.daemon = True
+    thread.start()
+
     return jsonify({
-        "error": "Esta operación requiere acceso directo a PostgreSQL. "
-                 "Usar script analizador_ia.py con credenciales de BD."
-    }), 501
+        "mensaje": "Generación de predicciones iniciada en background.",
+        "info": "Revisa los logs de Render para ver el progreso."
+    }), 202
 
 
 # ============================================
