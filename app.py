@@ -7557,7 +7557,7 @@ JSON esperado:
 
                     # Llamar a Claude
                     response_ia = client.messages.create(
-                        model="claude-3-5-sonnet-20241022",
+                        model="claude-3-5-sonnet-20240620",  # Versión estable y disponible
                         max_tokens=1024,
                         temperature=0.3,
                         messages=[{"role": "user", "content": prompt}]
@@ -7583,7 +7583,7 @@ JSON esperado:
                         "gravedad_tecnica": analisis.get('gravedad_tecnica'),
                         "recomendacion_ia": analisis.get('recomendacion_ia'),
                         "confianza_analisis": analisis.get('confianza_analisis'),
-                        "modelo_ia_usado": "claude-3-5-sonnet-20241022"
+                        "modelo_ia_usado": "claude-3-5-sonnet-20240620"
                     }
 
                     save_response = requests.post(
