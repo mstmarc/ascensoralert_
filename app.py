@@ -7692,7 +7692,7 @@ def ejecutar_analisis_web():
                 'errores_detallados': []
             }
 
-            logger.info("🚀 Iniciando análisis de partes 2025...")
+            logger.info("🚀 Iniciando análisis de TODOS los partes de averías...")
 
             # Obtener IDs ya analizados
             response_analizados = requests.get(
@@ -7703,9 +7703,9 @@ def ejecutar_analisis_web():
             if response_analizados.status_code == 200:
                 ids_analizados = [a['parte_id'] for a in response_analizados.json()]
 
-            # Obtener partes de 2025
+            # Obtener TODOS los partes (sin límite de año)
             response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=*&order=fecha_parte.desc&limit=1000",
+                f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=*&order=fecha_parte.desc&limit=10000",
                 headers=HEADERS
             )
 
@@ -7716,17 +7716,16 @@ def ejecutar_analisis_web():
 
             todos_partes = response.json()
 
-            # Filtrar: solo 2025, averías, con resolución, sin analizar
+            # Filtrar: averías con resolución, sin analizar (TODOS LOS AÑOS)
             partes = [
                 p for p in todos_partes
-                if (p.get('fecha_parte', '').startswith('2025') and
-                    p.get('tipo_parte_normalizado') in ['AVERIA', 'GUARDIA AVISO', 'REPARACION', 'RESCATE'] and
+                if (p.get('tipo_parte_normalizado') in ['AVERIA', 'GUARDIA AVISO', 'REPARACION', 'RESCATE'] and
                     p.get('resolucion') and
                     p['id'] not in ids_analizados)
             ]
 
-            estado_analisis_global['total'] = min(len(partes), 100)  # Máximo 100
-            logger.info(f"📊 Encontrados {len(partes)} partes, procesando {estado_analisis_global['total']}")
+            estado_analisis_global['total'] = len(partes)  # SIN LÍMITE - procesar todos
+            logger.info(f"📊 Encontrados {len(partes)} partes pendientes, procesando TODOS")
 
             if estado_analisis_global['total'] == 0:
                 logger.info("✅ No hay partes pendientes")
@@ -7734,8 +7733,8 @@ def ejecutar_analisis_web():
                 estado_analisis_global['en_progreso'] = False
                 return
 
-            # Procesar partes (máximo 100)
-            for parte in partes[:100]:
+            # Procesar TODOS los partes
+            for parte in partes:
                 try:
                     prompt = f"""Analiza este parte de ascensor y responde SOLO con JSON:
 
