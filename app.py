@@ -7098,11 +7098,13 @@ def crear_trabajo_desde_alerta(alerta_id):
 @app.route("/cartera/ia")
 @helpers.login_required
 def dashboard_ia_predictiva():
-    """Dashboard principal del sistema de IA predictiva - VERSIÓN SIMPLE"""
+    """Dashboard principal del sistema de IA predictiva - CON RIESGO Y PREDICCIONES"""
     try:
-        # Obtener todos los análisis con datos de partes y máquinas
+        from datetime import datetime, timedelta
+
+        # Obtener TODOS los análisis (sin límite) para cálculo preciso de riesgo
         response_analisis = requests.get(
-            f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?select=*,partes_trabajo(numero_parte,fecha_parte,tipo_parte_normalizado,maquina_id,maquinas_cartera(identificador,instalaciones(nombre)))&order=fecha_analisis.desc&limit=100",
+            f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?select=*,partes_trabajo(numero_parte,fecha_parte,tipo_parte_normalizado,maquina_id,maquinas_cartera(identificador,instalaciones(nombre)))&order=fecha_analisis.desc&limit=1000",
             headers=HEADERS
         )
 
@@ -7110,48 +7112,239 @@ def dashboard_ia_predictiva():
         if response_analisis.status_code == 200:
             analisis = response_analisis.json()
 
-        # Procesar estadísticas desde los análisis
+        # Obtener recomendaciones pendientes de revisar
+        response_recomendaciones = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?tiene_recomendacion=eq.true&recomendacion_revisada=eq.false&select=*,maquinas_cartera(identificador,instalaciones(nombre))&limit=100",
+            headers=HEADERS
+        )
+
+        recomendaciones_pendientes = []
+        if response_recomendaciones.status_code == 200:
+            recomendaciones_pendientes = response_recomendaciones.json()
+
+        # CALCULAR RIESGO POR MÁQUINA
+        maquinas_riesgo = {}
+
+        for a in analisis:
+            parte = a.get('partes_trabajo')
+            if not parte or not parte.get('maquina_id'):
+                continue
+
+            maquina_id = parte['maquina_id']
+            maquina_info = parte.get('maquinas_cartera', {})
+
+            if maquina_id not in maquinas_riesgo:
+                maquinas_riesgo[maquina_id] = {
+                    'maquina_id': maquina_id,
+                    'identificador': maquina_info.get('identificador', f'ID-{maquina_id}'),
+                    'instalacion': maquina_info.get('instalaciones', {}).get('nombre', 'Desconocida'),
+                    'puntuacion_riesgo': 0,
+                    'total_fallos': 0,
+                    'criticos': 0,
+                    'graves': 0,
+                    'componentes': set(),
+                    'ultimo_fallo': None,
+                    'dias_desde_ultimo': 999
+                }
+
+            m = maquinas_riesgo[maquina_id]
+            m['total_fallos'] += 1
+
+            # Puntos por gravedad
+            gravedad = a.get('gravedad_tecnica', 'LEVE')
+            if gravedad == 'CRITICA':
+                m['puntuacion_riesgo'] += 40
+                m['criticos'] += 1
+            elif gravedad == 'GRAVE':
+                m['puntuacion_riesgo'] += 25
+                m['graves'] += 1
+            elif gravedad == 'MODERADA':
+                m['puntuacion_riesgo'] += 10
+            else:
+                m['puntuacion_riesgo'] += 3
+
+            # Componentes afectados
+            if a.get('componente_principal'):
+                m['componentes'].add(a['componente_principal'])
+
+            # Fecha último fallo
+            fecha_parte = parte.get('fecha_parte')
+            if fecha_parte:
+                if not m['ultimo_fallo'] or fecha_parte > m['ultimo_fallo']:
+                    m['ultimo_fallo'] = fecha_parte
+
+        # Calcular días desde último fallo y ajustar puntuación
+        ahora = datetime.now()
+        for m in maquinas_riesgo.values():
+            if m['ultimo_fallo']:
+                try:
+                    fecha_dt = datetime.fromisoformat(m['ultimo_fallo'].replace('Z', '+00:00'))
+                    m['dias_desde_ultimo'] = (ahora - fecha_dt).days
+
+                    # Fallos recientes aumentan el riesgo
+                    if m['dias_desde_ultimo'] < 30:
+                        m['puntuacion_riesgo'] *= 1.5  # +50% si fallo en último mes
+                    elif m['dias_desde_ultimo'] < 90:
+                        m['puntuacion_riesgo'] *= 1.2  # +20% si fallo en últimos 3 meses
+                except:
+                    pass
+
+            # Diversidad de componentes fallando aumenta riesgo
+            m['puntuacion_riesgo'] += len(m['componentes']) * 5
+
+            # Convertir set a lista para JSON
+            m['componentes'] = list(m['componentes'])
+
+            # Normalizar a escala 0-100
+            m['puntuacion_riesgo'] = min(100, int(m['puntuacion_riesgo']))
+
+        # Top 20 máquinas en riesgo
+        maquinas_criticas = sorted(
+            maquinas_riesgo.values(),
+            key=lambda x: x['puntuacion_riesgo'],
+            reverse=True
+        )[:20]
+
+        # Procesar estadísticas generales
         componentes_count = {}
         gravedad_count = {'LEVE': 0, 'MODERADA': 0, 'GRAVE': 0, 'CRITICA': 0}
 
         for a in analisis:
-            # Contar componentes
             comp = a.get('componente_principal', 'Desconocido')
             componentes_count[comp] = componentes_count.get(comp, 0) + 1
 
-            # Contar gravedad
             grav = a.get('gravedad_tecnica', 'LEVE')
             if grav in gravedad_count:
                 gravedad_count[grav] += 1
 
-        # Top componentes problemáticos
         componentes = sorted(
             [{'componente': k, 'total_fallos': v} for k, v in componentes_count.items()],
             key=lambda x: x['total_fallos'],
             reverse=True
         )[:10]
 
-        # Estadísticas generales
         stats = {
             'total_analisis': len(analisis),
             'graves_criticos': gravedad_count['GRAVE'] + gravedad_count['CRITICA'],
             'moderados': gravedad_count['MODERADA'],
             'leves': gravedad_count['LEVE'],
-            'componentes_unicos': len(componentes_count)
+            'componentes_unicos': len(componentes_count),
+            'maquinas_en_riesgo': len([m for m in maquinas_riesgo.values() if m['puntuacion_riesgo'] > 50]),
+            'recomendaciones_pendientes': len(recomendaciones_pendientes)
         }
 
         return render_template(
-            "cartera/dashboard_ia_simple.html",
-            analisis=analisis[:20],  # Mostrar top 20
+            "cartera/dashboard_ia_riesgo.html",
+            analisis=analisis[:20],
             componentes=componentes,
             stats=stats,
-            gravedad_count=gravedad_count
+            gravedad_count=gravedad_count,
+            maquinas_criticas=maquinas_criticas,
+            recomendaciones_pendientes=recomendaciones_pendientes[:20]
         )
 
     except Exception as e:
         logger.error(f"Error en dashboard IA: {str(e)}")
         flash(f"Error al cargar dashboard de IA: {str(e)}", "error")
         return redirect("/cartera/v2")
+
+
+@app.route("/cartera/ia/priorizar-recomendaciones")
+@helpers.login_required
+def priorizar_recomendaciones_ia():
+    """Analizar y priorizar recomendaciones pendientes con IA"""
+    try:
+        from anthropic import Anthropic
+        import json as json_lib
+
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            flash("ANTHROPIC_API_KEY no configurada", "error")
+            return redirect("/cartera/ia")
+
+        # Obtener recomendaciones pendientes
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/partes_trabajo?tiene_recomendacion=eq.true&recomendacion_revisada=eq.false&select=*,maquinas_cartera(identificador,instalaciones(nombre))&limit=50",
+            headers=HEADERS
+        )
+
+        if response.status_code != 200:
+            flash("Error obteniendo recomendaciones", "error")
+            return redirect("/cartera/ia")
+
+        recomendaciones = response.json()
+
+        if not recomendaciones:
+            flash("✅ No hay recomendaciones pendientes de revisar", "info")
+            return redirect("/cartera/ia")
+
+        # Preparar datos para IA
+        resumen_recomendaciones = []
+        for r in recomendaciones[:20]:  # Solo primeras 20 para no exceder límites
+            resumen_recomendaciones.append({
+                'numero_parte': r.get('numero_parte'),
+                'maquina': r.get('maquinas_cartera', {}).get('identificador', 'N/A'),
+                'fecha': r.get('fecha_parte', '')[:10],
+                'tipo': r.get('tipo_parte_normalizado'),
+                'recomendacion': r.get('recomendaciones', '')[:500]  # Limitar longitud
+            })
+
+        prompt = f"""Eres un experto en mantenimiento de ascensores. Analiza estas {len(resumen_recomendaciones)} recomendaciones pendientes y priorizalas.
+
+RECOMENDACIONES:
+{json_lib.dumps(resumen_recomendaciones, indent=2, ensure_ascii=False)}
+
+TAREA:
+1. Clasifica cada recomendación por URGENCIA (URGENTE, ALTA, MEDIA, BAJA)
+2. Identifica patrones críticos (componentes recurrentes, máquinas problemáticas)
+3. Sugiere las 5 acciones prioritarias
+4. Estima riesgo si se ignoran
+
+Responde SOLO con JSON:
+{{
+  "top_5_prioritarias": ["acción 1", "acción 2", ...],
+  "patrones_criticos": ["patrón 1", "patrón 2", ...],
+  "maquinas_atencion_urgente": ["máquina 1", "máquina 2", ...],
+  "resumen_ejecutivo": "resumen en 2-3 líneas"
+}}"""
+
+        # Llamar a Claude
+        client = Anthropic(api_key=api_key)
+        response_ia = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=2048,
+            temperature=0.3,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        # Parsear respuesta
+        contenido = response_ia.content[0].text
+        try:
+            analisis = json_lib.loads(contenido)
+        except:
+            import re
+            match = re.search(r'\{.*\}', contenido, re.DOTALL)
+            if match:
+                analisis = json_lib.loads(match.group())
+            else:
+                analisis = {
+                    "top_5_prioritarias": ["Error al parsear respuesta"],
+                    "patrones_criticos": [],
+                    "maquinas_atencion_urgente": [],
+                    "resumen_ejecutivo": contenido[:200]
+                }
+
+        return render_template(
+            "cartera/recomendaciones_priorizadas.html",
+            analisis=analisis,
+            total_recomendaciones=len(recomendaciones),
+            recomendaciones=recomendaciones[:20]
+        )
+
+    except Exception as e:
+        logger.error(f"Error priorizando recomendaciones: {str(e)}")
+        flash(f"Error al priorizar recomendaciones: {str(e)}", "error")
+        return redirect("/cartera/ia")
 
 
 @app.route("/cartera/ia/analizar-parte/<int:parte_id>", methods=["POST"])
@@ -7499,7 +7692,7 @@ def ejecutar_analisis_web():
                 'errores_detallados': []
             }
 
-            logger.info("🚀 Iniciando análisis de partes 2025...")
+            logger.info("🚀 Iniciando análisis de TODOS los partes de averías...")
 
             # Obtener IDs ya analizados
             response_analizados = requests.get(
@@ -7510,9 +7703,9 @@ def ejecutar_analisis_web():
             if response_analizados.status_code == 200:
                 ids_analizados = [a['parte_id'] for a in response_analizados.json()]
 
-            # Obtener partes de 2025
+            # Obtener TODOS los partes (sin límite de año)
             response = requests.get(
-                f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=*&order=fecha_parte.desc&limit=1000",
+                f"{SUPABASE_URL}/rest/v1/partes_trabajo?select=*&order=fecha_parte.desc&limit=10000",
                 headers=HEADERS
             )
 
@@ -7523,17 +7716,16 @@ def ejecutar_analisis_web():
 
             todos_partes = response.json()
 
-            # Filtrar: solo 2025, averías, con resolución, sin analizar
+            # Filtrar: averías con resolución, sin analizar (TODOS LOS AÑOS)
             partes = [
                 p for p in todos_partes
-                if (p.get('fecha_parte', '').startswith('2025') and
-                    p.get('tipo_parte_normalizado') in ['AVERIA', 'GUARDIA AVISO', 'REPARACION', 'RESCATE'] and
+                if (p.get('tipo_parte_normalizado') in ['AVERIA', 'GUARDIA AVISO', 'REPARACION', 'RESCATE'] and
                     p.get('resolucion') and
                     p['id'] not in ids_analizados)
             ]
 
-            estado_analisis_global['total'] = min(len(partes), 100)  # Máximo 100
-            logger.info(f"📊 Encontrados {len(partes)} partes, procesando {estado_analisis_global['total']}")
+            estado_analisis_global['total'] = len(partes)  # SIN LÍMITE - procesar todos
+            logger.info(f"📊 Encontrados {len(partes)} partes pendientes, procesando TODOS")
 
             if estado_analisis_global['total'] == 0:
                 logger.info("✅ No hay partes pendientes")
@@ -7541,8 +7733,8 @@ def ejecutar_analisis_web():
                 estado_analisis_global['en_progreso'] = False
                 return
 
-            # Procesar partes (máximo 100)
-            for parte in partes[:100]:
+            # Procesar TODOS los partes
+            for parte in partes:
                 try:
                     prompt = f"""Analiza este parte de ascensor y responde SOLO con JSON:
 

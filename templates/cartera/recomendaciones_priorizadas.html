@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendaciones Priorizadas por IA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #003366;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #003366;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #003366;
+            border-bottom: 2px solid #003366;
+            padding-bottom: 10px;
+        }
+        .resumen-ejecutivo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .lista-prioritaria {
+            list-style: none;
+            padding: 0;
+            counter-reset: item;
+        }
+        .lista-prioritaria li {
+            counter-increment: item;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #fff8e1;
+            border-left: 4px solid #ff9800;
+            border-radius: 4px;
+            position: relative;
+        }
+        .lista-prioritaria li:before {
+            content: counter(item);
+            background: #ff9800;
+            color: white;
+            font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        .patron-card {
+            background: #ffebee;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #dc3545;
+        }
+        .maquina-urgente {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-box .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 5px;
+        }
+        .stat-box .label {
+            color: #666;
+            font-size: 14px;
+        }
+        .ia-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Recomendaciones Priorizadas por IA</h1>
+        <p class="subtitle">Análisis inteligente de {{ total_recomendaciones }} recomendaciones pendientes</p>
+
+        <a href="/cartera/ia" class="btn">← Volver al Dashboard</a>
+        <a href="/cartera/v2" class="btn" style="background: #6c757d;">Ver Cartera</a>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="number">{{ total_recomendaciones }}</div>
+                <div class="label">Recomendaciones Analizadas</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">{{ analisis.top_5_prioritarias|length }}</div>
+                <div class="label">Acciones Prioritarias</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">{{ analisis.maquinas_atencion_urgente|length }}</div>
+                <div class="label">Máquinas Urgentes</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">{{ analisis.patrones_criticos|length }}</div>
+                <div class="label">Patrones Críticos</div>
+            </div>
+        </div>
+
+        <!-- Resumen Ejecutivo -->
+        <div class="resumen-ejecutivo">
+            <h2 style="color: white; border: none; margin-bottom: 15px;">📊 Resumen Ejecutivo <span class="ia-badge">IA</span></h2>
+            <p style="margin: 0;">{{ analisis.resumen_ejecutivo }}</p>
+        </div>
+
+        <!-- Top 5 Acciones Prioritarias -->
+        <div class="section">
+            <h2>🎯 Top 5 Acciones Prioritarias</h2>
+            <p style="color: #666; margin-bottom: 20px;">Estas son las acciones más urgentes según el análisis de IA</p>
+            <ul class="lista-prioritaria">
+                {% for accion in analisis.top_5_prioritarias %}
+                <li>{{ accion }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Máquinas que Requieren Atención Urgente -->
+        <div class="section">
+            <h2>⚠️ Máquinas que Requieren Atención Urgente</h2>
+            {% if analisis.maquinas_atencion_urgente %}
+            <div style="margin-top: 15px;">
+                {% for maquina in analisis.maquinas_atencion_urgente %}
+                <span class="maquina-urgente">{{ maquina }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: #666;">No se identificaron máquinas con urgencia crítica</p>
+            {% endif %}
+        </div>
+
+        <!-- Patrones Críticos Detectados -->
+        <div class="section">
+            <h2>🔍 Patrones Críticos Detectados</h2>
+            {% if analisis.patrones_criticos %}
+            {% for patron in analisis.patrones_criticos %}
+            <div class="patron-card">
+                <strong>🚨</strong> {{ patron }}
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color: #666;">No se detectaron patrones críticos recurrentes</p>
+            {% endif %}
+        </div>
+
+        <!-- Detalle de Recomendaciones -->
+        <div class="section">
+            <h2>📋 Detalle de Recomendaciones ({{ recomendaciones|length }} de {{ total_recomendaciones }})</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Máquina</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Parte</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Fecha</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Tipo</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Recomendación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in recomendaciones %}
+                    <tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #ddd;">
+                            <strong>{{ rec.maquinas_cartera.identificador if rec.maquinas_cartera else 'N/A' }}</strong>
+                            {% if rec.maquinas_cartera and rec.maquinas_cartera.instalaciones %}
+                            <br><small style="color: #666;">{{ rec.maquinas_cartera.instalaciones.nombre }}</small>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 12px; border-bottom: 1px solid #ddd;">{{ rec.numero_parte }}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #ddd;">{{ rec.fecha_parte[:10] if rec.fecha_parte else 'N/A' }}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #ddd;">{{ rec.tipo_parte_normalizado or 'N/A' }}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #ddd; max-width: 400px;">
+                            {{ rec.recomendaciones[:200] if rec.recomendaciones else 'N/A' }}{% if rec.recomendaciones and rec.recomendaciones|length > 200 %}...{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if total_recomendaciones > recomendaciones|length %}
+            <p style="text-align: center; margin-top: 20px; color: #666;">
+                Mostrando {{ recomendaciones|length }} de {{ total_recomendaciones }} recomendaciones
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="section" style="background: #e3f2fd;">
+            <p style="margin: 0;"><strong>💡 Nota:</strong> Este análisis fue generado por IA (Claude 3 Haiku) basándose en las recomendaciones pendientes de revisar. Use este análisis como guía para priorizar acciones de mantenimiento preventivo.</p>
+        </div>
+    </div>
+</body>
+</html>
