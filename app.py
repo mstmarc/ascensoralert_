@@ -7452,7 +7452,9 @@ estado_analisis_global = {
     'procesados': 0,
     'exitosos': 0,
     'errores': 0,
-    'completado': False
+    'completado': False,
+    'ultimo_error': None,  # Capturar último error para debugging
+    'errores_detallados': []  # Lista de errores específicos
 }
 
 @app.route("/cartera/ia/ejecutar")
@@ -7494,7 +7496,9 @@ def ejecutar_analisis_web():
                 'procesados': 0,
                 'exitosos': 0,
                 'errores': 0,
-                'completado': False
+                'completado': False,
+                'ultimo_error': None,
+                'errores_detallados': []
             }
 
             logger.info("🚀 Iniciando análisis de partes 2025...")
@@ -7593,11 +7597,19 @@ JSON esperado:
                         logger.info(f"✅ [{estado_analisis_global['procesados']+1}/{estado_analisis_global['total']}] {parte.get('numero_parte')}")
                     else:
                         estado_analisis_global['errores'] += 1
-                        logger.error(f"❌ Error guardando {parte.get('numero_parte')}")
+                        error_msg = f"Error guardando {parte.get('numero_parte')}: {save_response.status_code} - {save_response.text[:200]}"
+                        estado_analisis_global['ultimo_error'] = error_msg
+                        if len(estado_analisis_global['errores_detallados']) < 5:  # Guardar solo primeros 5
+                            estado_analisis_global['errores_detallados'].append(error_msg)
+                        logger.error(f"❌ {error_msg}")
 
                 except Exception as e:
                     estado_analisis_global['errores'] += 1
-                    logger.error(f"❌ Error: {str(e)[:100]}")
+                    error_msg = f"Error: {str(e)}"
+                    estado_analisis_global['ultimo_error'] = error_msg
+                    if len(estado_analisis_global['errores_detallados']) < 5:  # Guardar solo primeros 5
+                        estado_analisis_global['errores_detallados'].append(error_msg)
+                    logger.error(f"❌ {error_msg}")
 
                 estado_analisis_global['procesados'] += 1
 
@@ -7610,7 +7622,10 @@ JSON esperado:
             logger.info(f"✅ COMPLETADO: {estado_analisis_global['exitosos']} exitosos, {estado_analisis_global['errores']} errores")
 
         except Exception as e:
-            logger.error(f"💥 Error fatal: {str(e)}")
+            error_msg = f"Error fatal: {str(e)}"
+            logger.error(f"💥 {error_msg}")
+            estado_analisis_global['ultimo_error'] = error_msg
+            estado_analisis_global['errores_detallados'].append(error_msg)
             estado_analisis_global['en_progreso'] = False
             estado_analisis_global['completado'] = True
 

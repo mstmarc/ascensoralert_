@@ -184,6 +184,14 @@
                         document.querySelector('.status h3').innerHTML = '✅ Completado';
                         agregarLog('success', `Análisis completado: ${data.exitosos} partes analizados exitosamente`);
 
+                        // Mostrar errores si los hay
+                        if (data.errores > 0 && data.errores_detallados && data.errores_detallados.length > 0) {
+                            agregarLog('error', `⚠️ Se encontraron ${data.errores} errores:`);
+                            data.errores_detallados.forEach(err => {
+                                agregarLog('error', err);
+                            });
+                        }
+
                         const btn = document.getElementById('btnAnalizar');
                         btn.disabled = false;
                         btn.textContent = '✅ Ver Resultados en Dashboard';
