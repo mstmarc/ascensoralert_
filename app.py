@@ -7098,61 +7098,59 @@ def crear_trabajo_desde_alerta(alerta_id):
 @app.route("/cartera/ia")
 @helpers.login_required
 def dashboard_ia_predictiva():
-    """Dashboard principal del sistema de IA predictiva"""
+    """Dashboard principal del sistema de IA predictiva - VERSIÓN SIMPLE"""
     try:
-        # Obtener resumen de salud de máquinas
-        response_salud = requests.get(
-            f"{SUPABASE_URL}/rest/v1/v_salud_maquinas_ia?select=*&order=puntuacion_salud.asc&limit=20",
+        # Obtener todos los análisis con datos de partes y máquinas
+        response_analisis = requests.get(
+            f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?select=*,partes_trabajo(numero_parte,fecha_parte,tipo_parte_normalizado,maquina_id,maquinas_cartera(identificador,instalaciones(nombre)))&order=fecha_analisis.desc&limit=100",
             headers=HEADERS
         )
 
-        maquinas_salud = response_salud.json() if response_salud.status_code == 200 else []
+        analisis = []
+        if response_analisis.status_code == 200:
+            analisis = response_analisis.json()
 
-        # Obtener alertas predictivas activas
-        response_alertas = requests.get(
-            f"{SUPABASE_URL}/rest/v1/alertas_predictivas_ia?estado=eq.ACTIVA&select=*&order=nivel_urgencia.desc,fecha_deteccion.desc&limit=50",
-            headers=HEADERS
-        )
+        # Procesar estadísticas desde los análisis
+        componentes_count = {}
+        gravedad_count = {'LEVE': 0, 'MODERADA': 0, 'GRAVE': 0, 'CRITICA': 0}
 
-        alertas = response_alertas.json() if response_alertas.status_code == 200 else []
+        for a in analisis:
+            # Contar componentes
+            comp = a.get('componente_principal', 'Desconocido')
+            componentes_count[comp] = componentes_count.get(comp, 0) + 1
 
-        # Obtener componentes más problemáticos
-        response_componentes = requests.get(
-            f"{SUPABASE_URL}/rest/v1/v_componentes_problematicos?select=*&order=total_fallos.desc&limit=10",
-            headers=HEADERS
-        )
+            # Contar gravedad
+            grav = a.get('gravedad_tecnica', 'LEVE')
+            if grav in gravedad_count:
+                gravedad_count[grav] += 1
 
-        componentes = response_componentes.json() if response_componentes.status_code == 200 else []
-
-        # Obtener métricas de ROI
-        response_roi = requests.get(
-            f"{SUPABASE_URL}/rest/v1/v_roi_sistema_ia?select=*&order=mes.desc&limit=6",
-            headers=HEADERS
-        )
-
-        roi_data = response_roi.json() if response_roi.status_code == 200 else []
+        # Top componentes problemáticos
+        componentes = sorted(
+            [{'componente': k, 'total_fallos': v} for k, v in componentes_count.items()],
+            key=lambda x: x['total_fallos'],
+            reverse=True
+        )[:10]
 
         # Estadísticas generales
         stats = {
-            'maquinas_criticas': len([m for m in maquinas_salud if m.get('estado_general') == 'CRITICO']),
-            'maquinas_urgentes': len([m for m in maquinas_salud if m.get('estado_general') == 'URGENTE']),
-            'alertas_criticas': len([a for a in alertas if a.get('nivel_urgencia') in ['CRITICA', 'URGENTE']]),
-            'total_alertas_activas': len(alertas),
-            'ahorro_potencial_total': sum([m.get('ahorro_potencial', 0) or 0 for m in maquinas_salud])
+            'total_analisis': len(analisis),
+            'graves_criticos': gravedad_count['GRAVE'] + gravedad_count['CRITICA'],
+            'moderados': gravedad_count['MODERADA'],
+            'leves': gravedad_count['LEVE'],
+            'componentes_unicos': len(componentes_count)
         }
 
         return render_template(
-            "cartera/dashboard_ia.html",
-            maquinas=maquinas_salud,
-            alertas=alertas,
+            "cartera/dashboard_ia_simple.html",
+            analisis=analisis[:20],  # Mostrar top 20
             componentes=componentes,
-            roi_data=roi_data,
-            stats=stats
+            stats=stats,
+            gravedad_count=gravedad_count
         )
 
     except Exception as e:
         logger.error(f"Error en dashboard IA: {str(e)}")
-        flash("Error al cargar dashboard de IA", "error")
+        flash(f"Error al cargar dashboard de IA: {str(e)}", "error")
         return redirect("/cartera/v2")
 
 
