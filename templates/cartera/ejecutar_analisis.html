@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejecutar Análisis IA - AscensorAlert</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #003366;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #003366;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.show {
+            display: block;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #003366;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .log {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-line {
+            margin: 5px 0;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Ejecutar Análisis IA de Partes 2025</h1>
+        <p class="subtitle">Procesar partes de trabajo con Inteligencia Artificial</p>
+
+        <div class="info-box">
+            <p><strong>¿Qué hace esto?</strong></p>
+            <p>Analiza los partes de trabajo de 2025 (averías) usando IA para:</p>
+            <ul>
+                <li>Identificar componentes afectados</li>
+                <li>Detectar causas raíz de problemas</li>
+                <li>Generar recomendaciones técnicas</li>
+                <li>Predecir averías futuras</li>
+            </ul>
+            <p><strong>Coste estimado:</strong> ~$2 (2€) para analizar ~600 partes</p>
+            <p><strong>Tiempo:</strong> 20-30 minutos</p>
+        </div>
+
+        <button id="btnAnalizar" class="btn" onclick="iniciarAnalisis()">
+            🚀 Iniciar Análisis de 2025
+        </button>
+
+        <div id="status" class="status">
+            <h3><span class="loading"></span>Analizando...</h3>
+            <p id="statusText">Iniciando análisis...</p>
+            <div id="logs" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+
+        function iniciarAnalisis() {
+            const btn = document.getElementById('btnAnalizar');
+            const status = document.getElementById('status');
+            const logs = document.getElementById('logs');
+
+            // Deshabilitar botón
+            btn.disabled = true;
+            btn.textContent = '⏳ Procesando...';
+
+            // Mostrar status
+            status.classList.add('show');
+            logs.innerHTML = '';
+
+            // Iniciar análisis
+            fetch('/cartera/ia/ejecutar-analisis-2025', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    agregarLog('error', data.error);
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Iniciar Análisis de 2025';
+                } else {
+                    agregarLog('success', data.mensaje);
+                    monitorearProgreso();
+                }
+            })
+            .catch(error => {
+                agregarLog('error', 'Error: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = '🚀 Iniciar Análisis de 2025';
+            });
+        }
+
+        function monitorearProgreso() {
+            // Consultar estado cada 5 segundos
+            const intervalo = setInterval(() => {
+                fetch('/cartera/ia/estado-analisis')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('statusText').textContent =
+                        `Procesados: ${data.procesados} / ${data.total} | Exitosos: ${data.exitosos} | Errores: ${data.errores}`;
+
+                    if (data.completado) {
+                        clearInterval(intervalo);
+                        document.querySelector('.status h3').innerHTML = '✅ Completado';
+                        agregarLog('success', `Análisis completado: ${data.exitosos} partes analizados exitosamente`);
+
+                        const btn = document.getElementById('btnAnalizar');
+                        btn.disabled = false;
+                        btn.textContent = '✅ Ver Resultados en Dashboard';
+                        btn.onclick = () => window.location.href = '/cartera/ia';
+                    }
+                });
+            }, 5000);
+        }
+
+        function agregarLog(tipo, mensaje) {
+            const logs = document.getElementById('logs');
+            const linea = document.createElement('div');
+            linea.className = 'log-line ' + tipo;
+            linea.textContent = new Date().toLocaleTimeString() + ' - ' + mensaje;
+            logs.appendChild(linea);
+            logs.scrollTop = logs.scrollHeight;
+        }
+    </script>
+</body>
+</html>
