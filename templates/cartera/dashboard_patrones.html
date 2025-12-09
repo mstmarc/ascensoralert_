@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patrones y Tendencias - IA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #003366;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            color: #003366;
+            text-decoration: none;
+            border: 1px solid #e6e6e6;
+            margin-bottom: 20px;
+            margin-right: 10px;
+            transition: border-color 0.2s;
+        }
+        .btn:hover {
+            border-color: #003366;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border: 1px solid #e6e6e6;
+            transition: border-color 0.2s;
+        }
+        .stat-card:hover {
+            border-color: #003366;
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 13px;
+            font-weight: normal;
+        }
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #003366;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border: 1px solid #e6e6e6;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        .section:hover {
+            border-color: #003366;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #003366;
+            border-bottom: 1px solid #e6e6e6;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e6e6e6;
+        }
+        th {
+            background: transparent;
+            font-weight: bold;
+            color: #003366;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            color: #666;
+            font-size: 11px;
+            font-weight: normal;
+        }
+        .correlacion-item {
+            background: white;
+            border: 1px solid #e6e6e6;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+        .correlacion-item:hover {
+            border-color: #003366;
+        }
+        .correlacion-numero {
+            background: #f0f0f0;
+            color: #003366;
+            padding: 5px 12px;
+            font-weight: bold;
+            border: 1px solid #e6e6e6;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .mes-bar {
+            width: 100%;
+            height: 30px;
+            background: transparent;
+            border: 1px solid #e6e6e6;
+            overflow: hidden;
+        }
+        .mes-fill {
+            height: 100%;
+            background: #003366;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Patrones y Tendencias - Análisis Histórico</h1>
+        <p class="subtitle">Detección automática de patrones en {{ stats.total_analisis if not sin_datos else 0 }} análisis de partes</p>
+
+        <a href="/cartera/ia" class="btn">← Volver al Dashboard IA</a>
+        <a href="/cartera/v2" class="btn">Ver Cartera</a>
+
+        {% if sin_datos %}
+        <div class="section">
+            <p class="no-data">
+                ⚠️ No hay suficientes datos para detectar patrones.<br>
+                Ejecuta el análisis de partes primero desde el Dashboard IA.
+            </p>
+        </div>
+        {% else %}
+
+        <!-- Estadísticas Generales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Análisis</h3>
+                <div class="value">{{ stats.total_analisis }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Patrones Detectados</h3>
+                <div class="value">{{ stats.total_patrones_detectados }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Instalaciones Analizadas</h3>
+                <div class="value">{{ stats.instalaciones_analizadas }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Componentes Analizados</h3>
+                <div class="value">{{ stats.componentes_analizados }}</div>
+            </div>
+        </div>
+
+        <!-- Componentes que Fallan Juntos -->
+        <div class="section">
+            <h2>
+                <span>🔗 Componentes que Fallan Juntos</span>
+                <span style="font-size: 14px; font-weight: normal; color: #666;">En ventana de 30 días</span>
+            </h2>
+            {% if correlaciones %}
+                <p style="color: #666; margin-bottom: 20px;">Estos componentes tienden a fallar en secuencia en la misma máquina:</p>
+                {% for corr in correlaciones %}
+                <div class="correlacion-item">
+                    <div>
+                        <strong style="color: #003366;">{{ corr[0] }}</strong>
+                        <div style="color: #666; font-size: 12px; margin-top: 5px;">Detectado en múltiples máquinas</div>
+                    </div>
+                    <span class="correlacion-numero">{{ corr[1] }} veces</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-data">No se detectaron correlaciones significativas</p>
+            {% endif %}
+        </div>
+
+        <!-- Estacionalidad -->
+        <div class="section">
+            <h2>📅 Estacionalidad - Meses con Más Fallos</h2>
+            {% if estacionalidad %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th style="width: 100px; text-align: center;">Total Fallos</th>
+                            <th style="width: 80px; text-align: center;">Críticos</th>
+                            <th style="width: 80px; text-align: center;">Graves</th>
+                            <th style="width: 400px;">Distribución</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set max_fallos = estacionalidad[0][1] %}
+                        {% for mes, total in estacionalidad %}
+                        <tr>
+                            <td><strong style="color: #003366;">{{ mes }}</strong></td>
+                            <td style="text-align: center; color: #003366;"><strong>{{ total }}</strong></td>
+                            <td style="text-align: center;">
+                                {% if gravedad_por_mes[mes]['CRITICA'] > 0 %}
+                                <span class="badge">{{ gravedad_por_mes[mes]['CRITICA'] }}</span>
+                                {% else %}<span style="color: #666;">—</span>{% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                {% if gravedad_por_mes[mes]['GRAVE'] > 0 %}
+                                <span class="badge">{{ gravedad_por_mes[mes]['GRAVE'] }}</span>
+                                {% else %}<span style="color: #666;">—</span>{% endif %}
+                            </td>
+                            <td>
+                                <div class="mes-bar">
+                                    <div class="mes-fill" style="width: {{ (total / max_fallos * 100)|int }}%">
+                                        {{ (total / max_fallos * 100)|int }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="no-data">No hay datos de estacionalidad</p>
+            {% endif %}
+        </div>
+
+        <!-- Instalaciones Más Problemáticas -->
+        <div class="section">
+            <h2>🏢 Top 15 Instalaciones Más Problemáticas</h2>
+            {% if instalaciones %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Instalación</th>
+                            <th>Cliente</th>
+                            <th style="width: 100px; text-align: center;">Total Fallos</th>
+                            <th style="width: 80px; text-align: center;">Críticos</th>
+                            <th style="width: 80px; text-align: center;">Graves</th>
+                            <th style="width: 100px; text-align: center;">Máquinas</th>
+                            <th style="width: 120px; text-align: center;">Fallos/Máquina</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inst in instalaciones %}
+                        <tr>
+                            <td><strong style="color: #003366;">{{ loop.index }}</strong></td>
+                            <td><strong style="color: #003366;">{{ inst.instalacion }}</strong></td>
+                            <td style="color: #666;">{{ inst.cliente }}</td>
+                            <td style="text-align: center; color: #003366;"><strong>{{ inst.total_fallos }}</strong></td>
+                            <td style="text-align: center;">
+                                {% if inst.criticos > 0 %}<span class="badge">{{ inst.criticos }}</span>{% else %}<span style="color: #666;">—</span>{% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                {% if inst.graves > 0 %}<span class="badge">{{ inst.graves }}</span>{% else %}<span style="color: #666;">—</span>{% endif %}
+                            </td>
+                            <td style="text-align: center; color: #666;">{{ inst.num_maquinas }}</td>
+                            <td style="text-align: center; color: #003366;"><strong>{{ inst.fallos_por_maquina }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="no-data">No hay datos de instalaciones</p>
+            {% endif %}
+        </div>
+
+        <!-- Intervalos Promedio entre Fallos -->
+        <div class="section">
+            <h2>⏱️ Intervalos Promedio entre Fallos por Componente</h2>
+            <p style="color: #666; margin-bottom: 20px;">Tiempo promedio entre fallos del mismo componente en la misma máquina</p>
+            {% if intervalos %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th style="width: 150px; text-align: center;">Intervalo Promedio</th>
+                            <th style="width: 120px; text-align: center;">Mín - Máx</th>
+                            <th style="width: 100px; text-align: center;">Mediciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for int in intervalos %}
+                        <tr>
+                            <td><strong style="color: #003366;">{{ int.componente }}</strong></td>
+                            <td style="text-align: center; color: #003366;"><strong>{{ int.intervalo_promedio }} días</strong></td>
+                            <td style="text-align: center; color: #666;">{{ int.min_dias }} - {{ int.max_dias }} días</td>
+                            <td style="text-align: center;"><span class="badge">{{ int.total_mediciones }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="no-data">No hay suficientes datos para calcular intervalos</p>
+            {% endif %}
+        </div>
+
+        <!-- Componentes Más Críticos -->
+        <div class="section">
+            <h2>⚠️ Componentes Más Críticos (por % de Gravedad)</h2>
+            <p style="color: #666; margin-bottom: 20px;">Componentes con mayor porcentaje de fallos críticos</p>
+            {% if componentes_criticos %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Componente</th>
+                            <th style="width: 100px; text-align: center;">Total Fallos</th>
+                            <th style="width: 80px; text-align: center;">Críticos</th>
+                            <th style="width: 80px; text-align: center;">Graves</th>
+                            <th style="width: 150px; text-align: center;">% Críticos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in componentes_criticos %}
+                        <tr>
+                            <td><strong style="color: #003366;">{{ loop.index }}</strong></td>
+                            <td><strong style="color: #003366;">{{ comp.componente }}</strong></td>
+                            <td style="text-align: center; color: #003366;"><strong>{{ comp.total }}</strong></td>
+                            <td style="text-align: center;">
+                                {% if comp.criticos > 0 %}<span class="badge">{{ comp.criticos }}</span>{% else %}<span style="color: #666;">—</span>{% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                {% if comp.graves > 0 %}<span class="badge">{{ comp.graves }}</span>{% else %}<span style="color: #666;">—</span>{% endif %}
+                            </td>
+                            <td style="text-align: center; color: #003366;"><strong>{{ comp.porcentaje_critico }}%</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="no-data">No hay datos de componentes críticos</p>
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="section">
+            <h2>ℹ️ Sobre Este Análisis</h2>
+            <p><strong style="color: #003366;">Metodología:</strong> <span style="color: #666;">Análisis estadístico automático sin coste adicional de IA</span></p>
+            <p><strong style="color: #003366;">Ventana de correlación:</strong> <span style="color: #666;">30 días (componentes que fallan en el mismo período)</span></p>
+            <p><strong style="color: #003366;">Datos analizados:</strong> <span style="color: #666;">{{ stats.total_analisis }} partes con análisis IA</span></p>
+            <p><strong style="color: #003366;">Actualización:</strong> <span style="color: #666;">En tiempo real con cada nuevo análisis</span></p>
+        </div>
+
+        {% endif %}
+    </div>
+</body>
+</html>

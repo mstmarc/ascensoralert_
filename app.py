@@ -7531,6 +7531,220 @@ Responde SOLO con JSON:
         return redirect("/cartera/ia")
 
 
+@app.route("/cartera/ia/patrones")
+@helpers.login_required
+def patrones_tendencias_ia():
+    """Dashboard de detección de patrones y tendencias - FASE 3"""
+    try:
+        from collections import defaultdict
+        from datetime import datetime, timedelta
+        import calendar
+
+        # Obtener todos los análisis con sus relaciones
+        response_analisis = requests.get(
+            f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?select=*,partes_trabajo(id,fecha_parte,numero_parte,maquina_id,maquinas_cartera(id,identificador,instalaciones(id,nombre,cliente_id,clientes(nombre))))&order=created_at.desc&limit=5000",
+            headers=HEADERS
+        )
+
+        if response_analisis.status_code != 200:
+            flash("Error al cargar análisis", "error")
+            return redirect("/cartera/ia")
+
+        analisis_list = response_analisis.json()
+
+        if not analisis_list:
+            return render_template("cartera/dashboard_patrones.html",
+                                   sin_datos=True)
+
+        # 1. ANÁLISIS DE COMPONENTES QUE FALLAN JUNTOS
+        # Agrupar por máquina y período de 30 días
+        maquina_periodos = defaultdict(list)
+        for a in analisis_list:
+            if not a.get('partes_trabajo') or not a['partes_trabajo'].get('fecha_parte'):
+                continue
+
+            maquina_id = a['partes_trabajo'].get('maquina_id')
+            fecha = datetime.fromisoformat(a['partes_trabajo']['fecha_parte'].replace('Z', '+00:00'))
+            componente = a.get('componente_principal', 'Desconocido')
+
+            if maquina_id and componente and componente != 'Desconocido':
+                maquina_periodos[maquina_id].append({
+                    'fecha': fecha,
+                    'componente': componente,
+                    'gravedad': a.get('gravedad_tecnica', 'LEVE')
+                })
+
+        # Detectar componentes que fallan juntos (en ventana de 30 días)
+        correlaciones_componentes = defaultdict(int)
+        for maquina_id, fallos in maquina_periodos.items():
+            fallos_sorted = sorted(fallos, key=lambda x: x['fecha'])
+            for i, fallo1 in enumerate(fallos_sorted):
+                for fallo2 in fallos_sorted[i+1:]:
+                    if (fallo2['fecha'] - fallo1['fecha']).days <= 30:
+                        comp1, comp2 = sorted([fallo1['componente'], fallo2['componente']])
+                        if comp1 != comp2:
+                            correlaciones_componentes[f"{comp1} + {comp2}"] += 1
+
+        # Top 10 correlaciones
+        top_correlaciones = sorted(correlaciones_componentes.items(), key=lambda x: x[1], reverse=True)[:10]
+
+        # 2. ESTACIONALIDAD - Análisis por mes
+        fallos_por_mes = defaultdict(int)
+        gravedad_por_mes = defaultdict(lambda: {'CRITICA': 0, 'GRAVE': 0, 'MODERADA': 0, 'LEVE': 0})
+
+        for a in analisis_list:
+            if not a.get('partes_trabajo') or not a['partes_trabajo'].get('fecha_parte'):
+                continue
+
+            fecha = datetime.fromisoformat(a['partes_trabajo']['fecha_parte'].replace('Z', '+00:00'))
+            mes_nombre = calendar.month_name[fecha.month]
+            gravedad = a.get('gravedad_tecnica', 'LEVE')
+
+            fallos_por_mes[mes_nombre] += 1
+            gravedad_por_mes[mes_nombre][gravedad] += 1
+
+        # Ordenar por cantidad de fallos
+        estacionalidad = sorted(fallos_por_mes.items(), key=lambda x: x[1], reverse=True)[:12]
+
+        # 3. INSTALACIONES MÁS PROBLEMÁTICAS
+        problemas_por_instalacion = defaultdict(lambda: {
+            'total': 0,
+            'criticos': 0,
+            'graves': 0,
+            'instalacion_nombre': '',
+            'cliente_nombre': '',
+            'maquinas': set()
+        })
+
+        for a in analisis_list:
+            parte = a.get('partes_trabajo')
+            if not parte:
+                continue
+
+            maquina = parte.get('maquinas_cartera')
+            if not maquina:
+                continue
+
+            instalacion = maquina.get('instalaciones')
+            if not instalacion:
+                continue
+
+            inst_id = instalacion['id']
+            gravedad = a.get('gravedad_tecnica', 'LEVE')
+
+            problemas_por_instalacion[inst_id]['total'] += 1
+            if gravedad == 'CRITICA':
+                problemas_por_instalacion[inst_id]['criticos'] += 1
+            elif gravedad == 'GRAVE':
+                problemas_por_instalacion[inst_id]['graves'] += 1
+
+            problemas_por_instalacion[inst_id]['instalacion_nombre'] = instalacion.get('nombre', 'N/A')
+            if instalacion.get('clientes'):
+                problemas_por_instalacion[inst_id]['cliente_nombre'] = instalacion['clientes'].get('nombre', 'N/A')
+            problemas_por_instalacion[inst_id]['maquinas'].add(maquina.get('identificador', 'N/A'))
+
+        # Convertir a lista y ordenar
+        instalaciones_problematicas = []
+        for inst_id, data in problemas_por_instalacion.items():
+            instalaciones_problematicas.append({
+                'instalacion': data['instalacion_nombre'],
+                'cliente': data['cliente_nombre'],
+                'total_fallos': data['total'],
+                'criticos': data['criticos'],
+                'graves': data['graves'],
+                'num_maquinas': len(data['maquinas']),
+                'fallos_por_maquina': round(data['total'] / len(data['maquinas']), 1) if data['maquinas'] else 0
+            })
+
+        instalaciones_problematicas = sorted(instalaciones_problematicas,
+                                            key=lambda x: x['total_fallos'],
+                                            reverse=True)[:15]
+
+        # 4. INTERVALOS PROMEDIO ENTRE FALLOS (por componente)
+        intervalos_componente = defaultdict(list)
+        for maquina_id, fallos in maquina_periodos.items():
+            fallos_por_comp = defaultdict(list)
+            for fallo in fallos:
+                fallos_por_comp[fallo['componente']].append(fallo['fecha'])
+
+            for comp, fechas in fallos_por_comp.items():
+                if len(fechas) >= 2:
+                    fechas_sorted = sorted(fechas)
+                    for i in range(len(fechas_sorted) - 1):
+                        dias = (fechas_sorted[i+1] - fechas_sorted[i]).days
+                        if dias > 0:  # Evitar fallos el mismo día
+                            intervalos_componente[comp].append(dias)
+
+        # Calcular promedio
+        intervalos_promedio = []
+        for comp, intervalos in intervalos_componente.items():
+            if intervalos:
+                intervalos_promedio.append({
+                    'componente': comp,
+                    'intervalo_promedio': round(sum(intervalos) / len(intervalos), 1),
+                    'min_dias': min(intervalos),
+                    'max_dias': max(intervalos),
+                    'total_mediciones': len(intervalos)
+                })
+
+        intervalos_promedio = sorted(intervalos_promedio,
+                                     key=lambda x: x['intervalo_promedio'])[:15]
+
+        # 5. COMPONENTES MÁS CRÍTICOS (por gravedad)
+        componentes_criticos = defaultdict(lambda: {'total': 0, 'criticos': 0, 'graves': 0})
+        for a in analisis_list:
+            comp = a.get('componente_principal')
+            if comp and comp != 'Desconocido':
+                gravedad = a.get('gravedad_tecnica', 'LEVE')
+                componentes_criticos[comp]['total'] += 1
+                if gravedad == 'CRITICA':
+                    componentes_criticos[comp]['criticos'] += 1
+                elif gravedad == 'GRAVE':
+                    componentes_criticos[comp]['graves'] += 1
+
+        # Convertir y ordenar por % de críticos
+        comp_criticos_list = []
+        for comp, data in componentes_criticos.items():
+            if data['total'] >= 3:  # Mínimo 3 ocurrencias
+                comp_criticos_list.append({
+                    'componente': comp,
+                    'total': data['total'],
+                    'criticos': data['criticos'],
+                    'graves': data['graves'],
+                    'porcentaje_critico': round((data['criticos'] / data['total']) * 100, 1)
+                })
+
+        comp_criticos_list = sorted(comp_criticos_list,
+                                    key=lambda x: (x['porcentaje_critico'], x['total']),
+                                    reverse=True)[:15]
+
+        # Estadísticas generales
+        stats = {
+            'total_analisis': len(analisis_list),
+            'total_patrones_detectados': len(top_correlaciones),
+            'meses_analizados': len(estacionalidad),
+            'instalaciones_analizadas': len(instalaciones_problematicas),
+            'componentes_analizados': len(intervalos_promedio)
+        }
+
+        return render_template(
+            "cartera/dashboard_patrones.html",
+            stats=stats,
+            correlaciones=top_correlaciones,
+            estacionalidad=estacionalidad,
+            gravedad_por_mes=dict(gravedad_por_mes),
+            instalaciones=instalaciones_problematicas,
+            intervalos=intervalos_promedio,
+            componentes_criticos=comp_criticos_list,
+            sin_datos=False
+        )
+
+    except Exception as e:
+        logger.error(f"Error en patrones y tendencias: {str(e)}")
+        flash(f"Error al analizar patrones: {str(e)}", "error")
+        return redirect("/cartera/ia")
+
+
 @app.route("/cartera/ia/analizar-parte/<int:parte_id>", methods=["POST"])
 @helpers.login_required
 def analizar_parte_ia(parte_id):
