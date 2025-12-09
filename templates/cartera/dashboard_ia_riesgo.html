@@ -176,6 +176,17 @@
             color: #333;
             font-size: 13px;
         }
+        .maquina-link {
+            color: #003366;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .maquina-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -246,7 +257,11 @@
                     {% for m in maquinas_criticas %}
                     <tr style="{% if m.puntuacion_riesgo >= 80 %}background: #ffebee;{% elif m.puntuacion_riesgo >= 60 %}background: #fff8e1;{% endif %}">
                         <td><strong>{{ loop.index }}</strong></td>
-                        <td><strong>{{ m.identificador }}</strong></td>
+                        <td>
+                            <a href="/cartera/ia/maquina/{{ m.maquina_id }}" class="maquina-link">
+                                {{ m.identificador }}
+                            </a>
+                        </td>
                         <td>{{ m.instalacion }}</td>
                         <td>
                             <div class="riesgo-bar">
