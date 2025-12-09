@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROI y Optimización - IA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #003366;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            color: #003366;
+            text-decoration: none;
+            border: 1px solid #e6e6e6;
+            margin-bottom: 20px;
+            margin-right: 10px;
+            transition: border-color 0.2s;
+        }
+        .btn:hover {
+            border-color: #003366;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border: 1px solid #e6e6e6;
+            transition: border-color 0.2s;
+        }
+        .stat-card:hover {
+            border-color: #003366;
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 13px;
+            font-weight: normal;
+        }
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #003366;
+        }
+        .stat-card .subtext {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border: 1px solid #e6e6e6;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        .section:hover {
+            border-color: #003366;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #003366;
+            border-bottom: 1px solid #e6e6e6;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e6e6e6;
+        }
+        th {
+            background: transparent;
+            font-weight: bold;
+            color: #003366;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            color: #666;
+            font-size: 11px;
+            font-weight: normal;
+        }
+        .recomendacion-card {
+            background: white;
+            border: 1px solid #e6e6e6;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+        .recomendacion-card:hover {
+            border-color: #003366;
+        }
+        .recomendacion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .prioridad {
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #f0f0f0;
+            color: #003366;
+            border: 1px solid #e6e6e6;
+        }
+        .ahorro {
+            font-size: 20px;
+            font-weight: bold;
+            color: #003366;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .roi-box {
+            background: white;
+            border: 1px solid #e6e6e6;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .roi-numero {
+            font-size: 64px;
+            font-weight: bold;
+            color: #003366;
+            margin: 20px 0;
+        }
+        .coste-bar {
+            display: flex;
+            height: 40px;
+            border: 1px solid #e6e6e6;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .coste-segmento {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+            background: #003366;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 ROI y Optimización del Mantenimiento</h1>
+        <p class="subtitle">Análisis de retorno de inversión del sistema IA predictivo</p>
+
+        <a href="/cartera/ia" class="btn">← Volver al Dashboard IA</a>
+        <a href="/cartera/v2" class="btn">Ver Cartera</a>
+
+        {% if sin_datos %}
+        <div class="section">
+            <p class="no-data">
+                ⚠️ No hay suficientes datos para calcular ROI.<br>
+                Ejecuta el análisis de partes primero desde el Dashboard IA.
+            </p>
+        </div>
+        {% else %}
+
+        <!-- ROI Principal -->
+        <div class="roi-box">
+            <h2 style="color: #003366; margin-top: 0; border: none;">📈 Retorno de Inversión (ROI)</h2>
+            <div class="roi-numero">{{ stats.roi_porcentaje }}%</div>
+            <p style="color: #666; font-size: 16px; margin: 0;">
+                Por cada €1 invertido en IA, se ahorran <strong style="color: #003366;">€{{ (stats.roi_porcentaje / 100 + 1)|round(2) }}</strong>
+            </p>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e6e6e6;">
+                <p style="color: #666; margin: 5px 0;"><strong style="color: #003366;">Coste Sistema IA:</strong> €{{ stats.coste_ia }}</p>
+                <p style="color: #666; margin: 5px 0;"><strong style="color: #003366;">Ahorro Potencial:</strong> €{{ stats.ahorro_potencial }}</p>
+            </div>
+        </div>
+
+        <!-- Estadísticas Generales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Coste Total Averías</h3>
+                <div class="value">€{{ stats.coste_total }}</div>
+                <div class="subtext">{{ stats.total_analisis }} partes analizados</div>
+            </div>
+            <div class="stat-card">
+                <h3>Ahorro Potencial</h3>
+                <div class="value">€{{ stats.ahorro_potencial }}</div>
+                <div class="subtext">Con predicción IA (30% prevención)</div>
+            </div>
+            <div class="stat-card">
+                <h3>Mantenimiento Preventivo</h3>
+                <div class="value">{{ stats.porcentaje_preventivo }}%</div>
+                <div class="subtext">Objetivo: 60-70%</div>
+            </div>
+            <div class="stat-card">
+                <h3>Cobertura IA</h3>
+                <div class="value">{{ stats.porcentaje_con_recomendacion }}%</div>
+                <div class="subtext">Partes con recomendaciones</div>
+            </div>
+            <div class="stat-card">
+                <h3>Tiempo Respuesta</h3>
+                <div class="value">{{ stats.tiempo_respuesta_promedio }} días</div>
+                <div class="subtext">Promedio resolución ({{ stats.partes_con_cierre }} partes)</div>
+            </div>
+        </div>
+
+        <!-- Distribución de Costes por Gravedad -->
+        <div class="section">
+            <h2>📊 Distribución de Costes por Gravedad</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Gravedad</th>
+                        <th style="width: 120px; text-align: center;">Cantidad</th>
+                        <th style="width: 150px; text-align: center;">Coste Unitario</th>
+                        <th style="width: 150px; text-align: center;">Coste Total</th>
+                        <th style="width: 120px; text-align: center;">Prevenibles</th>
+                        <th style="width: 150px; text-align: center;">Ahorro Posible</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong style="color: #003366;">CRITICA</strong></td>
+                        <td style="text-align: center; color: #003366;"><strong>{{ conteo_gravedad.CRITICA }}</strong></td>
+                        <td style="text-align: center; color: #666;">€{{ costes_constantes.CRITICA }}</td>
+                        <td style="text-align: center; color: #003366;"><strong>€{{ costes_gravedad.CRITICA }}</strong></td>
+                        <td style="text-align: center;"><span class="badge">{{ averias_prevenibles.CRITICA }}</span></td>
+                        <td style="text-align: center; color: #003366;"><strong>€{{ averias_prevenibles.CRITICA * costes_constantes.CRITICA }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color: #003366;">GRAVE</strong></td>
+                        <td style="text-align: center; color: #003366;"><strong>{{ conteo_gravedad.GRAVE }}</strong></td>
+                        <td style="text-align: center; color: #666;">€{{ costes_constantes.GRAVE }}</td>
+                        <td style="text-align: center; color: #003366;"><strong>€{{ costes_gravedad.GRAVE }}</strong></td>
+                        <td style="text-align: center;"><span class="badge">{{ averias_prevenibles.GRAVE }}</span></td>
+                        <td style="text-align: center; color: #003366;"><strong>€{{ averias_prevenibles.GRAVE * costes_constantes.GRAVE }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color: #003366;">MODERADA</strong></td>
+                        <td style="text-align: center; color: #003366;"><strong>{{ conteo_gravedad.MODERADA }}</strong></td>
+                        <td style="text-align: center; color: #666;">€{{ costes_constantes.MODERADA }}</td>
+                        <td style="text-align: center; color: #003366;"><strong>€{{ costes_gravedad.MODERADA }}</strong></td>
+                        <td style="text-align: center; color: #666;">—</td>
+                        <td style="text-align: center; color: #666;">—</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color: #003366;">LEVE</strong></td>
+                        <td style="text-align: center; color: #003366;"><strong>{{ conteo_gravedad.LEVE }}</strong></td>
+                        <td style="text-align: center; color: #666;">€{{ costes_constantes.LEVE }}</td>
+                        <td style="text-align: center; color: #003366;"><strong>€{{ costes_gravedad.LEVE }}</strong></td>
+                        <td style="text-align: center; color: #666;">—</td>
+                        <td style="text-align: center; color: #666;">—</td>
+                    </tr>
+                    <tr style="border-top: 2px solid #003366;">
+                        <td><strong style="color: #003366;">TOTAL</strong></td>
+                        <td style="text-align: center; color: #003366;"><strong>{{ stats.total_analisis }}</strong></td>
+                        <td style="text-align: center; color: #666;">—</td>
+                        <td style="text-align: center; color: #003366;"><strong>€{{ stats.coste_total }}</strong></td>
+                        <td style="text-align: center;"><span class="badge">{{ averias_prevenibles.CRITICA + averias_prevenibles.GRAVE }}</span></td>
+                        <td style="text-align: center; color: #003366;"><strong>€{{ stats.ahorro_potencial }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="color: #666; margin-top: 15px; font-size: 13px;">
+                <strong style="color: #003366;">Nota:</strong> Costes estimados por avería. Con IA predictiva se estima prevenir ~30% de averías críticas y graves.
+            </p>
+        </div>
+
+        <!-- Tiempos de Respuesta -->
+        <div class="section">
+            <h2>⏱️ Tiempos de Respuesta por Gravedad</h2>
+            {% if promedios_respuesta %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Gravedad</th>
+                            <th style="width: 150px; text-align: center;">Tiempo Promedio</th>
+                            <th style="width: 150px; text-align: center;">Rango (Min - Max)</th>
+                            <th style="width: 100px; text-align: center;">Mediciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gravedad in ['CRITICA', 'GRAVE', 'MODERADA', 'LEVE'] %}
+                            {% if gravedad in promedios_respuesta %}
+                            <tr>
+                                <td><strong style="color: #003366;">{{ gravedad }}</strong></td>
+                                <td style="text-align: center; color: #003366;"><strong>{{ promedios_respuesta[gravedad].promedio }} días</strong></td>
+                                <td style="text-align: center; color: #666;">{{ promedios_respuesta[gravedad].min }} - {{ promedios_respuesta[gravedad].max }} días</td>
+                                <td style="text-align: center;"><span class="badge">{{ promedios_respuesta[gravedad].total }}</span></td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="no-data">No hay suficientes datos de tiempos de respuesta (fechas de cierre)</p>
+            {% endif %}
+        </div>
+
+        <!-- Top 10 Máquinas Más Costosas -->
+        <div class="section">
+            <h2>💸 Top 10 Máquinas Más Costosas</h2>
+            {% if maquinas_costosas %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Máquina</th>
+                            <th>Instalación</th>
+                            <th style="width: 120px; text-align: center;">Coste Total</th>
+                            <th style="width: 100px; text-align: center;">Fallos</th>
+                            <th style="width: 80px; text-align: center;">Críticos</th>
+                            <th style="width: 120px; text-align: center;">Coste Medio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for maq in maquinas_costosas %}
+                        <tr>
+                            <td><strong style="color: #003366;">{{ loop.index }}</strong></td>
+                            <td>
+                                <a href="/cartera/ia/maquina/{{ maq.maquina_id }}" style="color: #003366; text-decoration: none; font-weight: bold;">
+                                    {{ maq.identificador }}
+                                </a>
+                            </td>
+                            <td style="color: #666;">{{ maq.instalacion }}</td>
+                            <td style="text-align: center; color: #003366;"><strong>€{{ maq.coste_total }}</strong></td>
+                            <td style="text-align: center; color: #003366;"><strong>{{ maq.total_fallos }}</strong></td>
+                            <td style="text-align: center;">
+                                {% if maq.criticos > 0 %}<span class="badge">{{ maq.criticos }}</span>{% else %}<span style="color: #666;">—</span>{% endif %}
+                            </td>
+                            <td style="text-align: center; color: #666;">€{{ maq.coste_promedio }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="no-data">No hay datos de máquinas</p>
+            {% endif %}
+        </div>
+
+        <!-- Recomendaciones de Optimización -->
+        <div class="section">
+            <h2>🎯 Recomendaciones de Optimización</h2>
+            <p style="color: #666; margin-bottom: 20px;">Acciones recomendadas para mejorar eficiencia y reducir costes</p>
+            {% if recomendaciones %}
+                {% for rec in recomendaciones %}
+                <div class="recomendacion-card">
+                    <div class="recomendacion-header">
+                        <div>
+                            <h3 style="margin: 0; color: #003366; font-size: 16px;">{{ rec.titulo }}</h3>
+                            <span class="prioridad">{{ rec.prioridad }}</span>
+                        </div>
+                        <div class="ahorro">€{{ rec.ahorro_estimado }}</div>
+                    </div>
+                    <p style="color: #666; margin: 10px 0 5px 0;">{{ rec.descripcion }}</p>
+                    <p style="color: #666; font-size: 12px; margin: 5px 0 0 0;"><strong style="color: #003366;">Tipo:</strong> {{ rec.tipo }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-data">✅ ¡Excelente! No hay recomendaciones críticas de optimización</p>
+            {% endif %}
+        </div>
+
+        <!-- Eficiencia del Mantenimiento -->
+        <div class="section">
+            <h2>📈 Eficiencia del Mantenimiento</h2>
+            <div style="margin: 20px 0;">
+                <h3 style="color: #003366; font-size: 15px;">Preventivo vs Correctivo</h3>
+                <div class="coste-bar" style="margin-top: 10px;">
+                    <div class="coste-segmento" style="width: {{ stats.porcentaje_preventivo }}%; background: #003366;">
+                        {{ stats.porcentaje_preventivo }}% Preventivo
+                    </div>
+                    <div class="coste-segmento" style="width: {{ stats.porcentaje_correctivo }}%; background: #666;">
+                        {{ stats.porcentaje_correctivo }}% Correctivo
+                    </div>
+                </div>
+                <p style="color: #666; margin-top: 10px; font-size: 13px;">
+                    <strong style="color: #003366;">Objetivo:</strong> 60-70% preventivo, 30-40% correctivo
+                </p>
+            </div>
+
+            <div style="margin: 30px 0;">
+                <h3 style="color: #003366; font-size: 15px;">Distribución por Tipo de Parte</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th style="width: 120px; text-align: center;">Cantidad</th>
+                            <th style="width: 120px; text-align: center;">Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tipo, cantidad in tipos_parte.items() %}
+                        <tr>
+                            <td><strong style="color: #003366;">{{ tipo }}</strong></td>
+                            <td style="text-align: center; color: #003366;"><strong>{{ cantidad }}</strong></td>
+                            <td style="text-align: center; color: #666;">{{ (cantidad / stats.total_analisis * 100)|round(1) }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="section">
+            <h2>ℹ️ Sobre Este Análisis</h2>
+            <p><strong style="color: #003366;">Costes estimados:</strong> <span style="color: #666;">Crítica €500 | Grave €300 | Moderada €150 | Leve €75 por avería</span></p>
+            <p><strong style="color: #003366;">Prevención estimada:</strong> <span style="color: #666;">30% de averías críticas y graves con IA predictiva</span></p>
+            <p><strong style="color: #003366;">Coste IA:</strong> <span style="color: #666;">€0.000276 por análisis (Claude 3 Haiku)</span></p>
+            <p><strong style="color: #003366;">ROI calculado:</strong> <span style="color: #666;">(Ahorro - Coste) / Coste × 100</span></p>
+            <p><strong style="color: #003366;">Datos analizados:</strong> <span style="color: #666;">{{ stats.total_analisis }} partes con análisis IA</span></p>
+        </div>
+
+        {% endif %}
+    </div>
+</body>
+</html>
