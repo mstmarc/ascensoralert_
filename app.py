@@ -7347,6 +7347,190 @@ Responde SOLO con JSON:
         return redirect("/cartera/ia")
 
 
+@app.route("/cartera/ia/maquina/<int:maquina_id>")
+@helpers.login_required
+def prediccion_maquina_ia(maquina_id):
+    """Vista de predicción individual por máquina - FASE 2"""
+    try:
+        from anthropic import Anthropic
+        import json as json_lib
+        from datetime import datetime, timedelta
+
+        # Obtener información de la máquina
+        response_maquina = requests.get(
+            f"{SUPABASE_URL}/rest/v1/maquinas_cartera?id=eq.{maquina_id}&select=*,instalaciones(nombre,direccion)",
+            headers=HEADERS
+        )
+
+        if response_maquina.status_code != 200 or not response_maquina.json():
+            flash("Máquina no encontrada", "error")
+            return redirect("/cartera/ia")
+
+        maquina = response_maquina.json()[0]
+
+        # Obtener todos los análisis de esta máquina
+        response_analisis = requests.get(
+            f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?select=*,partes_trabajo(numero_parte,fecha_parte,tipo_parte_normalizado,resolucion)&partes_trabajo.maquina_id=eq.{maquina_id}&order=partes_trabajo(fecha_parte).desc&limit=500",
+            headers=HEADERS
+        )
+
+        analisis_list = []
+        if response_analisis.status_code == 200:
+            analisis_list = response_analisis.json()
+
+        if not analisis_list:
+            flash("No hay análisis IA para esta máquina todavía", "info")
+            return redirect("/cartera/ia")
+
+        # Calcular estadísticas de la máquina
+        componentes_afectados = {}
+        gravedad_count = {'LEVE': 0, 'MODERADA': 0, 'GRAVE': 0, 'CRITICA': 0}
+        fallos_por_mes = {}
+
+        for a in analisis_list:
+            # Componentes
+            comp = a.get('componente_principal', 'Desconocido')
+            if comp not in componentes_afectados:
+                componentes_afectados[comp] = {'total': 0, 'criticos': 0, 'graves': 0}
+            componentes_afectados[comp]['total'] += 1
+
+            grav = a.get('gravedad_tecnica', 'LEVE')
+            if grav in gravedad_count:
+                gravedad_count[grav] += 1
+            if grav == 'CRITICA':
+                componentes_afectados[comp]['criticos'] += 1
+            elif grav == 'GRAVE':
+                componentes_afectados[comp]['graves'] += 1
+
+            # Fallos por mes
+            parte = a.get('partes_trabajo', {})
+            fecha = parte.get('fecha_parte', '')
+            if fecha:
+                mes = fecha[:7]  # YYYY-MM
+                fallos_por_mes[mes] = fallos_por_mes.get(mes, 0) + 1
+
+        # Top componentes problemáticos
+        top_componentes = sorted(
+            [{'componente': k, **v} for k, v in componentes_afectados.items()],
+            key=lambda x: (x['criticos'], x['graves'], x['total']),
+            reverse=True
+        )[:5]
+
+        # GENERAR PREDICCIÓN CON IA
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        prediccion_ia = None
+
+        if api_key and len(analisis_list) >= 3:  # Mínimo 3 análisis para predecir
+            try:
+                client = Anthropic(api_key=api_key)
+
+                # Preparar resumen para IA
+                resumen_fallos = []
+                for a in analisis_list[:20]:  # Últimos 20
+                    parte = a.get('partes_trabajo', {})
+                    resumen_fallos.append({
+                        'fecha': parte.get('fecha_parte', '')[:10],
+                        'componente': a.get('componente_principal'),
+                        'tipo_fallo': a.get('tipo_fallo'),
+                        'gravedad': a.get('gravedad_tecnica'),
+                        'recomendacion': a.get('recomendacion_ia', '')[:200]
+                    })
+
+                prompt = f"""Eres un experto en mantenimiento predictivo de ascensores. Analiza el historial de esta máquina y predice fallos futuros.
+
+MÁQUINA: {maquina.get('identificador')}
+INSTALACIÓN: {maquina.get('instalaciones', {}).get('nombre', 'N/A')}
+TOTAL FALLOS ANALIZADOS: {len(analisis_list)}
+
+HISTORIAL RECIENTE (últimos 20):
+{json_lib.dumps(resumen_fallos, indent=2, ensure_ascii=False)}
+
+ESTADÍSTICAS:
+- Críticos: {gravedad_count['CRITICA']}
+- Graves: {gravedad_count['GRAVE']}
+- Moderados: {gravedad_count['MODERADA']}
+
+TAREA:
+1. Identifica componentes con alto riesgo de fallo
+2. Predice probabilidad de fallo próximo (0-100%)
+3. Estima días hasta próximo fallo probable
+4. Genera 3 recomendaciones preventivas específicas
+
+Responde SOLO con JSON:
+{{
+  "salud_general": "EXCELENTE|BUENA|REGULAR|MALA|CRITICA",
+  "puntuacion_salud": 0-100,
+  "componentes_riesgo": [
+    {{"componente": "nombre", "probabilidad_fallo": 75, "dias_estimados": 30, "razon": "explicación"}},
+    ...top 3
+  ],
+  "prediccion_proxima_averia": {{"dias": 15, "componente_probable": "nombre", "confianza": 80}},
+  "recomendaciones": ["acción 1", "acción 2", "acción 3"],
+  "tendencia": "MEJORANDO|ESTABLE|DETERIORANDO",
+  "resumen": "resumen ejecutivo en 2 líneas"
+}}"""
+
+                response_ia = client.messages.create(
+                    model="claude-3-haiku-20240307",
+                    max_tokens=2048,
+                    temperature=0.3,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+
+                contenido = response_ia.content[0].text
+                try:
+                    prediccion_ia = json_lib.loads(contenido)
+                except:
+                    import re
+                    match = re.search(r'\{.*\}', contenido, re.DOTALL)
+                    if match:
+                        prediccion_ia = json_lib.loads(match.group())
+
+            except Exception as e:
+                logger.error(f"Error generando predicción IA: {str(e)}")
+
+        # Calcular puntuación de riesgo local
+        puntuacion_riesgo = 0
+        puntuacion_riesgo += gravedad_count['CRITICA'] * 40
+        puntuacion_riesgo += gravedad_count['GRAVE'] * 25
+        puntuacion_riesgo += gravedad_count['MODERADA'] * 10
+        puntuacion_riesgo += len(componentes_afectados) * 5
+
+        # Fallos recientes aumentan riesgo
+        ahora = datetime.now()
+        if analisis_list:
+            ultima_fecha = analisis_list[0].get('partes_trabajo', {}).get('fecha_parte')
+            if ultima_fecha:
+                try:
+                    fecha_dt = datetime.fromisoformat(ultima_fecha.replace('Z', '+00:00'))
+                    dias_desde = (ahora - fecha_dt).days
+                    if dias_desde < 30:
+                        puntuacion_riesgo *= 1.5
+                    elif dias_desde < 90:
+                        puntuacion_riesgo *= 1.2
+                except:
+                    pass
+
+        puntuacion_riesgo = min(100, int(puntuacion_riesgo))
+
+        return render_template(
+            "cartera/dashboard_maquina_ia.html",
+            maquina=maquina,
+            analisis=analisis_list[:20],
+            total_analisis=len(analisis_list),
+            top_componentes=top_componentes,
+            gravedad_count=gravedad_count,
+            fallos_por_mes=sorted(fallos_por_mes.items())[-12:],  # Últimos 12 meses
+            puntuacion_riesgo=puntuacion_riesgo,
+            prediccion_ia=prediccion_ia
+        )
+
+    except Exception as e:
+        logger.error(f"Error en predicción máquina: {str(e)}")
+        flash(f"Error al cargar predicción: {str(e)}", "error")
+        return redirect("/cartera/ia")
+
+
 @app.route("/cartera/ia/analizar-parte/<int:parte_id>", methods=["POST"])
 @helpers.login_required
 def analizar_parte_ia(parte_id):

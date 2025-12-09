@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción IA - {{ maquina.identificador }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #003366;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #003366;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #003366;
+            border-bottom: 2px solid #003366;
+            padding-bottom: 10px;
+        }
+        .prediccion-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .prediccion-card h2 {
+            color: white;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            margin-bottom: 20px;
+        }
+        .salud-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .salud-EXCELENTE { background: #28a745; color: white; }
+        .salud-BUENA { background: #20c997; color: white; }
+        .salud-REGULAR { background: #ffc107; color: #000; }
+        .salud-MALA { background: #ff6b6b; color: white; }
+        .salud-CRITICA { background: #dc3545; color: white; }
+
+        .puntuacion-grande {
+            font-size: 64px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .puntuacion-critica { color: #dc3545; }
+        .puntuacion-alta { color: #ff9800; }
+        .puntuacion-media { color: #ffc107; }
+        .puntuacion-baja { color: #28a745; }
+
+        .componente-riesgo {
+            background: #fff8e1;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .componente-riesgo h4 {
+            margin: 0 0 10px 0;
+            color: #ff6b00;
+        }
+        .probabilidad-bar {
+            width: 100%;
+            height: 25px;
+            background: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .probabilidad-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .prob-alta { background: linear-gradient(90deg, #dc3545, #c82333); }
+        .prob-media { background: linear-gradient(90deg, #ffc107, #ff9800); }
+        .prob-baja { background: linear-gradient(90deg, #28a745, #20c997); }
+
+        .recomendacion-item {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #003366;
+        }
+        .stat-box .label {
+            color: #666;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-critica { background: #dc3545; color: white; }
+        .badge-grave { background: #ff6b6b; color: white; }
+        .badge-moderada { background: #ffc107; color: #000; }
+        .badge-leve { background: #28a745; color: white; }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #003366;
+        }
+        .tendencia {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .tendencia-MEJORANDO { background: #d4edda; color: #155724; }
+        .tendencia-ESTABLE { background: #d1ecf1; color: #0c5460; }
+        .tendencia-DETERIORANDO { background: #f8d7da; color: #721c24; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #003366;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 Predicción IA - {{ maquina.identificador }}</h1>
+        <p class="subtitle">
+            {% if maquina.instalaciones %}
+                📍 {{ maquina.instalaciones.nombre }}
+                {% if maquina.instalaciones.direccion %} - {{ maquina.instalaciones.direccion }}{% endif %}
+            {% else %}
+                Instalación no especificada
+            {% endif %}
+        </p>
+
+        <a href="/cartera/ia" class="btn">← Volver al Dashboard</a>
+        <a href="/cartera/v2" class="btn" style="background: #6c757d;">Ver Cartera</a>
+
+        <!-- Puntuación de Riesgo -->
+        <div class="section">
+            <h2>📊 Puntuación de Riesgo</h2>
+            <div class="puntuacion-grande {% if puntuacion_riesgo >= 80 %}puntuacion-critica{% elif puntuacion_riesgo >= 60 %}puntuacion-alta{% elif puntuacion_riesgo >= 40 %}puntuacion-media{% else %}puntuacion-baja{% endif %}">
+                {{ puntuacion_riesgo }}/100
+            </div>
+            <div style="text-align: center; color: #666;">
+                Basado en {{ total_analisis }} análisis históricos
+            </div>
+        </div>
+
+        <!-- Predicción IA -->
+        {% if prediccion_ia %}
+        <div class="prediccion-card">
+            <h2>🤖 Predicción Inteligente</h2>
+
+            <div style="margin-bottom: 20px;">
+                <strong style="font-size: 16px;">Estado de Salud:</strong><br>
+                <span class="salud-badge salud-{{ prediccion_ia.salud_general }}">
+                    {{ prediccion_ia.salud_general }} ({{ prediccion_ia.puntuacion_salud }}/100)
+                </span>
+                <span class="tendencia tendencia-{{ prediccion_ia.tendencia }}" style="margin-left: 15px;">
+                    {% if prediccion_ia.tendencia == 'MEJORANDO' %}📈{% elif prediccion_ia.tendencia == 'DETERIORANDO' %}📉{% else %}➡️{% endif %}
+                    {{ prediccion_ia.tendencia }}
+                </span>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: white; font-size: 18px;">⚠️ Próxima Avería Probable</h3>
+                <div style="font-size: 16px;">
+                    <strong>Componente:</strong> {{ prediccion_ia.prediccion_proxima_averia.componente_probable }}<br>
+                    <strong>Estimación:</strong> En {{ prediccion_ia.prediccion_proxima_averia.dias }} días<br>
+                    <strong>Confianza:</strong> {{ prediccion_ia.prediccion_proxima_averia.confianza }}%
+                </div>
+            </div>
+
+            <p style="font-size: 15px; line-height: 1.6; margin: 20px 0;">
+                <strong>Resumen:</strong> {{ prediccion_ia.resumen }}
+            </p>
+        </div>
+
+        <!-- Componentes en Riesgo -->
+        <div class="section">
+            <h2>⚠️ Componentes en Alto Riesgo</h2>
+            {% for comp in prediccion_ia.componentes_riesgo %}
+            <div class="componente-riesgo">
+                <h4>{{ comp.componente }}</h4>
+                <div class="probabilidad-bar">
+                    <div class="probabilidad-fill {% if comp.probabilidad_fallo >= 70 %}prob-alta{% elif comp.probabilidad_fallo >= 40 %}prob-media{% else %}prob-baja{% endif %}"
+                         style="width: {{ comp.probabilidad_fallo }}%">
+                        {{ comp.probabilidad_fallo }}% probabilidad
+                    </div>
+                </div>
+                <p style="margin: 10px 0 5px 0;"><strong>Estimación de fallo:</strong> {{ comp.dias_estimados }} días</p>
+                <p style="margin: 5px 0; color: #666;">{{ comp.razon }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Recomendaciones Preventivas -->
+        <div class="section">
+            <h2>💡 Recomendaciones Preventivas</h2>
+            {% for rec in prediccion_ia.recomendaciones %}
+            <div class="recomendacion-item">
+                <strong>{{ loop.index }}.</strong> {{ rec }}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="section" style="background: #fff8e1;">
+            <p style="margin: 0;">
+                ⚠️ Se requieren al menos 3 análisis para generar predicciones con IA.
+                Esta máquina tiene {{ total_analisis }} análisis.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="number">{{ total_analisis }}</div>
+                <div class="label">Total Análisis</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" style="color: #dc3545;">{{ gravedad_count.CRITICA }}</div>
+                <div class="label">Críticos</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" style="color: #ff6b6b;">{{ gravedad_count.GRAVE }}</div>
+                <div class="label">Graves</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" style="color: #ffc107;">{{ gravedad_count.MODERADA }}</div>
+                <div class="label">Moderados</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" style="color: #28a745;">{{ gravedad_count.LEVE }}</div>
+                <div class="label">Leves</div>
+            </div>
+        </div>
+
+        <!-- Top Componentes Problemáticos -->
+        <div class="section">
+            <h2>🔧 Top 5 Componentes Problemáticos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Componente</th>
+                        <th style="width: 100px; text-align: center;">Total</th>
+                        <th style="width: 100px; text-align: center;">Críticos</th>
+                        <th style="width: 100px; text-align: center;">Graves</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comp in top_componentes %}
+                    <tr>
+                        <td><strong>{{ comp.componente }}</strong></td>
+                        <td style="text-align: center;">{{ comp.total }}</td>
+                        <td style="text-align: center;">
+                            {% if comp.criticos > 0 %}<span class="badge badge-critica">{{ comp.criticos }}</span>{% else %}—{% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            {% if comp.graves > 0 %}<span class="badge badge-grave">{{ comp.graves }}</span>{% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Historial Reciente -->
+        <div class="section">
+            <h2>📋 Historial de Análisis (Últimos 20)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Parte</th>
+                        <th>Tipo</th>
+                        <th>Componente</th>
+                        <th>Gravedad</th>
+                        <th>Recomendación IA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in analisis %}
+                    {% set parte = a.partes_trabajo %}
+                    <tr>
+                        <td>{{ parte.fecha_parte[:10] if parte and parte.fecha_parte else 'N/A' }}</td>
+                        <td>{{ parte.numero_parte if parte else 'N/A' }}</td>
+                        <td>{{ parte.tipo_parte_normalizado if parte else 'N/A' }}</td>
+                        <td>{{ a.componente_principal or 'N/A' }}</td>
+                        <td>
+                            {% if a.gravedad_tecnica == 'CRITICA' %}
+                                <span class="badge badge-critica">CRÍTICA</span>
+                            {% elif a.gravedad_tecnica == 'GRAVE' %}
+                                <span class="badge badge-grave">GRAVE</span>
+                            {% elif a.gravedad_tecnica == 'MODERADA' %}
+                                <span class="badge badge-moderada">MODERADA</span>
+                            {% else %}
+                                <span class="badge badge-leve">LEVE</span>
+                            {% endif %}
+                        </td>
+                        <td style="max-width: 300px;">{{ a.recomendacion_ia[:150] if a.recomendacion_ia else 'N/A' }}{% if a.recomendacion_ia and a.recomendacion_ia|length > 150 %}...{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if total_analisis > 20 %}
+            <p style="text-align: center; margin-top: 20px; color: #666;">
+                Mostrando 20 de {{ total_analisis }} análisis
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="section" style="background: #e3f2fd;">
+            <p style="margin: 0;"><strong>💡 Nota:</strong> Las predicciones son generadas por IA (Claude 3 Haiku) basándose en el historial de esta máquina específica. Use estas predicciones como guía para planificar mantenimiento preventivo.</p>
+            <p style="margin: 10px 0 0 0;"><strong>Coste de predicción:</strong> ~$0.002 (0.2 céntimos) por máquina</p>
+        </div>
+    </div>
+</body>
+</html>
