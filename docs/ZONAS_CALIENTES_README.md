@@ -95,26 +95,33 @@ Motor de análisis principal.
 ```python
 detector = DetectorZonasCalientes()
 
-# 1. Analizar por código postal (⭐ RECOMENDADO para análisis comercial)
+# 1. Analizar por código postal (⭐ RECOMENDADO para análisis comercial masivo)
 zona = detector.analizar_zona_por_codigo_postal(
     codigo_postal="35001",
     ciudad="Las Palmas de Gran Canaria"
 )
 
-# 2. Analizar por nombre de zona/barrio
+# 2. Analizar por calle (⭐ IDEAL para calles comerciales específicas)
+zona = detector.analizar_zona_por_calle(
+    nombre_calle="Calle Mayor de Triana",
+    ciudad="Las Palmas de Gran Canaria",
+    radio_metros=300
+)
+
+# 3. Analizar por nombre de zona/barrio
 zona = detector.analizar_zona_por_nombre(
     nombre_zona="Vegueta",
     ciudad="Las Palmas de Gran Canaria"
 )
 
-# 3. Analizar por direcciones semilla
+# 4. Analizar por direcciones semilla (avanzado)
 zona = detector.analizar_zona_por_direcciones(
     direcciones_semilla=["Calle Aconcagua", "Calle Amazonas"],
     ciudad="Las Palmas de Gran Canaria",
     radio_metros=500
 )
 
-# 4. Comparar múltiples zonas
+# 5. Comparar múltiples zonas
 zonas_ordenadas = detector.comparar_zonas([zona1, zona2, zona3])
 ```
 
@@ -175,7 +182,28 @@ for i, zona in enumerate(ranking[:3], 1):
     print(f"{i}. {zona.nombre}: Score {zona.score_total}")
 ```
 
-### Ejemplo 3: Análisis por Nombre de Barrio
+### Ejemplo 3: Análisis por Calle Específica
+
+```python
+# Analizar calle comercial principal
+zona = detector.analizar_zona_por_calle(
+    nombre_calle="Calle Mayor de Triana",
+    ciudad="Las Palmas de Gran Canaria",
+    radio_metros=300,
+    solo_residencial=True
+)
+
+print(detector.generar_reporte_texto(zona))
+
+# Comparar varias calles comerciales
+calles = ["Calle Mayor de Triana", "Calle Mesa y López", "Calle León y Castillo"]
+zonas = [detector.analizar_zona_por_calle(c) for c in calles]
+ranking = detector.comparar_zonas(zonas)
+
+print(f"Mejor calle: {ranking[0].nombre} (Score: {ranking[0].score_total})")
+```
+
+### Ejemplo 4: Análisis por Nombre de Barrio
 
 ```python
 # Analizar barrio Vegueta (casco histórico)
@@ -218,7 +246,23 @@ python ejemplo_analisis_por_cp.py
 ```
 Analiza CP 35001 (Triana) y compara 4 códigos postales clave.
 
-#### 2. Análisis Masivo de Todos los CPs
+#### 2. Ejemplo de Análisis por Calle
+```bash
+python ejemplo_analisis_por_calle.py
+```
+Analiza Calle Mayor de Triana y compara 3 calles comerciales principales.
+
+**Calles incluidas:**
+- Comerciales: Calle Mayor de Triana, Mesa y López, León y Castillo
+- Históricas: Pelota, Obispo Codina, Los Balcones
+- Principales: Juan de Quesada, Avenida Marítima
+
+**Outputs:**
+- `calle_triana_analisis.json` - Análisis detallado
+- `calle_triana_edificios.csv` - Listado de edificios
+- `ranking_calles.json` - Comparación de calles
+
+#### 3. Análisis Masivo de Todos los CPs
 ```bash
 # Análisis completo (30-60 min)
 python scripts/analisis_masivo_codigos_postales.py
@@ -240,7 +284,7 @@ Genera ranking completo de los 19 códigos postales de Las Palmas.
 - `detalle_cp_XXXXX.json` - Detalle por cada CP
 - `edificios_cp_XXXXX.csv` - Edificios por cada CP
 
-#### 3. Análisis por Barrios
+#### 4. Análisis por Barrios
 ```bash
 # Menú interactivo
 python scripts/analizar_zonas_las_palmas.py

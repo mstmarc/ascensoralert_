@@ -362,6 +362,100 @@ class DetectorZonasCalientes:
 
         return zona
 
+    def analizar_zona_por_calle(
+        self,
+        nombre_calle: str,
+        ciudad: str = "Las Palmas de Gran Canaria",
+        radio_metros: int = 300,
+        grid_size: int = 5,
+        solo_residencial: bool = True
+    ) -> ZonaCaliente:
+        """
+        Analiza una zona alrededor de una calle específica.
+
+        Args:
+            nombre_calle: Nombre de la calle (ej: "Calle Mayor de Triana")
+            ciudad: Ciudad donde se encuentra la calle
+            radio_metros: Radio de búsqueda alrededor de la calle
+            grid_size: Tamaño de cuadrícula de muestreo
+            solo_residencial: Si True, filtra solo inmuebles residenciales
+
+        Returns:
+            ZonaCaliente con el análisis
+
+        Example:
+            >>> detector = DetectorZonasCalientes()
+            >>> zona = detector.analizar_zona_por_calle(
+            ...     "Calle Mayor de Triana",
+            ...     ciudad="Las Palmas de Gran Canaria"
+            ... )
+        """
+        logger.info(f"Analizando zona por calle: {nombre_calle}, {ciudad}")
+
+        # Geocodificar calle
+        coords = self.geocoding.geocodificar_direccion(
+            direccion=nombre_calle,
+            ciudad=ciudad
+        )
+
+        if not coords:
+            logger.error(f"No se pudo geocodificar la calle: {nombre_calle}")
+            return self._crear_zona_vacia(nombre_calle, 0, 0, 0)
+
+        lat_centro = coords['latitud']
+        lon_centro = coords['longitud']
+
+        logger.info(f"Calle geocodificada: ({lat_centro}, {lon_centro})")
+
+        # Obtener datos del área alrededor de la calle
+        inmuebles = self.catastro.obtener_datos_area(
+            lat_centro=lat_centro,
+            lon_centro=lon_centro,
+            radio_metros=radio_metros,
+            grid_size=grid_size
+        )
+
+        # Procesar edificios
+        edificios_candidatos = []
+        for datos in inmuebles:
+            if solo_residencial and not self._es_residencial(datos.get('uso', '')):
+                continue
+
+            anio_construccion = datos.get('anio_construccion')
+            if anio_construccion:
+                antiguedad = self.ANIO_ACTUAL - anio_construccion
+                categoria = self._clasificar_antiguedad(antiguedad)
+                score = self._calcular_score_modernizacion(antiguedad)
+            else:
+                antiguedad = None
+                categoria = "Sin datos"
+                score = 0.0
+
+            edificio = EdificioCandidato(
+                referencia_catastral=datos.get('referencia_catastral', ''),
+                direccion=datos.get('direccion', ''),
+                latitud=datos.get('latitud', 0),
+                longitud=datos.get('longitud', 0),
+                anio_construccion=anio_construccion,
+                antiguedad=antiguedad,
+                uso=datos.get('uso', ''),
+                superficie=datos.get('superficie', 0),
+                score_modernizacion=score,
+                categoria_antiguedad=categoria
+            )
+            edificios_candidatos.append(edificio)
+
+        # Generar zona caliente
+        zona = self._crear_zona_caliente(
+            nombre=nombre_calle,
+            lat_centro=lat_centro,
+            lon_centro=lon_centro,
+            radio_metros=radio_metros,
+            edificios=edificios_candidatos
+        )
+
+        return zona
+
     def comparar_zonas(self, zonas: List[ZonaCaliente]) -> List[ZonaCaliente]:
         """
         Compara y ordena zonas por potencial de modernización.

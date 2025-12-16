@@ -47,6 +47,49 @@ python scripts/analisis_masivo_codigos_postales.py
 
 ---
 
+### ✅ Por Calle Específica (IDEAL para calles comerciales)
+
+**Cuándo usar:**
+- Análisis de calles comerciales principales
+- Prospección calle por calle
+- Identificar edificios antiguos en calles específicas
+- Comparar diferentes calles de la ciudad
+
+**Ventajas:**
+- ⭐⭐⭐ Perfecto para calles comerciales
+- ⭐⭐⭐ Análisis muy focalizado
+- ⭐⭐ Útil para campañas específicas
+- ⭐⭐ Control fino del radio de análisis
+
+**Ejemplo:**
+```python
+from zonas_calientes import DetectorZonasCalientes
+
+detector = DetectorZonasCalientes()
+
+# Analizar una calle
+zona = detector.analizar_zona_por_calle(
+    "Calle Mayor de Triana",
+    radio_metros=300
+)
+print(detector.generar_reporte_texto(zona))
+
+# Comparar calles comerciales
+calles = ["Calle Mayor de Triana", "Calle Mesa y López", "Calle León y Castillo"]
+zonas = [detector.analizar_zona_por_calle(c) for c in calles]
+ranking = detector.comparar_zonas(zonas)
+
+print(f"Mejor calle: {ranking[0].nombre}")
+```
+
+**Script disponible:**
+```bash
+# Analiza 3 calles comerciales principales
+python ejemplo_analisis_por_calle.py
+```
+
+---
+
 ### ✅ Por Nombre de Barrio/Zona
 
 **Cuándo usar:**
@@ -121,6 +164,35 @@ zona = detector.analizar_zona_por_direcciones(
 | **35017** | San Lorenzo - Tenoya | Residencial |
 | **35018** | Hoya de la Plata - Casa Ayala | Residencial |
 | **35019** | Siete Palmas | Residencial moderno |
+
+---
+
+## 🛣️ Calles Principales de Las Palmas
+
+### Comerciales (Alta densidad edificios)
+| Calle | Zona | Características |
+|-------|------|-----------------|
+| **Calle Mayor de Triana** | Centro | Peatonal, comercio histórico |
+| **Calle Mesa y López** | Guanarteme | Eje comercial principal |
+| **Calle León y Castillo** | Centro-Puerto | Gran arteria comercial |
+| **Calle Cano** | Triana | Comercial céntrica |
+| **Calle Domingo Rivero** | Triana | Comercial histórica |
+
+### Históricas (Alto potencial antigüedad)
+| Calle | Zona | Características |
+|-------|------|-----------------|
+| **Calle Los Balcones** | Vegueta | Casco histórico |
+| **Calle Obispo Codina** | Vegueta | Colonial |
+| **Calle Pelota** | Vegueta | Zona antigua |
+| **Calle Espíritu Santo** | Vegueta | Histórica |
+
+### Residenciales Principales
+| Calle | Zona | Características |
+|-------|------|-----------------|
+| **Calle Aconcagua** | Casablanca | Residencial |
+| **Calle Amazonas** | Casablanca | Residencial |
+| **Calle Doctor Grau Bassas** | Ciudad Jardín | Residencial alto |
+| **Calle Juan de Quesada** | Centro | Residencial/Comercial |
 
 ---
 
