@@ -271,6 +271,97 @@ class DetectorZonasCalientes:
 
         return zona
 
+    def analizar_zona_por_codigo_postal(
+        self,
+        codigo_postal: str,
+        ciudad: str = "Las Palmas de Gran Canaria",
+        grid_size: int = 6,
+        solo_residencial: bool = True
+    ) -> ZonaCaliente:
+        """
+        Analiza una zona por su código postal.
+
+        Args:
+            codigo_postal: Código postal de 5 dígitos (ej: "35001")
+            ciudad: Ciudad donde se encuentra el código postal
+            grid_size: Tamaño de cuadrícula de muestreo
+            solo_residencial: Si True, filtra solo inmuebles residenciales
+
+        Returns:
+            ZonaCaliente con el análisis
+        """
+        logger.info(f"Analizando zona por código postal: {codigo_postal}, {ciudad}")
+
+        # Construir query para geocodificación
+        query = f"{codigo_postal}, {ciudad}, España"
+
+        # Geocodificar código postal para obtener bbox
+        zona_data = self.geocoding.geocodificar_zona(codigo_postal, ciudad=ciudad)
+
+        if not zona_data:
+            logger.error(f"No se pudo geocodificar el código postal: {codigo_postal}")
+            return self._crear_zona_vacia(f"CP {codigo_postal}", 0, 0, 0)
+
+        # Calcular radio aproximado del bbox
+        bbox = zona_data['bbox']  # [lat_min, lat_max, lon_min, lon_max]
+        lat_min, lat_max, lon_min, lon_max = [float(x) for x in bbox]
+
+        # Radio en metros (mitad del lado mayor del bbox)
+        lat_diff_km = (lat_max - lat_min) * 111
+        lon_diff_km = (lon_max - lon_min) * 111 * math.cos(math.radians(zona_data['latitud']))
+        radio_metros = int(max(lat_diff_km, lon_diff_km) * 1000 / 2)
+
+        logger.info(f"CP {codigo_postal}: área {zona_data['area_km2']:.2f} km², radio aproximado: {radio_metros}m")
+
+        # Obtener datos del área
+        inmuebles = self.catastro.obtener_datos_area(
+            lat_centro=zona_data['latitud'],
+            lon_centro=zona_data['longitud'],
+            radio_metros=radio_metros,
+            grid_size=grid_size
+        )
+
+        # Procesar edificios
+        edificios_candidatos = []
+        for datos in inmuebles:
+            if solo_residencial and not self._es_residencial(datos.get('uso', '')):
+                continue
+
+            anio_construccion = datos.get('anio_construccion')
+            if anio_construccion:
+                antiguedad = self.ANIO_ACTUAL - anio_construccion
+                categoria = self._clasificar_antiguedad(antiguedad)
+                score = self._calcular_score_modernizacion(antiguedad)
+            else:
+                antiguedad = None
+                categoria = "Sin datos"
+                score = 0.0
+
+            edificio = EdificioCandidato(
+                referencia_catastral=datos.get('referencia_catastral', ''),
+                direccion=datos.get('direccion', ''),
+                latitud=datos.get('latitud', 0),
+                longitud=datos.get('longitud', 0),
+                anio_construccion=anio_construccion,
+                antiguedad=antiguedad,
+                uso=datos.get('uso', ''),
+                superficie=datos.get('superficie', 0),
+                score_modernizacion=score,
+                categoria_antiguedad=categoria
+            )
+            edificios_candidatos.append(edificio)
+
+        # Generar zona caliente
+        zona = self._crear_zona_caliente(
+            nombre=f"CP {codigo_postal}",
+            lat_centro=zona_data['latitud'],
+            lon_centro=zona_data['longitud'],
+            radio_metros=radio_metros,
+            edificios=edificios_candidatos
+        )
+
+        return zona
+
     def comparar_zonas(self, zonas: List[ZonaCaliente]) -> List[ZonaCaliente]:
         """
         Compara y ordena zonas por potencial de modernización.

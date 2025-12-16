@@ -95,20 +95,26 @@ Motor de análisis principal.
 ```python
 detector = DetectorZonasCalientes()
 
-# Analizar por direcciones semilla
+# 1. Analizar por código postal (⭐ RECOMENDADO para análisis comercial)
+zona = detector.analizar_zona_por_codigo_postal(
+    codigo_postal="35001",
+    ciudad="Las Palmas de Gran Canaria"
+)
+
+# 2. Analizar por nombre de zona/barrio
+zona = detector.analizar_zona_por_nombre(
+    nombre_zona="Vegueta",
+    ciudad="Las Palmas de Gran Canaria"
+)
+
+# 3. Analizar por direcciones semilla
 zona = detector.analizar_zona_por_direcciones(
     direcciones_semilla=["Calle Aconcagua", "Calle Amazonas"],
     ciudad="Las Palmas de Gran Canaria",
     radio_metros=500
 )
 
-# Analizar por nombre de zona
-zona = detector.analizar_zona_por_nombre(
-    nombre_zona="Vegueta",
-    ciudad="Las Palmas de Gran Canaria"
-)
-
-# Comparar múltiples zonas
+# 4. Comparar múltiples zonas
 zonas_ordenadas = detector.comparar_zonas([zona1, zona2, zona3])
 ```
 
@@ -127,7 +133,7 @@ La única dependencia nueva agregada es:
 
 ---
 
-### Ejemplo Básico
+### Ejemplo 1: Análisis por Código Postal (Recomendado)
 
 ```python
 from zonas_calientes import DetectorZonasCalientes
@@ -135,7 +141,57 @@ from zonas_calientes import DetectorZonasCalientes
 # Inicializar detector
 detector = DetectorZonasCalientes()
 
-# Analizar barrio Casablanca III
+# Analizar código postal 35001 (Triana - Centro)
+zona = detector.analizar_zona_por_codigo_postal(
+    codigo_postal="35001",
+    ciudad="Las Palmas de Gran Canaria",
+    solo_residencial=True
+)
+
+# Generar reporte
+print(detector.generar_reporte_texto(zona))
+
+# Exportar resultados
+detector.exportar_zona_json(zona, 'resultados/cp_35001.json')
+detector.exportar_zona_csv(zona, 'resultados/cp_35001.csv')
+```
+
+### Ejemplo 2: Comparación Masiva de Códigos Postales
+
+```python
+# Analizar múltiples CPs para ranking comercial
+codigos_postales = ["35001", "35002", "35010", "35012"]
+
+zonas = []
+for cp in codigos_postales:
+    zona = detector.analizar_zona_por_codigo_postal(cp)
+    zonas.append(zona)
+
+# Ordenar por potencial
+ranking = detector.comparar_zonas(zonas)
+
+# Ver top 3
+for i, zona in enumerate(ranking[:3], 1):
+    print(f"{i}. {zona.nombre}: Score {zona.score_total}")
+```
+
+### Ejemplo 3: Análisis por Nombre de Barrio
+
+```python
+# Analizar barrio Vegueta (casco histórico)
+zona = detector.analizar_zona_por_nombre(
+    nombre_zona="Vegueta",
+    ciudad="Las Palmas de Gran Canaria",
+    solo_residencial=True
+)
+
+print(detector.generar_reporte_texto(zona))
+```
+
+### Ejemplo 4: Análisis por Direcciones Semilla
+
+```python
+# Analizar área alrededor de direcciones específicas
 zona = detector.analizar_zona_por_direcciones(
     direcciones_semilla=[
         "Calle Aconcagua",
@@ -147,25 +203,49 @@ zona = detector.analizar_zona_por_direcciones(
     solo_residencial=True
 )
 
-# Generar reporte
-print(detector.generar_reporte_texto(zona))
-
 # Exportar resultados
-detector.exportar_zona_json(zona, 'resultados/analisis.json')
-detector.exportar_zona_csv(zona, 'resultados/edificios.csv')
+detector.exportar_zona_json(zona, 'resultados/casablanca.json')
+detector.exportar_zona_csv(zona, 'resultados/casablanca.csv')
 ```
 
 ---
 
-### Script de Análisis de Las Palmas
+### Scripts Disponibles
 
-Se incluye un script completo con ejemplos para Las Palmas de Gran Canaria:
-
+#### 1. Ejemplo Rápido por Código Postal
 ```bash
-# Ejecutar menú interactivo
+python ejemplo_analisis_por_cp.py
+```
+Analiza CP 35001 (Triana) y compara 4 códigos postales clave.
+
+#### 2. Análisis Masivo de Todos los CPs
+```bash
+# Análisis completo (30-60 min)
+python scripts/analisis_masivo_codigos_postales.py
+
+# Análisis rápido (15-25 min)
+python scripts/analisis_masivo_codigos_postales.py --rapido
+```
+Genera ranking completo de los 19 códigos postales de Las Palmas.
+
+**CPs incluidos:**
+- 35001: Triana - Centro
+- 35002: Vegueta - Casco Antiguo
+- 35003: Arenales - Ciudad Jardín
+- 35004-35019: Resto de zonas
+
+**Outputs:**
+- `analisis_masivo_cps_lpgc.json` - Ranking completo
+- `ranking_cps_resumen.csv` - Tabla resumen
+- `detalle_cp_XXXXX.json` - Detalle por cada CP
+- `edificios_cp_XXXXX.csv` - Edificios por cada CP
+
+#### 3. Análisis por Barrios
+```bash
+# Menú interactivo
 python scripts/analizar_zonas_las_palmas.py
 
-# O ejecutar análisis específico
+# O análisis específico
 python scripts/analizar_zonas_las_palmas.py casablanca
 python scripts/analizar_zonas_las_palmas.py vegueta
 python scripts/analizar_zonas_las_palmas.py triana
