@@ -371,24 +371,51 @@
         .btn,
         .button {
             display: inline-block;
-            padding: 8px 14px;
+            padding: 10px 18px;
             background: #003c80;
-            color: white;
+            color: white !important;
             text-decoration: none;
             font-weight: 700;
             font-size: 14px;
-            text-align: left;
+            text-align: center;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
             border: none;
             border-radius: 8px;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
+            box-shadow: 0 2px 4px rgba(0, 60, 128, 0.2);
         }
 
         .btn:hover,
         .button:hover {
             background: #002f66;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 60, 128, 0.3);
+        }
+
+        .btn-primary {
+            background: #003c80;
+        }
+
+        .btn-primary:hover {
+            background: #002f66;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
         }
 
         .btn-sm {
