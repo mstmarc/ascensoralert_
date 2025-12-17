@@ -1110,7 +1110,7 @@ def crear_visita_seguimiento(cliente_id):
     
     response_cliente = requests.get(f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{cliente_id}", headers=HEADERS)
     response_oportunidades = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=eq.{cliente_id}&estado=eq.activa",
+        f"{SUPABASE_URL}/rest/v1/oportunidades?cliente_id=eq.{cliente_id}&estado=neq.ganada&estado=neq.perdida",
         headers=HEADERS
     )
     
