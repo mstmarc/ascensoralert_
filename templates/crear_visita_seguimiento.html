@@ -133,12 +133,18 @@
                 <label>Fecha de Visita:</label><br>
                 <input type="date" name="fecha_visita" value="{{ fecha_hoy }}" required><br><br>
 
-                {% if oportunidades %}
+                {% if oportunidad_id_preseleccionada %}
+                {# Si viene desde una oportunidad, pasar el ID como campo oculto #}
+                <input type="hidden" name="oportunidad_id" value="{{ oportunidad_id_preseleccionada }}">
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #1976d2;">
+                    <p style="margin: 0; color: #1565c0; font-weight: 600;">📎 Esta visita se registrará en la oportunidad seleccionada</p>
+                </div>
+                {% elif oportunidades %}
                 <label>Oportunidad Relacionada (opcional):</label><br>
                 <select name="oportunidad_id">
                     <option value="">-- Sin vincular a oportunidad --</option>
                     {% for op in oportunidades %}
-                    <option value="{{ op.id }}" {% if oportunidad_id_preseleccionada and oportunidad_id_preseleccionada|string == op.id|string %}selected{% endif %}>
+                    <option value="{{ op.id }}">
                         {{ op.tipo }} - {{ op.estado }}
                     </option>
                     {% endfor %}

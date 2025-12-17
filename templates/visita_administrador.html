@@ -232,10 +232,11 @@
     <main>
         <div class="container">
             {% if oportunidad %}
-            <div class="info-oportunidad">
-                <h3>📌 Vinculada a Oportunidad:</h3>
-                <p><strong>{{ oportunidad.tipo }}</strong></p>
-                <p>{{ oportunidad.clientes.nombre_cliente or 'Sin nombre' }} - {{ oportunidad.clientes.direccion }}</p>
+            <div class="info-oportunidad" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2; margin-bottom: 20px;">
+                <h3 style="color: #1565c0; font-size: 16px; margin-bottom: 8px;">📎 Esta visita se registrará en la oportunidad</h3>
+                <p style="margin: 5px 0;"><strong>Tipo:</strong> {{ oportunidad.tipo }}</p>
+                <p style="margin: 5px 0;"><strong>Comunidad:</strong> {{ oportunidad.clientes.nombre_cliente or 'Sin nombre' }}</p>
+                <p style="margin: 5px 0; color: #666;">{{ oportunidad.clientes.direccion }}</p>
             </div>
             {% endif %}
 
