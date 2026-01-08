@@ -175,13 +175,14 @@
         }
 
         .estado-dropdown {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
         }
 
         .estado-dropdown select {
             padding: 9px 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            border: 1px solid #e6e6e6;
+            border-radius: 0;
             font-size: 13px;
             font-weight: 600;
             background: white;
@@ -191,13 +192,11 @@
             height: 38px;
             box-sizing: border-box;
             line-height: 1.2;
-            vertical-align: middle;
         }
 
         .estado-dropdown select:focus {
             outline: none;
             border-color: #003366;
-            box-shadow: 0 0 0 3px rgba(0,51,102,0.1);
         }
 
         .estado-dropdown select:hover {
