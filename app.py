@@ -7745,6 +7745,262 @@ def patrones_tendencias_ia():
         return redirect("/cartera/ia")
 
 
+@app.route("/cartera/ia/roi")
+@helpers.login_required
+def roi_optimizacion_ia():
+    """Dashboard de ROI y Optimización del Mantenimiento - FASE 4"""
+    try:
+        from collections import defaultdict
+        from datetime import datetime, timedelta
+
+        # Costes estimados por gravedad (en euros)
+        COSTES_GRAVEDAD = {
+            'CRITICA': 500,
+            'GRAVE': 300,
+            'MODERADA': 150,
+            'LEVE': 75
+        }
+
+        # Obtener todos los análisis con partes
+        response_analisis = requests.get(
+            f"{SUPABASE_URL}/rest/v1/analisis_partes_ia?select=*,partes_trabajo(id,fecha_parte,numero_parte,tipo_parte_normalizado,fecha_cierre,maquina_id,maquinas_cartera(id,identificador,instalaciones(id,nombre)))&order=created_at.desc&limit=5000",
+            headers=HEADERS
+        )
+
+        if response_analisis.status_code != 200:
+            flash("Error al cargar análisis", "error")
+            return redirect("/cartera/ia")
+
+        analisis_list = response_analisis.json()
+
+        if not analisis_list:
+            return render_template("cartera/dashboard_roi.html", sin_datos=True)
+
+        # 1. CÁLCULO DE COSTES POR GRAVEDAD
+        costes_por_gravedad = {'CRITICA': 0, 'GRAVE': 0, 'MODERADA': 0, 'LEVE': 0}
+        conteo_gravedad = {'CRITICA': 0, 'GRAVE': 0, 'MODERADA': 0, 'LEVE': 0}
+
+        for a in analisis_list:
+            gravedad = a.get('gravedad_tecnica', 'LEVE')
+            costes_por_gravedad[gravedad] += COSTES_GRAVEDAD[gravedad]
+            conteo_gravedad[gravedad] += 1
+
+        coste_total = sum(costes_por_gravedad.values())
+
+        # 2. AHORRO POTENCIAL (si se previenen averías)
+        # Estimación: Con IA predictiva se pueden prevenir ~30% de GRAVES y CRÍTICAS
+        averias_prevenibles = {
+            'CRITICA': int(conteo_gravedad['CRITICA'] * 0.30),
+            'GRAVE': int(conteo_gravedad['GRAVE'] * 0.30)
+        }
+        ahorro_potencial = (
+            averias_prevenibles['CRITICA'] * COSTES_GRAVEDAD['CRITICA'] +
+            averias_prevenibles['GRAVE'] * COSTES_GRAVEDAD['GRAVE']
+        )
+
+        # 3. ANÁLISIS DE TIEMPOS DE RESPUESTA
+        tiempos_respuesta = []
+        partes_con_fecha_cierre = 0
+
+        for a in analisis_list:
+            parte = a.get('partes_trabajo')
+            if not parte:
+                continue
+
+            fecha_parte = parte.get('fecha_parte')
+            fecha_cierre = parte.get('fecha_cierre')
+
+            if fecha_parte and fecha_cierre:
+                try:
+                    f_parte = datetime.fromisoformat(fecha_parte.replace('Z', '+00:00'))
+                    f_cierre = datetime.fromisoformat(fecha_cierre.replace('Z', '+00:00'))
+                    dias = (f_cierre - f_parte).days
+                    if dias >= 0:
+                        tiempos_respuesta.append({
+                            'dias': dias,
+                            'gravedad': a.get('gravedad_tecnica', 'LEVE'),
+                            'numero_parte': parte.get('numero_parte', 'N/A')
+                        })
+                        partes_con_fecha_cierre += 1
+                except:
+                    pass
+
+        # Calcular promedios por gravedad
+        tiempos_por_gravedad = defaultdict(list)
+        for t in tiempos_respuesta:
+            tiempos_por_gravedad[t['gravedad']].append(t['dias'])
+
+        promedios_respuesta = {}
+        for gravedad, dias_list in tiempos_por_gravedad.items():
+            if dias_list:
+                promedios_respuesta[gravedad] = {
+                    'promedio': round(sum(dias_list) / len(dias_list), 1),
+                    'min': min(dias_list),
+                    'max': max(dias_list),
+                    'total': len(dias_list)
+                }
+
+        # 4. EFICIENCIA DEL MANTENIMIENTO
+        # Contar tipos de partes
+        tipos_parte = defaultdict(int)
+        for a in analisis_list:
+            parte = a.get('partes_trabajo')
+            if parte:
+                tipo = parte.get('tipo_parte_normalizado', 'DESCONOCIDO')
+                tipos_parte[tipo] += 1
+
+        # Clasificar en preventivo vs correctivo
+        preventivos = tipos_parte.get('CONSERVACION', 0) + tipos_parte.get('IPO', 0) + tipos_parte.get('MANTENIMIENTO', 0)
+        correctivos = tipos_parte.get('AVERIA', 0) + tipos_parte.get('REPARACION', 0) + tipos_parte.get('RESCATE', 0)
+        total_clasificados = preventivos + correctivos
+
+        porcentaje_preventivo = round((preventivos / total_clasificados * 100), 1) if total_clasificados > 0 else 0
+        porcentaje_correctivo = round((correctivos / total_clasificados * 100), 1) if total_clasificados > 0 else 0
+
+        # 5. PARTES CON RECOMENDACIONES IA
+        partes_con_recomendacion = sum(1 for a in analisis_list if a.get('recomendacion_ia'))
+        porcentaje_con_recomendacion = round((partes_con_recomendacion / len(analisis_list) * 100), 1) if analisis_list else 0
+
+        # 6. COSTE DEL SISTEMA IA
+        coste_analisis_ia = len(analisis_list) * 0.0003  # $0.0003 por análisis con Haiku
+        coste_analisis_ia_eur = coste_analisis_ia * 0.92  # Conversión aproximada USD a EUR
+
+        # 7. ROI CALCULADO
+        roi_porcentaje = round(((ahorro_potencial - coste_analisis_ia_eur) / coste_analisis_ia_eur * 100), 1) if coste_analisis_ia_eur > 0 else 0
+
+        # 8. TOP 10 MÁQUINAS MÁS COSTOSAS
+        costes_por_maquina = defaultdict(lambda: {'coste': 0, 'fallos': 0, 'criticos': 0, 'identificador': '', 'instalacion': ''})
+
+        for a in analisis_list:
+            parte = a.get('partes_trabajo')
+            if not parte:
+                continue
+
+            maquina = parte.get('maquinas_cartera')
+            if not maquina:
+                continue
+
+            maquina_id = maquina['id']
+            gravedad = a.get('gravedad_tecnica', 'LEVE')
+
+            costes_por_maquina[maquina_id]['coste'] += COSTES_GRAVEDAD[gravedad]
+            costes_por_maquina[maquina_id]['fallos'] += 1
+            if gravedad == 'CRITICA':
+                costes_por_maquina[maquina_id]['criticos'] += 1
+
+            costes_por_maquina[maquina_id]['identificador'] = maquina.get('identificador', 'N/A')
+            if maquina.get('instalaciones'):
+                costes_por_maquina[maquina_id]['instalacion'] = maquina['instalaciones'].get('nombre', 'N/A')
+
+        # Convertir a lista y ordenar
+        maquinas_costosas = []
+        for maq_id, data in costes_por_maquina.items():
+            maquinas_costosas.append({
+                'maquina_id': maq_id,
+                'identificador': data['identificador'],
+                'instalacion': data['instalacion'],
+                'coste_total': data['coste'],
+                'total_fallos': data['fallos'],
+                'criticos': data['criticos'],
+                'coste_promedio': round(data['coste'] / data['fallos'], 2)
+            })
+
+        maquinas_costosas = sorted(maquinas_costosas, key=lambda x: x['coste_total'], reverse=True)[:10]
+
+        # 9. RECOMENDACIONES DE OPTIMIZACIÓN (automáticas)
+        recomendaciones = []
+
+        # Recomendación 1: Ratio preventivo/correctivo
+        if porcentaje_preventivo < 40:
+            recomendaciones.append({
+                'tipo': 'EFICIENCIA',
+                'titulo': 'Incrementar Mantenimiento Preventivo',
+                'descripcion': f'Actualmente solo el {porcentaje_preventivo}% del mantenimiento es preventivo. Objetivo recomendado: 60-70%.',
+                'ahorro_estimado': int((40 - porcentaje_preventivo) * coste_total / 100 * 0.5),
+                'prioridad': 'ALTA'
+            })
+
+        # Recomendación 2: Tiempos de respuesta altos
+        if 'CRITICA' in promedios_respuesta and promedios_respuesta['CRITICA']['promedio'] > 3:
+            recomendaciones.append({
+                'tipo': 'TIEMPO_RESPUESTA',
+                'titulo': 'Reducir Tiempo de Respuesta en Críticos',
+                'descripcion': f'El tiempo promedio de resolución de averías críticas es {promedios_respuesta["CRITICA"]["promedio"]} días. Objetivo: <24h.',
+                'ahorro_estimado': int(conteo_gravedad['CRITICA'] * 100),  # €100 por avería crítica resuelta rápido
+                'prioridad': 'ALTA'
+            })
+
+        # Recomendación 3: Máquinas muy costosas
+        if maquinas_costosas and maquinas_costosas[0]['coste_total'] > 2000:
+            recomendaciones.append({
+                'tipo': 'MAQUINA_PROBLEMATICA',
+                'titulo': f'Auditoría de Máquina: {maquinas_costosas[0]["identificador"]}',
+                'descripcion': f'Esta máquina acumula €{maquinas_costosas[0]["coste_total"]} en costes. Considerar revisión completa o sustitución.',
+                'ahorro_estimado': int(maquinas_costosas[0]['coste_total'] * 0.5),
+                'prioridad': 'MEDIA'
+            })
+
+        # Recomendación 4: Sistema IA generando ROI positivo
+        if roi_porcentaje > 100:
+            recomendaciones.append({
+                'tipo': 'EXPANSION_IA',
+                'titulo': 'Expandir Uso del Sistema IA',
+                'descripcion': f'El sistema IA tiene un ROI de {roi_porcentaje}%. Considerar analizar más partes históricos.',
+                'ahorro_estimado': int(ahorro_potencial * 0.3),
+                'prioridad': 'MEDIA'
+            })
+
+        # Recomendación 5: Partes sin recomendaciones
+        if porcentaje_con_recomendacion < 80:
+            recomendaciones.append({
+                'tipo': 'COBERTURA_IA',
+                'titulo': 'Mejorar Cobertura de Recomendaciones IA',
+                'descripcion': f'Solo {porcentaje_con_recomendacion}% de partes tienen recomendaciones IA. Revisar calidad de descripciones.',
+                'ahorro_estimado': int(ahorro_potencial * 0.2),
+                'prioridad': 'BAJA'
+            })
+
+        # Ordenar por prioridad y ahorro
+        prioridad_orden = {'ALTA': 3, 'MEDIA': 2, 'BAJA': 1}
+        recomendaciones = sorted(recomendaciones,
+                                key=lambda x: (prioridad_orden[x['prioridad']], x['ahorro_estimado']),
+                                reverse=True)
+
+        # Estadísticas generales
+        stats = {
+            'total_analisis': len(analisis_list),
+            'coste_total': int(coste_total),
+            'ahorro_potencial': int(ahorro_potencial),
+            'roi_porcentaje': roi_porcentaje,
+            'coste_ia': round(coste_analisis_ia_eur, 2),
+            'porcentaje_preventivo': porcentaje_preventivo,
+            'porcentaje_correctivo': porcentaje_correctivo,
+            'porcentaje_con_recomendacion': porcentaje_con_recomendacion,
+            'tiempo_respuesta_promedio': round(sum(t['dias'] for t in tiempos_respuesta) / len(tiempos_respuesta), 1) if tiempos_respuesta else 0,
+            'partes_con_cierre': partes_con_fecha_cierre
+        }
+
+        return render_template(
+            "cartera/dashboard_roi.html",
+            stats=stats,
+            costes_gravedad=costes_por_gravedad,
+            conteo_gravedad=conteo_gravedad,
+            costes_constantes=COSTES_GRAVEDAD,
+            ahorro_potencial=ahorro_potencial,
+            averias_prevenibles=averias_prevenibles,
+            promedios_respuesta=promedios_respuesta,
+            maquinas_costosas=maquinas_costosas,
+            recomendaciones=recomendaciones,
+            tipos_parte=dict(tipos_parte),
+            sin_datos=False
+        )
+
+    except Exception as e:
+        logger.error(f"Error en ROI y optimización: {str(e)}")
+        flash(f"Error al calcular ROI: {str(e)}", "error")
+        return redirect("/cartera/ia")
+
+
 @app.route("/cartera/ia/analizar-parte/<int:parte_id>", methods=["POST"])
 @helpers.login_required
 def analizar_parte_ia(parte_id):
