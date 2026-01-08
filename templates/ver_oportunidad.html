@@ -585,7 +585,7 @@
                         <a href="{{ url_for('crear_visita_seguimiento', cliente_id=oportunidad.cliente_id, oportunidad_id=oportunidad.id) }}"
                            class="btn btn-primary">+ Registrar Visita a Instalación</a>
                         <a href="{{ url_for('visita_administrador', oportunidad_id=oportunidad.id) }}"
-                           class="btn btn-secondary">+ Registrar Visita a Administrador</a>
+                           class="btn btn-primary">+ Registrar Visita a Administrador</a>
                     </div>
                 </div>
             </div>
@@ -594,7 +594,7 @@
             <div class="action-buttons">
                 <a href="{{ url_for('editar_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-primary">Editar Oportunidad</a>
                 <a href="{{ url_for('ver_lead', lead_id=oportunidad.cliente_id) }}" class="btn btn-primary">Ver Comunidad</a>
-                <a href="{{ url_for('oportunidades') }}" class="btn btn-secondary">Volver a Oportunidades</a>
+                <a href="{{ url_for('oportunidades') }}" class="btn btn-primary">Volver a Oportunidades</a>
             </div>
 
             <!-- FOOTER CON FECHA CREACIÓN -->
