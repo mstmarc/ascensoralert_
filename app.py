@@ -4382,23 +4382,34 @@ def cambiar_estado_presupuesto(inspeccion_id):
 def marcar_segunda_realizada(inspeccion_id):
     """Marcar que se realizó la segunda inspección (a los 6 meses)"""
 
-    # Establecer fecha de hoy como fecha_segunda_realizada
-    hoy = date.today().strftime('%Y-%m-%d')
+    try:
+        # Establecer fecha de hoy como fecha_segunda_realizada
+        hoy = date.today().strftime('%Y-%m-%d')
 
-    data = {
-        "fecha_segunda_realizada": hoy
-    }
+        data = {
+            "fecha_segunda_realizada": hoy
+        }
 
-    response = requests.patch(
-        f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
-        json=data,
-        headers=HEADERS
-    )
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}",
+            json=data,
+            headers=HEADERS
+        )
 
-    if response.status_code in [200, 204]:
-        flash("Segunda inspección marcada como realizada", "success")
-    else:
-        flash("Error al marcar segunda inspección", "error")
+        if response.status_code in [200, 204]:
+            flash("Segunda inspección marcada como realizada", "success")
+        else:
+            # Mostrar el error detallado de Supabase
+            error_detail = response.text if response.text else f"Código de error: {response.status_code}"
+            flash(f"Error al marcar segunda inspección: {error_detail}", "error")
+            print(f"Error en marcar_segunda_realizada - Status: {response.status_code}, Response: {response.text}")
+
+    except requests.exceptions.RequestException as e:
+        flash(f"Error de conexión al marcar segunda inspección: {str(e)}", "error")
+        print(f"Error de conexión en marcar_segunda_realizada: {str(e)}")
+    except Exception as e:
+        flash(f"Error inesperado al marcar segunda inspección: {str(e)}", "error")
+        print(f"Error inesperado en marcar_segunda_realizada: {str(e)}")
 
     return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
