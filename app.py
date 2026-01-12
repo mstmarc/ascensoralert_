@@ -7558,7 +7558,17 @@ def patrones_tendencias_ia():
         )
 
         if response_analisis.status_code != 200:
-            flash("Error al cargar análisis", "error")
+            error_msg = f"Error al cargar análisis (Status: {response_analisis.status_code})"
+            try:
+                error_detail = response_analisis.json()
+                logger.error(f"Error en patrones y tendencias - Status {response_analisis.status_code}: {error_detail}")
+                # Si hay un mensaje de error específico, mostrarlo
+                if isinstance(error_detail, dict) and 'message' in error_detail:
+                    error_msg = f"Error al cargar análisis: {error_detail['message']}"
+            except:
+                logger.error(f"Error en patrones y tendencias - Status {response_analisis.status_code}: {response_analisis.text}")
+
+            flash(error_msg, "error")
             return redirect("/cartera/ia")
 
         analisis_list = response_analisis.json()
@@ -7779,7 +7789,17 @@ def roi_optimizacion_ia():
         )
 
         if response_analisis.status_code != 200:
-            flash("Error al cargar análisis", "error")
+            error_msg = f"Error al cargar análisis (Status: {response_analisis.status_code})"
+            try:
+                error_detail = response_analisis.json()
+                logger.error(f"Error en ROI y optimización - Status {response_analisis.status_code}: {error_detail}")
+                # Si hay un mensaje de error específico, mostrarlo
+                if isinstance(error_detail, dict) and 'message' in error_detail:
+                    error_msg = f"Error al cargar análisis: {error_detail['message']}"
+            except:
+                logger.error(f"Error en ROI y optimización - Status {response_analisis.status_code}: {response_analisis.text}")
+
+            flash(error_msg, "error")
             return redirect("/cartera/ia")
 
         analisis_list = response_analisis.json()
