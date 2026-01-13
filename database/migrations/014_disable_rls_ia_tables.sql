@@ -145,6 +145,6 @@ END
 $$;
 
 -- Registrar esta migración
-INSERT INTO schema_migrations (version, name, executed_at)
-VALUES ('014', 'disable_rls_ia_tables', NOW())
+INSERT INTO schema_migrations (version, executed_at)
+VALUES ('014', NOW())
 ON CONFLICT (version) DO NOTHING;
