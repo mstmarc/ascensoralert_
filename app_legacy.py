@@ -665,10 +665,9 @@ def logout():
 
 # Home - ACTUALIZADO: Dashboard en desktop, menú simple en móvil
 @app.route("/home")
+@helpers.login_required
 def home():
     """Homepage - Dashboard responsive para todos los dispositivos"""
-    if "usuario" not in session:
-        return redirect("/")
 
     # Dashboard responsive (funciona en desktop, tablet y móvil)
 
@@ -771,9 +770,9 @@ def home():
 
 # Alta de Lead CON FECHA DE VISITA
 @app.route("/formulario_lead", methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('clientes', 'write')
 def formulario_lead():
-    if "usuario" not in session:
-        return redirect("/")
     if request.method == "POST":
         # Obtener administrador_id y convertir a int o None
         administrador_id = request.form.get("administrador_id")
@@ -1343,9 +1342,9 @@ def reporte_mensual():
 
 # DASHBOARD MEJORADO CON PAGINACIÓN Y BÚSQUEDA
 @app.route("/leads_dashboard")
+@helpers.login_required
+@helpers.requiere_permiso('clientes', 'read')
 def leads_dashboard():
-    if "usuario" not in session:
-        return redirect("/")
 
     page = int(request.args.get("page", 1))
     per_page = 25
@@ -2665,101 +2664,41 @@ def eliminar_oportunidad(oportunidad_id):
 # ============================================
 
 @app.route('/oportunidad/<int:oportunidad_id>/accion/add', methods=['POST'])
+@helpers.login_required
 def add_accion(oportunidad_id):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    
-    texto_accion = request.form.get('texto_accion', '').strip()
-    
-    if not texto_accion:
-        flash('Debes escribir una acción', 'error')
-        return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
-    
-    # Obtener acciones actuales
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=acciones",
-        headers=HEADERS
+    from utils.helpers_actions import gestionar_accion
+    return gestionar_accion(
+        tabla='oportunidades',
+        registro_id=oportunidad_id,
+        operacion='add',
+        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
     )
-    
-    if response.status_code == 200 and response.json():
-        acciones = response.json()[0].get('acciones', [])
-        if not isinstance(acciones, list):
-            acciones = []
-        
-        # Añadir nueva acción
-        acciones.append({
-            'texto': texto_accion,
-            'completada': False
-        })
-        
-        # Actualizar en BD
-        requests.patch(
-            f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
-            headers=HEADERS,
-            json={'acciones': acciones}
-        )
-        
-        flash('Acción añadida correctamente', 'success')
-    
-    return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
 
 
 @app.route('/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>', methods=['POST'])
+@helpers.login_required
 def toggle_accion(oportunidad_id, index):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    
-    # Obtener acciones actuales
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=acciones",
-        headers=HEADERS
+    from utils.helpers_actions import gestionar_accion
+    return gestionar_accion(
+        tabla='oportunidades',
+        registro_id=oportunidad_id,
+        operacion='toggle',
+        index=index,
+        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
     )
-    
-    if response.status_code == 200 and response.json():
-        acciones = response.json()[0].get('acciones', [])
-        
-        if 0 <= index < len(acciones):
-            # Toggle el estado
-            acciones[index]['completada'] = not acciones[index]['completada']
-            
-            # Actualizar en BD
-            requests.patch(
-                f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
-                headers=HEADERS,
-                json={'acciones': acciones}
-            )
-    
-    return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
 
 
 @app.route('/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>', methods=['POST'])
+@helpers.login_required
 def delete_accion(oportunidad_id, index):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    
-    # Obtener acciones actuales
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}&select=acciones",
-        headers=HEADERS
+    from utils.helpers_actions import gestionar_accion
+    return gestionar_accion(
+        tabla='oportunidades',
+        registro_id=oportunidad_id,
+        operacion='delete',
+        index=index,
+        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
     )
-    
-    if response.status_code == 200 and response.json():
-        acciones = response.json()[0].get('acciones', [])
-        
-        if 0 <= index < len(acciones):
-            # Eliminar acción
-            acciones.pop(index)
-            
-            # Actualizar en BD
-            requests.patch(
-                f"{SUPABASE_URL}/rest/v1/oportunidades?id=eq.{oportunidad_id}",
-                headers=HEADERS,
-                json={'acciones': acciones}
-            )
-            
-            flash('Acción eliminada', 'success')
-    
-    return redirect(url_for('ver_oportunidad', oportunidad_id=oportunidad_id))
 
 
 # ============================================
@@ -2767,101 +2706,41 @@ def delete_accion(oportunidad_id, index):
 # ============================================
 
 @app.route('/equipo/<int:equipo_id>/accion/add', methods=['POST'])
+@helpers.login_required
 def add_accion_equipo(equipo_id):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
-    texto_accion = request.form.get('texto_accion', '').strip()
-
-    if not texto_accion:
-        flash('Debes escribir una acción', 'error')
-        return redirect(url_for('ver_equipo', equipo_id=equipo_id))
-
-    # Obtener acciones actuales
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=acciones",
-        headers=HEADERS
+    from utils.helpers_actions import gestionar_accion
+    return gestionar_accion(
+        tabla='equipos',
+        registro_id=equipo_id,
+        operacion='add',
+        redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
     )
-
-    if response.status_code == 200 and response.json():
-        acciones = response.json()[0].get('acciones', [])
-        if not isinstance(acciones, list):
-            acciones = []
-
-        # Añadir nueva acción
-        acciones.append({
-            'texto': texto_accion,
-            'completada': False
-        })
-
-        # Actualizar en BD
-        requests.patch(
-            f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}",
-            headers=HEADERS,
-            json={'acciones': acciones}
-        )
-
-        flash('Acción añadida', 'success')
-
-    return redirect(url_for('ver_equipo', equipo_id=equipo_id))
 
 
 @app.route('/equipo/<int:equipo_id>/accion/toggle/<int:index>', methods=['POST'])
+@helpers.login_required
 def toggle_accion_equipo(equipo_id, index):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
-    # Obtener acciones actuales
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=acciones",
-        headers=HEADERS
+    from utils.helpers_actions import gestionar_accion
+    return gestionar_accion(
+        tabla='equipos',
+        registro_id=equipo_id,
+        operacion='toggle',
+        index=index,
+        redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
     )
-
-    if response.status_code == 200 and response.json():
-        acciones = response.json()[0].get('acciones', [])
-
-        if 0 <= index < len(acciones):
-            # Toggle el estado
-            acciones[index]['completada'] = not acciones[index]['completada']
-
-            # Actualizar en BD
-            requests.patch(
-                f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}",
-                headers=HEADERS,
-                json={'acciones': acciones}
-            )
-
-    return redirect(url_for('ver_equipo', equipo_id=equipo_id))
 
 
 @app.route('/equipo/<int:equipo_id>/accion/delete/<int:index>', methods=['POST'])
+@helpers.login_required
 def delete_accion_equipo(equipo_id, index):
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
-    # Obtener acciones actuales
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=acciones",
-        headers=HEADERS
+    from utils.helpers_actions import gestionar_accion
+    return gestionar_accion(
+        tabla='equipos',
+        registro_id=equipo_id,
+        operacion='delete',
+        index=index,
+        redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
     )
-
-    if response.status_code == 200 and response.json():
-        acciones = response.json()[0].get('acciones', [])
-
-        if 0 <= index < len(acciones):
-            # Eliminar acción
-            acciones.pop(index)
-
-            # Actualizar en BD
-            requests.patch(
-                f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}",
-                headers=HEADERS,
-                json={'acciones': acciones}
-            )
-
-            flash('Acción eliminada', 'success')
-
-    return redirect(url_for('ver_equipo', equipo_id=equipo_id))
 
 
 # ============================================
@@ -5367,30 +5246,23 @@ def actualizar_gestion_defecto(defecto_id):
 
 # Listado de OCAs
 @app.route("/ocas")
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'read')
 def lista_ocas():
-    """Listado de todos los OCAs"""
-    if "usuario" not in session:
-        return redirect("/")
+    """Listado de todos los OCAs con conteo optimizado de inspecciones"""
+    from utils.helpers_actions import obtener_conteos_por_tabla
 
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/ocas?select=*&order=nombre.asc",
-        headers=HEADERS
+    # Obtener OCAs con conteos en una sola query (optimización N+1)
+    ocas = obtener_conteos_por_tabla(
+        tabla_principal='ocas',
+        tabla_relacionada='inspecciones',
+        campo_relacion='oca_id',
+        filtros_principal='order=nombre.asc'
     )
 
-    ocas = []
-    if response.status_code == 200:
-        ocas = response.json()
-
-    # Contar inspecciones por OCA
+    # Renombrar el campo para compatibilidad con el template
     for oca in ocas:
-        response_count = requests.get(
-            f"{SUPABASE_URL}/rest/v1/inspecciones?oca_id=eq.{oca['id']}&select=id",
-            headers=HEADERS
-        )
-        if response_count.status_code == 200:
-            oca['total_inspecciones'] = len(response_count.json())
-        else:
-            oca['total_inspecciones'] = 0
+        oca['total_inspecciones'] = oca.pop('total_count', 0)
 
     return render_template("lista_ocas.html", ocas=ocas)
 
