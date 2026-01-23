@@ -120,8 +120,8 @@
 
             <div style="margin-top: 30px; display: flex; align-items: center;">
                 <button type="submit" class="button">Guardar Cambios</button>
-                <a href="/ocas" class="btn-secondary">Cancelar</a>
-                <a href="/ocas/eliminar/{{ oca.id }}" class="btn-danger" onclick="return confirm('¿Eliminar este OCA?')">Eliminar</a>
+                <a href="{{ url_for('ocas.lista') }}" class="btn-secondary">Cancelar</a>
+                <a href="{{ url_for('ocas.eliminar', oca_id=oca.id) }}" class="btn-danger" onclick="return confirm('¿Eliminar este OCA?')">Eliminar</a>
             </div>
         </form>
     </main>    <!-- Inyectar permisos del usuario para JavaScript -->
