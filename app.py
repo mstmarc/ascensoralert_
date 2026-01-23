@@ -312,4 +312,13 @@ app.add_url_rule("/cartera/ia/api/generar-predicciones", "api_generar_prediccion
 # ============================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Render requiere escuchar en 0.0.0.0 (todas las interfaces)
+    # y usar el puerto de la variable de entorno PORT
+    port = int(os.environ.get("PORT", 10000))
+    debug = os.environ.get("FLASK_ENV") == "development"
+
+    app.run(
+        host='0.0.0.0',  # CRÍTICO: Necesario para Render
+        port=port,
+        debug=debug
+    )
