@@ -903,34 +903,35 @@ def visita_administrador():
 
 # Dashboard de visitas a administradores
 @app.route("/visitas_administradores_dashboard")
+@helpers.login_required
+@helpers.requiere_permiso('visitas', 'read')
 def visitas_administradores_dashboard():
-    if "usuario" not in session:
-        return redirect("/")
-    
-    page = int(request.args.get("page", 1))
-    per_page = 25
-    offset = (page - 1) * per_page
+    from utils.pagination import get_pagination
+
+    # Usar helper de paginación
+    pagination = get_pagination(per_page_default=25)
 
     # OPTIMIZACIÓN: Para count solo necesitamos id, no todos los campos
     count_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id"
     count_response = requests.get(count_url, headers={**HEADERS, "Prefer": "count=exact"})
     total_registros = int(count_response.headers.get("Content-Range", "0").split("/")[-1])
-    total_pages = max(1, (total_registros + per_page - 1) // per_page)
+    pagination.total = total_registros
 
     # OPTIMIZACIÓN: Seleccionar campos específicos con JOIN a administradores
-    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,administradores(nombre_empresa),persona_contacto,observaciones,oportunidad_id&order=fecha_visita.desc&limit={per_page}&offset={offset}"
+    data_url = f"{SUPABASE_URL}/rest/v1/visitas_administradores?select=id,fecha_visita,administrador_id,administradores(nombre_empresa),persona_contacto,observaciones,oportunidad_id&order=fecha_visita.desc&limit={pagination.limit}&offset={pagination.offset}"
     response = requests.get(data_url, headers=HEADERS)
-    
+
     if response.status_code != 200:
         return f"<h3 style='color:red;'>Error al obtener visitas</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
-    
+
     visitas = response.json()
-    
+
     return render_template("visitas_admin_dashboard.html",
         visitas=visitas,
-        page=page,
-        total_pages=total_pages,
-        total_registros=total_registros
+        pagination=pagination,
+        page=pagination.page,
+        total_pages=pagination.total_pages,
+        total_registros=pagination.total
     )
 
 @app.route("/ver_visita_admin/<int:visita_id>")
@@ -1345,10 +1346,13 @@ def reporte_mensual():
 @helpers.login_required
 @helpers.requiere_permiso('clientes', 'read')
 def leads_dashboard():
+    from utils.pagination import get_pagination
 
-    page = int(request.args.get("page", 1))
-    per_page = 25
-    offset = (page - 1) * per_page
+    # Usar helper de paginación
+    pagination = get_pagination(per_page_default=25)
+    page = pagination.page
+    per_page = pagination.per_page
+    offset = pagination.offset
 
     filtro_localidad = request.args.get("localidad", "")
     filtro_empresa = request.args.get("empresa", "")
