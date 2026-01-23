@@ -116,8 +116,8 @@ from app_legacy import (
     subsanar_defecto, revertir_defecto, eliminar_defecto,
     ver_defecto, editar_defecto, actualizar_gestion_defecto,
 
-    # OCAs
-    lista_ocas, nuevo_oca, editar_oca, eliminar_oca,
+    # OCAs - MIGRADAS A BLUEPRINT (ver routes/ocas/ocas_bp.py)
+    # lista_ocas, nuevo_oca, editar_oca, eliminar_oca,
 
     # Administración de Usuarios
     admin_usuarios, admin_crear_usuario, admin_editar_usuario,
@@ -249,11 +249,8 @@ app.add_url_rule("/defectos/<int:defecto_id>", "ver_defecto", ver_defecto)
 app.add_url_rule("/defectos/<int:defecto_id>/editar", "editar_defecto", editar_defecto, methods=["GET", "POST"])
 app.add_url_rule("/defectos/<int:defecto_id>/actualizar_gestion", "actualizar_gestion_defecto", actualizar_gestion_defecto, methods=["POST"])
 
-# OCAs
-app.add_url_rule("/ocas", "lista_ocas", lista_ocas)
-app.add_url_rule("/ocas/nuevo", "nuevo_oca", nuevo_oca, methods=["GET", "POST"])
-app.add_url_rule("/ocas/editar/<int:oca_id>", "editar_oca", editar_oca, methods=["GET", "POST"])
-app.add_url_rule("/ocas/eliminar/<int:oca_id>", "eliminar_oca", eliminar_oca)
+# OCAs - MIGRADAS A BLUEPRINT (ver routes/ocas/ocas_bp.py)
+# Las rutas de OCAs ahora se registran automáticamente via Blueprint
 
 # Administración de Usuarios
 app.add_url_rule("/admin/usuarios", "admin_usuarios", admin_usuarios)
@@ -306,6 +303,14 @@ app.add_url_rule("/cartera/ia/ejecutar", "mostrar_ejecutar_analisis", mostrar_ej
 app.add_url_rule("/cartera/ia/ejecutar-analisis-2025", "ejecutar_analisis_web", ejecutar_analisis_web, methods=["POST"])
 app.add_url_rule("/cartera/ia/estado-analisis", "estado_analisis", estado_analisis)
 app.add_url_rule("/cartera/ia/api/generar-predicciones", "api_generar_predicciones_ia", api_generar_predicciones_ia, methods=["POST"])
+
+# ============================================
+# REGISTRAR BLUEPRINTS
+# ============================================
+
+# Blueprint de OCAs (primer módulo migrado)
+from routes.ocas import ocas_bp
+app.register_blueprint(ocas_bp)
 
 # ============================================
 # PUNTO DE ENTRADA

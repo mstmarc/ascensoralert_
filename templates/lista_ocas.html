@@ -105,7 +105,7 @@
                 <h2 class="page-title">Gestión de OCAs (Organismos de Control)</h2>
                 <div>
                     <a href="/inspecciones" class="btn btn-secondary" style="margin-right: 10px;">Volver a Inspecciones</a>
-                    <a href="/ocas/nuevo" class="btn btn-primary">+ Nuevo OCA</a>
+                    <a href="{{ url_for('ocas.nuevo') }}" class="btn btn-primary">+ Nuevo OCA</a>
                 </div>
             </div>
 
@@ -125,7 +125,7 @@
                 <div class="leads-list">
                     {% for oca in ocas %}
                     <div class="lead-list-item">
-                        <a href="/ocas/editar/{{ oca.id }}" class="lead-list-direccion">
+                        <a href="{{ url_for('ocas.editar', oca_id=oca.id) }}" class="lead-list-direccion">
                             {{ oca.nombre }}
                         </a>
                         <div class="lead-list-info">

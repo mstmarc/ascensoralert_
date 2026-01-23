@@ -5245,14 +5245,34 @@ def actualizar_gestion_defecto(defecto_id):
 
 # ============================================
 # ============================================
+# ============================================
 # GESTIÓN DE OCAs (Organismos de Control)
 # ============================================
+#
+# ⚠️ MIGRADO A BLUEPRINT: routes/ocas/ocas_bp.py
+#
+# Las rutas de OCAs han sido migradas al Blueprint modular.
+# Este código se mantiene como referencia y se eliminará en futuras iteraciones.
+#
+# Rutas migradas:
+# - GET  /ocas              → ocas.lista()
+# - GET  /ocas/nuevo        → ocas.nuevo()
+# - POST /ocas/nuevo        → ocas.nuevo()
+# - GET  /ocas/editar/<id>  → ocas.editar(oca_id)
+# - POST /ocas/editar/<id>  → ocas.editar(oca_id)
+# - GET  /ocas/eliminar/<id> → ocas.eliminar(oca_id)
+#
+# ============================================
 
-# Listado de OCAs
-@app.route("/ocas")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'read')
-def lista_ocas():
+# CÓDIGO LEGACY COMENTADO - Ya no se usa (migrado a Blueprint)
+# Las siguientes funciones están comentadas porque fueron migradas
+# a routes/ocas/ocas_bp.py
+
+# # Listado de OCAs
+# @app.route("/ocas")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'read')
+def _lista_ocas_legacy():
     """Listado de todos los OCAs con conteo optimizado de inspecciones"""
     from utils.helpers_actions import obtener_conteos_por_tabla
 
@@ -5270,11 +5290,11 @@ def lista_ocas():
 
     return render_template("lista_ocas.html", ocas=ocas)
 
-# Nuevo OCA
-@app.route("/ocas/nuevo", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def nuevo_oca():
+# # Nuevo OCA
+# @app.route("/ocas/nuevo", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _nuevo_oca_legacy():
     """Crear un nuevo OCA"""
 
     if request.method == "POST":
@@ -5307,11 +5327,11 @@ def nuevo_oca():
 
     return render_template("nuevo_oca.html")
 
-# Editar OCA
-@app.route("/ocas/editar/<int:oca_id>", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def editar_oca(oca_id):
+# # Editar OCA
+# @app.route("/ocas/editar/<int:oca_id>", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _editar_oca_legacy(oca_id):
     """Editar un OCA existente"""
 
     if request.method == "POST":
@@ -5360,11 +5380,11 @@ def editar_oca(oca_id):
 
     return render_template("editar_oca.html", oca=oca)
 
-# Eliminar OCA
-@app.route("/ocas/eliminar/<int:oca_id>")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'delete')
-def eliminar_oca(oca_id):
+# # Eliminar OCA
+# @app.route("/ocas/eliminar/<int:oca_id>")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'delete')
+def _eliminar_oca_legacy(oca_id):
     """Eliminar un OCA"""
 
     response = requests.delete(
