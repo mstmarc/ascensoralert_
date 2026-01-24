@@ -335,6 +335,37 @@ from routes.equipos import equipos_bp
 app.register_blueprint(equipos_bp)
 
 # ============================================
+# RUTA DE DIAGNÓSTICO (temporal)
+# ============================================
+
+@app.route('/debug/routes')
+def debug_routes():
+    """Muestra todas las rutas registradas en la aplicación"""
+    from flask import jsonify
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'path': rule.rule
+        })
+    # Ordenar por path
+    routes.sort(key=lambda x: x['path'])
+
+    # Buscar rutas específicas que el usuario reporta como no funcionando
+    problematic = ['/formulario_lead', '/visita_administrador', '/inspecciones/nueva']
+    found = {path: False for path in problematic}
+    for route in routes:
+        if route['path'] in problematic:
+            found[route['path']] = True
+
+    return jsonify({
+        'total_routes': len(routes),
+        'problematic_routes_status': found,
+        'all_routes': routes
+    })
+
+# ============================================
 # PUNTO DE ENTRADA
 # ============================================
 
