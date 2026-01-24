@@ -432,7 +432,7 @@
                             <li class="accion-item">
                                 <div class="accion-content">
                                     <div class="accion-checkbox-wrapper">
-                                        <form method="POST" action="{{ url_for('toggle_accion_equipo', equipo_id=equipo.id, index=loop.index0) }}">
+                                        <form method="POST" action="{{ url_for('equipos.toggle_accion', equipo_id=equipo.id, index=loop.index0) }}">
                                             <input type="checkbox"
                                                    class="accion-checkbox"
                                                    {% if accion.completada %}checked{% endif %}
@@ -443,7 +443,7 @@
                                         {{ accion.texto }}
                                     </div>
                                     <div class="accion-delete">
-                                        <form method="POST" action="{{ url_for('delete_accion_equipo', equipo_id=equipo.id, index=loop.index0) }}">
+                                        <form method="POST" action="{{ url_for('equipos.delete_accion', equipo_id=equipo.id, index=loop.index0) }}">
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta acción?')">×</button>
                                         </form>
                                     </div>
@@ -455,7 +455,7 @@
                         <p class="empty-state">No hay acciones registradas</p>
                     {% endif %}
 
-                    <form method="POST" action="{{ url_for('add_accion_equipo', equipo_id=equipo.id) }}" class="add-accion-form">
+                    <form method="POST" action="{{ url_for('equipos.add_accion', equipo_id=equipo.id) }}" class="add-accion-form">
                         <input type="text" name="texto_accion" placeholder="Escribe una nueva acción..." required>
                         <button type="submit">+ Añadir</button>
                     </form>
@@ -463,7 +463,7 @@
 
                 <!-- BOTONES DE ACCIÓN -->
                 <div class="botones-accion">
-                    <a href="/editar_equipo/{{ equipo.id }}" class="button">Editar Equipo</a>
+                    <a href="{{ url_for('equipos.editar', equipo_id=equipo.id) }}" class="button">Editar Equipo</a>
                     {% if cliente %}
                     <a href="/ver_lead/{{ cliente.id }}" class="button">Ver Instalación</a>
                     {% endif %}
