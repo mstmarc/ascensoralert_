@@ -31,7 +31,7 @@ oportunidades_bp = Blueprint('oportunidades', __name__)
 # ============================================
 
 @oportunidades_bp.route('/oportunidades')
-def dashboard():
+def oportunidades():
     """Dashboard principal de oportunidades con contadores por estado"""
     if "usuario" not in session:
         return redirect("/")
@@ -122,7 +122,7 @@ def mi_agenda():
 
 
 @oportunidades_bp.route('/oportunidades_post_ipo')
-def post_ipo():
+def oportunidades_post_ipo():
     """Seguimiento Comercial - Sistema de tareas automáticas"""
     if "usuario" not in session:
         return redirect("/")
@@ -386,10 +386,10 @@ def post_ipo():
 # CRUD DE OPORTUNIDADES
 # ============================================
 
-@oportunidades_bp.route('/crear/<int:cliente_id>', methods=["GET", "POST"])
+@oportunidades_bp.route('/crear_oportunidad/<int:cliente_id>', methods=["GET", "POST"])
 @helpers.login_required
 @helpers.requiere_permiso('oportunidades', 'write')
-def crear(cliente_id):
+def crear_oportunidad(cliente_id):
     """Crear nueva oportunidad para un cliente"""
 
     if request.method == "POST":
@@ -431,8 +431,8 @@ def crear(cliente_id):
         return redirect(url_for("leads.dashboard"))
 
 
-@oportunidades_bp.route('/ver/<int:oportunidad_id>')
-def ver(oportunidad_id):
+@oportunidades_bp.route('/ver_oportunidad/<int:oportunidad_id>')
+def ver_oportunidad(oportunidad_id):
     """Ver detalle de una oportunidad con visitas relacionadas"""
     if "usuario" not in session:
         return redirect("/")
@@ -496,16 +496,16 @@ def ver(oportunidad_id):
                                  visitas=todas_visitas)
         else:
             flash_error("Oportunidad no encontrada")
-            return redirect(url_for("oportunidades.dashboard"))
+            return redirect(url_for("oportunidades"))
     except Exception as e:
         flash_error(f"Error: {str(e)}")
-        return redirect(url_for("oportunidades.dashboard"))
+        return redirect(url_for("oportunidades"))
 
 
-@oportunidades_bp.route('/editar/<int:oportunidad_id>', methods=["GET", "POST"])
+@oportunidades_bp.route('/editar_oportunidad/<int:oportunidad_id>', methods=["GET", "POST"])
 @helpers.login_required
 @helpers.requiere_permiso('oportunidades', 'write')
-def editar(oportunidad_id):
+def editar_oportunidad(oportunidad_id):
     """Editar oportunidad existente"""
 
     if request.method == "POST":
@@ -530,7 +530,7 @@ def editar(oportunidad_id):
 
             if response.status_code in [200, 204]:
                 flash_success("Oportunidad actualizada correctamente")
-                return redirect(url_for("oportunidades.ver", oportunidad_id=oportunidad_id))
+                return redirect(url_for("ver_oportunidad", oportunidad_id=oportunidad_id))
             else:
                 flash_error("Error al actualizar")
 
@@ -547,13 +547,13 @@ def editar(oportunidad_id):
             return render_template("editar_oportunidad.html", oportunidad=oportunidad)
     except:
         flash_error("Error al cargar oportunidad")
-        return redirect(url_for("oportunidades.dashboard"))
+        return redirect(url_for("oportunidades"))
 
 
-@oportunidades_bp.route('/eliminar/<int:oportunidad_id>')
+@oportunidades_bp.route('/eliminar_oportunidad/<int:oportunidad_id>')
 @helpers.login_required
 @helpers.requiere_permiso('oportunidades', 'delete')
-def eliminar(oportunidad_id):
+def eliminar_oportunidad(oportunidad_id):
     """Eliminar oportunidad"""
 
     try:
@@ -575,21 +575,21 @@ def eliminar(oportunidad_id):
                 return redirect(f"/ver_lead/{cliente_id}")
             else:
                 flash_error("Error al eliminar oportunidad")
-                return redirect(url_for("oportunidades.dashboard"))
+                return redirect(url_for("oportunidades"))
         else:
             flash_error("Oportunidad no encontrada")
-            return redirect(url_for("oportunidades.dashboard"))
+            return redirect(url_for("oportunidades"))
     except Exception as e:
         flash_error(f"Error: {str(e)}")
-        return redirect(url_for("oportunidades.dashboard"))
+        return redirect(url_for("oportunidades"))
 
 
 # ============================================
 # ENDPOINTS AJAX
 # ============================================
 
-@oportunidades_bp.route('/cambiar_estado/<int:oportunidad_id>', methods=["POST"])
-def cambiar_estado(oportunidad_id):
+@oportunidades_bp.route('/cambiar_estado_oportunidad/<int:oportunidad_id>', methods=["POST"])
+def cambiar_estado_oportunidad(oportunidad_id):
     """Endpoint para cambio rápido de estado desde Mi Agenda"""
     if "usuario" not in session:
         return {"error": "No autorizado"}, 401
@@ -630,7 +630,7 @@ def cambiar_estado(oportunidad_id):
 # SISTEMA DE ACCIONES
 # ============================================
 
-@oportunidades_bp.route('/<int:oportunidad_id>/accion/add', methods=["POST"])
+@oportunidades_bp.route('/oportunidad/<int:oportunidad_id>/accion/add', methods=["POST"])
 @helpers.login_required
 def add_accion(oportunidad_id):
     """Agregar nueva acción a una oportunidad"""
@@ -639,11 +639,11 @@ def add_accion(oportunidad_id):
         tabla='oportunidades',
         registro_id=oportunidad_id,
         operacion='add',
-        redirect_to=url_for('oportunidades.ver', oportunidad_id=oportunidad_id)
+        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
     )
 
 
-@oportunidades_bp.route('/<int:oportunidad_id>/accion/toggle/<int:index>', methods=["POST"])
+@oportunidades_bp.route('/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>', methods=["POST"])
 @helpers.login_required
 def toggle_accion(oportunidad_id, index):
     """Marcar/desmarcar acción como completada"""
@@ -653,11 +653,11 @@ def toggle_accion(oportunidad_id, index):
         registro_id=oportunidad_id,
         operacion='toggle',
         index=index,
-        redirect_to=url_for('oportunidades.ver', oportunidad_id=oportunidad_id)
+        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
     )
 
 
-@oportunidades_bp.route('/<int:oportunidad_id>/accion/delete/<int:index>', methods=["POST"])
+@oportunidades_bp.route('/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>', methods=["POST"])
 @helpers.login_required
 def delete_accion(oportunidad_id, index):
     """Eliminar acción de una oportunidad"""
@@ -667,5 +667,5 @@ def delete_accion(oportunidad_id, index):
         registro_id=oportunidad_id,
         operacion='delete',
         index=index,
-        redirect_to=url_for('oportunidades.ver', oportunidad_id=oportunidad_id)
+        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
     )
