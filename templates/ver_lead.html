@@ -499,7 +499,7 @@
                             <div class="equipo-detalles">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima|format_fecha }}</div>
                         </div>
                         <div class="equipo-acciones">
-                            <a href="/ver_equipo/{{ equipo.id }}" class="btn btn-sm">Ver detalle</a>
+                            <a href="{{ url_for('equipos.ver', equipo_id=equipo.id) }}" class="btn btn-sm">Ver detalle</a>
                         </div>
                     </div>
                     {% endfor %}
@@ -508,7 +508,7 @@
                 {% endif %}
 
                 <div class="add-item-button">
-                    <a href="/nuevo_equipo?lead_id={{ lead.id }}" class="btn">+ Añadir Equipo</a>
+                    <a href="{{ url_for('equipos.nuevo', lead_id=lead.id) }}" class="btn">+ Añadir Equipo</a>
                 </div>
             </div>
 

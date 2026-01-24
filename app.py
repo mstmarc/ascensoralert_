@@ -71,8 +71,9 @@ from app_legacy import (
     # formulario_lead, leads_dashboard, exportar_leads, ver_lead,
     # eliminar_lead, editar_lead,
 
-    # Equipos
-    nuevo_equipo, ver_equipo, eliminar_equipo, editar_equipo,
+    # Equipos - MIGRADAS A BLUEPRINT (ver routes/equipos/equipos_bp.py)
+    # nuevo_equipo, ver_equipo, eliminar_equipo, editar_equipo,
+    # add_accion_equipo, toggle_accion_equipo, delete_accion_equipo,
 
     # Visitas
     visita_administrador, visitas_administradores_dashboard,
@@ -94,8 +95,8 @@ from app_legacy import (
     tarea_comercial_aplazar, tarea_comercial_descartar,
     tarea_comercial_convertir, tarea_comercial_agregar_nota,
 
-    # Acciones de Equipos
-    add_accion_equipo, toggle_accion_equipo, delete_accion_equipo,
+    # Acciones de Equipos - MIGRADAS A BLUEPRINT (ver routes/equipos/equipos_bp.py)
+    # add_accion_equipo, toggle_accion_equipo, delete_accion_equipo,
 
     # Notificaciones
     configuracion_avisos, enviar_avisos_manual,
@@ -170,11 +171,11 @@ app.add_url_rule("/home", "home", home)
 # app.add_url_rule("/eliminar_lead/<int:lead_id>", "eliminar_lead", eliminar_lead)
 # app.add_url_rule("/editar_lead/<int:lead_id>", "editar_lead", editar_lead, methods=["GET", "POST"])
 
-# Equipos
-app.add_url_rule("/nuevo_equipo", "nuevo_equipo", nuevo_equipo, methods=["GET", "POST"])
-app.add_url_rule("/ver_equipo/<int:equipo_id>", "ver_equipo", ver_equipo)
-app.add_url_rule("/eliminar_equipo/<int:equipo_id>", "eliminar_equipo", eliminar_equipo)
-app.add_url_rule("/editar_equipo/<int:equipo_id>", "editar_equipo", editar_equipo, methods=["GET", "POST"])
+# Equipos - MIGRADAS A BLUEPRINT (ver routes/equipos/equipos_bp.py)
+# app.add_url_rule("/nuevo_equipo", "nuevo_equipo", nuevo_equipo, methods=["GET", "POST"])
+# app.add_url_rule("/ver_equipo/<int:equipo_id>", "ver_equipo", ver_equipo)
+# app.add_url_rule("/eliminar_equipo/<int:equipo_id>", "eliminar_equipo", eliminar_equipo)
+# app.add_url_rule("/editar_equipo/<int:equipo_id>", "editar_equipo", editar_equipo, methods=["GET", "POST"])
 
 # Visitas
 app.add_url_rule("/visita_administrador", "visita_administrador", visita_administrador, methods=["GET", "POST"])
@@ -208,10 +209,10 @@ app.add_url_rule("/tarea_comercial_descartar/<int:cliente_id>", "tarea_comercial
 app.add_url_rule("/tarea_comercial_convertir/<int:cliente_id>", "tarea_comercial_convertir", tarea_comercial_convertir, methods=["POST"])
 app.add_url_rule("/tarea_comercial_agregar_nota/<int:cliente_id>", "tarea_comercial_agregar_nota", tarea_comercial_agregar_nota, methods=["POST"])
 
-# Acciones de Equipos
-app.add_url_rule("/equipo/<int:equipo_id>/accion/add", "add_accion_equipo", add_accion_equipo, methods=["POST"])
-app.add_url_rule("/equipo/<int:equipo_id>/accion/toggle/<int:index>", "toggle_accion_equipo", toggle_accion_equipo, methods=["POST"])
-app.add_url_rule("/equipo/<int:equipo_id>/accion/delete/<int:index>", "delete_accion_equipo", delete_accion_equipo, methods=["POST"])
+# Acciones de Equipos - MIGRADAS A BLUEPRINT (ver routes/equipos/equipos_bp.py)
+# app.add_url_rule("/equipo/<int:equipo_id>/accion/add", "add_accion_equipo", add_accion_equipo, methods=["POST"])
+# app.add_url_rule("/equipo/<int:equipo_id>/accion/toggle/<int:index>", "toggle_accion_equipo", toggle_accion_equipo, methods=["POST"])
+# app.add_url_rule("/equipo/<int:equipo_id>/accion/delete/<int:index>", "delete_accion_equipo", delete_accion_equipo, methods=["POST"])
 
 # Notificaciones
 app.add_url_rule("/configuracion_avisos", "configuracion_avisos", configuracion_avisos, methods=["GET", "POST"])
@@ -328,6 +329,10 @@ app.register_blueprint(inspecciones_bp)
 # Blueprint de Defectos (quinto módulo migrado)
 from routes.defectos import defectos_bp
 app.register_blueprint(defectos_bp)
+
+# Blueprint de Equipos (sexto módulo migrado)
+from routes.equipos import equipos_bp
+app.register_blueprint(equipos_bp)
 
 # ============================================
 # PUNTO DE ENTRADA

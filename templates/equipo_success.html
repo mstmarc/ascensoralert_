@@ -67,7 +67,7 @@
             <h3>Equipo registrado correctamente</h3>
             <p>El equipo se ha añadido a la base de datos.</p>
             <div class="botones-form">
-                <a href="/nuevo_equipo?cliente_id={{ cliente_id }}" class="button">Añadir otro equipo</a>
+                <a href="{{ url_for('equipos.nuevo', lead_id=cliente_id) }}" class="button">Añadir otro equipo</a>
                 <a href="/home" class="button">Finalizar y volver al inicio</a>
             </div>
         </div>

@@ -1025,56 +1025,57 @@ def eliminar_visita_admin(visita_id):
 
 # Alta de Equipo (ahora requiere lead_id)
 @app.route("/nuevo_equipo", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('equipos', 'write')
-def nuevo_equipo():
-    
-    # VALIDAR que viene con lead_id
-    lead_id = request.args.get("lead_id")
-    
-    if not lead_id:
-        flash("Debes añadir equipos desde un lead específico", "error")
-        return redirect("/leads_dashboard")
-    
-    # Verificar que el lead existe
-    lead_url = f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}"
-    lead_response = requests.get(lead_url, headers=HEADERS)
-    
-    if lead_response.status_code != 200 or not lead_response.json():
-        flash("Lead no encontrado", "error")
-        return redirect("/leads_dashboard")
-    
-    lead_data = lead_response.json()[0]
-    # Limpiar valores None para evitar mostrar "none"
-    lead_data = limpiar_none(lead_data)
-    
-    if request.method == "POST":
-        equipo_data = {
-            "cliente_id": int(lead_id),
-            "tipo_equipo": request.form.get("tipo_equipo"),
-            "identificacion": request.form.get("identificacion") or None,
-            "descripcion": request.form.get("observaciones") or None,
-            "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
-            "rae": request.form.get("rae") or None,
-            "ipo_proxima": request.form.get("ipo_proxima") or None
-        }
-
-        # Solo tipo_equipo es obligatorio
-        if not equipo_data["tipo_equipo"]:
-            return render_template("nuevo_equipo.html", 
-                                 lead=lead_data, 
-                                 error="Tipo de equipo es obligatorio")
-
-        res = requests.post(f"{SUPABASE_URL}/rest/v1/equipos", json=equipo_data, headers=HEADERS)
-        if res.status_code in [200, 201]:
-            flash("Equipo añadido correctamente", "success")
-            return redirect(f"/ver_lead/{lead_id}")
-        else:
-            return render_template("nuevo_equipo.html", 
-                                 lead=lead_data, 
-                                 error="Error al crear el equipo")
-
-    return render_template("nuevo_equipo.html", lead=lead_data)
+# MIGRADO A BLUEPRINT: routes/equipos/equipos_bp.py
+# @helpers.login_required
+# @helpers.requiere_permiso('equipos', 'write')
+# def nuevo_equipo():
+#
+#     # VALIDAR que viene con lead_id
+#     lead_id = request.args.get("lead_id")
+#
+#     if not lead_id:
+#         flash("Debes añadir equipos desde un lead específico", "error")
+#         return redirect("/leads_dashboard")
+#
+#     # Verificar que el lead existe
+#     lead_url = f"{SUPABASE_URL}/rest/v1/clientes?id=eq.{lead_id}"
+#     lead_response = requests.get(lead_url, headers=HEADERS)
+#
+#     if lead_response.status_code != 200 or not lead_response.json():
+#         flash("Lead no encontrado", "error")
+#         return redirect("/leads_dashboard")
+#
+#     lead_data = lead_response.json()[0]
+#     # Limpiar valores None para evitar mostrar "none"
+#     lead_data = limpiar_none(lead_data)
+#
+#     if request.method == "POST":
+#         equipo_data = {
+#             "cliente_id": int(lead_id),
+#             "tipo_equipo": request.form.get("tipo_equipo"),
+#             "identificacion": request.form.get("identificacion") or None,
+#             "descripcion": request.form.get("observaciones") or None,
+#             "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
+#             "rae": request.form.get("rae") or None,
+#             "ipo_proxima": request.form.get("ipo_proxima") or None
+#         }
+#
+#         # Solo tipo_equipo es obligatorio
+#         if not equipo_data["tipo_equipo"]:
+#             return render_template("nuevo_equipo.html",
+#                                  lead=lead_data,
+#                                  error="Tipo de equipo es obligatorio")
+#
+#         res = requests.post(f"{SUPABASE_URL}/rest/v1/equipos", json=equipo_data, headers=HEADERS)
+#         if res.status_code in [200, 201]:
+#             flash("Equipo añadido correctamente", "success")
+#             return redirect(f"/ver_lead/{lead_id}")
+#         else:
+#             return render_template("nuevo_equipo.html",
+#                                  lead=lead_data,
+#                                  error="Error al crear el equipo")
+#
+#     return render_template("nuevo_equipo.html", lead=lead_data)
 
 # Crear visita de seguimiento
 @app.route("/crear_visita_seguimiento/<int:cliente_id>", methods=["GET", "POST"])
@@ -1781,46 +1782,48 @@ def _eliminar_lead_legacy(lead_id):
         return f"<h3 style='color:red;'>Error al eliminar Lead</h3><pre>{response.text}</pre><a href='/leads_dashboard'>Volver</a>"
 
 # Eliminar Equipo
-@app.route("/eliminar_equipo/<int:equipo_id>")
-@helpers.login_required
-@helpers.requiere_permiso('equipos', 'delete')
-def eliminar_equipo(equipo_id):
-    
-    equipo_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
-    if equipo_response.status_code == 200 and equipo_response.json():
-        cliente_id = equipo_response.json()[0].get("cliente_id")
-        
-        response = requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
-        
-        if response.status_code in [200, 204]:
-            return redirect(f"/ver_lead/{cliente_id}")
-        else:
-            return f"<h3 style='color:red;'>Error al eliminar Equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
-    else:
-        return f"<h3 style='color:red;'>Error al obtener Equipo</h3><a href='/home'>Volver</a>"
+# MIGRADO A BLUEPRINT: routes/equipos/equipos_bp.py
+# @app.route("/eliminar_equipo/<int:equipo_id>")
+# @helpers.login_required
+# @helpers.requiere_permiso('equipos', 'delete')
+# def eliminar_equipo(equipo_id):
+#
+#     equipo_response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
+#     if equipo_response.status_code == 200 and equipo_response.json():
+#         cliente_id = equipo_response.json()[0].get("cliente_id")
+#
+#         response = requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
+#
+#         if response.status_code in [200, 204]:
+#             return redirect(f"/ver_lead/{cliente_id}")
+#         else:
+#             return f"<h3 style='color:red;'>Error al eliminar Equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+#     else:
+#         return f"<h3 style='color:red;'>Error al obtener Equipo</h3><a href='/home'>Volver</a>"
 
-# Ver detalle de equipo (accesible solo desde ver_lead)
-@app.route("/ver_equipo/<int:equipo_id>")
-def ver_equipo(equipo_id):
-    if "usuario" not in session:
-        return redirect("/")
-
-    # Obtener equipo con JOIN a cliente
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=*,cliente:clientes(id,direccion,localidad,nombre_cliente)",
-        headers=HEADERS
-    )
-
-    if response.status_code != 200 or not response.json():
-        flash("Equipo no encontrado", "error")
-        return redirect("/leads_dashboard")
-
-    equipo = limpiar_none(response.json()[0])
-
-    # El cliente viene como un objeto dentro de equipo
-    cliente = equipo.pop('cliente', None) if 'cliente' in equipo else None
-
-    return render_template("ver_equipo.html", equipo=equipo, cliente=cliente)
+# MIGRADO A BLUEPRINT: routes/equipos/equipos_bp.py
+# # Ver detalle de equipo (accesible solo desde ver_lead)
+# @app.route("/ver_equipo/<int:equipo_id>")
+# def ver_equipo(equipo_id):
+#     if "usuario" not in session:
+#         return redirect("/")
+#
+#     # Obtener equipo con JOIN a cliente
+#     response = requests.get(
+#         f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}&select=*,cliente:clientes(id,direccion,localidad,nombre_cliente)",
+#         headers=HEADERS
+#     )
+#
+#     if response.status_code != 200 or not response.json():
+#         flash("Equipo no encontrado", "error")
+#         return redirect("/leads_dashboard")
+#
+#     equipo = limpiar_none(response.json()[0])
+#
+#     # El cliente viene como un objeto dentro de equipo
+#     cliente = equipo.pop('cliente', None) if 'cliente' in equipo else None
+#
+#     return render_template("ver_equipo.html", equipo=equipo, cliente=cliente)
 
 # Dashboard de Oportunidades Post-IPO
 @app.route("/oportunidades_post_ipo", methods=["GET"])
@@ -2295,45 +2298,46 @@ def _editar_lead_legacy(lead_id):
 
     return render_template("editar_lead.html", lead=lead, administradores=administradores)
 
-# Editar Equipo - CON LIMPIEZA DE NONE
-@app.route("/editar_equipo/<int:equipo_id>", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('equipos', 'write')
-def editar_equipo(equipo_id):
-
-    response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
-    if response.status_code != 200 or not response.json():
-        return f"<h3 style='color:red;'>Error al obtener equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
-
-    equipo = response.json()[0]
-
-    if request.method == "POST":
-        data = {
-            "tipo_equipo": request.form.get("tipo_equipo"),
-            "identificacion": request.form.get("identificacion") or None,
-            "descripcion": request.form.get("observaciones") or None,
-            "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
-            "rae": request.form.get("rae") or None,
-            "ipo_proxima": request.form.get("ipo_proxima") or None
-        }
-
-        # Solo tipo_equipo es obligatorio
-        if not data["tipo_equipo"]:
-            flash("Tipo de equipo es obligatorio", "error")
-            return redirect(request.referrer)
-
-        update_url = f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}"
-        res = requests.patch(update_url, json=data, headers=HEADERS)
-        if res.status_code in [200, 204]:
-            # Obtener el cliente_id del equipo para volver a su vista
-            cliente_id = equipo.get("cliente_id")
-            return redirect(f"/ver_lead/{cliente_id}")
-        else:
-            return f"<h3 style='color:red;'>Error al actualizar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
-
-    # LIMPIAR VALORES NONE PARA NO MOSTRAR "none" EN EL FORMULARIO
-    equipo = limpiar_none(equipo)
-    return render_template("editar_equipo.html", equipo=equipo)
+# MIGRADO A BLUEPRINT: routes/equipos/equipos_bp.py
+# # Editar Equipo - CON LIMPIEZA DE NONE
+# @app.route("/editar_equipo/<int:equipo_id>", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('equipos', 'write')
+# def editar_equipo(equipo_id):
+#
+#     response = requests.get(f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}", headers=HEADERS)
+#     if response.status_code != 200 or not response.json():
+#         return f"<h3 style='color:red;'>Error al obtener equipo</h3><pre>{response.text}</pre><a href='/home'>Volver</a>"
+#
+#     equipo = response.json()[0]
+#
+#     if request.method == "POST":
+#         data = {
+#             "tipo_equipo": request.form.get("tipo_equipo"),
+#             "identificacion": request.form.get("identificacion") or None,
+#             "descripcion": request.form.get("observaciones") or None,
+#             "fecha_vencimiento_contrato": request.form.get("fecha_vencimiento_contrato") or None,
+#             "rae": request.form.get("rae") or None,
+#             "ipo_proxima": request.form.get("ipo_proxima") or None
+#         }
+#
+#         # Solo tipo_equipo es obligatorio
+#         if not data["tipo_equipo"]:
+#             flash("Tipo de equipo es obligatorio", "error")
+#             return redirect(request.referrer)
+#
+#         update_url = f"{SUPABASE_URL}/rest/v1/equipos?id=eq.{equipo_id}"
+#         res = requests.patch(update_url, json=data, headers=HEADERS)
+#         if res.status_code in [200, 204]:
+#             # Obtener el cliente_id del equipo para volver a su vista
+#             cliente_id = equipo.get("cliente_id")
+#             return redirect(f"/ver_lead/{cliente_id}")
+#         else:
+#             return f"<h3 style='color:red;'>Error al actualizar equipo</h3><pre>{res.text}</pre><a href='/home'>Volver</a>"
+#
+#     # LIMPIAR VALORES NONE PARA NO MOSTRAR "none" EN EL FORMULARIO
+#     equipo = limpiar_none(equipo)
+#     return render_template("editar_equipo.html", equipo=equipo)
 
 # ============================================
 # MÓDULO DE OPORTUNIDADES - ACTUALIZADO
@@ -2705,46 +2709,47 @@ def delete_accion(oportunidad_id, index):
     )
 
 
-# ============================================
-# GESTIÓN DE ACCIONES PARA EQUIPOS
-# ============================================
-
-@app.route('/equipo/<int:equipo_id>/accion/add', methods=['POST'])
-@helpers.login_required
-def add_accion_equipo(equipo_id):
-    from utils.helpers_actions import gestionar_accion
-    return gestionar_accion(
-        tabla='equipos',
-        registro_id=equipo_id,
-        operacion='add',
-        redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
-    )
-
-
-@app.route('/equipo/<int:equipo_id>/accion/toggle/<int:index>', methods=['POST'])
-@helpers.login_required
-def toggle_accion_equipo(equipo_id, index):
-    from utils.helpers_actions import gestionar_accion
-    return gestionar_accion(
-        tabla='equipos',
-        registro_id=equipo_id,
-        operacion='toggle',
-        index=index,
-        redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
-    )
-
-
-@app.route('/equipo/<int:equipo_id>/accion/delete/<int:index>', methods=['POST'])
-@helpers.login_required
-def delete_accion_equipo(equipo_id, index):
-    from utils.helpers_actions import gestionar_accion
-    return gestionar_accion(
-        tabla='equipos',
-        registro_id=equipo_id,
-        operacion='delete',
-        index=index,
-        redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
-    )
+# MIGRADO A BLUEPRINT: routes/equipos/equipos_bp.py
+# # ============================================
+# # GESTIÓN DE ACCIONES PARA EQUIPOS
+# # ============================================
+#
+# @app.route('/equipo/<int:equipo_id>/accion/add', methods=['POST'])
+# @helpers.login_required
+# def add_accion_equipo(equipo_id):
+#     from utils.helpers_actions import gestionar_accion
+#     return gestionar_accion(
+#         tabla='equipos',
+#         registro_id=equipo_id,
+#         operacion='add',
+#         redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
+#     )
+#
+#
+# @app.route('/equipo/<int:equipo_id>/accion/toggle/<int:index>', methods=['POST'])
+# @helpers.login_required
+# def toggle_accion_equipo(equipo_id, index):
+#     from utils.helpers_actions import gestionar_accion
+#     return gestionar_accion(
+#         tabla='equipos',
+#         registro_id=equipo_id,
+#         operacion='toggle',
+#         index=index,
+#         redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
+#     )
+#
+#
+# @app.route('/equipo/<int:equipo_id>/accion/delete/<int:index>', methods=['POST'])
+# @helpers.login_required
+# def delete_accion_equipo(equipo_id, index):
+#     from utils.helpers_actions import gestionar_accion
+#     return gestionar_accion(
+#         tabla='equipos',
+#         registro_id=equipo_id,
+#         operacion='delete',
+#         index=index,
+#         redirect_to=url_for('ver_equipo', equipo_id=equipo_id)
+#     )
 
 
 # ============================================

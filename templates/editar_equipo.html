@@ -92,7 +92,7 @@
                 <div class="botones-form">
                     <button type="submit" class="button">Actualizar</button>
                     <a href="/home" class="button">Volver</a>
-                    <a href="/eliminar_equipo/{{ equipo.id }}" class="button btn-eliminar-form" onclick="return confirmarEliminacion()">Eliminar Equipo</a>
+                    <a href="{{ url_for('equipos.eliminar', equipo_id=equipo.id) }}" class="button btn-eliminar-form" onclick="return confirmarEliminacion()">Eliminar Equipo</a>
                 </div>
             </form>
         </div>
