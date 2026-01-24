@@ -89,30 +89,31 @@ if RESEND_API_KEY:
 # FUNCIONES DE CONTEXTO PARA TEMPLATES
 # ============================================
 # Registra funciones de permisos para que estén disponibles en Jinja2
+# MIGRADO A app.py (líneas 36-56)
 
-@app.context_processor
-def inject_permisos():
-    """Inyecta funciones de control de acceso en todos los templates"""
-    import json
-
-    # Obtener perfil del usuario actual
-    perfil_actual = helpers.obtener_perfil_usuario()
-
-    # Construir diccionario de permisos para JavaScript
-    permisos_js = {}
-    if perfil_actual in helpers.PERMISOS_POR_PERFIL:
-        for modulo, permisos in helpers.PERMISOS_POR_PERFIL[perfil_actual].items():
-            permisos_js[modulo] = permisos
-
-    return {
-        'tiene_permiso': helpers.tiene_permiso,
-        'puede_escribir': helpers.puede_escribir,
-        'puede_eliminar': helpers.puede_eliminar,
-        'obtener_perfil_usuario': helpers.obtener_perfil_usuario,
-        'obtener_modulos_permitidos': helpers.obtener_modulos_permitidos,
-        'perfil_usuario': perfil_actual,
-        'permisos_usuario_json': json.dumps(permisos_js)
-    }
+# @app.context_processor
+# def inject_permisos():
+#     """Inyecta funciones de control de acceso en todos los templates"""
+#     import json
+#
+#     # Obtener perfil del usuario actual
+#     perfil_actual = helpers.obtener_perfil_usuario()
+#
+#     # Construir diccionario de permisos para JavaScript
+#     permisos_js = {}
+#     if perfil_actual in helpers.PERMISOS_POR_PERFIL:
+#         for modulo, permisos in helpers.PERMISOS_POR_PERFIL[perfil_actual].items():
+#             permisos_js[modulo] = permisos
+#
+#     return {
+#         'tiene_permiso': helpers.tiene_permiso,
+#         'puede_escribir': helpers.puede_escribir,
+#         'puede_eliminar': helpers.puede_eliminar,
+#         'obtener_perfil_usuario': helpers.obtener_perfil_usuario,
+#         'obtener_modulos_permitidos': helpers.obtener_modulos_permitidos,
+#         'perfil_usuario': perfil_actual,
+#         'permisos_usuario_json': json.dumps(permisos_js)
+#     }
 
 # ============================================
 # SISTEMA DE CACHÉ OPTIMIZADO
