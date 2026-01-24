@@ -88,10 +88,10 @@ from app_legacy import (
     # nuevo_equipo, ver_equipo, eliminar_equipo, editar_equipo,
     # add_accion_equipo, toggle_accion_equipo, delete_accion_equipo,
 
-    # Visitas
-    visita_administrador, visitas_administradores_dashboard,
-    ver_visita_admin, editar_visita_admin, eliminar_visita_admin,
-    crear_visita_seguimiento,
+    # Visitas - MIGRADAS A BLUEPRINT (ver routes/visitas/visitas_bp.py)
+    # visita_administrador, visitas_administradores_dashboard,
+    # ver_visita_admin, editar_visita_admin, eliminar_visita_admin,
+    # crear_visita_seguimiento,
 
     # Reportes
     reporte_mensual,
@@ -190,13 +190,13 @@ app.add_url_rule("/home", "home", home)
 # app.add_url_rule("/eliminar_equipo/<int:equipo_id>", "eliminar_equipo", eliminar_equipo)
 # app.add_url_rule("/editar_equipo/<int:equipo_id>", "editar_equipo", editar_equipo, methods=["GET", "POST"])
 
-# Visitas
-app.add_url_rule("/visita_administrador", "visita_administrador", visita_administrador, methods=["GET", "POST"])
-app.add_url_rule("/visitas_administradores_dashboard", "visitas_administradores_dashboard", visitas_administradores_dashboard)
-app.add_url_rule("/ver_visita_admin/<int:visita_id>", "ver_visita_admin", ver_visita_admin)
-app.add_url_rule("/editar_visita_admin/<int:visita_id>", "editar_visita_admin", editar_visita_admin, methods=["GET", "POST"])
-app.add_url_rule("/eliminar_visita_admin/<int:visita_id>", "eliminar_visita_admin", eliminar_visita_admin)
-app.add_url_rule("/crear_visita_seguimiento/<int:cliente_id>", "crear_visita_seguimiento", crear_visita_seguimiento, methods=["GET", "POST"])
+# Visitas - MIGRADAS A BLUEPRINT (ver routes/visitas/visitas_bp.py)
+# app.add_url_rule("/visita_administrador", "visita_administrador", visita_administrador, methods=["GET", "POST"])
+# app.add_url_rule("/visitas_administradores_dashboard", "visitas_administradores_dashboard", visitas_administradores_dashboard)
+# app.add_url_rule("/ver_visita_admin/<int:visita_id>", "ver_visita_admin", ver_visita_admin)
+# app.add_url_rule("/editar_visita_admin/<int:visita_id>", "editar_visita_admin", editar_visita_admin, methods=["GET", "POST"])
+# app.add_url_rule("/eliminar_visita_admin/<int:visita_id>", "eliminar_visita_admin", eliminar_visita_admin)
+# app.add_url_rule("/crear_visita_seguimiento/<int:cliente_id>", "crear_visita_seguimiento", crear_visita_seguimiento, methods=["GET", "POST"])
 
 # Reportes
 app.add_url_rule("/reporte_mensual", "reporte_mensual", reporte_mensual, methods=["GET", "POST"])
@@ -350,6 +350,10 @@ app.register_blueprint(equipos_bp)
 # Blueprint de Oportunidades (séptimo módulo migrado)
 from routes.oportunidades import oportunidades_bp
 app.register_blueprint(oportunidades_bp)
+
+# Blueprint de Visitas (octavo módulo migrado)
+from routes.visitas import visitas_bp
+app.register_blueprint(visitas_bp)
 
 # ============================================
 # RUTA DE DIAGNÓSTICO (temporal)
