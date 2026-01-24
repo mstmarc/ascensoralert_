@@ -496,10 +496,10 @@ def ver_oportunidad(oportunidad_id):
                                  visitas=todas_visitas)
         else:
             flash_error("Oportunidad no encontrada")
-            return redirect(url_for("oportunidades"))
+            return redirect(url_for("oportunidades.oportunidades"))
     except Exception as e:
         flash_error(f"Error: {str(e)}")
-        return redirect(url_for("oportunidades"))
+        return redirect(url_for("oportunidades.oportunidades"))
 
 
 @oportunidades_bp.route('/editar_oportunidad/<int:oportunidad_id>', methods=["GET", "POST"])
@@ -530,7 +530,7 @@ def editar_oportunidad(oportunidad_id):
 
             if response.status_code in [200, 204]:
                 flash_success("Oportunidad actualizada correctamente")
-                return redirect(url_for("ver_oportunidad", oportunidad_id=oportunidad_id))
+                return redirect(url_for("oportunidades.ver_oportunidad", oportunidad_id=oportunidad_id))
             else:
                 flash_error("Error al actualizar")
 
@@ -547,7 +547,7 @@ def editar_oportunidad(oportunidad_id):
             return render_template("editar_oportunidad.html", oportunidad=oportunidad)
     except:
         flash_error("Error al cargar oportunidad")
-        return redirect(url_for("oportunidades"))
+        return redirect(url_for("oportunidades.oportunidades"))
 
 
 @oportunidades_bp.route('/eliminar_oportunidad/<int:oportunidad_id>')
@@ -575,13 +575,13 @@ def eliminar_oportunidad(oportunidad_id):
                 return redirect(f"/ver_lead/{cliente_id}")
             else:
                 flash_error("Error al eliminar oportunidad")
-                return redirect(url_for("oportunidades"))
+                return redirect(url_for("oportunidades.oportunidades"))
         else:
             flash_error("Oportunidad no encontrada")
-            return redirect(url_for("oportunidades"))
+            return redirect(url_for("oportunidades.oportunidades"))
     except Exception as e:
         flash_error(f"Error: {str(e)}")
-        return redirect(url_for("oportunidades"))
+        return redirect(url_for("oportunidades.oportunidades"))
 
 
 # ============================================
@@ -639,7 +639,7 @@ def add_accion(oportunidad_id):
         tabla='oportunidades',
         registro_id=oportunidad_id,
         operacion='add',
-        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
+        redirect_to=url_for('oportunidades.ver_oportunidad', oportunidad_id=oportunidad_id)
     )
 
 
@@ -653,7 +653,7 @@ def toggle_accion(oportunidad_id, index):
         registro_id=oportunidad_id,
         operacion='toggle',
         index=index,
-        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
+        redirect_to=url_for('oportunidades.ver_oportunidad', oportunidad_id=oportunidad_id)
     )
 
 
@@ -667,5 +667,5 @@ def delete_accion(oportunidad_id, index):
         registro_id=oportunidad_id,
         operacion='delete',
         index=index,
-        redirect_to=url_for('ver_oportunidad', oportunidad_id=oportunidad_id)
+        redirect_to=url_for('oportunidades.ver_oportunidad', oportunidad_id=oportunidad_id)
     )
