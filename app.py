@@ -138,30 +138,30 @@ from app_legacy import (
     # admin_usuarios, admin_crear_usuario, admin_editar_usuario,
     # admin_eliminar_usuario,
 
-    # Cartera
-    cartera_dashboard, cartera_importar, cartera_importar_equipos,
-    cartera_importar_partes, cartera_reanalizar_recomendaciones,
-    cartera_oportunidades, cartera_crear_oportunidad,
-    cartera_descartar_recomendacion, cartera_ver_oportunidad,
-    cartera_actualizar_oportunidad, cartera_ver_maquina,
-    cartera_ver_instalacion, cartera_dar_baja_instalacion,
-    cartera_reactivar_instalacion,
+    # Cartera - MIGRADAS A BLUEPRINT (ver routes/cartera/cartera_bp.py)
+    # cartera_dashboard, cartera_importar, cartera_importar_equipos,
+    # cartera_importar_partes, cartera_reanalizar_recomendaciones,
+    # cartera_oportunidades, cartera_crear_oportunidad,
+    # cartera_descartar_recomendacion, cartera_ver_oportunidad,
+    # cartera_actualizar_oportunidad, cartera_ver_maquina,
+    # cartera_ver_instalacion, cartera_dar_baja_instalacion,
+    # cartera_reactivar_instalacion,
 
-    # Cartera V2 - Alertas
-    cartera_dashboard_v2, ejecutar_detectores_alertas,
-    ver_todas_alertas, ver_detalle_alerta, resolver_alerta,
-    ver_pendientes_tecnicos, actualizar_pendiente_tecnico,
-    crear_trabajo_desde_alerta,
+    # Cartera V2 - Alertas - MIGRADAS A BLUEPRINT (ver routes/cartera/cartera_bp.py)
+    # cartera_dashboard_v2, ejecutar_detectores_alertas,
+    # ver_todas_alertas, ver_detalle_alerta, resolver_alerta,
+    # ver_pendientes_tecnicos, actualizar_pendiente_tecnico,
+    # crear_trabajo_desde_alerta,
 
-    # Sistema de IA Predictiva
-    dashboard_ia_predictiva, priorizar_recomendaciones_ia,
-    prediccion_maquina_ia, patrones_tendencias_ia,
-    roi_optimizacion_ia, analizar_parte_ia, analizar_lote_ia,
-    ver_prediccion_maquina, generar_prediccion_ia,
-    listar_alertas_ia, ver_alerta_ia, resolver_alerta_ia,
-    ver_componentes_criticos, ver_metricas_ia,
-    mostrar_ejecutar_analisis, ejecutar_analisis_web,
-    estado_analisis, api_generar_predicciones_ia,
+    # Sistema de IA Predictiva - MIGRADAS A BLUEPRINT (ver routes/cartera/cartera_bp.py)
+    # dashboard_ia_predictiva, priorizar_recomendaciones_ia,
+    # prediccion_maquina_ia, patrones_tendencias_ia,
+    # roi_optimizacion_ia, analizar_parte_ia, analizar_lote_ia,
+    # ver_prediccion_maquina, generar_prediccion_ia,
+    # listar_alertas_ia, ver_alerta_ia, resolver_alerta_ia,
+    # ver_componentes_criticos, ver_metricas_ia,
+    # mostrar_ejecutar_analisis, ejecutar_analisis_web,
+    # estado_analisis, api_generar_predicciones_ia,
 
     # Funciones auxiliares que se usan en templates
     limpiar_none, calcular_color_ipo, calcular_color_contrato,
@@ -273,51 +273,51 @@ app.add_url_rule("/inspecciones/<int:inspeccion_id>/defectos/nuevo", "nuevo_defe
 # app.add_url_rule("/admin/usuarios/editar/<int:usuario_id>", "admin_editar_usuario", admin_editar_usuario, methods=["POST"])
 # app.add_url_rule("/admin/usuarios/eliminar/<int:usuario_id>", "admin_eliminar_usuario", admin_eliminar_usuario)
 
-# Cartera
-app.add_url_rule("/cartera", "cartera_dashboard", cartera_dashboard)
-app.add_url_rule("/cartera/importar", "cartera_importar", cartera_importar)
-app.add_url_rule("/cartera/importar_equipos", "cartera_importar_equipos", cartera_importar_equipos, methods=["POST"])
-app.add_url_rule("/cartera/importar_partes", "cartera_importar_partes", cartera_importar_partes, methods=["POST"])
-app.add_url_rule("/cartera/reanalizar-recomendaciones", "cartera_reanalizar_recomendaciones", cartera_reanalizar_recomendaciones, methods=["POST"])
-app.add_url_rule("/cartera/oportunidades", "cartera_oportunidades", cartera_oportunidades)
-app.add_url_rule("/cartera/oportunidades/crear/<int:maquina_id>", "cartera_crear_oportunidad", cartera_crear_oportunidad, methods=["GET", "POST"])
-app.add_url_rule("/cartera/recomendaciones/<int:recomendacion_id>/descartar", "cartera_descartar_recomendacion", cartera_descartar_recomendacion, methods=["POST"])
-app.add_url_rule("/cartera/oportunidades/<int:oportunidad_id>", "cartera_ver_oportunidad", cartera_ver_oportunidad)
-app.add_url_rule("/cartera/oportunidades/<int:oportunidad_id>/actualizar", "cartera_actualizar_oportunidad", cartera_actualizar_oportunidad, methods=["POST"])
-app.add_url_rule("/cartera/maquina/<int:maquina_id>", "cartera_ver_maquina", cartera_ver_maquina)
-app.add_url_rule("/cartera/instalacion/<int:instalacion_id>", "cartera_ver_instalacion", cartera_ver_instalacion)
-app.add_url_rule("/cartera/instalacion/<int:instalacion_id>/dar-baja", "cartera_dar_baja_instalacion", cartera_dar_baja_instalacion, methods=["POST"])
-app.add_url_rule("/cartera/instalacion/<int:instalacion_id>/reactivar", "cartera_reactivar_instalacion", cartera_reactivar_instalacion, methods=["POST"])
+# Cartera - MIGRADAS A BLUEPRINT (ver routes/cartera/cartera_bp.py)
+# app.add_url_rule("/cartera", "cartera_dashboard", cartera_dashboard)
+# app.add_url_rule("/cartera/importar", "cartera_importar", cartera_importar)
+# app.add_url_rule("/cartera/importar_equipos", "cartera_importar_equipos", cartera_importar_equipos, methods=["POST"])
+# app.add_url_rule("/cartera/importar_partes", "cartera_importar_partes", cartera_importar_partes, methods=["POST"])
+# app.add_url_rule("/cartera/reanalizar-recomendaciones", "cartera_reanalizar_recomendaciones", cartera_reanalizar_recomendaciones, methods=["POST"])
+# app.add_url_rule("/cartera/oportunidades", "cartera_oportunidades", cartera_oportunidades)
+# app.add_url_rule("/cartera/oportunidades/crear/<int:maquina_id>", "cartera_crear_oportunidad", cartera_crear_oportunidad, methods=["GET", "POST"])
+# app.add_url_rule("/cartera/recomendaciones/<int:recomendacion_id>/descartar", "cartera_descartar_recomendacion", cartera_descartar_recomendacion, methods=["POST"])
+# app.add_url_rule("/cartera/oportunidades/<int:oportunidad_id>", "cartera_ver_oportunidad", cartera_ver_oportunidad)
+# app.add_url_rule("/cartera/oportunidades/<int:oportunidad_id>/actualizar", "cartera_actualizar_oportunidad", cartera_actualizar_oportunidad, methods=["POST"])
+# app.add_url_rule("/cartera/maquina/<int:maquina_id>", "cartera_ver_maquina", cartera_ver_maquina)
+# app.add_url_rule("/cartera/instalacion/<int:instalacion_id>", "cartera_ver_instalacion", cartera_ver_instalacion)
+# app.add_url_rule("/cartera/instalacion/<int:instalacion_id>/dar-baja", "cartera_dar_baja_instalacion", cartera_dar_baja_instalacion, methods=["POST"])
+# app.add_url_rule("/cartera/instalacion/<int:instalacion_id>/reactivar", "cartera_reactivar_instalacion", cartera_reactivar_instalacion, methods=["POST"])
 
-# Cartera V2 - Alertas
-app.add_url_rule("/cartera/v2", "cartera_dashboard_v2", cartera_dashboard_v2)
-app.add_url_rule("/cartera/v2/ejecutar-detectores", "ejecutar_detectores_alertas", ejecutar_detectores_alertas, methods=["POST"])
-app.add_url_rule("/cartera/v2/alertas", "ver_todas_alertas", ver_todas_alertas)
-app.add_url_rule("/cartera/v2/alerta/<int:alerta_id>", "ver_detalle_alerta", ver_detalle_alerta)
-app.add_url_rule("/cartera/v2/alerta/<int:alerta_id>/resolver", "resolver_alerta", resolver_alerta, methods=["POST"])
-app.add_url_rule("/cartera/v2/pendientes-tecnicos", "ver_pendientes_tecnicos", ver_pendientes_tecnicos)
-app.add_url_rule("/cartera/v2/pendiente/<int:pendiente_id>/actualizar", "actualizar_pendiente_tecnico", actualizar_pendiente_tecnico, methods=["POST"])
-app.add_url_rule("/cartera/v2/alerta/<int:alerta_id>/crear-trabajo-tecnico", "crear_trabajo_desde_alerta", crear_trabajo_desde_alerta, methods=["POST"])
+# Cartera V2 - Alertas - MIGRADAS A BLUEPRINT (ver routes/cartera/cartera_bp.py)
+# app.add_url_rule("/cartera/v2", "cartera_dashboard_v2", cartera_dashboard_v2)
+# app.add_url_rule("/cartera/v2/ejecutar-detectores", "ejecutar_detectores_alertas", ejecutar_detectores_alertas, methods=["POST"])
+# app.add_url_rule("/cartera/v2/alertas", "ver_todas_alertas", ver_todas_alertas)
+# app.add_url_rule("/cartera/v2/alerta/<int:alerta_id>", "ver_detalle_alerta", ver_detalle_alerta)
+# app.add_url_rule("/cartera/v2/alerta/<int:alerta_id>/resolver", "resolver_alerta", resolver_alerta, methods=["POST"])
+# app.add_url_rule("/cartera/v2/pendientes-tecnicos", "ver_pendientes_tecnicos", ver_pendientes_tecnicos)
+# app.add_url_rule("/cartera/v2/pendiente/<int:pendiente_id>/actualizar", "actualizar_pendiente_tecnico", actualizar_pendiente_tecnico, methods=["POST"])
+# app.add_url_rule("/cartera/v2/alerta/<int:alerta_id>/crear-trabajo-tecnico", "crear_trabajo_desde_alerta", crear_trabajo_desde_alerta, methods=["POST"])
 
-# Sistema de IA Predictiva
-app.add_url_rule("/cartera/ia", "dashboard_ia_predictiva", dashboard_ia_predictiva)
-app.add_url_rule("/cartera/ia/priorizar-recomendaciones", "priorizar_recomendaciones_ia", priorizar_recomendaciones_ia)
-app.add_url_rule("/cartera/ia/maquina/<int:maquina_id>", "prediccion_maquina_ia", prediccion_maquina_ia)
-app.add_url_rule("/cartera/ia/patrones", "patrones_tendencias_ia", patrones_tendencias_ia)
-app.add_url_rule("/cartera/ia/roi", "roi_optimizacion_ia", roi_optimizacion_ia)
-app.add_url_rule("/cartera/ia/analizar-parte/<int:parte_id>", "analizar_parte_ia", analizar_parte_ia, methods=["POST"])
-app.add_url_rule("/cartera/ia/analizar-lote", "analizar_lote_ia", analizar_lote_ia, methods=["POST"])
-app.add_url_rule("/cartera/ia/prediccion/<int:prediccion_id>", "ver_prediccion_maquina", ver_prediccion_maquina)
-app.add_url_rule("/cartera/ia/generar-prediccion/<int:maquina_id>", "generar_prediccion_ia", generar_prediccion_ia, methods=["POST"])
-app.add_url_rule("/cartera/ia/alertas", "listar_alertas_ia", listar_alertas_ia)
-app.add_url_rule("/cartera/ia/alerta/<int:alerta_id>", "ver_alerta_ia", ver_alerta_ia)
-app.add_url_rule("/cartera/ia/alerta/<int:alerta_id>/resolver", "resolver_alerta_ia", resolver_alerta_ia, methods=["POST"])
-app.add_url_rule("/cartera/ia/componentes", "ver_componentes_criticos", ver_componentes_criticos)
-app.add_url_rule("/cartera/ia/metricas", "ver_metricas_ia", ver_metricas_ia)
-app.add_url_rule("/cartera/ia/ejecutar", "mostrar_ejecutar_analisis", mostrar_ejecutar_analisis)
-app.add_url_rule("/cartera/ia/ejecutar-analisis-2025", "ejecutar_analisis_web", ejecutar_analisis_web, methods=["POST"])
-app.add_url_rule("/cartera/ia/estado-analisis", "estado_analisis", estado_analisis)
-app.add_url_rule("/cartera/ia/api/generar-predicciones", "api_generar_predicciones_ia", api_generar_predicciones_ia, methods=["POST"])
+# Sistema de IA Predictiva - MIGRADAS A BLUEPRINT (ver routes/cartera/cartera_bp.py)
+# app.add_url_rule("/cartera/ia", "dashboard_ia_predictiva", dashboard_ia_predictiva)
+# app.add_url_rule("/cartera/ia/priorizar-recomendaciones", "priorizar_recomendaciones_ia", priorizar_recomendaciones_ia)
+# app.add_url_rule("/cartera/ia/maquina/<int:maquina_id>", "prediccion_maquina_ia", prediccion_maquina_ia)
+# app.add_url_rule("/cartera/ia/patrones", "patrones_tendencias_ia", patrones_tendencias_ia)
+# app.add_url_rule("/cartera/ia/roi", "roi_optimizacion_ia", roi_optimizacion_ia)
+# app.add_url_rule("/cartera/ia/analizar-parte/<int:parte_id>", "analizar_parte_ia", analizar_parte_ia, methods=["POST"])
+# app.add_url_rule("/cartera/ia/analizar-lote", "analizar_lote_ia", analizar_lote_ia, methods=["POST"])
+# app.add_url_rule("/cartera/ia/prediccion/<int:prediccion_id>", "ver_prediccion_maquina", ver_prediccion_maquina)
+# app.add_url_rule("/cartera/ia/generar-prediccion/<int:maquina_id>", "generar_prediccion_ia", generar_prediccion_ia, methods=["POST"])
+# app.add_url_rule("/cartera/ia/alertas", "listar_alertas_ia", listar_alertas_ia)
+# app.add_url_rule("/cartera/ia/alerta/<int:alerta_id>", "ver_alerta_ia", ver_alerta_ia)
+# app.add_url_rule("/cartera/ia/alerta/<int:alerta_id>/resolver", "resolver_alerta_ia", resolver_alerta_ia, methods=["POST"])
+# app.add_url_rule("/cartera/ia/componentes", "ver_componentes_criticos", ver_componentes_criticos)
+# app.add_url_rule("/cartera/ia/metricas", "ver_metricas_ia", ver_metricas_ia)
+# app.add_url_rule("/cartera/ia/ejecutar", "mostrar_ejecutar_analisis", mostrar_ejecutar_analisis)
+# app.add_url_rule("/cartera/ia/ejecutar-analisis-2025", "ejecutar_analisis_web", ejecutar_analisis_web, methods=["POST"])
+# app.add_url_rule("/cartera/ia/estado-analisis", "estado_analisis", estado_analisis)
+# app.add_url_rule("/cartera/ia/api/generar-predicciones", "api_generar_predicciones_ia", api_generar_predicciones_ia, methods=["POST"])
 
 # ============================================
 # REGISTRAR BLUEPRINTS
@@ -362,6 +362,10 @@ app.register_blueprint(reportes_bp)
 # Blueprint de Notificaciones (décimo módulo migrado)
 from routes.notificaciones import notificaciones_bp
 app.register_blueprint(notificaciones_bp)
+
+# Blueprint de Cartera (undécimo módulo migrado - V1, V2, IA Predictiva)
+from routes.cartera import cartera_bp
+app.register_blueprint(cartera_bp)
 
 # ============================================
 # RUTA DE DIAGNÓSTICO (temporal)
