@@ -293,7 +293,7 @@
         </div>
 
         {% if descripciones %}
-        <form method="POST" action="/inspecciones/{{ inspeccion.id }}/guardar_defectos_importados" id="formDefectos">
+        <form method="POST" action="{{ url_for('inspecciones.guardar_defectos_importados', inspeccion_id=inspeccion.id) }}" id="formDefectos">
             <div class="contador-seleccionados">
                 <span>
                     <span class="numero" id="contadorSeleccionados">{{ descripciones|length }}</span> defecto(s) seleccionado(s)
@@ -351,7 +351,7 @@
             </table>
 
             <div class="action-buttons">
-                <a href="/inspecciones/ver/{{ inspeccion.id }}" class="btn btn-secondary">Cancelar</a>
+                <a href="{{ url_for('inspecciones.ver', inspeccion_id=inspeccion.id) }}" class="btn btn-secondary">Cancelar</a>
                 <button type="submit" class="btn btn-primary">Guardar Defectos Seleccionados</button>
             </div>
         </form>
@@ -359,7 +359,7 @@
         {% else %}
         <div class="empty-state">
             <p>No se encontraron descripciones en el PDF</p>
-            <a href="/inspecciones/ver/{{ inspeccion.id }}" class="btn btn-secondary">Volver a Inspección</a>
+            <a href="{{ url_for('inspecciones.ver', inspeccion_id=inspeccion.id) }}" class="btn btn-secondary">Volver a Inspección</a>
         </div>
         {% endif %}
     </main>

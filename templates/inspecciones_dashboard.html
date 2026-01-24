@@ -544,7 +544,7 @@
             <div class="page-header">
                 <h2 class="page-title">Gestión de Inspecciones (IPOs)</h2>
                 <div>
-                    <a href="/inspecciones/nueva" class="btn btn-primary">+ Nueva Inspección</a>
+                    <a href="{{ url_for('inspecciones.nueva') }}" class="btn btn-primary">+ Nueva Inspección</a>
                 </div>
             </div>
 
@@ -581,7 +581,7 @@
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_criticas %}
-                        <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-critica">
+                        <a href="{{ url_for('inspecciones.ver', inspeccion_id=item.id) }}" class="alerta-card alerta-critica">
                             <span class="alerta-badge alerta-badge-critica">PLAZO VENCIDO</span>
                             <div class="alerta-maquina">{{ item.maquina }}</div>
                             <div class="alerta-info">
@@ -620,7 +620,7 @@
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_urgentes %}
-                        <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-urgente">
+                        <a href="{{ url_for('inspecciones.ver', inspeccion_id=item.id) }}" class="alerta-card alerta-urgente">
                             <span class="alerta-badge alerta-badge-urgente">URGENTE</span>
                             <div class="alerta-maquina">{{ item.maquina }}</div>
                             <div class="alerta-info">
@@ -659,7 +659,7 @@
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_proximas %}
-                        <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-proxima">
+                        <a href="{{ url_for('inspecciones.ver', inspeccion_id=item.id) }}" class="alerta-card alerta-proxima">
                             <span class="alerta-badge alerta-badge-proxima">PRÓXIMO</span>
                             <div class="alerta-maquina">{{ item.maquina }}</div>
                             <div class="alerta-info">
@@ -698,7 +698,7 @@
                 </div>
                 <div class="alertas-grid">
                     {% for tipo, item in alertas_normales %}
-                        <a href="/inspecciones/ver/{{ item.id }}" class="alerta-card alerta-normal">
+                        <a href="{{ url_for('inspecciones.ver', inspeccion_id=item.id) }}" class="alerta-card alerta-normal">
                             {% if item.fecha_segunda_realizada %}
                                 <span class="alerta-badge alerta-badge-normal">✅ SUBSANADO</span>
                             {% elif item.fecha_segunda_inspeccion %}
@@ -780,7 +780,7 @@
                     </div>
                     <div class="lista-container">
                         {% for tipo, item in alertas_criticas %}
-                            <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-critica inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
+                            <a href="{{ url_for('inspecciones.ver', inspeccion_id=item.id) }}" class="lista-item lista-critica inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
                                 <div class="lista-maquina">{{ item.maquina }}</div>
                                 <div class="lista-urgencia lista-urgencia-critica">
                                     ⚠️ Venció hace {{ item.dias_hasta_segunda|abs }} días
@@ -800,7 +800,7 @@
                     </div>
                     <div class="lista-container">
                         {% for tipo, item in alertas_urgentes %}
-                            <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-urgente inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
+                            <a href="{{ url_for('inspecciones.ver', inspeccion_id=item.id) }}" class="lista-item lista-urgente inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
                                 <div class="lista-maquina">{{ item.maquina }}</div>
                                 <div class="lista-urgencia lista-urgencia-urgente">
                                     ⏰ Quedan {{ item.dias_hasta_segunda }} días
@@ -820,7 +820,7 @@
                     </div>
                     <div class="lista-container">
                         {% for tipo, item in alertas_proximas %}
-                            <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-proxima inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
+                            <a href="{{ url_for('inspecciones.ver', inspeccion_id=item.id) }}" class="lista-item lista-proxima inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion }}">
                                 <div class="lista-maquina">{{ item.maquina }}</div>
                                 <div class="lista-urgencia lista-urgencia-proxima">
                                     📅 Quedan {{ item.dias_hasta_segunda }} días
@@ -840,7 +840,7 @@
                     </div>
                     <div class="lista-container">
                         {% for tipo, item in alertas_normales %}
-                            <a href="/inspecciones/ver/{{ item.id }}" class="lista-item lista-normal inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion if item.fecha_segunda_inspeccion else item.fecha_inspeccion }}">
+                            <a href="{{ url_for('inspecciones.ver', inspeccion_id=item.id) }}" class="lista-item lista-normal inspeccion-item" data-maquina="{{ item.maquina|lower }}" data-fecha="{{ item.fecha_segunda_inspeccion if item.fecha_segunda_inspeccion else item.fecha_inspeccion }}">
                                 <div class="lista-maquina">{{ item.maquina }}</div>
                                 <div class="lista-urgencia lista-urgencia-normal">
                                     {% if item.fecha_segunda_realizada %}

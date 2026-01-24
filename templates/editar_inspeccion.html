@@ -100,7 +100,7 @@
 
             <div style="margin-top: 30px;">
                 <button type="submit" class="button">Guardar Cambios</button>
-                <a href="/inspecciones/ver/{{ inspeccion.id }}" class="btn-secondary">Cancelar</a>
+                <a href="{{ url_for('inspecciones.ver', inspeccion_id=inspeccion.id) }}" class="btn-secondary">Cancelar</a>
             </div>
         </form>
     </main>    <!-- Inyectar permisos del usuario para JavaScript -->

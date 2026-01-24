@@ -543,14 +543,14 @@
                                 📥 Descargar Acta
                             </a>
                         </div>
-                        <form method="POST" action="/inspecciones/{{ inspeccion.id }}/subir_acta" enctype="multipart/form-data" style="margin-top: 10px;">
+                        <form method="POST" action="{{ url_for('inspecciones.subir_acta_pdf', inspeccion_id=inspeccion.id) }}" enctype="multipart/form-data" style="margin-top: 10px;">
                             <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666;">Reemplazar acta:</label>
                             <input type="file" name="acta_pdf" accept=".pdf" required style="margin-bottom: 10px; width: 100%;">
                             <button type="submit" class="btn-secondary btn-sm">Actualizar Acta</button>
                         </form>
                     {% else %}
                         <p style="color: #999; font-size: 14px; margin-bottom: 15px;">No hay acta subida</p>
-                        <form method="POST" action="/inspecciones/{{ inspeccion.id }}/subir_acta" enctype="multipart/form-data">
+                        <form method="POST" action="{{ url_for('inspecciones.subir_acta_pdf', inspeccion_id=inspeccion.id) }}" enctype="multipart/form-data">
                             <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666;">Subir acta (PDF):</label>
                             <input type="file" name="acta_pdf" accept=".pdf" required style="margin-bottom: 10px; width: 100%;">
                             <button type="submit" class="btn-primary btn-sm">Subir Acta</button>
@@ -568,20 +568,20 @@
                             </a>
                         </div>
                         <div style="margin-bottom: 15px;">
-                            <form method="POST" action="/inspecciones/{{ inspeccion.id }}/extraer_defectos_pdf" style="display: inline;">
+                            <form method="POST" action="{{ url_for('inspecciones.extraer_defectos_pdf', inspeccion_id=inspeccion.id) }}" style="display: inline;">
                                 <button type="submit" class="btn-primary" style="display: inline-block;">
                                     📋 Importar Defectos desde PDF
                                 </button>
                             </form>
                         </div>
-                        <form method="POST" action="/inspecciones/{{ inspeccion.id }}/subir_presupuesto" enctype="multipart/form-data" style="margin-top: 10px;">
+                        <form method="POST" action="{{ url_for('inspecciones.subir_presupuesto_pdf', inspeccion_id=inspeccion.id) }}" enctype="multipart/form-data" style="margin-top: 10px;">
                             <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666;">Reemplazar presupuesto:</label>
                             <input type="file" name="presupuesto_pdf" accept=".pdf" required style="margin-bottom: 10px; width: 100%;">
                             <button type="submit" class="btn-secondary btn-sm">Actualizar Presupuesto</button>
                         </form>
                     {% else %}
                         <p style="color: #999; font-size: 14px; margin-bottom: 15px;">No hay presupuesto subido</p>
-                        <form method="POST" action="/inspecciones/{{ inspeccion.id }}/subir_presupuesto" enctype="multipart/form-data">
+                        <form method="POST" action="{{ url_for('inspecciones.subir_presupuesto_pdf', inspeccion_id=inspeccion.id) }}" enctype="multipart/form-data">
                             <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666;">Subir presupuesto (PDF):</label>
                             <input type="file" name="presupuesto_pdf" accept=".pdf" required style="margin-bottom: 10px; width: 100%;">
                             <button type="submit" class="btn-primary btn-sm">Subir Presupuesto</button>
@@ -612,9 +612,9 @@
 
         <!-- Acciones -->
         <div class="btn-actions">
-            <a href="/inspecciones/editar/{{ inspeccion.id }}" class="btn-primary">Editar Inspección</a>
-            <a href="/inspecciones" class="btn-secondary">Volver a Inspecciones</a>
-            <a href="/inspecciones/eliminar/{{ inspeccion.id }}" class="btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta inspección?')" style="margin-left: auto;">Eliminar Inspección</a>
+            <a href="{{ url_for('inspecciones.editar', inspeccion_id=inspeccion.id) }}" class="btn-primary">Editar Inspección</a>
+            <a href="{{ url_for('inspecciones.dashboard') }}" class="btn-secondary">Volver a Inspecciones</a>
+            <a href="{{ url_for('inspecciones.eliminar', inspeccion_id=inspeccion.id) }}" class="btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta inspección?')" style="margin-left: auto;">Eliminar Inspección</a>
         </div>
     </main>    <!-- Inyectar permisos del usuario para JavaScript -->
     <script>
@@ -637,7 +637,7 @@
                     // Crear formulario y enviarlo
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = `/inspecciones/estado_presupuesto/${inspeccionId}`;
+                    form.action = `{{ url_for('inspecciones.cambiar_estado_presupuesto', inspeccion_id=0) }}`.replace('/0', `/${inspeccionId}`);
 
                     const input = document.createElement('input');
                     input.type = 'hidden';
@@ -663,7 +663,7 @@
                         // Crear formulario y enviarlo
                         const form = document.createElement('form');
                         form.method = 'POST';
-                        form.action = `/inspecciones/marcar_segunda_realizada/${inspeccionId}`;
+                        form.action = `{{ url_for('inspecciones.marcar_segunda_realizada', inspeccion_id=0) }}`.replace('/0', `/${inspeccionId}`);
 
                         document.body.appendChild(form);
                         form.submit();
