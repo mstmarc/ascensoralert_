@@ -92,6 +92,12 @@ def formulario():
 # DASHBOARD DE LEADS
 # ============================================
 
+@leads_bp.route('/leads')
+def leads_redirect():
+    """Redirect de /leads a /leads_dashboard para compatibilidad"""
+    return redirect(url_for('leads.dashboard'))
+
+
 @leads_bp.route('/leads_dashboard')
 def dashboard():
     """Dashboard principal de leads con filtros y búsqueda"""
