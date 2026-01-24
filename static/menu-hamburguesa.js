@@ -198,7 +198,7 @@
                     <a href="/formulario" class="menu-link">
                         <span class="emoji">📋</span> Nueva Visita
                     </a>
-                    <a href="/leads_dashboard" class="menu-link">
+                    <a href="/leads" class="menu-link">
                         <span class="emoji">📊</span> Dashboard Leads
                     </a>
                 </div>
@@ -231,7 +231,7 @@
                 <!-- Administradores de Fincas -->
                 <div class="menu-section">
                     <div class="menu-section-title">Administradores de Fincas</div>
-                    <a href="/administradores_dashboard" class="menu-link">
+                    <a href="/admin/administradores" class="menu-link">
                         <span class="emoji">🏢</span> Ver Administradores
                     </a>
                     <a href="/nuevo_administrador" class="menu-link">
