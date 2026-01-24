@@ -43,7 +43,7 @@ SUPABASE_URL = config.SUPABASE_URL
 HEADERS = config.HEADERS
 
 # Crear Blueprint
-cartera_bp = Blueprint('cartera', __name__)
+cartera_bp = Blueprint('cartera', __name__, url_prefix='/cartera')
 
 # Estado global para análisis en background
 estado_analisis_global = {
