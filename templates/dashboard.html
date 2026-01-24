@@ -382,7 +382,7 @@
                 </a>
             </div>
 
-            <form method="GET" action="/leads_dashboard">
+            <form method="GET" action="{{ url_for('leads.dashboard') }}">
                 <div class="buscador-destacado">
                     <div class="buscador-label">Buscar por Direccion</div>
                     <div class="buscador-input-container">
@@ -429,14 +429,14 @@
 
                         <div class="filtro-grupo">
                             <label>&nbsp;</label>
-                            <a href="/leads_dashboard" class="btn btn-secondary">
+                            <a href="{{ url_for('leads.dashboard') }}" class="btn btn-secondary">
                                 Limpiar
                             </a>
                         </div>
 
                         <div class="filtro-grupo">
                             <label>&nbsp;</label>
-                            <a href="/exportar_leads?localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-success">
+                            <a href="{{ url_for('leads.exportar', localidad=filtro_localidad, empresa=filtro_empresa, buscar_direccion=buscar_direccion) }}" class="btn btn-success">
                                 📊 Excel
                             </a>
                         </div>
@@ -451,7 +451,7 @@
                 <div class="leads-list">
                     {% for row in rows %}
                     <div class="lead-list-item">
-                        <a href="/ver_lead/{{ row.lead_id }}" class="lead-list-direccion">
+                        <a href="{{ url_for('leads.ver', lead_id=row.lead_id) }}" class="lead-list-direccion">
                             {{ row.direccion }}
                         </a>
                         <div class="lead-list-info">

@@ -769,10 +769,10 @@ def home():
     )
 
 # Alta de Lead CON FECHA DE VISITA
-@app.route("/formulario_lead", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('clientes', 'write')
-def formulario_lead():
+# @app.route("/formulario_lead", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('clientes', 'write')
+def _formulario_lead_legacy():
     if request.method == "POST":
         # Obtener administrador_id y convertir a int o None
         administrador_id = request.form.get("administrador_id")
@@ -1342,10 +1342,10 @@ def reporte_mensual():
     return render_template("reporte_mensual.html")
 
 # DASHBOARD MEJORADO CON PAGINACIÓN Y BÚSQUEDA
-@app.route("/leads_dashboard")
-@helpers.login_required
-@helpers.requiere_permiso('clientes', 'read')
-def leads_dashboard():
+# @app.route("/leads_dashboard")
+# @helpers.login_required
+# @helpers.requiere_permiso('clientes', 'read')
+def _leads_dashboard_legacy():
     from utils.pagination import get_pagination
 
     # Usar helper de paginación
@@ -1523,8 +1523,8 @@ def leads_dashboard():
     )
 
 # Exportar leads a Excel
-@app.route("/exportar_leads")
-def exportar_leads():
+# @app.route("/exportar_leads")
+def _exportar_leads_legacy():
     if "usuario" not in session:
         return redirect("/")
 
@@ -1652,8 +1652,8 @@ def exportar_leads():
     )
 
 # Ver detalle completo del Lead
-@app.route("/ver_lead/<int:lead_id>")
-def ver_lead(lead_id):
+# @app.route("/ver_lead/<int:lead_id>")
+def _ver_lead_legacy(lead_id):
     if "usuario" not in session:
         return redirect("/")
     
@@ -1765,10 +1765,10 @@ def ver_lead(lead_id):
     )
 
 # Eliminar Lead
-@app.route("/eliminar_lead/<int:lead_id>")
-@helpers.login_required
-@helpers.requiere_permiso('clientes', 'delete')
-def eliminar_lead(lead_id):
+# @app.route("/eliminar_lead/<int:lead_id>")
+# @helpers.login_required
+# @helpers.requiere_permiso('clientes', 'delete')
+def _eliminar_lead_legacy(lead_id):
     
     requests.delete(f"{SUPABASE_URL}/rest/v1/equipos?cliente_id=eq.{lead_id}", headers=HEADERS)
     requests.delete(f"{SUPABASE_URL}/rest/v1/visitas_seguimiento?cliente_id=eq.{lead_id}", headers=HEADERS)
@@ -2228,10 +2228,10 @@ def tarea_comercial_agregar_nota(tarea_id):
 
 
 # Editar Lead - CON LIMPIEZA DE NONE
-@app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('clientes', 'write')
-def editar_lead(lead_id):
+# @app.route("/editar_lead/<int:lead_id>", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('clientes', 'write')
+def _editar_lead_legacy(lead_id):
 
     if request.method == "POST":
         # Obtener administrador_id y convertir a int o None
