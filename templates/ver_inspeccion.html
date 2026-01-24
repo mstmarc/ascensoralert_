@@ -462,7 +462,7 @@
         <!-- Sección: Defectos Detectados -->
         <div class="seccion">
             <h2>Defectos Detectados
-                <a href="{{ url_for('defectos.nuevo', inspeccion_id=inspeccion.id) }}" class="btn-primary btn-sm" style="margin-left: 15px;">+ Añadir Defecto</a>
+                <a href="{{ url_for('nuevo_defecto', inspeccion_id=inspeccion.id) }}" class="btn-primary btn-sm" style="margin-left: 15px;">+ Añadir Defecto</a>
             </h2>
 
             {% if defectos %}
