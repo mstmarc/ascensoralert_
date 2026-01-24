@@ -16,6 +16,8 @@ import requests
 import logging
 import sys
 import io
+import os
+import urllib.parse
 import pandas as pd
 import pdfplumber
 import threading
@@ -817,7 +819,7 @@ def cartera_crear_oportunidad(parte_id):
             )
 
             flash("Oportunidad creada exitosamente", "success")
-            return redirect(f"/cartera/oportunidades/{oportunidad_id}")
+            return redirect(url_for('cartera.cartera_ver_oportunidad', oportunidad_id=oportunidad_id))
         else:
             logger.error(f"Error creando oportunidad: {response.status_code} - {response.text}")
             flash("Error al crear oportunidad", "error")
@@ -937,7 +939,7 @@ def cartera_actualizar_oportunidad(oportunidad_id):
         logger.error(f"Error actualizando oportunidad: {response.status_code} - {response.text}")
         flash("Error al actualizar oportunidad", "error")
 
-    return redirect(f"/cartera/oportunidades/{oportunidad_id}")
+    return redirect(url_for('cartera.cartera_ver_oportunidad', oportunidad_id=oportunidad_id))
 
 
 # @app.route("/cartera/maquina/<int:maquina_id>")
@@ -1133,7 +1135,7 @@ def cartera_dar_baja_instalacion(instalacion_id):
 
     if not fecha_baja or not motivo:
         flash("Debe proporcionar fecha y motivo de baja", "error")
-        return redirect(f"/cartera/instalacion/{instalacion_id}")
+        return redirect(url_for('cartera.cartera_ver_instalacion', instalacion_id=instalacion_id))
 
     # Actualizar instalación
     response = requests.patch(
@@ -1162,7 +1164,7 @@ def cartera_dar_baja_instalacion(instalacion_id):
         logger.error(f"Error al dar de baja instalación: {response.status_code} - {response.text}")
         flash("Error al dar de baja la instalación", "error")
 
-    return redirect(f"/cartera/instalacion/{instalacion_id}")
+    return redirect(url_for('cartera.cartera_ver_instalacion', instalacion_id=instalacion_id))
 
 
 # @app.route("/cartera/instalacion/<int:instalacion_id>/reactivar", methods=["POST"])
@@ -1188,7 +1190,7 @@ def cartera_reactivar_instalacion(instalacion_id):
         logger.error(f"Error al reactivar instalación: {response.status_code} - {response.text}")
         flash("Error al reactivar la instalación", "error")
 
-    return redirect(f"/cartera/instalacion/{instalacion_id}")
+    return redirect(url_for('cartera.cartera_ver_instalacion', instalacion_id=instalacion_id))
 
 
 # ============================================
@@ -1554,7 +1556,7 @@ def crear_trabajo_desde_alerta(alerta_id):
         return redirect(url_for('cartera.ver_pendientes_tecnicos'))
     else:
         flash("Error al crear trabajo técnico", "error")
-        return redirect(f"/cartera/v2/alerta/{alerta_id}")
+        return redirect(url_for('cartera.ver_detalle_alerta', alerta_id=alerta_id))
 
 
 # ============================================
@@ -2521,7 +2523,7 @@ def analizar_parte_ia(parte_id):
         # Analizar con IA (esto requerirá conexión directa a PostgreSQL)
         # Por ahora retornamos un mensaje de éxito
         flash("Parte enviado a análisis con IA. El proceso puede tardar unos segundos.", "info")
-        return redirect(request.referrer or "/cartera")
+        return redirect(request.referrer or url_for('cartera.cartera_dashboard'))
 
     except Exception as e:
         logger.error(f"Error analizando parte: {str(e)}")
@@ -2616,7 +2618,7 @@ def generar_prediccion_ia(maquina_id):
         # En producción, se ejecutaría como tarea en background
 
         flash(f"Generando predicción con IA para la máquina. El proceso puede tardar unos minutos.", "info")
-        return redirect(f"/cartera/ia/prediccion/{maquina_id}")
+        return redirect(url_for('cartera.ver_prediccion_maquina', maquina_id=maquina_id))
 
     except Exception as e:
         logger.error(f"Error generando predicción: {str(e)}")
@@ -2672,7 +2674,7 @@ def ver_alerta_ia(alerta_id):
 
         if response.status_code != 200 or not response.json():
             flash("Alerta no encontrada", "error")
-            return redirect("/cartera/ia/alertas")
+            return redirect(url_for('cartera.listar_alertas_ia'))
 
         alerta = response.json()[0]
 
@@ -2684,7 +2686,7 @@ def ver_alerta_ia(alerta_id):
     except Exception as e:
         logger.error(f"Error obteniendo alerta: {str(e)}")
         flash("Error al cargar alerta", "error")
-        return redirect("/cartera/ia/alertas")
+        return redirect(url_for('cartera.listar_alertas_ia'))
 
 
 # @app.route("/cartera/ia/alerta/<int:alerta_id>/resolver", methods=["POST"])
@@ -2714,12 +2716,12 @@ def resolver_alerta_ia(alerta_id):
         else:
             flash("Error al actualizar alerta", "error")
 
-        return redirect(f"/cartera/ia/alerta/{alerta_id}")
+        return redirect(url_for('cartera.ver_alerta_ia', alerta_id=alerta_id))
 
     except Exception as e:
         logger.error(f"Error resolviendo alerta: {str(e)}")
         flash("Error al resolver alerta", "error")
-        return redirect(f"/cartera/ia/alerta/{alerta_id}")
+        return redirect(url_for('cartera.ver_alerta_ia', alerta_id=alerta_id))
 
 
 # @app.route("/cartera/ia/componentes")
