@@ -2761,8 +2761,8 @@ def delete_accion(oportunidad_id, index):
 def configuracion_avisos():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
-    
-    user_id = session['usuario_id']
+
+    user_id = session.get('usuario_id')
     
     if request.method == 'POST':
         email = request.form.get('email_destinatario')

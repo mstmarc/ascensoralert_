@@ -18,6 +18,14 @@ from services import cache_service
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 
+# Configuración de sesión y seguridad
+from datetime import timedelta
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
+app.config['SESSION_COOKIE_SECURE'] = True  # Solo HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # No accesible desde JavaScript
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Protección CSRF
+app.config['SESSION_REFRESH_EACH_REQUEST'] = False  # No renovar en cada request
+
 # Configurar Resend para emails
 if config.RESEND_API_KEY:
     resend.api_key = config.RESEND_API_KEY
@@ -32,20 +40,25 @@ helpers.init_helpers(config.SUPABASE_URL, config.HEADERS)
 # Registrar filtro personalizado para formatear fechas
 app.template_filter('format_fecha')(format_fecha_filter)
 
+# Caché de permisos pre-serializados (inicializado una sola vez)
+CACHE_PERMISOS_JSON = {}
+def _inicializar_cache_permisos():
+    """Inicializa la caché de permisos serializados a JSON"""
+    import json
+    for perfil, permisos in helpers.PERMISOS_POR_PERFIL.items():
+        CACHE_PERMISOS_JSON[perfil] = json.dumps(permisos)
+
+_inicializar_cache_permisos()
+
 # Inyectar funciones de permisos en todos los templates
 @app.context_processor
 def inject_permisos():
     """Inyecta funciones de control de acceso en todos los templates"""
-    import json
-
     # Obtener perfil del usuario actual
     perfil_actual = helpers.obtener_perfil_usuario()
 
-    # Construir diccionario de permisos para JavaScript
-    permisos_js = {}
-    if perfil_actual in helpers.PERMISOS_POR_PERFIL:
-        for modulo, permisos in helpers.PERMISOS_POR_PERFIL[perfil_actual].items():
-            permisos_js[modulo] = permisos
+    # Usar caché pre-serializado en lugar de recalcular
+    permisos_json = CACHE_PERMISOS_JSON.get(perfil_actual, '{}')
 
     return {
         'tiene_permiso': helpers.tiene_permiso,
@@ -54,7 +67,7 @@ def inject_permisos():
         'obtener_perfil_usuario': helpers.obtener_perfil_usuario,
         'obtener_modulos_permitidos': helpers.obtener_modulos_permitidos,
         'perfil_usuario': perfil_actual,
-        'permisos_usuario_json': json.dumps(permisos_js)
+        'permisos_usuario_json': permisos_json
     }
 
 # ============================================
