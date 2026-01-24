@@ -3592,10 +3592,10 @@ def _clear_cache_legacy():
 # ============================================
 
 # Dashboard de Inspecciones (vista principal)
-@app.route("/inspecciones")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'read')
-def inspecciones_dashboard():
+# @app.route("/inspecciones")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'read')
+def _inspecciones_dashboard_legacy():
     """Dashboard principal de inspecciones con alertas y estados"""
 
     # Obtener todas las inspecciones con información del OCA
@@ -4018,10 +4018,10 @@ def exportar_defectos_pdf():
     )
 
 # Nueva Inspección - Formulario
-@app.route("/inspecciones/nueva", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def nueva_inspeccion():
+# @app.route("/inspecciones/nueva", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _nueva_inspeccion_legacy():
     """Crear una nueva inspección"""
 
     if request.method == "POST":
@@ -4089,10 +4089,10 @@ def nueva_inspeccion():
     return render_template("nueva_inspeccion.html", ocas=ocas)
 
 # Ver Detalle de Inspección
-@app.route("/inspecciones/ver/<int:inspeccion_id>")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'read')
-def ver_inspeccion(inspeccion_id):
+# @app.route("/inspecciones/ver/<int:inspeccion_id>")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'read')
+def _ver_inspeccion_legacy(inspeccion_id):
     """Ver detalle completo de una inspección"""
 
     # Obtener inspección con información del OCA
@@ -4155,10 +4155,10 @@ def ver_inspeccion(inspeccion_id):
     )
 
 # Editar Inspección
-@app.route("/inspecciones/editar/<int:inspeccion_id>", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def editar_inspeccion(inspeccion_id):
+# @app.route("/inspecciones/editar/<int:inspeccion_id>", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _editar_inspeccion_legacy(inspeccion_id):
     """Editar una inspección existente"""
 
     if request.method == "POST":
@@ -4233,10 +4233,10 @@ def editar_inspeccion(inspeccion_id):
     return render_template("editar_inspeccion.html", inspeccion=inspeccion, ocas=ocas)
 
 # Cambiar Estado de Presupuesto
-@app.route("/inspecciones/estado_presupuesto/<int:inspeccion_id>", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def cambiar_estado_presupuesto(inspeccion_id):
+# @app.route("/inspecciones/estado_presupuesto/<int:inspeccion_id>", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _cambiar_estado_presupuesto_legacy(inspeccion_id):
     """Cambiar el estado del presupuesto de una inspección"""
 
     nuevo_estado = request.form.get("presupuesto")
@@ -4259,10 +4259,10 @@ def cambiar_estado_presupuesto(inspeccion_id):
     return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
 # Marcar Segunda Inspección como Realizada
-@app.route("/inspecciones/marcar_segunda_realizada/<int:inspeccion_id>", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def marcar_segunda_realizada(inspeccion_id):
+# @app.route("/inspecciones/marcar_segunda_realizada/<int:inspeccion_id>", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _marcar_segunda_realizada_legacy(inspeccion_id):
     """Marcar que se realizó la segunda inspección (a los 6 meses)"""
 
     try:
@@ -4297,10 +4297,10 @@ def marcar_segunda_realizada(inspeccion_id):
     return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
 # Subir PDF de Acta
-@app.route("/inspecciones/<int:inspeccion_id>/subir_acta", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def subir_acta_pdf(inspeccion_id):
+# @app.route("/inspecciones/<int:inspeccion_id>/subir_acta", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _subir_acta_pdf_legacy(inspeccion_id):
     """Subir PDF del acta de inspección a Supabase Storage"""
 
     if 'acta_pdf' not in request.files:
@@ -4373,10 +4373,10 @@ def subir_acta_pdf(inspeccion_id):
     return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
 # Subir PDF de Presupuesto
-@app.route("/inspecciones/<int:inspeccion_id>/subir_presupuesto", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def subir_presupuesto_pdf(inspeccion_id):
+# @app.route("/inspecciones/<int:inspeccion_id>/subir_presupuesto", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _subir_presupuesto_pdf_legacy(inspeccion_id):
     """Subir PDF del presupuesto de inspección a Supabase Storage"""
 
     if 'presupuesto_pdf' not in request.files:
@@ -4449,10 +4449,10 @@ def subir_presupuesto_pdf(inspeccion_id):
     return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
 # Eliminar Inspección
-@app.route("/inspecciones/eliminar/<int:inspeccion_id>")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'delete')
-def eliminar_inspeccion(inspeccion_id):
+# @app.route("/inspecciones/eliminar/<int:inspeccion_id>")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'delete')
+def _eliminar_inspeccion_legacy(inspeccion_id):
     """Eliminar una inspección (y sus defectos en cascada)"""
 
     response = requests.delete(
@@ -4684,10 +4684,10 @@ def extraer_descripciones_pdf(pdf_content):
     return descripciones
 
 # Extraer defectos de PDF de presupuesto
-@app.route("/inspecciones/<int:inspeccion_id>/extraer_defectos_pdf", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def extraer_defectos_pdf(inspeccion_id):
+# @app.route("/inspecciones/<int:inspeccion_id>/extraer_defectos_pdf", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _extraer_defectos_pdf_legacy(inspeccion_id):
     """Extraer defectos del PDF de presupuesto y mostrar preview para clasificación"""
 
     # Obtener información de la inspección
@@ -4739,10 +4739,10 @@ def extraer_defectos_pdf(inspeccion_id):
         return redirect(f"/inspecciones/ver/{inspeccion_id}")
 
 # Guardar defectos importados desde PDF
-@app.route("/inspecciones/<int:inspeccion_id>/guardar_defectos_importados", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def guardar_defectos_importados(inspeccion_id):
+# @app.route("/inspecciones/<int:inspeccion_id>/guardar_defectos_importados", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _guardar_defectos_importados_legacy(inspeccion_id):
     """Guardar defectos clasificados manualmente después de la extracción del PDF"""
 
     logger.info(f" Guardando defectos para inspección {inspeccion_id}")

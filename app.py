@@ -105,11 +105,11 @@ from app_legacy import (
     # editar_administrador, eliminar_administrador,
     test_dropdown_admin,  # clear_cache migrado a Blueprint
 
-    # Inspecciones e IPOs
-    inspecciones_dashboard, nueva_inspeccion, ver_inspeccion,
-    editar_inspeccion, cambiar_estado_presupuesto,
-    marcar_segunda_realizada, subir_acta_pdf, subir_presupuesto_pdf,
-    eliminar_inspeccion, extraer_defectos_pdf, guardar_defectos_importados,
+    # Inspecciones e IPOs - MIGRADAS A BLUEPRINT (ver routes/inspecciones/inspecciones_bp.py)
+    # inspecciones_dashboard, nueva_inspeccion, ver_inspeccion,
+    # editar_inspeccion, cambiar_estado_presupuesto,
+    # marcar_segunda_realizada, subir_acta_pdf, subir_presupuesto_pdf,
+    # eliminar_inspeccion, extraer_defectos_pdf, guardar_defectos_importados,
 
     # Defectos
     defectos_dashboard, exportar_defectos_pdf, nuevo_defecto,
@@ -225,18 +225,18 @@ app.add_url_rule("/enviar_avisos_manual", "enviar_avisos_manual", enviar_avisos_
 app.add_url_rule("/test_dropdown_admin", "test_dropdown_admin", test_dropdown_admin)
 # app.add_url_rule("/admin/clear_cache", "clear_cache", clear_cache)  # Migrado a Blueprint
 
-# Inspecciones e IPOs
-app.add_url_rule("/inspecciones", "inspecciones_dashboard", inspecciones_dashboard)
-app.add_url_rule("/inspecciones/nueva", "nueva_inspeccion", nueva_inspeccion, methods=["GET", "POST"])
-app.add_url_rule("/inspecciones/ver/<int:inspeccion_id>", "ver_inspeccion", ver_inspeccion)
-app.add_url_rule("/inspecciones/editar/<int:inspeccion_id>", "editar_inspeccion", editar_inspeccion, methods=["GET", "POST"])
-app.add_url_rule("/inspecciones/estado_presupuesto/<int:inspeccion_id>", "cambiar_estado_presupuesto", cambiar_estado_presupuesto, methods=["POST"])
-app.add_url_rule("/inspecciones/marcar_segunda_realizada/<int:inspeccion_id>", "marcar_segunda_realizada", marcar_segunda_realizada, methods=["POST"])
-app.add_url_rule("/inspecciones/<int:inspeccion_id>/subir_acta", "subir_acta_pdf", subir_acta_pdf, methods=["POST"])
-app.add_url_rule("/inspecciones/<int:inspeccion_id>/subir_presupuesto", "subir_presupuesto_pdf", subir_presupuesto_pdf, methods=["POST"])
-app.add_url_rule("/inspecciones/eliminar/<int:inspeccion_id>", "eliminar_inspeccion", eliminar_inspeccion)
-app.add_url_rule("/inspecciones/<int:inspeccion_id>/extraer_defectos_pdf", "extraer_defectos_pdf", extraer_defectos_pdf, methods=["POST"])
-app.add_url_rule("/inspecciones/<int:inspeccion_id>/guardar_defectos_importados", "guardar_defectos_importados", guardar_defectos_importados, methods=["POST"])
+# Inspecciones e IPOs - MIGRADAS A BLUEPRINT (ver routes/inspecciones/inspecciones_bp.py)
+# app.add_url_rule("/inspecciones", "inspecciones_dashboard", inspecciones_dashboard)
+# app.add_url_rule("/inspecciones/nueva", "nueva_inspeccion", nueva_inspeccion, methods=["GET", "POST"])
+# app.add_url_rule("/inspecciones/ver/<int:inspeccion_id>", "ver_inspeccion", ver_inspeccion)
+# app.add_url_rule("/inspecciones/editar/<int:inspeccion_id>", "editar_inspeccion", editar_inspeccion, methods=["GET", "POST"])
+# app.add_url_rule("/inspecciones/estado_presupuesto/<int:inspeccion_id>", "cambiar_estado_presupuesto", cambiar_estado_presupuesto, methods=["POST"])
+# app.add_url_rule("/inspecciones/marcar_segunda_realizada/<int:inspeccion_id>", "marcar_segunda_realizada", marcar_segunda_realizada, methods=["POST"])
+# app.add_url_rule("/inspecciones/<int:inspeccion_id>/subir_acta", "subir_acta_pdf", subir_acta_pdf, methods=["POST"])
+# app.add_url_rule("/inspecciones/<int:inspeccion_id>/subir_presupuesto", "subir_presupuesto_pdf", subir_presupuesto_pdf, methods=["POST"])
+# app.add_url_rule("/inspecciones/eliminar/<int:inspeccion_id>", "eliminar_inspeccion", eliminar_inspeccion)
+# app.add_url_rule("/inspecciones/<int:inspeccion_id>/extraer_defectos_pdf", "extraer_defectos_pdf", extraer_defectos_pdf, methods=["POST"])
+# app.add_url_rule("/inspecciones/<int:inspeccion_id>/guardar_defectos_importados", "guardar_defectos_importados", guardar_defectos_importados, methods=["POST"])
 
 # Defectos
 app.add_url_rule("/defectos_dashboard", "defectos_dashboard", defectos_dashboard)
@@ -319,6 +319,10 @@ app.register_blueprint(admin_bp)
 # Blueprint de Leads/Clientes (tercer módulo migrado)
 from routes.leads import leads_bp
 app.register_blueprint(leads_bp)
+
+# Blueprint de Inspecciones (cuarto módulo migrado)
+from routes.inspecciones import inspecciones_bp
+app.register_blueprint(inspecciones_bp)
 
 # ============================================
 # PUNTO DE ENTRADA
