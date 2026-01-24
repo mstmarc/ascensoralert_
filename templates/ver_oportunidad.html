@@ -542,7 +542,7 @@
                             <li class="accion-item">
                                 <div class="accion-content">
                                     <div class="accion-checkbox-wrapper">
-                                        <form method="POST" action="{{ url_for('toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
+                                        <form method="POST" action="{{ url_for('oportunidades.toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
                                             <input type="checkbox"
                                                    class="accion-checkbox"
                                                    {% if accion.completada %}checked{% endif %}
@@ -553,7 +553,7 @@
                                         {{ accion.texto }}
                                     </div>
                                     <div class="accion-delete">
-                                        <form method="POST" action="{{ url_for('delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
+                                        <form method="POST" action="{{ url_for('oportunidades.delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta acción?')">×</button>
                                         </form>
                                     </div>
@@ -565,7 +565,7 @@
                         <p class="empty-state">No hay acciones registradas</p>
                     {% endif %}
 
-                    <form method="POST" action="{{ url_for('add_accion', oportunidad_id=oportunidad.id) }}" class="add-accion-form">
+                    <form method="POST" action="{{ url_for('oportunidades.add_accion', oportunidad_id=oportunidad.id) }}" class="add-accion-form">
                         <input type="text" name="texto_accion" placeholder="Escribe una nueva acción..." required>
                         <button type="submit">+ Añadir</button>
                     </form>
@@ -576,7 +576,7 @@
             <div class="oportunidad-card">
                 <div class="section-title">📝 Notas</div>
                 <div class="section-content">
-                    <form method="POST" action="{{ url_for('editar_oportunidad', oportunidad_id=oportunidad.id) }}">
+                    <form method="POST" action="{{ url_for('oportunidades.editar', oportunidad_id=oportunidad.id) }}">
                         <input type="hidden" name="tipo" value="{{ oportunidad.tipo }}">
                         <input type="hidden" name="descripcion" value="{{ oportunidad.descripcion or '' }}">
                         <input type="hidden" name="estado" value="{{ oportunidad.estado }}">
@@ -628,7 +628,7 @@
 
             <!-- BOTONES DE ACCIÓN -->
             <div class="action-buttons">
-                <a href="{{ url_for('editar_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-primary">Editar Oportunidad</a>
+                <a href="{{ url_for('oportunidades.editar', oportunidad_id=oportunidad.id) }}" class="btn btn-primary">Editar Oportunidad</a>
                 <a href="{{ url_for('ver_lead', lead_id=oportunidad.cliente_id) }}" class="btn btn-primary">Ver Comunidad</a>
                 <a href="{{ url_for('oportunidades') }}" class="btn btn-primary">Volver a Oportunidades</a>
             </div>

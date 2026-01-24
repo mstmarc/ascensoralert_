@@ -327,8 +327,8 @@
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                        <a href="{{ url_for('ver_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-secondary">Cancelar</a>
-                        <a href="{{ url_for('eliminar_oportunidad', oportunidad_id=oportunidad.id) }}" class="button btn-eliminar-form" onclick="return confirm('¿Estás seguro de que deseas eliminar esta oportunidad? Esta acción no se puede deshacer.');">Eliminar Oportunidad</a>
+                        <a href="{{ url_for('oportunidades.ver', oportunidad_id=oportunidad.id) }}" class="btn btn-secondary">Cancelar</a>
+                        <a href="{{ url_for('oportunidades.eliminar', oportunidad_id=oportunidad.id) }}" class="button btn-eliminar-form" onclick="return confirm('¿Estás seguro de que deseas eliminar esta oportunidad? Esta acción no se puede deshacer.');">Eliminar Oportunidad</a>
                     </div>
                 </form>
             </div>

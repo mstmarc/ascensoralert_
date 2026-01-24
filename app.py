@@ -96,13 +96,13 @@ from app_legacy import (
     # Reportes
     reporte_mensual,
 
-    # Oportunidades
-    oportunidades, mi_agenda, cambiar_estado_oportunidad,
-    crear_oportunidad, editar_oportunidad, ver_oportunidad,
-    eliminar_oportunidad, oportunidades_post_ipo,
+    # Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+    # oportunidades, mi_agenda, cambiar_estado_oportunidad,
+    # crear_oportunidad, editar_oportunidad, ver_oportunidad,
+    # eliminar_oportunidad, oportunidades_post_ipo,
 
-    # Acciones de Oportunidades
-    add_accion, toggle_accion, delete_accion,
+    # Acciones de Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+    # add_accion, toggle_accion, delete_accion,
 
     # Tareas Comerciales
     tarea_comercial_aplazar, tarea_comercial_descartar,
@@ -201,20 +201,20 @@ app.add_url_rule("/crear_visita_seguimiento/<int:cliente_id>", "crear_visita_seg
 # Reportes
 app.add_url_rule("/reporte_mensual", "reporte_mensual", reporte_mensual, methods=["GET", "POST"])
 
-# Oportunidades
-app.add_url_rule("/oportunidades", "oportunidades", oportunidades)
-app.add_url_rule("/mi_agenda", "mi_agenda", mi_agenda)
-app.add_url_rule("/cambiar_estado_oportunidad/<int:oportunidad_id>", "cambiar_estado_oportunidad", cambiar_estado_oportunidad, methods=["POST"])
-app.add_url_rule("/crear_oportunidad/<int:cliente_id>", "crear_oportunidad", crear_oportunidad, methods=["GET", "POST"])
-app.add_url_rule("/editar_oportunidad/<int:oportunidad_id>", "editar_oportunidad", editar_oportunidad, methods=["GET", "POST"])
-app.add_url_rule("/ver_oportunidad/<int:oportunidad_id>", "ver_oportunidad", ver_oportunidad)
-app.add_url_rule("/eliminar_oportunidad/<int:oportunidad_id>", "eliminar_oportunidad", eliminar_oportunidad)
-app.add_url_rule("/oportunidades_post_ipo", "oportunidades_post_ipo", oportunidades_post_ipo)
+# Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+# app.add_url_rule("/oportunidades", "oportunidades", oportunidades)
+# app.add_url_rule("/mi_agenda", "mi_agenda", mi_agenda)
+# app.add_url_rule("/cambiar_estado_oportunidad/<int:oportunidad_id>", "cambiar_estado_oportunidad", cambiar_estado_oportunidad, methods=["POST"])
+# app.add_url_rule("/crear_oportunidad/<int:cliente_id>", "crear_oportunidad", crear_oportunidad, methods=["GET", "POST"])
+# app.add_url_rule("/editar_oportunidad/<int:oportunidad_id>", "editar_oportunidad", editar_oportunidad, methods=["GET", "POST"])
+# app.add_url_rule("/ver_oportunidad/<int:oportunidad_id>", "ver_oportunidad", ver_oportunidad)
+# app.add_url_rule("/eliminar_oportunidad/<int:oportunidad_id>", "eliminar_oportunidad", eliminar_oportunidad)
+# app.add_url_rule("/oportunidades_post_ipo", "oportunidades_post_ipo", oportunidades_post_ipo)
 
-# Acciones de Oportunidades
-app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/add", "add_accion", add_accion, methods=["POST"])
-app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>", "toggle_accion", toggle_accion, methods=["POST"])
-app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>", "delete_accion", delete_accion, methods=["POST"])
+# Acciones de Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+# app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/add", "add_accion", add_accion, methods=["POST"])
+# app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>", "toggle_accion", toggle_accion, methods=["POST"])
+# app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>", "delete_accion", delete_accion, methods=["POST"])
 
 # Tareas Comerciales
 app.add_url_rule("/tarea_comercial_aplazar/<int:cliente_id>", "tarea_comercial_aplazar", tarea_comercial_aplazar, methods=["POST"])
@@ -346,6 +346,10 @@ app.register_blueprint(defectos_bp)
 # Blueprint de Equipos (sexto módulo migrado)
 from routes.equipos import equipos_bp
 app.register_blueprint(equipos_bp)
+
+# Blueprint de Oportunidades (séptimo módulo migrado)
+from routes.oportunidades import oportunidades_bp
+app.register_blueprint(oportunidades_bp)
 
 # ============================================
 # RUTA DE DIAGNÓSTICO (temporal)
