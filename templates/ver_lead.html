@@ -444,7 +444,7 @@
                     <div class="info-item">
                         <label>Empresa Mantenedora</label>
                         {% if lead.empresa_mantenedora %}
-                            <a href="/leads_dashboard?empresa={{ lead.empresa_mantenedora|urlencode }}">{{ lead.empresa_mantenedora }}</a>
+                            <a href="{{ url_for('leads.dashboard') }}?empresa={{ lead.empresa_mantenedora|urlencode }}">{{ lead.empresa_mantenedora }}</a>
                         {% else %}
                             <span>-</span>
                         {% endif %}
@@ -611,8 +611,8 @@
 
             <!-- BOTONES DE ACCIÓN -->
             <div class="botones-accion">
-                <a href="/editar_lead/{{ lead.id }}" class="btn">Editar Comunidad</a>
-                <a href="/leads_dashboard" class="btn">Volver al Dashboard</a>
+                <a href="{{ url_for('leads.editar', lead_id=lead.id) }}" class="btn">Editar Comunidad</a>
+                <a href="{{ url_for('leads.dashboard') }}" class="btn">Volver al Dashboard</a>
             </div>
 
         </div>

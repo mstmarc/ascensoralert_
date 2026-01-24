@@ -67,9 +67,9 @@ from app_legacy import (
     # Autenticación y Home
     login, logout, home,
 
-    # Leads y Clientes
-    formulario_lead, leads_dashboard, exportar_leads, ver_lead,
-    eliminar_lead, editar_lead,
+    # Leads y Clientes - MIGRADAS A BLUEPRINT (ver routes/leads/leads_bp.py)
+    # formulario_lead, leads_dashboard, exportar_leads, ver_lead,
+    # eliminar_lead, editar_lead,
 
     # Equipos
     nuevo_equipo, ver_equipo, eliminar_equipo, editar_equipo,
@@ -161,13 +161,13 @@ app.add_url_rule("/", "login", login, methods=["GET", "POST"])
 app.add_url_rule("/logout", "logout", logout)
 app.add_url_rule("/home", "home", home)
 
-# Leads y Clientes
-app.add_url_rule("/formulario_lead", "formulario_lead", formulario_lead, methods=["GET", "POST"])
-app.add_url_rule("/leads_dashboard", "leads_dashboard", leads_dashboard)
-app.add_url_rule("/exportar_leads", "exportar_leads", exportar_leads)
-app.add_url_rule("/ver_lead/<int:lead_id>", "ver_lead", ver_lead)
-app.add_url_rule("/eliminar_lead/<int:lead_id>", "eliminar_lead", eliminar_lead)
-app.add_url_rule("/editar_lead/<int:lead_id>", "editar_lead", editar_lead, methods=["GET", "POST"])
+# Leads y Clientes - MIGRADAS A BLUEPRINT (ver routes/leads/leads_bp.py)
+# app.add_url_rule("/formulario_lead", "formulario_lead", formulario_lead, methods=["GET", "POST"])
+# app.add_url_rule("/leads_dashboard", "leads_dashboard", leads_dashboard)
+# app.add_url_rule("/exportar_leads", "exportar_leads", exportar_leads)
+# app.add_url_rule("/ver_lead/<int:lead_id>", "ver_lead", ver_lead)
+# app.add_url_rule("/eliminar_lead/<int:lead_id>", "eliminar_lead", eliminar_lead)
+# app.add_url_rule("/editar_lead/<int:lead_id>", "editar_lead", editar_lead, methods=["GET", "POST"])
 
 # Equipos
 app.add_url_rule("/nuevo_equipo", "nuevo_equipo", nuevo_equipo, methods=["GET", "POST"])
@@ -315,6 +315,10 @@ app.register_blueprint(ocas_bp)
 # Blueprint de Administradores y Usuarios (segundo módulo migrado)
 from routes.admin import admin_bp
 app.register_blueprint(admin_bp)
+
+# Blueprint de Leads/Clientes (tercer módulo migrado)
+from routes.leads import leads_bp
+app.register_blueprint(leads_bp)
 
 # ============================================
 # PUNTO DE ENTRADA
