@@ -659,3 +659,79 @@ def guardar_defectos_importados(inspeccion_id):
         flash_error(f"Error al importar defectos: {str(e)}")
 
     return redirect(url_for('inspecciones.ver', inspeccion_id=inspeccion_id))
+
+
+# ============================================
+# AÑADIR NUEVO DEFECTO MANUALMENTE
+# ============================================
+
+@inspecciones_bp.route('/<int:inspeccion_id>/defectos/nuevo', methods=["GET", "POST"])
+@helpers.login_required
+@helpers.requiere_permiso('inspecciones', 'write')
+def nuevo_defecto(inspeccion_id):
+    """Añadir un nuevo defecto a una inspección"""
+
+    if request.method == "POST":
+        # Obtener fecha de inspección para calcular fecha límite
+        response_insp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/inspecciones?id=eq.{inspeccion_id}&select=fecha_inspeccion",
+            headers=HEADERS
+        )
+
+        if response_insp.status_code != 200 or not response_insp.json():
+            flash_error("Inspección no encontrada")
+            return redirect(url_for('inspecciones.inspecciones_dashboard'))
+
+        fecha_inspeccion = response_insp.json()[0].get('fecha_inspeccion')
+        plazo_meses = int(request.form.get("plazo_meses", 6))
+
+        # Calcular fecha límite
+        fecha_limite = None
+        if fecha_inspeccion:
+            try:
+                from datetime import datetime
+                fecha_insp_dt = datetime.strptime(fecha_inspeccion.split('T')[0], '%Y-%m-%d')
+                # Sumar plazo en meses
+                mes_limite = fecha_insp_dt.month + plazo_meses
+                anio_limite = fecha_insp_dt.year + (mes_limite - 1) // 12
+                mes_limite = ((mes_limite - 1) % 12) + 1
+
+                fecha_limite_dt = fecha_insp_dt.replace(year=anio_limite, month=mes_limite)
+                fecha_limite = fecha_limite_dt.strftime('%Y-%m-%d')
+            except:
+                flash_error("Error al calcular fecha límite")
+                return redirect(request.referrer or url_for('inspecciones.ver', inspeccion_id=inspeccion_id))
+
+        # Crear defecto
+        data = {
+            "inspeccion_id": inspeccion_id,
+            "descripcion": request.form.get("descripcion"),
+            "calificacion": request.form.get("calificacion"),
+            "plazo_meses": plazo_meses,
+            "fecha_limite": fecha_limite,
+            "estado": "PENDIENTE",
+            "es_cortina": request.form.get("es_cortina") == "true",
+            "es_pesacarga": request.form.get("es_pesacarga") == "true",
+            "observaciones": request.form.get("observaciones") or None
+        }
+
+        # Validar
+        if not data["descripcion"] or not data["calificacion"]:
+            flash_error("Descripción y Calificación son obligatorios")
+            return redirect(request.referrer or url_for('inspecciones.ver', inspeccion_id=inspeccion_id))
+
+        response = requests.post(
+            f"{SUPABASE_URL}/rest/v1/defectos_inspeccion",
+            json=data,
+            headers=HEADERS
+        )
+
+        if response.status_code in [200, 201]:
+            flash_success("Defecto añadido correctamente")
+            return redirect(url_for('inspecciones.ver', inspeccion_id=inspeccion_id))
+        else:
+            flash_error(f"Error al añadir defecto: {response.text}")
+            return redirect(request.referrer or url_for('inspecciones.ver', inspeccion_id=inspeccion_id))
+
+    # GET - Mostrar formulario
+    return render_template("nuevo_defecto.html", inspeccion_id=inspeccion_id)
