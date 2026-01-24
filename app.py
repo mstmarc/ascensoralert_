@@ -93,8 +93,8 @@ from app_legacy import (
     # ver_visita_admin, editar_visita_admin, eliminar_visita_admin,
     # crear_visita_seguimiento,
 
-    # Reportes
-    reporte_mensual,
+    # Reportes - MIGRADAS A BLUEPRINT (ver routes/reportes/reportes_bp.py)
+    # reporte_mensual,
 
     # Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
     # oportunidades, mi_agenda, cambiar_estado_oportunidad,
@@ -198,8 +198,8 @@ app.add_url_rule("/home", "home", home)
 # app.add_url_rule("/eliminar_visita_admin/<int:visita_id>", "eliminar_visita_admin", eliminar_visita_admin)
 # app.add_url_rule("/crear_visita_seguimiento/<int:cliente_id>", "crear_visita_seguimiento", crear_visita_seguimiento, methods=["GET", "POST"])
 
-# Reportes
-app.add_url_rule("/reporte_mensual", "reporte_mensual", reporte_mensual, methods=["GET", "POST"])
+# Reportes - MIGRADAS A BLUEPRINT (ver routes/reportes/reportes_bp.py)
+# app.add_url_rule("/reporte_mensual", "reporte_mensual", reporte_mensual, methods=["GET", "POST"])
 
 # Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
 # app.add_url_rule("/oportunidades", "oportunidades", oportunidades)
@@ -354,6 +354,10 @@ app.register_blueprint(oportunidades_bp)
 # Blueprint de Visitas (octavo módulo migrado)
 from routes.visitas import visitas_bp
 app.register_blueprint(visitas_bp)
+
+# Blueprint de Reportes (noveno módulo migrado)
+from routes.reportes import reportes_bp
+app.register_blueprint(reportes_bp)
 
 # ============================================
 # RUTA DE DIAGNÓSTICO (temporal)
