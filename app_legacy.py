@@ -5005,7 +5005,7 @@ def _ver_defecto_legacy(defecto_id):
 
     if response.status_code != 200 or not response.json():
         flash("Defecto no encontrado", "error")
-        return redirect("/defectos_dashboard")
+        return redirect("/defectos")
 
     defecto = response.json()[0]
 
@@ -5172,7 +5172,7 @@ def _editar_defecto_legacy(defecto_id):
 
     if response.status_code != 200 or not response.json():
         flash("Defecto no encontrado", "error")
-        return redirect("/defectos_dashboard")
+        return redirect("/defectos")
 
     defecto = response.json()[0]
 
