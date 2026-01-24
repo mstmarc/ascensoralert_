@@ -3724,10 +3724,10 @@ def _inspecciones_dashboard_legacy():
     )
 
 # Dashboard de Defectos (vista dedicada)
-@app.route("/defectos_dashboard")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'read')
-def defectos_dashboard():
+# @app.route("/defectos_dashboard")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'read')
+def _defectos_dashboard_legacy():
     """Dashboard principal de defectos con estadísticas y filtros"""
 
     # Obtener todos los defectos con información de urgencia usando la vista
@@ -3818,10 +3818,10 @@ def defectos_dashboard():
     )
 
 # Exportar Defectos a PDF
-@app.route("/exportar_defectos_pdf")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'read')
-def exportar_defectos_pdf():
+# @app.route("/exportar_defectos_pdf")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'read')
+def _exportar_defectos_pdf_legacy():
     """Exporta defectos a PDF en formato horizontal, agrupados por máquina"""
 
     # Obtener todos los defectos con información de urgencia usando la vista
@@ -4922,10 +4922,10 @@ def nuevo_defecto(inspeccion_id):
     return render_template("nuevo_defecto.html", inspeccion_id=inspeccion_id)
 
 # Marcar Defecto como Subsanado
-@app.route("/defectos/<int:defecto_id>/subsanar", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def subsanar_defecto(defecto_id):
+# @app.route("/defectos/<int:defecto_id>/subsanar", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _subsanar_defecto_legacy(defecto_id):
     """Marcar un defecto como subsanado"""
 
     data = {
@@ -4947,10 +4947,10 @@ def subsanar_defecto(defecto_id):
     return redirect(request.referrer)
 
 # Revertir Defecto Subsanado
-@app.route("/defectos/<int:defecto_id>/revertir", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def revertir_defecto(defecto_id):
+# @app.route("/defectos/<int:defecto_id>/revertir", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _revertir_defecto_legacy(defecto_id):
     """Revertir un defecto subsanado a estado pendiente"""
 
     data = {
@@ -4972,10 +4972,10 @@ def revertir_defecto(defecto_id):
     return redirect(request.referrer)
 
 # Eliminar Defecto
-@app.route("/defectos/<int:defecto_id>/eliminar")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'delete')
-def eliminar_defecto(defecto_id):
+# @app.route("/defectos/<int:defecto_id>/eliminar")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'delete')
+def _eliminar_defecto_legacy(defecto_id):
     """Eliminar un defecto"""
 
     response = requests.delete(
@@ -4991,10 +4991,10 @@ def eliminar_defecto(defecto_id):
     return redirect(request.referrer)
 
 # Ver detalle de un defecto
-@app.route("/defectos/<int:defecto_id>")
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'read')
-def ver_defecto(defecto_id):
+# @app.route("/defectos/<int:defecto_id>")
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'read')
+def _ver_defecto_legacy(defecto_id):
     """Ver detalle completo de un defecto"""
 
     # Obtener el defecto con información de inspección
@@ -5065,10 +5065,10 @@ def ver_defecto(defecto_id):
     )
 
 # Editar defecto
-@app.route("/defectos/<int:defecto_id>/editar", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def editar_defecto(defecto_id):
+# @app.route("/defectos/<int:defecto_id>/editar", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _editar_defecto_legacy(defecto_id):
     """Editar un defecto existente"""
 
     if request.method == "POST":
@@ -5197,10 +5197,10 @@ def editar_defecto(defecto_id):
 
 
 # Endpoint para actualización rápida de gestión operativa (AJAX)
-@app.route("/defectos/<int:defecto_id>/actualizar_gestion", methods=["POST"])
-@helpers.login_required
-@helpers.requiere_permiso('inspecciones', 'write')
-def actualizar_gestion_defecto(defecto_id):
+# @app.route("/defectos/<int:defecto_id>/actualizar_gestion", methods=["POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('inspecciones', 'write')
+def _actualizar_gestion_defecto_legacy(defecto_id):
     """Endpoint para actualización rápida de campos de gestión operativa desde el dashboard"""
     try:
         data = request.json

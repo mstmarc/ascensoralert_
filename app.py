@@ -111,10 +111,11 @@ from app_legacy import (
     # marcar_segunda_realizada, subir_acta_pdf, subir_presupuesto_pdf,
     # eliminar_inspeccion, extraer_defectos_pdf, guardar_defectos_importados,
 
-    # Defectos
-    defectos_dashboard, exportar_defectos_pdf, nuevo_defecto,
-    subsanar_defecto, revertir_defecto, eliminar_defecto,
-    ver_defecto, editar_defecto, actualizar_gestion_defecto,
+    # Defectos - MIGRADAS A BLUEPRINT (ver routes/defectos/defectos_bp.py)
+    # defectos_dashboard, exportar_defectos_pdf,
+    # subsanar_defecto, revertir_defecto, eliminar_defecto,
+    # ver_defecto, editar_defecto, actualizar_gestion_defecto,
+    nuevo_defecto,  # Esta ruta queda en app.py (ruta: /inspecciones/<id>/defectos/nuevo)
 
     # OCAs - MIGRADAS A BLUEPRINT (ver routes/ocas/ocas_bp.py)
     # lista_ocas, nuevo_oca, editar_oca, eliminar_oca,
@@ -238,16 +239,16 @@ app.add_url_rule("/test_dropdown_admin", "test_dropdown_admin", test_dropdown_ad
 # app.add_url_rule("/inspecciones/<int:inspeccion_id>/extraer_defectos_pdf", "extraer_defectos_pdf", extraer_defectos_pdf, methods=["POST"])
 # app.add_url_rule("/inspecciones/<int:inspeccion_id>/guardar_defectos_importados", "guardar_defectos_importados", guardar_defectos_importados, methods=["POST"])
 
-# Defectos
-app.add_url_rule("/defectos_dashboard", "defectos_dashboard", defectos_dashboard)
-app.add_url_rule("/exportar_defectos_pdf", "exportar_defectos_pdf", exportar_defectos_pdf)
+# Defectos - MIGRADAS A BLUEPRINT (ver routes/defectos/defectos_bp.py)
+# app.add_url_rule("/defectos_dashboard", "defectos_dashboard", defectos_dashboard)
+# app.add_url_rule("/exportar_defectos_pdf", "exportar_defectos_pdf", exportar_defectos_pdf)
 app.add_url_rule("/inspecciones/<int:inspeccion_id>/defectos/nuevo", "nuevo_defecto", nuevo_defecto, methods=["GET", "POST"])
-app.add_url_rule("/defectos/<int:defecto_id>/subsanar", "subsanar_defecto", subsanar_defecto, methods=["POST"])
-app.add_url_rule("/defectos/<int:defecto_id>/revertir", "revertir_defecto", revertir_defecto, methods=["POST"])
-app.add_url_rule("/defectos/<int:defecto_id>/eliminar", "eliminar_defecto", eliminar_defecto)
-app.add_url_rule("/defectos/<int:defecto_id>", "ver_defecto", ver_defecto)
-app.add_url_rule("/defectos/<int:defecto_id>/editar", "editar_defecto", editar_defecto, methods=["GET", "POST"])
-app.add_url_rule("/defectos/<int:defecto_id>/actualizar_gestion", "actualizar_gestion_defecto", actualizar_gestion_defecto, methods=["POST"])
+# app.add_url_rule("/defectos/<int:defecto_id>/subsanar", "subsanar_defecto", subsanar_defecto, methods=["POST"])
+# app.add_url_rule("/defectos/<int:defecto_id>/revertir", "revertir_defecto", revertir_defecto, methods=["POST"])
+# app.add_url_rule("/defectos/<int:defecto_id>/eliminar", "eliminar_defecto", eliminar_defecto)
+# app.add_url_rule("/defectos/<int:defecto_id>", "ver_defecto", ver_defecto)
+# app.add_url_rule("/defectos/<int:defecto_id>/editar", "editar_defecto", editar_defecto, methods=["GET", "POST"])
+# app.add_url_rule("/defectos/<int:defecto_id>/actualizar_gestion", "actualizar_gestion_defecto", actualizar_gestion_defecto, methods=["POST"])
 
 # OCAs - MIGRADAS A BLUEPRINT (ver routes/ocas/ocas_bp.py)
 # Las rutas de OCAs ahora se registran automáticamente via Blueprint
@@ -323,6 +324,10 @@ app.register_blueprint(leads_bp)
 # Blueprint de Inspecciones (cuarto módulo migrado)
 from routes.inspecciones import inspecciones_bp
 app.register_blueprint(inspecciones_bp)
+
+# Blueprint de Defectos (quinto módulo migrado)
+from routes.defectos import defectos_bp
+app.register_blueprint(defectos_bp)
 
 # ============================================
 # PUNTO DE ENTRADA
