@@ -35,13 +35,13 @@ logger = logging.getLogger(__name__)
 logging.getLogger('pdfminer').setLevel(logging.WARNING)
 logging.getLogger('pdfplumber').setLevel(logging.WARNING)
 
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY")
-if not app.secret_key:
-    raise RuntimeError("SECRET_KEY environment variable is not set")
+# app = Flask(__name__)  # Instancia comentada - se usa la de app.py
+# app.secret_key = os.environ.get("SECRET_KEY")
+# if not app.secret_key:
+#     raise RuntimeError("SECRET_KEY environment variable is not set")
 
 # Filtro Jinja2 para formatear fechas a dd/mm/yyyy
-@app.template_filter('format_fecha')
+# @app.template_filter('format_fecha')
 def format_fecha_filter(fecha_str):
     """Formatea fechas al formato dd/mm/yyyy para mostrar en templates"""
     if not fecha_str or fecha_str == "-":
@@ -61,8 +61,8 @@ SUPABASE_URL = "https://hvkifqguxsgegzaxwcmj.supabase.co"
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")  # Service role key para storage
 
-if not SUPABASE_KEY:
-    raise RuntimeError("SUPABASE_KEY environment variable is not set")
+# if not SUPABASE_KEY:
+#     raise RuntimeError("SUPABASE_KEY environment variable is not set")
 
 # Headers para operaciones de base de datos (usa anon key)
 HEADERS = {
@@ -635,7 +635,7 @@ def enviar_avisos_email(config):
 # ============================================
 
 # Login
-@app.route("/", methods=["GET", "POST"])
+# @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         usuario = request.form.get("usuario")
@@ -658,13 +658,13 @@ def login():
         return render_template("login.html", error="Usuario o contraseña incorrectos")
     return render_template("login.html", error=None)
 
-@app.route("/logout")
+# @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/")
 
 # Home - ACTUALIZADO: Dashboard en desktop, menú simple en móvil
-@app.route("/home")
+# @app.route("/home")
 @helpers.login_required
 def home():
     """Homepage - Dashboard responsive para todos los dispositivos"""
@@ -823,7 +823,7 @@ def _formulario_lead_legacy():
     return render_template("formulario_lead.html", fecha_hoy=fecha_hoy, administradores=administradores)
 
 # Visita a Administrador
-@app.route("/visita_administrador", methods=["GET", "POST"])
+# @app.route("/visita_administrador", methods=["GET", "POST"])
 def visita_administrador():
     if "usuario" not in session:
         return redirect("/")
@@ -902,7 +902,7 @@ def visita_administrador():
                          administradores=administradores)
 
 # Dashboard de visitas a administradores
-@app.route("/visitas_administradores_dashboard")
+# @app.route("/visitas_administradores_dashboard")
 @helpers.login_required
 @helpers.requiere_permiso('visitas', 'read')
 def visitas_administradores_dashboard():
@@ -934,7 +934,7 @@ def visitas_administradores_dashboard():
         total_registros=pagination.total
     )
 
-@app.route("/ver_visita_admin/<int:visita_id>")
+# @app.route("/ver_visita_admin/<int:visita_id>")
 def ver_visita_admin(visita_id):
     if "usuario" not in session:
         return redirect("/")
@@ -951,7 +951,7 @@ def ver_visita_admin(visita_id):
     visita = limpiar_none(response.json()[0])
     return render_template("ver_visita_admin.html", visita=visita)
 
-@app.route("/editar_visita_admin/<int:visita_id>", methods=["GET", "POST"])
+# @app.route("/editar_visita_admin/<int:visita_id>", methods=["GET", "POST"])
 @helpers.login_required
 @helpers.requiere_permiso('visitas', 'write')
 def editar_visita_admin(visita_id):
@@ -1009,7 +1009,7 @@ def editar_visita_admin(visita_id):
 
     return render_template("editar_visita_admin.html", visita=visita, administradores=administradores)
 
-@app.route("/eliminar_visita_admin/<int:visita_id>")
+# @app.route("/eliminar_visita_admin/<int:visita_id>")
 @helpers.login_required
 @helpers.requiere_permiso('visitas', 'delete')
 def eliminar_visita_admin(visita_id):
@@ -1024,7 +1024,7 @@ def eliminar_visita_admin(visita_id):
     return redirect("/visitas_administradores_dashboard")
 
 # Alta de Equipo (ahora requiere lead_id)
-@app.route("/nuevo_equipo", methods=["GET", "POST"])
+# @app.route("/nuevo_equipo", methods=["GET", "POST"])
 # MIGRADO A BLUEPRINT: routes/equipos/equipos_bp.py
 # @helpers.login_required
 # @helpers.requiere_permiso('equipos', 'write')
@@ -1078,7 +1078,7 @@ def eliminar_visita_admin(visita_id):
 #     return render_template("nuevo_equipo.html", lead=lead_data)
 
 # Crear visita de seguimiento
-@app.route("/crear_visita_seguimiento/<int:cliente_id>", methods=["GET", "POST"])
+# @app.route("/crear_visita_seguimiento/<int:cliente_id>", methods=["GET", "POST"])
 @helpers.login_required
 @helpers.requiere_permiso('visitas', 'write')
 def crear_visita_seguimiento(cliente_id):
@@ -1132,7 +1132,7 @@ def crear_visita_seguimiento(cliente_id):
     )
 
 # DESCARGO COMERCIAL MENSUAL
-@app.route("/reporte_mensual", methods=["GET", "POST"])
+# @app.route("/reporte_mensual", methods=["GET", "POST"])
 def reporte_mensual():
     if "usuario" not in session:
         return redirect("/")
@@ -1826,7 +1826,7 @@ def _eliminar_lead_legacy(lead_id):
 #     return render_template("ver_equipo.html", equipo=equipo, cliente=cliente)
 
 # Dashboard de Oportunidades Post-IPO
-@app.route("/oportunidades_post_ipo", methods=["GET"])
+# @app.route("/oportunidades_post_ipo", methods=["GET"])
 def oportunidades_post_ipo():
     """Seguimiento Comercial - Sistema de tareas automáticas"""
     if "usuario" not in session:
@@ -2089,7 +2089,7 @@ def oportunidades_post_ipo():
 
 # === RUTAS DE GESTIÓN DE TAREAS COMERCIALES ===
 
-@app.route("/tarea_comercial_aplazar/<int:tarea_id>", methods=["POST"])
+# @app.route("/tarea_comercial_aplazar/<int:tarea_id>", methods=["POST"])
 def tarea_comercial_aplazar(tarea_id):
     """Aplazar una tarea comercial"""
     if "usuario" not in session:
@@ -2122,7 +2122,7 @@ def tarea_comercial_aplazar(tarea_id):
         return {"error": str(e)}, 500
 
 
-@app.route("/tarea_comercial_descartar/<int:tarea_id>", methods=["POST"])
+# @app.route("/tarea_comercial_descartar/<int:tarea_id>", methods=["POST"])
 def tarea_comercial_descartar(tarea_id):
     """Descartar una tarea comercial (cerrarla sin crear oportunidad)"""
     if "usuario" not in session:
@@ -2154,7 +2154,7 @@ def tarea_comercial_descartar(tarea_id):
         return {"error": str(e)}, 500
 
 
-@app.route("/tarea_comercial_convertir/<int:tarea_id>", methods=["POST"])
+# @app.route("/tarea_comercial_convertir/<int:tarea_id>", methods=["POST"])
 def tarea_comercial_convertir(tarea_id):
     """Marcar tarea como convertida (redirecciona a crear oportunidad)"""
     if "usuario" not in session:
@@ -2183,7 +2183,7 @@ def tarea_comercial_convertir(tarea_id):
         return redirect("/oportunidades_post_ipo")
 
 
-@app.route("/tarea_comercial_agregar_nota/<int:tarea_id>", methods=["POST"])
+# @app.route("/tarea_comercial_agregar_nota/<int:tarea_id>", methods=["POST"])
 def tarea_comercial_agregar_nota(tarea_id):
     """Agregar una nota a la tarea"""
     if "usuario" not in session:
@@ -2343,7 +2343,7 @@ def _editar_lead_legacy(lead_id):
 # MÓDULO DE OPORTUNIDADES - ACTUALIZADO
 # ============================================
 
-@app.route("/oportunidades")
+# @app.route("/oportunidades")
 def oportunidades():
     if "usuario" not in session:
         return redirect("/")
@@ -2382,7 +2382,7 @@ def oportunidades():
         return redirect(url_for("home"))
 
 
-@app.route("/mi_agenda")
+# @app.route("/mi_agenda")
 def mi_agenda():
     """Dashboard personal - Mi Agenda Comercial con pipeline de oportunidades"""
     if "usuario" not in session:
@@ -2433,7 +2433,7 @@ def mi_agenda():
         return redirect(url_for("home"))
 
 
-@app.route("/cambiar_estado_oportunidad/<int:oportunidad_id>", methods=["POST"])
+# @app.route("/cambiar_estado_oportunidad/<int:oportunidad_id>", methods=["POST"])
 def cambiar_estado_oportunidad(oportunidad_id):
     """Endpoint para cambio rápido de estado desde Mi Agenda"""
     if "usuario" not in session:
@@ -2471,7 +2471,7 @@ def cambiar_estado_oportunidad(oportunidad_id):
         return {"error": str(e)}, 500
 
 
-@app.route("/crear_oportunidad/<int:cliente_id>", methods=["GET", "POST"])
+# @app.route("/crear_oportunidad/<int:cliente_id>", methods=["GET", "POST"])
 @helpers.login_required
 @helpers.requiere_permiso('oportunidades', 'write')
 def crear_oportunidad(cliente_id):
@@ -2516,7 +2516,7 @@ def crear_oportunidad(cliente_id):
 
 
 # ACTUALIZADO: editar_oportunidad con nuevos campos
-@app.route("/editar_oportunidad/<int:oportunidad_id>", methods=["GET", "POST"])
+# @app.route("/editar_oportunidad/<int:oportunidad_id>", methods=["GET", "POST"])
 @helpers.login_required
 @helpers.requiere_permiso('oportunidades', 'write')
 def editar_oportunidad(oportunidad_id):
@@ -2564,7 +2564,7 @@ def editar_oportunidad(oportunidad_id):
 
 
 # ACTUALIZADO: ver_oportunidad con visitas y acciones
-@app.route("/ver_oportunidad/<int:oportunidad_id>")
+# @app.route("/ver_oportunidad/<int:oportunidad_id>")
 def ver_oportunidad(oportunidad_id):
     if "usuario" not in session:
         return redirect("/")
@@ -2634,7 +2634,7 @@ def ver_oportunidad(oportunidad_id):
         return redirect(url_for("oportunidades"))
 
 
-@app.route("/eliminar_oportunidad/<int:oportunidad_id>")
+# @app.route("/eliminar_oportunidad/<int:oportunidad_id>")
 @helpers.login_required
 @helpers.requiere_permiso('oportunidades', 'delete')
 def eliminar_oportunidad(oportunidad_id):
@@ -2671,7 +2671,7 @@ def eliminar_oportunidad(oportunidad_id):
 # NUEVAS RUTAS PARA ACCIONES
 # ============================================
 
-@app.route('/oportunidad/<int:oportunidad_id>/accion/add', methods=['POST'])
+# @app.route('/oportunidad/<int:oportunidad_id>/accion/add', methods=['POST'])
 @helpers.login_required
 def add_accion(oportunidad_id):
     from utils.helpers_actions import gestionar_accion
@@ -2683,7 +2683,7 @@ def add_accion(oportunidad_id):
     )
 
 
-@app.route('/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>', methods=['POST'])
+# @app.route('/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>', methods=['POST'])
 @helpers.login_required
 def toggle_accion(oportunidad_id, index):
     from utils.helpers_actions import gestionar_accion
@@ -2696,7 +2696,7 @@ def toggle_accion(oportunidad_id, index):
     )
 
 
-@app.route('/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>', methods=['POST'])
+# @app.route('/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>', methods=['POST'])
 @helpers.login_required
 def delete_accion(oportunidad_id, index):
     from utils.helpers_actions import gestionar_accion
@@ -2756,7 +2756,7 @@ def delete_accion(oportunidad_id, index):
 # MÓDULO DE NOTIFICACIONES POR EMAIL
 # ============================================
 
-@app.route('/configuracion_avisos', methods=['GET', 'POST'])
+# @app.route('/configuracion_avisos', methods=['GET', 'POST'])
 def configuracion_avisos():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
@@ -2840,7 +2840,7 @@ def configuracion_avisos():
     return render_template('configuracion_avisos.html', config=config_data)
 
 
-@app.route('/enviar_avisos_manual')
+# @app.route('/enviar_avisos_manual')
 def enviar_avisos_manual():
     if "usuario" not in session:
         return redirect(url_for("login"))
@@ -3422,7 +3422,7 @@ def _eliminar_administrador_legacy(admin_id):
 # RUTA DE PRUEBA - DROPDOWN ADMINISTRADORES
 # ============================================
 
-@app.route("/test_dropdown_admin")
+# @app.route("/test_dropdown_admin")
 def test_dropdown_admin():
     if "usuario" not in session:
         return redirect("/")
@@ -4856,7 +4856,7 @@ def _guardar_defectos_importados_legacy(inspeccion_id):
 # ============================================
 
 # Añadir Defecto a Inspección
-@app.route("/inspecciones/<int:inspeccion_id>/defectos/nuevo", methods=["GET", "POST"])
+# @app.route("/inspecciones/<int:inspeccion_id>/defectos/nuevo", methods=["GET", "POST"])
 @helpers.login_required
 @helpers.requiere_permiso('inspecciones', 'write')
 def nuevo_defecto(inspeccion_id):
@@ -5526,7 +5526,7 @@ def _admin_eliminar_usuario_legacy(usuario_id):
 # CARTERA Y ANÁLISIS
 # ============================================
 
-@app.route("/cartera")
+# @app.route("/cartera")
 @helpers.login_required
 def cartera_dashboard():
     """Dashboard principal de Cartera y Análisis"""
@@ -5664,14 +5664,14 @@ def cartera_dashboard():
     )
 
 
-@app.route("/cartera/importar")
+# @app.route("/cartera/importar")
 @helpers.login_required
 def cartera_importar():
     """Interfaz de importación de datos"""
     return render_template("cartera/importar.html")
 
 
-@app.route("/cartera/importar_equipos", methods=["POST"])
+# @app.route("/cartera/importar_equipos", methods=["POST"])
 @helpers.login_required
 def cartera_importar_equipos():
     """Importar instalaciones y máquinas desde Excel"""
@@ -5848,7 +5848,7 @@ def cartera_importar_equipos():
     return redirect("/cartera/importar")
 
 
-@app.route("/cartera/importar_partes", methods=["POST"])
+# @app.route("/cartera/importar_partes", methods=["POST"])
 @helpers.login_required
 def cartera_importar_partes():
     """Importar partes de trabajo desde Excel"""
@@ -6048,7 +6048,7 @@ def cartera_importar_partes():
     return redirect("/cartera/importar")
 
 
-@app.route("/cartera/reanalizar-recomendaciones", methods=["POST"])
+# @app.route("/cartera/reanalizar-recomendaciones", methods=["POST"])
 @helpers.login_required
 def cartera_reanalizar_recomendaciones():
     """Re-analizar todos los partes existentes con las nuevas palabras clave"""
@@ -6151,7 +6151,7 @@ def cartera_reanalizar_recomendaciones():
 # OPORTUNIDADES DE FACTURACIÓN
 # ============================================
 
-@app.route("/cartera/oportunidades")
+# @app.route("/cartera/oportunidades")
 @helpers.login_required
 def cartera_oportunidades():
     """Dashboard de oportunidades de facturación"""
@@ -6208,7 +6208,7 @@ def cartera_oportunidades():
     )
 
 
-@app.route("/cartera/oportunidades/crear/<int:parte_id>", methods=["GET", "POST"])
+# @app.route("/cartera/oportunidades/crear/<int:parte_id>", methods=["GET", "POST"])
 @helpers.login_required
 def cartera_crear_oportunidad(parte_id):
     """Crear oportunidad desde una recomendación"""
@@ -6285,7 +6285,7 @@ def cartera_crear_oportunidad(parte_id):
             return redirect("/cartera/oportunidades")
 
 
-@app.route("/cartera/recomendaciones/<int:parte_id>/descartar", methods=["POST"])
+# @app.route("/cartera/recomendaciones/<int:parte_id>/descartar", methods=["POST"])
 @helpers.login_required
 def cartera_descartar_recomendacion(parte_id):
     """Descartar una recomendación sin crear oportunidad"""
@@ -6310,7 +6310,7 @@ def cartera_descartar_recomendacion(parte_id):
     return redirect("/cartera")
 
 
-@app.route("/cartera/oportunidades/<int:oportunidad_id>")
+# @app.route("/cartera/oportunidades/<int:oportunidad_id>")
 @helpers.login_required
 def cartera_ver_oportunidad(oportunidad_id):
     """Ver detalle de oportunidad"""
@@ -6330,7 +6330,7 @@ def cartera_ver_oportunidad(oportunidad_id):
     return render_template("cartera/ver_oportunidad.html", oportunidad=oportunidad)
 
 
-@app.route("/cartera/oportunidades/<int:oportunidad_id>/actualizar", methods=["POST"])
+# @app.route("/cartera/oportunidades/<int:oportunidad_id>/actualizar", methods=["POST"])
 @helpers.login_required
 def cartera_actualizar_oportunidad(oportunidad_id):
     """Actualizar estado y datos de oportunidad"""
@@ -6398,7 +6398,7 @@ def cartera_actualizar_oportunidad(oportunidad_id):
     return redirect(f"/cartera/oportunidades/{oportunidad_id}")
 
 
-@app.route("/cartera/maquina/<int:maquina_id>")
+# @app.route("/cartera/maquina/<int:maquina_id>")
 @helpers.login_required
 def cartera_ver_maquina(maquina_id):
     """Vista detallada de una máquina"""
@@ -6480,7 +6480,7 @@ def cartera_ver_maquina(maquina_id):
     )
 
 
-@app.route("/cartera/instalacion/<int:instalacion_id>")
+# @app.route("/cartera/instalacion/<int:instalacion_id>")
 @helpers.login_required
 def cartera_ver_instalacion(instalacion_id):
     """Vista detallada de una instalación"""
@@ -6577,7 +6577,7 @@ def cartera_ver_instalacion(instalacion_id):
     )
 
 
-@app.route("/cartera/instalacion/<int:instalacion_id>/dar-baja", methods=["POST"])
+# @app.route("/cartera/instalacion/<int:instalacion_id>/dar-baja", methods=["POST"])
 @helpers.login_required
 def cartera_dar_baja_instalacion(instalacion_id):
     """Dar de baja una instalación"""
@@ -6620,7 +6620,7 @@ def cartera_dar_baja_instalacion(instalacion_id):
     return redirect(f"/cartera/instalacion/{instalacion_id}")
 
 
-@app.route("/cartera/instalacion/<int:instalacion_id>/reactivar", methods=["POST"])
+# @app.route("/cartera/instalacion/<int:instalacion_id>/reactivar", methods=["POST"])
 @helpers.login_required
 def cartera_reactivar_instalacion(instalacion_id):
     """Reactivar una instalación dada de baja"""
@@ -6650,7 +6650,7 @@ def cartera_reactivar_instalacion(instalacion_id):
 # Sistema de Alertas y Gestión Predictiva
 # ============================================
 
-@app.route("/cartera/v2")
+# @app.route("/cartera/v2")
 @helpers.login_required
 def cartera_dashboard_v2():
     """Dashboard V2 con sistema de alertas y estado semafórico"""
@@ -6728,7 +6728,7 @@ def cartera_dashboard_v2():
     )
 
 
-@app.route("/cartera/v2/ejecutar-detectores", methods=["POST"])
+# @app.route("/cartera/v2/ejecutar-detectores", methods=["POST"])
 @helpers.login_required
 def ejecutar_detectores_alertas():
     """Ejecutar detectores de alertas manualmente"""
@@ -6746,7 +6746,7 @@ def ejecutar_detectores_alertas():
     return redirect("/cartera/v2")
 
 
-@app.route("/cartera/v2/alertas")
+# @app.route("/cartera/v2/alertas")
 @helpers.login_required
 def ver_todas_alertas():
     """Ver todas las alertas con filtros"""
@@ -6787,7 +6787,7 @@ def ver_todas_alertas():
     )
 
 
-@app.route("/cartera/v2/alerta/<int:alerta_id>")
+# @app.route("/cartera/v2/alerta/<int:alerta_id>")
 @helpers.login_required
 def ver_detalle_alerta(alerta_id):
     """Ver detalle de una alerta"""
@@ -6806,7 +6806,7 @@ def ver_detalle_alerta(alerta_id):
     return render_template("cartera/detalle_alerta.html", alerta=alerta)
 
 
-@app.route("/cartera/v2/alerta/<int:alerta_id>/resolver", methods=["POST"])
+# @app.route("/cartera/v2/alerta/<int:alerta_id>/resolver", methods=["POST"])
 @helpers.login_required
 def resolver_alerta(alerta_id):
     """Marcar alerta como resuelta"""
@@ -6843,7 +6843,7 @@ def resolver_alerta(alerta_id):
     return redirect("/cartera/v2/alertas")
 
 
-@app.route("/cartera/v2/pendientes-tecnicos")
+# @app.route("/cartera/v2/pendientes-tecnicos")
 @helpers.login_required
 def ver_pendientes_tecnicos():
     """Vista de backlog técnico para Sergio"""
@@ -6902,7 +6902,7 @@ def ver_pendientes_tecnicos():
     )
 
 
-@app.route("/cartera/v2/pendiente/<int:pendiente_id>/actualizar", methods=["POST"])
+# @app.route("/cartera/v2/pendiente/<int:pendiente_id>/actualizar", methods=["POST"])
 @helpers.login_required
 def actualizar_pendiente_tecnico(pendiente_id):
     """Actualizar estado de un pendiente técnico"""
@@ -6940,7 +6940,7 @@ def actualizar_pendiente_tecnico(pendiente_id):
     return redirect("/cartera/v2/pendientes-tecnicos")
 
 
-@app.route("/cartera/v2/alerta/<int:alerta_id>/crear-trabajo-tecnico", methods=["POST"])
+# @app.route("/cartera/v2/alerta/<int:alerta_id>/crear-trabajo-tecnico", methods=["POST"])
 @helpers.login_required
 def crear_trabajo_desde_alerta(alerta_id):
     """Crear pendiente técnico desde una alerta"""
@@ -7007,7 +7007,7 @@ def crear_trabajo_desde_alerta(alerta_id):
 # RUTAS: SISTEMA DE IA PREDICTIVA
 # ============================================
 
-@app.route("/cartera/ia")
+# @app.route("/cartera/ia")
 @helpers.login_required
 def dashboard_ia_predictiva():
     """Dashboard principal del sistema de IA predictiva - CON RIESGO Y PREDICCIONES"""
@@ -7161,7 +7161,7 @@ def dashboard_ia_predictiva():
         return redirect("/cartera/v2")
 
 
-@app.route("/cartera/ia/priorizar-recomendaciones")
+# @app.route("/cartera/ia/priorizar-recomendaciones")
 @helpers.login_required
 def priorizar_recomendaciones_ia():
     """Analizar y priorizar recomendaciones pendientes con IA"""
@@ -7259,7 +7259,7 @@ Responde SOLO con JSON:
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/maquina/<int:maquina_id>")
+# @app.route("/cartera/ia/maquina/<int:maquina_id>")
 @helpers.login_required
 def prediccion_maquina_ia(maquina_id):
     """Vista de predicción individual por máquina - FASE 2"""
@@ -7443,7 +7443,7 @@ Responde SOLO con JSON:
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/patrones")
+# @app.route("/cartera/ia/patrones")
 @helpers.login_required
 def patrones_tendencias_ia():
     """Dashboard de detección de patrones y tendencias - FASE 3"""
@@ -7667,7 +7667,7 @@ def patrones_tendencias_ia():
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/roi")
+# @app.route("/cartera/ia/roi")
 @helpers.login_required
 def roi_optimizacion_ia():
     """Dashboard de ROI y Optimización del Mantenimiento - FASE 4"""
@@ -7933,7 +7933,7 @@ def roi_optimizacion_ia():
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/analizar-parte/<int:parte_id>", methods=["POST"])
+# @app.route("/cartera/ia/analizar-parte/<int:parte_id>", methods=["POST"])
 @helpers.login_required
 def analizar_parte_ia(parte_id):
     """Analizar un parte específico con IA"""
@@ -7968,7 +7968,7 @@ def analizar_parte_ia(parte_id):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/cartera/ia/analizar-lote", methods=["POST"])
+# @app.route("/cartera/ia/analizar-lote", methods=["POST"])
 @helpers.login_required
 def analizar_lote_ia():
     """Analizar un lote de partes con IA"""
@@ -7987,7 +7987,7 @@ def analizar_lote_ia():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/cartera/ia/prediccion/<int:maquina_id>")
+# @app.route("/cartera/ia/prediccion/<int:maquina_id>")
 @helpers.login_required
 def ver_prediccion_maquina(maquina_id):
     """Ver predicción detallada de una máquina"""
@@ -8044,7 +8044,7 @@ def ver_prediccion_maquina(maquina_id):
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/generar-prediccion/<int:maquina_id>", methods=["POST"])
+# @app.route("/cartera/ia/generar-prediccion/<int:maquina_id>", methods=["POST"])
 @helpers.login_required
 def generar_prediccion_ia(maquina_id):
     """Generar nueva predicción para una máquina"""
@@ -8061,7 +8061,7 @@ def generar_prediccion_ia(maquina_id):
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/alertas")
+# @app.route("/cartera/ia/alertas")
 @helpers.login_required
 def listar_alertas_ia():
     """Listar todas las alertas predictivas"""
@@ -8095,7 +8095,7 @@ def listar_alertas_ia():
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/alerta/<int:alerta_id>")
+# @app.route("/cartera/ia/alerta/<int:alerta_id>")
 @helpers.login_required
 def ver_alerta_ia(alerta_id):
     """Ver detalle de una alerta predictiva"""
@@ -8122,7 +8122,7 @@ def ver_alerta_ia(alerta_id):
         return redirect("/cartera/ia/alertas")
 
 
-@app.route("/cartera/ia/alerta/<int:alerta_id>/resolver", methods=["POST"])
+# @app.route("/cartera/ia/alerta/<int:alerta_id>/resolver", methods=["POST"])
 @helpers.login_required
 def resolver_alerta_ia(alerta_id):
     """Resolver una alerta predictiva"""
@@ -8156,7 +8156,7 @@ def resolver_alerta_ia(alerta_id):
         return redirect(f"/cartera/ia/alerta/{alerta_id}")
 
 
-@app.route("/cartera/ia/componentes")
+# @app.route("/cartera/ia/componentes")
 @helpers.login_required
 def ver_componentes_criticos():
     """Ver análisis de componentes críticos"""
@@ -8189,7 +8189,7 @@ def ver_componentes_criticos():
         return redirect("/cartera/ia")
 
 
-@app.route("/cartera/ia/metricas")
+# @app.route("/cartera/ia/metricas")
 @helpers.login_required
 def ver_metricas_ia():
     """Ver métricas y ROI del sistema de IA"""
@@ -8234,14 +8234,14 @@ estado_analisis_global = {
     'errores_detallados': []  # Lista de errores específicos
 }
 
-@app.route("/cartera/ia/ejecutar")
+# @app.route("/cartera/ia/ejecutar")
 @helpers.login_required
 def mostrar_ejecutar_analisis():
     """Página para ejecutar análisis desde la web"""
     return render_template("cartera/ejecutar_analisis.html")
 
 
-@app.route("/cartera/ia/ejecutar-analisis-2025", methods=["POST"])
+# @app.route("/cartera/ia/ejecutar-analisis-2025", methods=["POST"])
 @helpers.login_required
 def ejecutar_analisis_web():
     """Ejecuta el análisis de partes 2025 desde la web - VERSIÓN WEB COMPLETA"""
@@ -8415,14 +8415,14 @@ JSON esperado:
     })
 
 
-@app.route("/cartera/ia/estado-analisis")
+# @app.route("/cartera/ia/estado-analisis")
 @helpers.login_required
 def estado_analisis():
     """Obtiene el estado actual del análisis"""
     return jsonify(estado_analisis_global)
 
 
-@app.route("/cartera/ia/api/generar-predicciones", methods=["POST"])
+# @app.route("/cartera/ia/api/generar-predicciones", methods=["POST"])
 @helpers.login_required
 def api_generar_predicciones_ia():
     """API para generar predicciones masivas - EJECUTA EN BACKGROUND"""
