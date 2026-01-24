@@ -297,7 +297,7 @@ def ver(defecto_id):
     )
     
     if response.status_code != 200 or not response.json():
-        helpers.flash_error("Defecto no encontrado")
+        flash("Defecto no encontrado", "error")
         return redirect('/defectos')
     
     defecto = response.json()[0]
@@ -383,7 +383,7 @@ def editar(defecto_id):
         
         # Validaciones
         if not descripcion or not calificacion:
-            helpers.flash_error("Descripción y calificación son obligatorios")
+            flash("Descripción y calificación son obligatorios", "error")
             return redirect(f"/defectos/{defecto_id}/editar")
         
         # Obtener el defecto actual para verificar si cambió el plazo
@@ -419,7 +419,7 @@ def editar(defecto_id):
                             fecha_limite_dt = fecha_insp_dt.replace(year=anio_limite, month=mes_limite)
                             fecha_limite_str = fecha_limite_dt.strftime('%Y-%m-%d')
                         except Exception as e:
-                            helpers.flash_error(f"Error al calcular fecha límite: {str(e)}")
+                            flash(f"Error al calcular fecha límite: {str(e)}", "error")
         
         # Preparar datos para actualizar
         datos_actualizacion = {
@@ -450,10 +450,10 @@ def editar(defecto_id):
         )
         
         if response.status_code in [200, 204]:
-            helpers.flash_success("Defecto actualizado correctamente")
+            flash("Defecto actualizado correctamente", "success")
             return redirect(f"/defectos/{defecto_id}")
         else:
-            helpers.flash_error(f"Error al actualizar defecto: {response.text}")
+            flash(f"Error al actualizar defecto: {response.text}", "error")
             return redirect(f"/defectos/{defecto_id}/editar")
     
     # GET: Mostrar formulario de edición
@@ -464,7 +464,7 @@ def editar(defecto_id):
     )
     
     if response.status_code != 200 or not response.json():
-        helpers.flash_error("Defecto no encontrado")
+        flash("Defecto no encontrado", "error")
         return redirect('/defectos')
     
     defecto = response.json()[0]
@@ -507,9 +507,9 @@ def subsanar(defecto_id):
     )
     
     if response.status_code in [200, 204]:
-        helpers.flash_success("Defecto marcado como subsanado")
+        flash("Defecto marcado como subsanado", "success")
     else:
-        helpers.flash_error("Error al actualizar defecto")
+        flash("Error al actualizar defecto", "error")
     
     return redirect(request.referrer)
 
@@ -532,9 +532,9 @@ def revertir(defecto_id):
     )
     
     if response.status_code in [200, 204]:
-        helpers.flash_success("Defecto revertido a pendiente")
+        flash("Defecto revertido a pendiente", "success")
     else:
-        helpers.flash_error("Error al revertir defecto")
+        flash("Error al revertir defecto", "error")
     
     return redirect(request.referrer)
 
@@ -551,9 +551,9 @@ def eliminar(defecto_id):
     )
     
     if response.status_code in [200, 204]:
-        helpers.flash_success("Defecto eliminado correctamente")
+        flash("Defecto eliminado correctamente", "success")
     else:
-        helpers.flash_error("Error al eliminar defecto")
+        flash("Error al eliminar defecto", "error")
     
     return redirect(request.referrer)
 
