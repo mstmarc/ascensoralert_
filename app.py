@@ -18,6 +18,14 @@ from services import cache_service
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 
+# Configuración de sesión y seguridad
+from datetime import timedelta
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
+app.config['SESSION_COOKIE_SECURE'] = True  # Solo HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # No accesible desde JavaScript
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Protección CSRF
+app.config['SESSION_REFRESH_EACH_REQUEST'] = False  # No renovar en cada request
+
 # Configurar Resend para emails
 if config.RESEND_API_KEY:
     resend.api_key = config.RESEND_API_KEY
@@ -32,20 +40,25 @@ helpers.init_helpers(config.SUPABASE_URL, config.HEADERS)
 # Registrar filtro personalizado para formatear fechas
 app.template_filter('format_fecha')(format_fecha_filter)
 
+# Caché de permisos pre-serializados (inicializado una sola vez)
+CACHE_PERMISOS_JSON = {}
+def _inicializar_cache_permisos():
+    """Inicializa la caché de permisos serializados a JSON"""
+    import json
+    for perfil, permisos in helpers.PERMISOS_POR_PERFIL.items():
+        CACHE_PERMISOS_JSON[perfil] = json.dumps(permisos)
+
+_inicializar_cache_permisos()
+
 # Inyectar funciones de permisos en todos los templates
 @app.context_processor
 def inject_permisos():
     """Inyecta funciones de control de acceso en todos los templates"""
-    import json
-
     # Obtener perfil del usuario actual
     perfil_actual = helpers.obtener_perfil_usuario()
 
-    # Construir diccionario de permisos para JavaScript
-    permisos_js = {}
-    if perfil_actual in helpers.PERMISOS_POR_PERFIL:
-        for modulo, permisos in helpers.PERMISOS_POR_PERFIL[perfil_actual].items():
-            permisos_js[modulo] = permisos
+    # Usar caché pre-serializado en lugar de recalcular
+    permisos_json = CACHE_PERMISOS_JSON.get(perfil_actual, '{}')
 
     return {
         'tiene_permiso': helpers.tiene_permiso,
@@ -54,7 +67,7 @@ def inject_permisos():
         'obtener_perfil_usuario': helpers.obtener_perfil_usuario,
         'obtener_modulos_permitidos': helpers.obtener_modulos_permitidos,
         'perfil_usuario': perfil_actual,
-        'permisos_usuario_json': json.dumps(permisos_js)
+        'permisos_usuario_json': permisos_json
     }
 
 # ============================================
@@ -83,13 +96,13 @@ from app_legacy import (
     # Reportes
     reporte_mensual,
 
-    # Oportunidades
-    oportunidades, mi_agenda, cambiar_estado_oportunidad,
-    crear_oportunidad, editar_oportunidad, ver_oportunidad,
-    eliminar_oportunidad, oportunidades_post_ipo,
+    # Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+    # oportunidades, mi_agenda, cambiar_estado_oportunidad,
+    # crear_oportunidad, editar_oportunidad, ver_oportunidad,
+    # eliminar_oportunidad, oportunidades_post_ipo,
 
-    # Acciones de Oportunidades
-    add_accion, toggle_accion, delete_accion,
+    # Acciones de Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+    # add_accion, toggle_accion, delete_accion,
 
     # Tareas Comerciales
     tarea_comercial_aplazar, tarea_comercial_descartar,
@@ -188,20 +201,20 @@ app.add_url_rule("/crear_visita_seguimiento/<int:cliente_id>", "crear_visita_seg
 # Reportes
 app.add_url_rule("/reporte_mensual", "reporte_mensual", reporte_mensual, methods=["GET", "POST"])
 
-# Oportunidades
-app.add_url_rule("/oportunidades", "oportunidades", oportunidades)
-app.add_url_rule("/mi_agenda", "mi_agenda", mi_agenda)
-app.add_url_rule("/cambiar_estado_oportunidad/<int:oportunidad_id>", "cambiar_estado_oportunidad", cambiar_estado_oportunidad, methods=["POST"])
-app.add_url_rule("/crear_oportunidad/<int:cliente_id>", "crear_oportunidad", crear_oportunidad, methods=["GET", "POST"])
-app.add_url_rule("/editar_oportunidad/<int:oportunidad_id>", "editar_oportunidad", editar_oportunidad, methods=["GET", "POST"])
-app.add_url_rule("/ver_oportunidad/<int:oportunidad_id>", "ver_oportunidad", ver_oportunidad)
-app.add_url_rule("/eliminar_oportunidad/<int:oportunidad_id>", "eliminar_oportunidad", eliminar_oportunidad)
-app.add_url_rule("/oportunidades_post_ipo", "oportunidades_post_ipo", oportunidades_post_ipo)
+# Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+# app.add_url_rule("/oportunidades", "oportunidades", oportunidades)
+# app.add_url_rule("/mi_agenda", "mi_agenda", mi_agenda)
+# app.add_url_rule("/cambiar_estado_oportunidad/<int:oportunidad_id>", "cambiar_estado_oportunidad", cambiar_estado_oportunidad, methods=["POST"])
+# app.add_url_rule("/crear_oportunidad/<int:cliente_id>", "crear_oportunidad", crear_oportunidad, methods=["GET", "POST"])
+# app.add_url_rule("/editar_oportunidad/<int:oportunidad_id>", "editar_oportunidad", editar_oportunidad, methods=["GET", "POST"])
+# app.add_url_rule("/ver_oportunidad/<int:oportunidad_id>", "ver_oportunidad", ver_oportunidad)
+# app.add_url_rule("/eliminar_oportunidad/<int:oportunidad_id>", "eliminar_oportunidad", eliminar_oportunidad)
+# app.add_url_rule("/oportunidades_post_ipo", "oportunidades_post_ipo", oportunidades_post_ipo)
 
-# Acciones de Oportunidades
-app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/add", "add_accion", add_accion, methods=["POST"])
-app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>", "toggle_accion", toggle_accion, methods=["POST"])
-app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>", "delete_accion", delete_accion, methods=["POST"])
+# Acciones de Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+# app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/add", "add_accion", add_accion, methods=["POST"])
+# app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>", "toggle_accion", toggle_accion, methods=["POST"])
+# app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>", "delete_accion", delete_accion, methods=["POST"])
 
 # Tareas Comerciales
 app.add_url_rule("/tarea_comercial_aplazar/<int:cliente_id>", "tarea_comercial_aplazar", tarea_comercial_aplazar, methods=["POST"])
@@ -333,6 +346,10 @@ app.register_blueprint(defectos_bp)
 # Blueprint de Equipos (sexto módulo migrado)
 from routes.equipos import equipos_bp
 app.register_blueprint(equipos_bp)
+
+# Blueprint de Oportunidades (séptimo módulo migrado)
+from routes.oportunidades import oportunidades_bp
+app.register_blueprint(oportunidades_bp)
 
 # ============================================
 # RUTA DE DIAGNÓSTICO (temporal)

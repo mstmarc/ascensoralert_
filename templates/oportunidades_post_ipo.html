@@ -776,7 +776,7 @@
 
         function convertirTarea(tareaId, clienteId) {
             if (confirm('¿Crear oportunidad para este cliente?')) {
-                window.location.href = `/crear_oportunidad/${clienteId}?tarea_id=${tareaId}`;
+                window.location.href = `{{ url_for('crear_oportunidad', cliente_id=0) }}`.replace('/0', `/${clienteId}`) + `?tarea_id=${tareaId}`;
             }
         }
 
