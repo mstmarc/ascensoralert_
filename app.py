@@ -104,9 +104,9 @@ from app_legacy import (
     # Acciones de Oportunidades - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
     # add_accion, toggle_accion, delete_accion,
 
-    # Tareas Comerciales
-    tarea_comercial_aplazar, tarea_comercial_descartar,
-    tarea_comercial_convertir, tarea_comercial_agregar_nota,
+    # Tareas Comerciales - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+    # tarea_comercial_aplazar, tarea_comercial_descartar,
+    # tarea_comercial_convertir, tarea_comercial_agregar_nota,
 
     # Acciones de Equipos - MIGRADAS A BLUEPRINT (ver routes/equipos/equipos_bp.py)
     # add_accion_equipo, toggle_accion_equipo, delete_accion_equipo,
@@ -216,11 +216,11 @@ app.add_url_rule("/reporte_mensual", "reporte_mensual", reporte_mensual, methods
 # app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/toggle/<int:index>", "toggle_accion", toggle_accion, methods=["POST"])
 # app.add_url_rule("/oportunidad/<int:oportunidad_id>/accion/delete/<int:index>", "delete_accion", delete_accion, methods=["POST"])
 
-# Tareas Comerciales
-app.add_url_rule("/tarea_comercial_aplazar/<int:cliente_id>", "tarea_comercial_aplazar", tarea_comercial_aplazar, methods=["POST"])
-app.add_url_rule("/tarea_comercial_descartar/<int:cliente_id>", "tarea_comercial_descartar", tarea_comercial_descartar, methods=["POST"])
-app.add_url_rule("/tarea_comercial_convertir/<int:cliente_id>", "tarea_comercial_convertir", tarea_comercial_convertir, methods=["POST"])
-app.add_url_rule("/tarea_comercial_agregar_nota/<int:cliente_id>", "tarea_comercial_agregar_nota", tarea_comercial_agregar_nota, methods=["POST"])
+# Tareas Comerciales - MIGRADAS A BLUEPRINT (ver routes/oportunidades/oportunidades_bp.py)
+# app.add_url_rule("/tarea_comercial_aplazar/<int:tarea_id>", "tarea_comercial_aplazar", tarea_comercial_aplazar, methods=["POST"])
+# app.add_url_rule("/tarea_comercial_descartar/<int:tarea_id>", "tarea_comercial_descartar", tarea_comercial_descartar, methods=["POST"])
+# app.add_url_rule("/tarea_comercial_convertir/<int:tarea_id>", "tarea_comercial_convertir", tarea_comercial_convertir, methods=["POST"])
+# app.add_url_rule("/tarea_comercial_agregar_nota/<int:tarea_id>", "tarea_comercial_agregar_nota", tarea_comercial_agregar_nota, methods=["POST"])
 
 # Acciones de Equipos - MIGRADAS A BLUEPRINT (ver routes/equipos/equipos_bp.py)
 # app.add_url_rule("/equipo/<int:equipo_id>/accion/add", "add_accion_equipo", add_accion_equipo, methods=["POST"])

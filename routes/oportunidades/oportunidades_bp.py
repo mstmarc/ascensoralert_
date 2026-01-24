@@ -8,10 +8,11 @@ Gestión de oportunidades comerciales con funcionalidades de:
 - CRUD completo de oportunidades
 - Sistema de acciones/tareas para seguimiento
 - Cambio rápido de estado (AJAX)
+- Tareas comerciales: aplazar, descartar, convertir, agregar notas
 """
 
 from flask import Blueprint, render_template, request, redirect, url_for, session
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 
 import helpers
@@ -669,3 +670,149 @@ def delete_accion(oportunidad_id, index):
         index=index,
         redirect_to=url_for('oportunidades.ver_oportunidad', oportunidad_id=oportunidad_id)
     )
+
+
+# ============================================
+# TAREAS COMERCIALES (SEGUIMIENTO POST-IPO)
+# ============================================
+
+@oportunidades_bp.route('/tarea_comercial_aplazar/<int:tarea_id>', methods=["POST"])
+def tarea_comercial_aplazar(tarea_id):
+    """Aplazar una tarea comercial"""
+    if "usuario" not in session:
+        return {"error": "No autorizado"}, 401
+
+    try:
+        dias_aplazar = int(request.json.get("dias", 7))
+        motivo = request.json.get("motivo", "")
+
+        fecha_aplazada = (datetime.now().date() + timedelta(days=dias_aplazar)).isoformat()
+
+        data = {
+            "aplazada_hasta": fecha_aplazada,
+            "motivo_aplazamiento": motivo,
+            "motivo_creacion": "aplazada_vuelve"
+        }
+
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS,
+            json=data
+        )
+
+        if response.status_code in [200, 204]:
+            return {"success": True, "fecha_aplazada": fecha_aplazada}, 200
+        else:
+            return {"error": "Error al aplazar tarea"}, 500
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+@oportunidades_bp.route('/tarea_comercial_descartar/<int:tarea_id>', methods=["POST"])
+def tarea_comercial_descartar(tarea_id):
+    """Descartar una tarea comercial (cerrarla sin crear oportunidad)"""
+    if "usuario" not in session:
+        return {"error": "No autorizado"}, 401
+
+    try:
+        tipo_descarte = request.json.get("tipo", "descartada_sin_interes")
+        motivo = request.json.get("motivo", "")
+
+        data = {
+            "estado": "cerrada",
+            "tipo_cierre": tipo_descarte,
+            "motivo_cierre": motivo,
+            "fecha_cierre": datetime.now().isoformat()
+        }
+
+        response = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS,
+            json=data
+        )
+
+        if response.status_code in [200, 204]:
+            return {"success": True}, 200
+        else:
+            return {"error": "Error al descartar tarea"}, 500
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+@oportunidades_bp.route('/tarea_comercial_convertir/<int:tarea_id>', methods=["POST"])
+def tarea_comercial_convertir(tarea_id):
+    """Marcar tarea como convertida (redirecciona a crear oportunidad)"""
+    if "usuario" not in session:
+        return redirect("/")
+
+    try:
+        # Obtener datos de la tarea
+        tarea_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS
+        )
+
+        if tarea_response.status_code == 200:
+            tarea = tarea_response.json()[0]
+            cliente_id = tarea['cliente_id']
+
+            # Redirigir a crear oportunidad
+            # La tarea se cerrará cuando se cree la oportunidad exitosamente
+            return redirect(url_for("oportunidades.crear_oportunidad", cliente_id=cliente_id, tarea_id=tarea_id))
+        else:
+            flash_error("Error al obtener datos de la tarea")
+            return redirect(url_for("oportunidades.oportunidades_post_ipo"))
+
+    except Exception as e:
+        flash_error(f"Error: {str(e)}")
+        return redirect(url_for("oportunidades.oportunidades_post_ipo"))
+
+
+@oportunidades_bp.route('/tarea_comercial_agregar_nota/<int:tarea_id>', methods=["POST"])
+def tarea_comercial_agregar_nota(tarea_id):
+    """Agregar una nota a la tarea"""
+    if "usuario" not in session:
+        return {"error": "No autorizado"}, 401
+
+    try:
+        texto_nota = request.json.get("nota", "")
+        if not texto_nota:
+            return {"error": "Nota vacía"}, 400
+
+        # Obtener notas actuales
+        tarea_response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+            headers=HEADERS
+        )
+
+        if tarea_response.status_code == 200:
+            tarea = tarea_response.json()[0]
+            notas = tarea.get('notas', [])
+
+            # Agregar nueva nota
+            nueva_nota = {
+                "fecha": datetime.now().isoformat(),
+                "usuario": session.get("usuario", "Usuario"),
+                "texto": texto_nota
+            }
+            notas.append(nueva_nota)
+
+            # Actualizar
+            response = requests.patch(
+                f"{SUPABASE_URL}/rest/v1/seguimiento_comercial_tareas?id=eq.{tarea_id}",
+                headers=HEADERS,
+                json={"notas": notas}
+            )
+
+            if response.status_code in [200, 204]:
+                return {"success": True, "nota": nueva_nota}, 200
+            else:
+                return {"error": "Error al guardar nota"}, 500
+        else:
+            return {"error": "Tarea no encontrada"}, 404
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
