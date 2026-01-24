@@ -467,7 +467,7 @@
                     {% if cliente %}
                     <a href="/ver_lead/{{ cliente.id }}" class="button">Ver Instalación</a>
                     {% endif %}
-                    <a href="/leads_dashboard" class="button">Volver a Instalaciones</a>
+                    <a href="{{ url_for('leads.dashboard') }}" class="button">Volver a Instalaciones</a>
                 </div>
 
             </div>

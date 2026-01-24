@@ -205,13 +205,13 @@
 
     if (tienePermiso('clientes', 'read')) {
         menuHTML += `
-                <a href="/leads_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
+                <a href="/leads" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Instalaciones
                 </a>`;
     }
     if (tienePermiso('administradores', 'read')) {
         menuHTML += `
-                <a href="/administradores_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
+                <a href="/admin/administradores" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Administradores
                 </a>`;
     }
@@ -241,7 +241,7 @@
                 <a href="/inspecciones" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Inspecciones
                 </a>
-                <a href="/defectos_dashboard" class="sidebar-integrated-link" style="padding-left: 54px;">
+                <a href="/defectos" class="sidebar-integrated-link" style="padding-left: 54px;">
                     Defectos
                 </a>`;
         }

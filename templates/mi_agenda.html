@@ -330,7 +330,7 @@
                 <div class="no-oportunidades">
                     <h3>No hay oportunidades activas</h3>
                     <p>Cuando crees nuevas oportunidades, aparecerán aquí organizadas por estado.</p>
-                    <a href="/leads_dashboard" class="btn" style="margin-top: 20px;">Ver Instalaciones</a>
+                    <a href="{{ url_for('leads.dashboard') }}" class="btn" style="margin-top: 20px;">Ver Instalaciones</a>
                 </div>
             {% else %}
                 <!-- OPORTUNIDADES NUEVAS -->
