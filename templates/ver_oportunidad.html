@@ -629,7 +629,7 @@
             <!-- BOTONES DE ACCIÓN -->
             <div class="action-buttons">
                 <a href="{{ url_for('oportunidades.editar_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-primary">Editar Oportunidad</a>
-                <a href="{{ url_for('ver_lead', lead_id=oportunidad.cliente_id) }}" class="btn btn-primary">Ver Comunidad</a>
+                <a href="{{ url_for('leads.ver', lead_id=oportunidad.cliente_id) }}" class="btn btn-primary">Ver Comunidad</a>
                 <a href="{{ url_for('oportunidades.oportunidades') }}" class="btn btn-primary">Volver a Oportunidades</a>
             </div>
 

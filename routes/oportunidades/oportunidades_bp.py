@@ -379,7 +379,7 @@ def oportunidades_post_ipo():
     except Exception as e:
         print(f"Error en seguimiento comercial: {str(e)}")
         flash_error(f"Error al cargar seguimiento comercial: {str(e)}")
-        return redirect("/home")
+        return redirect(url_for("home"))
 
 
 # ============================================
@@ -572,7 +572,7 @@ def eliminar_oportunidad(oportunidad_id):
 
             if response.status_code in [200, 204]:
                 flash_success("Oportunidad eliminada correctamente")
-                return redirect(f"/ver_lead/{cliente_id}")
+                return redirect(url_for("leads.ver", lead_id=cliente_id))
             else:
                 flash_error("Error al eliminar oportunidad")
                 return redirect(url_for("oportunidades.oportunidades"))
