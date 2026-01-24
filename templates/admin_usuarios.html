@@ -250,7 +250,7 @@
             <!-- Create User Section -->
             <div class="create-section">
                 <h2>➕ Crear Nuevo Usuario</h2>
-                <form action="/admin/usuarios/crear" method="POST">
+                <form action="{{ url_for('admin.crear_usuario') }}" method="POST">
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="nombre_usuario">Nombre de Usuario *</label>
@@ -312,7 +312,7 @@
                             <td>
                                 <div class="actions">
                                     <!-- Editar Perfil -->
-                                    <form action="/admin/usuarios/editar/{{ usuario.id }}" method="POST" style="display: inline;">
+                                    <form action="{{ url_for('admin.editar_usuario', usuario_id=usuario.id) }}" method="POST" style="display: inline;">
                                         <select name="perfil" class="perfil-select" onchange="this.form.submit()">
                                             <option value="admin" {% if usuario.perfil == 'admin' %}selected{% endif %}>Admin</option>
                                             <option value="gestor" {% if usuario.perfil == 'gestor' %}selected{% endif %}>Gestor</option>
@@ -322,7 +322,7 @@
 
                                     <!-- Eliminar -->
                                     {% if usuario.id != session.usuario_id %}
-                                    <a href="/admin/usuarios/eliminar/{{ usuario.id }}"
+                                    <a href="{{ url_for('admin.eliminar_usuario', usuario_id=usuario.id) }}"
                                        onclick="return confirm('¿Seguro que quieres eliminar a {{ usuario.nombre_usuario }}?')"
                                        class="btn btn-danger"
                                        style="font-size: 12px; padding: 6px 12px;">

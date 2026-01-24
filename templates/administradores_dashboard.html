@@ -528,18 +528,18 @@
             <!-- Header de página con título y botón -->
             <div class="page-header">
                 <h2 class="page-title">Gestión de Administradores</h2>
-                <a href="/nuevo_administrador" class="btn btn-primary">
+                <a href="{{ url_for('admin.nuevo') }}" class="btn btn-primary">
                     + Nuevo Administrador
                 </a>
             </div>
 
             <!-- Pestañas -->
             <div class="tabs-container">
-                <a href="/administradores_dashboard?tab=administradores"
+                <a href="{{ url_for('admin.dashboard') }}?tab=administradores"
                    class="tab-button {% if tab == 'administradores' or not tab %}active{% endif %}">
                     Administradores
                 </a>
-                <a href="/administradores_dashboard?tab=visitas"
+                <a href="{{ url_for('admin.dashboard') }}?tab=visitas"
                    class="tab-button {% if tab == 'visitas' %}active{% endif %}">
                     Visitas
                 </a>
@@ -549,7 +549,7 @@
             {% if tab == 'administradores' or not tab %}
             <!-- TAB: ADMINISTRADORES -->
 
-            <form method="GET" action="/administradores_dashboard">
+            <form method="GET" action="{{ url_for('admin.dashboard') }}">
                 <div class="buscador-destacado">
                     <div class="buscador-label">Buscar Administrador</div>
                     <div class="buscador-input-container">
@@ -574,7 +574,7 @@
                 <div class="admin-list">
                     {% for admin in administradores %}
                     <div class="admin-list-item">
-                        <a href="/ver_administrador/{{ admin.id }}" class="admin-list-name">
+                        <a href="{{ url_for('admin.ver', admin_id=admin.id) }}" class="admin-list-name">
                             {{ admin.nombre_empresa }}
                         </a>
                         <span class="admin-list-location">

@@ -100,10 +100,10 @@ from app_legacy import (
     # Notificaciones
     configuracion_avisos, enviar_avisos_manual,
 
-    # Administradores
-    administradores_dashboard, nuevo_administrador, ver_administrador,
-    editar_administrador, eliminar_administrador,
-    test_dropdown_admin, clear_cache,
+    # Administradores - MIGRADAS A BLUEPRINT (ver routes/admin/admin_bp.py)
+    # administradores_dashboard, nuevo_administrador, ver_administrador,
+    # editar_administrador, eliminar_administrador,
+    test_dropdown_admin,  # clear_cache migrado a Blueprint
 
     # Inspecciones e IPOs
     inspecciones_dashboard, nueva_inspeccion, ver_inspeccion,
@@ -119,9 +119,9 @@ from app_legacy import (
     # OCAs - MIGRADAS A BLUEPRINT (ver routes/ocas/ocas_bp.py)
     # lista_ocas, nuevo_oca, editar_oca, eliminar_oca,
 
-    # Administración de Usuarios
-    admin_usuarios, admin_crear_usuario, admin_editar_usuario,
-    admin_eliminar_usuario,
+    # Administración de Usuarios - MIGRADAS A BLUEPRINT (ver routes/admin/admin_bp.py)
+    # admin_usuarios, admin_crear_usuario, admin_editar_usuario,
+    # admin_eliminar_usuario,
 
     # Cartera
     cartera_dashboard, cartera_importar, cartera_importar_equipos,
@@ -216,14 +216,14 @@ app.add_url_rule("/equipo/<int:equipo_id>/accion/delete/<int:index>", "delete_ac
 app.add_url_rule("/configuracion_avisos", "configuracion_avisos", configuracion_avisos, methods=["GET", "POST"])
 app.add_url_rule("/enviar_avisos_manual", "enviar_avisos_manual", enviar_avisos_manual)
 
-# Administradores
-app.add_url_rule("/administradores_dashboard", "administradores_dashboard", administradores_dashboard)
-app.add_url_rule("/nuevo_administrador", "nuevo_administrador", nuevo_administrador, methods=["GET", "POST"])
-app.add_url_rule("/ver_administrador/<int:admin_id>", "ver_administrador", ver_administrador)
-app.add_url_rule("/editar_administrador/<int:admin_id>", "editar_administrador", editar_administrador, methods=["GET", "POST"])
-app.add_url_rule("/eliminar_administrador/<int:admin_id>", "eliminar_administrador", eliminar_administrador)
+# Administradores - MIGRADAS A BLUEPRINT (ver routes/admin/admin_bp.py)
+# app.add_url_rule("/administradores_dashboard", "administradores_dashboard", administradores_dashboard)
+# app.add_url_rule("/nuevo_administrador", "nuevo_administrador", nuevo_administrador, methods=["GET", "POST"])
+# app.add_url_rule("/ver_administrador/<int:admin_id>", "ver_administrador", ver_administrador)
+# app.add_url_rule("/editar_administrador/<int:admin_id>", "editar_administrador", editar_administrador, methods=["GET", "POST"])
+# app.add_url_rule("/eliminar_administrador/<int:admin_id>", "eliminar_administrador", eliminar_administrador)
 app.add_url_rule("/test_dropdown_admin", "test_dropdown_admin", test_dropdown_admin)
-app.add_url_rule("/admin/clear_cache", "clear_cache", clear_cache)
+# app.add_url_rule("/admin/clear_cache", "clear_cache", clear_cache)  # Migrado a Blueprint
 
 # Inspecciones e IPOs
 app.add_url_rule("/inspecciones", "inspecciones_dashboard", inspecciones_dashboard)
@@ -252,11 +252,11 @@ app.add_url_rule("/defectos/<int:defecto_id>/actualizar_gestion", "actualizar_ge
 # OCAs - MIGRADAS A BLUEPRINT (ver routes/ocas/ocas_bp.py)
 # Las rutas de OCAs ahora se registran automáticamente via Blueprint
 
-# Administración de Usuarios
-app.add_url_rule("/admin/usuarios", "admin_usuarios", admin_usuarios)
-app.add_url_rule("/admin/usuarios/crear", "admin_crear_usuario", admin_crear_usuario, methods=["POST"])
-app.add_url_rule("/admin/usuarios/editar/<int:usuario_id>", "admin_editar_usuario", admin_editar_usuario, methods=["POST"])
-app.add_url_rule("/admin/usuarios/eliminar/<int:usuario_id>", "admin_eliminar_usuario", admin_eliminar_usuario)
+# Administración de Usuarios - MIGRADAS A BLUEPRINT (ver routes/admin/admin_bp.py)
+# app.add_url_rule("/admin/usuarios", "admin_usuarios", admin_usuarios)
+# app.add_url_rule("/admin/usuarios/crear", "admin_crear_usuario", admin_crear_usuario, methods=["POST"])
+# app.add_url_rule("/admin/usuarios/editar/<int:usuario_id>", "admin_editar_usuario", admin_editar_usuario, methods=["POST"])
+# app.add_url_rule("/admin/usuarios/eliminar/<int:usuario_id>", "admin_eliminar_usuario", admin_eliminar_usuario)
 
 # Cartera
 app.add_url_rule("/cartera", "cartera_dashboard", cartera_dashboard)
@@ -311,6 +311,10 @@ app.add_url_rule("/cartera/ia/api/generar-predicciones", "api_generar_prediccion
 # Blueprint de OCAs (primer módulo migrado)
 from routes.ocas import ocas_bp
 app.register_blueprint(ocas_bp)
+
+# Blueprint de Administradores y Usuarios (segundo módulo migrado)
+from routes.admin import admin_bp
+app.register_blueprint(admin_bp)
 
 # ============================================
 # PUNTO DE ENTRADA

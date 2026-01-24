@@ -768,8 +768,8 @@
 
                 <!-- BOTONES DE ACCIÓN -->
                 <div class="botones-accion">
-                    <a href="/editar_administrador/{{ administrador.id }}" class="button">Editar Administrador</a>
-                    <a href="/administradores_dashboard" class="button">Volver al Listado</a>
+                    <a href="{{ url_for('admin.editar', admin_id=administrador.id) }}" class="button">Editar Administrador</a>
+                    <a href="{{ url_for('admin.dashboard') }}" class="button">Volver al Listado</a>
                 </div>
 
             </div>
