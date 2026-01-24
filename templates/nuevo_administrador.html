@@ -47,7 +47,7 @@
     <nav class="menu-lateral" id="menuLateral">
         <a href="/home">Inicio</a>
         <a href="/leads_dashboard">Ver Comunidades</a>
-        <a href="/administradores_dashboard">Administradores de Fincas</a>
+        <a href="{{ url_for('admin.dashboard') }}">Administradores de Fincas</a>
         <a href="/visitas_administradores_dashboard">Ver Visitas Administradores</a>
         <a href="/oportunidades">Oportunidades</a>
         <a href="/reporte_mensual">Descargo Comercial</a>
@@ -129,7 +129,7 @@
 
                 <div class="botones-form">
                     <button type="submit" class="button">Crear Administrador</button>
-                    <a href="/administradores_dashboard" class="button">Cancelar</a>
+                    <a href="{{ url_for('admin.dashboard') }}" class="button">Cancelar</a>
                 </div>
             </form>
         </div>

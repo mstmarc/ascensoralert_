@@ -2873,8 +2873,8 @@ def enviar_avisos_manual():
 # ============================================
 
 # Dashboard de Administradores (con pestañas)
-@app.route("/administradores_dashboard", methods=["GET"])
-def administradores_dashboard():
+# @app.route("/administradores_dashboard", methods=["GET"])
+def _administradores_dashboard_legacy():
     if "usuario" not in session:
         return redirect("/")
 
@@ -3220,10 +3220,10 @@ def administradores_dashboard():
 
 
 # Alta de Administrador
-@app.route("/nuevo_administrador", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('administradores', 'write')
-def nuevo_administrador():
+# @app.route("/nuevo_administrador", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('administradores', 'write')
+def _nuevo_administrador_legacy():
 
     if request.method == "POST":
         data = {
@@ -3257,8 +3257,8 @@ def nuevo_administrador():
 
 
 # Ver Administrador
-@app.route("/ver_administrador/<int:admin_id>", methods=["GET"])
-def ver_administrador(admin_id):
+# @app.route("/ver_administrador/<int:admin_id>", methods=["GET"])
+def _ver_administrador_legacy(admin_id):
     if "usuario" not in session:
         return redirect("/")
 
@@ -3334,10 +3334,10 @@ def ver_administrador(admin_id):
 
 
 # Editar Administrador
-@app.route("/editar_administrador/<int:admin_id>", methods=["GET", "POST"])
-@helpers.login_required
-@helpers.requiere_permiso('administradores', 'write')
-def editar_administrador(admin_id):
+# @app.route("/editar_administrador/<int:admin_id>", methods=["GET", "POST"])
+# @helpers.login_required
+# @helpers.requiere_permiso('administradores', 'write')
+def _editar_administrador_legacy(admin_id):
 
     if request.method == "POST":
         data = {
@@ -3382,10 +3382,10 @@ def editar_administrador(admin_id):
 
 
 # Eliminar Administrador
-@app.route("/eliminar_administrador/<int:admin_id>", methods=["GET"])
-@helpers.login_required
-@helpers.requiere_permiso('administradores', 'delete')
-def eliminar_administrador(admin_id):
+# @app.route("/eliminar_administrador/<int:admin_id>", methods=["GET"])
+# @helpers.login_required
+# @helpers.requiere_permiso('administradores', 'delete')
+def _eliminar_administrador_legacy(admin_id):
 
     # Verificar si tiene clientes asociados
     clientes_check = requests.get(
@@ -3546,8 +3546,8 @@ def test_dropdown_admin():
 
     return html
 
-@app.route("/admin/clear_cache")
-def clear_cache():
+# @app.route("/admin/clear_cache")
+def _clear_cache_legacy():
     """Endpoint para limpiar manualmente el caché de administradores"""
     if "usuario" not in session:
         return redirect("/")
@@ -5403,10 +5403,10 @@ def _eliminar_oca_legacy(oca_id):
 # ADMINISTRACIÓN DE USUARIOS (Solo Admin)
 # ============================================
 
-@app.route("/admin/usuarios")
-@helpers.login_required
-@helpers.solo_admin
-def admin_usuarios():
+# @app.route("/admin/usuarios")
+# @helpers.login_required
+# @helpers.solo_admin
+def _admin_usuarios_legacy():
     """Panel de administración de usuarios - Solo para admin"""
 
     # Obtener todos los usuarios
@@ -5422,10 +5422,10 @@ def admin_usuarios():
     return render_template("admin_usuarios.html", usuarios=usuarios)
 
 
-@app.route("/admin/usuarios/crear", methods=["POST"])
-@helpers.login_required
-@helpers.solo_admin
-def admin_crear_usuario():
+# @app.route("/admin/usuarios/crear", methods=["POST"])
+# @helpers.login_required
+# @helpers.solo_admin
+def _admin_crear_usuario_legacy():
     """Crear un nuevo usuario"""
 
     nombre_usuario = request.form.get("nombre_usuario", "").strip()
@@ -5464,10 +5464,10 @@ def admin_crear_usuario():
     return redirect("/admin/usuarios")
 
 
-@app.route("/admin/usuarios/editar/<int:usuario_id>", methods=["POST"])
-@helpers.login_required
-@helpers.solo_admin
-def admin_editar_usuario(usuario_id):
+# @app.route("/admin/usuarios/editar/<int:usuario_id>", methods=["POST"])
+# @helpers.login_required
+# @helpers.solo_admin
+def _admin_editar_usuario_legacy(usuario_id):
     """Editar perfil de un usuario"""
 
     perfil = request.form.get("perfil", "visualizador")
@@ -5493,10 +5493,10 @@ def admin_editar_usuario(usuario_id):
     return redirect("/admin/usuarios")
 
 
-@app.route("/admin/usuarios/eliminar/<int:usuario_id>")
-@helpers.login_required
-@helpers.solo_admin
-def admin_eliminar_usuario(usuario_id):
+# @app.route("/admin/usuarios/eliminar/<int:usuario_id>")
+# @helpers.login_required
+# @helpers.solo_admin
+def _admin_eliminar_usuario_legacy(usuario_id):
     """Eliminar un usuario"""
 
     # Evitar que el admin se elimine a sí mismo
