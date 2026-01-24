@@ -111,8 +111,8 @@ from app_legacy import (
     # Acciones de Equipos - MIGRADAS A BLUEPRINT (ver routes/equipos/equipos_bp.py)
     # add_accion_equipo, toggle_accion_equipo, delete_accion_equipo,
 
-    # Notificaciones
-    configuracion_avisos, enviar_avisos_manual,
+    # Notificaciones - MIGRADAS A BLUEPRINT (ver routes/notificaciones/notificaciones_bp.py)
+    # configuracion_avisos, enviar_avisos_manual,
 
     # Administradores - MIGRADAS A BLUEPRINT (ver routes/admin/admin_bp.py)
     # administradores_dashboard, nuevo_administrador, ver_administrador,
@@ -227,9 +227,9 @@ app.add_url_rule("/home", "home", home)
 # app.add_url_rule("/equipo/<int:equipo_id>/accion/toggle/<int:index>", "toggle_accion_equipo", toggle_accion_equipo, methods=["POST"])
 # app.add_url_rule("/equipo/<int:equipo_id>/accion/delete/<int:index>", "delete_accion_equipo", delete_accion_equipo, methods=["POST"])
 
-# Notificaciones
-app.add_url_rule("/configuracion_avisos", "configuracion_avisos", configuracion_avisos, methods=["GET", "POST"])
-app.add_url_rule("/enviar_avisos_manual", "enviar_avisos_manual", enviar_avisos_manual)
+# Notificaciones - MIGRADAS A BLUEPRINT (ver routes/notificaciones/notificaciones_bp.py)
+# app.add_url_rule("/configuracion_avisos", "configuracion_avisos", configuracion_avisos, methods=["GET", "POST"])
+# app.add_url_rule("/enviar_avisos_manual", "enviar_avisos_manual", enviar_avisos_manual)
 
 # Administradores - MIGRADAS A BLUEPRINT (ver routes/admin/admin_bp.py)
 # app.add_url_rule("/administradores_dashboard", "administradores_dashboard", administradores_dashboard)
@@ -358,6 +358,10 @@ app.register_blueprint(visitas_bp)
 # Blueprint de Reportes (noveno módulo migrado)
 from routes.reportes import reportes_bp
 app.register_blueprint(reportes_bp)
+
+# Blueprint de Notificaciones (décimo módulo migrado)
+from routes.notificaciones import notificaciones_bp
+app.register_blueprint(notificaciones_bp)
 
 # ============================================
 # RUTA DE DIAGNÓSTICO (temporal)
