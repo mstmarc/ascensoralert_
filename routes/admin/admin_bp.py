@@ -27,6 +27,12 @@ HEADERS = config.HEADERS
 # GESTIÓN DE ADMINISTRADORES (FINCAS)
 # ============================================
 
+@admin_bp.route('/admin/administradores')
+def admin_administradores_redirect():
+    """Redirect de /admin/administradores a /administradores_dashboard para compatibilidad"""
+    return redirect(url_for('admin.dashboard'))
+
+
 @admin_bp.route('/administradores_dashboard')
 @helpers.login_required
 def dashboard():
