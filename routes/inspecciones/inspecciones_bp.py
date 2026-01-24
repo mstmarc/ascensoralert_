@@ -241,6 +241,15 @@ def ver(inspeccion_id):
     inspeccion = response.json()[0]
     inspeccion = limpiar_none(inspeccion)
 
+    # Calcular días hasta segunda inspección (necesario para el template)
+    if inspeccion.get('fecha_segunda_inspeccion') and not inspeccion.get('fecha_segunda_realizada'):
+        try:
+            fecha_limite = datetime.strptime(inspeccion['fecha_segunda_inspeccion'].split('T')[0], '%Y-%m-%d').date()
+            hoy = date.today()
+            inspeccion['dias_hasta_segunda'] = (fecha_limite - hoy).days
+        except:
+            inspeccion['dias_hasta_segunda'] = None
+
     # Obtener defectos de esta inspección
     defectos_response = requests.get(
         f"{SUPABASE_URL}/rest/v1/defectos_inspeccion?inspeccion_id=eq.{inspeccion_id}&order=created_at.desc",
