@@ -329,7 +329,7 @@
         <div class="info-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e6e6e6;">
                 <h3 style="margin: 0; padding: 0; border: none;">Información del Defecto</h3>
-                <a href="/defectos/{{ defecto.id }}/editar" class="button" style="padding: 8px 16px; font-size: 13px;">✏️ Editar</a>
+                <a href="{{ url_for('defectos.editar', defecto_id=defecto.id) }}" class="button" style="padding: 8px 16px; font-size: 13px;">✏️ Editar</a>
             </div>
 
             <div class="info-item">
@@ -564,7 +564,7 @@
         <!-- Botones de Acción -->
         <div class="action-buttons">
             <!-- Botón Toggle Subsanar/Revertir -->
-            <form method="POST" action="/defectos/{{ defecto.id }}/{% if defecto.estado == 'PENDIENTE' %}subsanar{% else %}revertir{% endif %}" style="display: inline;">
+            <form method="POST" action="{% if defecto.estado == 'PENDIENTE' %}{{ url_for('defectos.subsanar', defecto_id=defecto.id) }}{% else %}{{ url_for('defectos.revertir', defecto_id=defecto.id) }}{% endif %}" style="display: inline;">
                 <button type="submit"
                         class="button {% if defecto.estado == 'PENDIENTE' %}btn-success{% else %}btn-warning{% endif %}"
                         onclick="return confirm('{% if defecto.estado == 'PENDIENTE' %}¿Marcar este defecto como subsanado?{% else %}¿Revertir este defecto a pendiente?{% endif %}')">
@@ -576,10 +576,10 @@
                 </button>
             </form>
 
-            <a href="/defectos_dashboard" class="button btn-secondary">Volver al Dashboard</a>
+            <a href="{{ url_for('defectos.dashboard') }}" class="button btn-secondary">Volver al Dashboard</a>
 
             {% if session.get('perfil') == 'admin' %}
-            <a href="/defectos/{{ defecto.id }}/eliminar"
+            <a href="{{ url_for('defectos.eliminar', defecto_id=defecto.id) }}"
                class="button btn-danger"
                onclick="return confirm('¿Estás seguro de eliminar este defecto?')">
                 🗑️ Eliminar
@@ -639,7 +639,7 @@
                     this.style.opacity = '0.6';
 
                     try {
-                        const response = await fetch(`/defectos/${defectoId}/actualizar_gestion`, {
+                        const response = await fetch(`{{ url_for('defectos.actualizar_gestion', defecto_id=0) }}`.replace('/0', `/${defectoId}`), {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

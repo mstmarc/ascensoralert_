@@ -466,7 +466,7 @@
             <!-- Filtros -->
             <div class="filtros-container">
                 <div class="filtros-titulo">🔍 Filtros de Búsqueda</div>
-                <form method="GET" action="/defectos_dashboard">
+                <form method="GET" action="{{ url_for('defectos.dashboard') }}">
                     <div class="filtros-grid">
                         <div class="filtro-item">
                             <label for="filtro_tecnico">👷 Técnico Asignado</label>
@@ -506,7 +506,7 @@
                     </div>
                     <div class="filtros-acciones">
                         <button type="submit" class="btn-filtrar">Aplicar Filtros</button>
-                        <button type="button" class="boton-limpiar-filtros" onclick="window.location.href='/defectos_dashboard'">Limpiar Filtros</button>
+                        <button type="button" class="boton-limpiar-filtros" onclick="window.location.href='{{ url_for('defectos.dashboard') }}'">Limpiar Filtros</button>
                     </div>
                 </form>
             </div>
@@ -530,7 +530,7 @@
                     </thead>
                     <tbody>
                         {% for defecto in defectos_vencidos %}
-                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
+                        <tr onclick="window.location.href='{{ url_for('defectos.ver', defecto_id=defecto.id) }}'">
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -571,7 +571,7 @@
                     </thead>
                     <tbody>
                         {% for defecto in defectos_urgentes %}
-                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
+                        <tr onclick="window.location.href='{{ url_for('defectos.ver', defecto_id=defecto.id) }}'">
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -612,7 +612,7 @@
                     </thead>
                     <tbody>
                         {% for defecto in defectos_proximos %}
-                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
+                        <tr onclick="window.location.href='{{ url_for('defectos.ver', defecto_id=defecto.id) }}'">
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -653,7 +653,7 @@
                     </thead>
                     <tbody>
                         {% for defecto in defectos_normales %}
-                        <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
+                        <tr onclick="window.location.href='{{ url_for('defectos.ver', defecto_id=defecto.id) }}'">
                             <td>
                                 <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                 <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -701,7 +701,7 @@
                             </thead>
                             <tbody>
                                 {% for defecto in defectos_subsanados %}
-                                <tr onclick="window.location.href='/defectos/{{ defecto.id }}'">
+                                <tr onclick="window.location.href='{{ url_for('defectos.ver', defecto_id=defecto.id) }}'">
                                     <td>
                                         <div class="defecto-maquina">{{ defecto.maquina }}</div>
                                         <div class="defecto-direccion">{{ defecto.direccion or '' }}{% if defecto.poblacion %} - {{ defecto.poblacion }}{% endif %}</div>
@@ -761,7 +761,7 @@
             const stock = urlParams.get('stock') || '';
 
             // Construir URL de exportación con los filtros
-            let exportUrl = '/exportar_defectos_pdf?';
+            let exportUrl = '{{ url_for('defectos.exportar_pdf') }}?';
             const params = [];
 
             if (tecnico) params.push(`tecnico=${encodeURIComponent(tecnico)}`);

@@ -170,7 +170,7 @@
           {% endif %}
         {% endwith %}
 
-        <form method="POST" action="/defectos/{{ defecto.id }}/editar">
+        <form method="POST" action="{{ url_for('defectos.editar', defecto_id=defecto.id) }}">
             <!-- Información Básica -->
             <div class="form-section">
                 <h3>Información del Defecto</h3>
@@ -327,7 +327,7 @@
             <!-- Botones -->
             <div>
                 <button type="submit" class="button">💾 Guardar Cambios</button>
-                <a href="/defectos/{{ defecto.id }}" class="button btn-secondary">Cancelar</a>
+                <a href="{{ url_for('defectos.ver', defecto_id=defecto.id) }}" class="button btn-secondary">Cancelar</a>
             </div>
         </form>
 

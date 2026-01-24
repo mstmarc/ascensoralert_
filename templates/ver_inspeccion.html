@@ -462,13 +462,13 @@
         <!-- Sección: Defectos Detectados -->
         <div class="seccion">
             <h2>Defectos Detectados
-                <a href="/inspecciones/{{ inspeccion.id }}/defectos/nuevo" class="btn-primary btn-sm" style="margin-left: 15px;">+ Añadir Defecto</a>
+                <a href="{{ url_for('defectos.nuevo', inspeccion_id=inspeccion.id) }}" class="btn-primary btn-sm" style="margin-left: 15px;">+ Añadir Defecto</a>
             </h2>
 
             {% if defectos %}
                 <div class="defectos-grid">
                     {% for defecto in defectos %}
-                    <a href="/defectos/{{ defecto.id }}" class="defecto-card">
+                    <a href="{{ url_for('defectos.ver', defecto_id=defecto.id) }}" class="defecto-card">
                         <!-- Header con calificación -->
                         <div class="defecto-card-header">
                             <span class="defecto-calificacion badge-{{ defecto.calificacion|lower }}">
