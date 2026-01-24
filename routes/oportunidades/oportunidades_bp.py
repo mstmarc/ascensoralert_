@@ -35,7 +35,7 @@ oportunidades_bp = Blueprint('oportunidades', __name__)
 def oportunidades():
     """Dashboard principal de oportunidades con contadores por estado"""
     if "usuario" not in session:
-        return redirect("/")
+        return redirect(url_for("login"))
 
     try:
         response = requests.get(
@@ -75,7 +75,7 @@ def oportunidades():
 def mi_agenda():
     """Dashboard personal - Mi Agenda Comercial con pipeline de oportunidades"""
     if "usuario" not in session:
-        return redirect("/")
+        return redirect(url_for("login"))
 
     try:
         # Obtener TODAS las oportunidades que NO estén ganadas ni perdidas
@@ -126,7 +126,7 @@ def mi_agenda():
 def oportunidades_post_ipo():
     """Seguimiento Comercial - Sistema de tareas automáticas"""
     if "usuario" not in session:
-        return redirect("/")
+        return redirect(url_for("login"))
 
     # Determinar pestaña activa (abiertas o futuras)
     tab = request.args.get("tab", "abiertas")
@@ -436,7 +436,7 @@ def crear_oportunidad(cliente_id):
 def ver_oportunidad(oportunidad_id):
     """Ver detalle de una oportunidad con visitas relacionadas"""
     if "usuario" not in session:
-        return redirect("/")
+        return redirect(url_for("login"))
 
     try:
         # Obtener oportunidad con datos del cliente
@@ -745,7 +745,7 @@ def tarea_comercial_descartar(tarea_id):
 def tarea_comercial_convertir(tarea_id):
     """Marcar tarea como convertida (redirecciona a crear oportunidad)"""
     if "usuario" not in session:
-        return redirect("/")
+        return redirect(url_for("login"))
 
     try:
         # Obtener datos de la tarea
