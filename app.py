@@ -78,7 +78,7 @@ def inject_permisos():
 
 from app_legacy import (
     # Autenticación y Home
-    login, logout, home,
+    login, logout, home, login_tecnico,
 
     # Leads y Clientes - MIGRADAS A BLUEPRINT (ver routes/leads/leads_bp.py)
     # formulario_lead, leads_dashboard, exportar_leads, ver_lead,
@@ -173,6 +173,7 @@ from app_legacy import (
 
 # Autenticación y Home
 app.add_url_rule("/", "login", login, methods=["GET", "POST"])
+app.add_url_rule("/tecnico", "login_tecnico", login_tecnico, methods=["GET", "POST"])
 app.add_url_rule("/logout", "logout", logout)
 app.add_url_rule("/home", "home", home)
 

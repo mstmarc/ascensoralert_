@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#003366">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fedes Avisos">
+    <title>Fedes - Avisos</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo-fedes-ascensores.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest_tecnico.json') }}">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 360px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        .logo-text {
+            color: #003366;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            font-size: 16px;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #003366;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 18px;
+            background: #003366;
+            color: #ffffff;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-login:hover {
+            background: #002244;
+        }
+
+        .btn-login:active {
+            transform: scale(0.98);
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        /* PWA install prompt */
+        .install-prompt {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 12px 20px;
+            margin-top: 20px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+
+        .install-prompt.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Fedes">
+            <div class="logo-text">AVISOS A CLIENTES</div>
+        </div>
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label">Usuario</label>
+                <input type="text"
+                       name="usuario"
+                       class="form-input"
+                       placeholder="Tu nombre de usuario"
+                       autocomplete="username"
+                       autocapitalize="none"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Contraseña</label>
+                <input type="password"
+                       name="contrasena"
+                       class="form-input"
+                       placeholder="Tu contraseña"
+                       autocomplete="current-password"
+                       required>
+            </div>
+
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
+    </div>
+
+    <div class="footer-text">
+        Fedes Ascensores
+    </div>
+
+    <div id="installPrompt" class="install-prompt">
+        Añade esta página a tu pantalla de inicio para acceso rápido
+    </div>
+
+    <script>
+        // Mostrar mensaje de instalación en Android
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.add('visible');
+        });
+
+        // Detectar si ya está instalada como PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            document.getElementById('installPrompt').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

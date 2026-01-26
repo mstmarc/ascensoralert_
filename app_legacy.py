@@ -664,6 +664,45 @@ def logout():
     session.clear()
     return redirect("/")
 
+# Login específico para técnicos (landing page móvil)
+# @app.route("/tecnico", methods=["GET", "POST"])
+def login_tecnico():
+    """Landing page para técnicos - acceso directo desde móvil"""
+
+    # Si ya está logueado como técnico, ir directo a avisos
+    if "usuario" in session:
+        if session.get('perfil') == 'tecnico':
+            return redirect('/avisos-cliente')
+        else:
+            # Si no es técnico, ir al home normal
+            return redirect('/home')
+
+    if request.method == "POST":
+        usuario = request.form.get("usuario")
+        contrasena = request.form.get("contrasena")
+
+        if not usuario or not contrasena:
+            return render_template("login_tecnico.html", error="Usuario y contraseña requeridos")
+
+        encoded_user = urllib.parse.quote(usuario, safe="")
+        query = f"?nombre_usuario=eq.{encoded_user}"
+        response = requests.get(f"{SUPABASE_URL}/rest/v1/usuarios{query}", headers=HEADERS)
+
+        if response.status_code == 200 and len(response.json()) == 1:
+            user = response.json()[0]
+            if user.get("contrasena", "") == contrasena:
+                session["usuario"] = usuario
+                session["usuario_id"] = user.get("id")
+                session["email"] = user.get("email", "")
+                session["perfil"] = user.get("perfil", "visualizador")
+
+                # Siempre ir a avisos desde esta landing
+                return redirect('/avisos-cliente')
+
+        return render_template("login_tecnico.html", error="Usuario o contraseña incorrectos")
+
+    return render_template("login_tecnico.html", error=None)
+
 # Home - ACTUALIZADO: Dashboard en desktop, menú simple en móvil
 # @app.route("/home")
 @helpers.login_required
