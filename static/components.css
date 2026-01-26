@@ -347,7 +347,7 @@
     display: inline-block;
     padding: var(--space-sm) var(--space-lg);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-none);
+    border-radius: var(--radius-md);
     text-decoration: none;
     font-weight: 600;
     font-size: var(--font-size-base);
@@ -721,7 +721,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr auto auto auto;
     gap: var(--space-sm);
-    align-items: start;
+    align-items: end;
 }
 
 .filtro-grupo {
@@ -739,10 +739,10 @@
 .filtro-grupo select {
     padding: var(--space-sm);
     border: 2px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: var(--font-size-base);
     transition: border var(--transition-normal);
-    height: 36px;
+    height: 40px;
     box-sizing: border-box;
     font-family: var(--font-family);
 }
@@ -750,6 +750,14 @@
 .filtro-grupo select:focus {
     outline: none;
     border-color: var(--color-primary);
+}
+
+/* Botones en filtros - alineados con selects */
+.filtro-grupo .btn {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ============================================
