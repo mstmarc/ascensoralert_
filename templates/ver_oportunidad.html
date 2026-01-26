@@ -5,215 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalles de Oportunidad - Ascensor Alert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=6">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=9">
+    <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}?v=1">
     <style>
-        /* HEADER CENTRADO */
-        header .header-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        header .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* === ESTILO PROFESIONAL 2025 === */
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: #ffffff;
-            line-height: 1.5;
-        }
-
-        main {
-            max-width: 1400px !important;
-            margin: 0 auto !important;
-            padding: 60px 80px !important;
-            background: #ffffff;
-        }
-
-        main .menu {
-            max-width: none !important;
-            width: 100% !important;
-            margin: 0 !important;
-        }
-
-        .container {
-            max-width: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* INFO COMUNIDAD */
+        /* Estilos específicos para este template */
         .info-comunidad {
             background: transparent;
             padding: 0 0 20px 0;
-            border-radius: 0;
             margin-bottom: 20px;
-            box-shadow: none;
-            border-left: none;
-            border-bottom: 1px solid #e6e6e6;
+            border-bottom: 1px solid var(--color-border);
         }
 
         .info-comunidad h2 {
-            font-size: 18px;
-            color: #003366;
-            margin-bottom: 8px;
+            font-size: var(--font-size-2xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-sm);
             font-weight: 700;
         }
 
         .info-comunidad p {
-            color: #555;
-            font-size: 14px;
+            color: var(--color-text-light);
+            font-size: var(--font-size-base);
             margin: 0;
         }
 
-        /* SECCIONES - SIN RECUADROS */
-        .oportunidad-card {
-            background: transparent;
-            border-radius: 0;
-            box-shadow: none;
-            margin-bottom: 40px;
-            overflow: visible;
-            border: none;
-        }
+        /* Badges para estados de oportunidad */
+        .badge.activa { background: #e0e0e0; color: #616161; }
+        .badge.ganada { background: #d1ecf1; color: #0c5460; }
+        .badge.perdida { background: #f8d7da; color: #721c24; }
+        .badge.nueva { background: #e3f2fd; color: #1976d2; }
+        .badge.en_contacto { background: #fff3e0; color: #f57c00; }
+        .badge.presupuesto_preparacion { background: #f3e5f5; color: #7b1fa2; }
+        .badge.presupuesto_enviado { background: #fff9c4; color: #f57f17; }
 
-        .section-title {
-            background: transparent;
-            padding: 0 0 8px 0;
-            border-bottom: 2px solid #003366;
-            font-size: 17px;
-            font-weight: 700;
-            color: #003366;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 20px;
-        }
-
-        .section-content {
-            padding: 0;
-        }
-
-        .field-group {
-            margin-bottom: 15px;
-        }
-
-        .field-label {
-            font-weight: 700;
-            color: #222;
-            margin-bottom: 8px;
-            display: block;
-            font-size: 14px;
-        }
-
-        .field-value {
-            color: #222;
-            font-size: 14px;
-        }
-
-        /* BADGES */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 9px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            height: 38px;
-            box-sizing: border-box;
-            line-height: 1.2;
-            vertical-align: middle;
-        }
-
-        .badge.activa {
-            background: #e0e0e0;
-            color: #616161;
-        }
-
-        .badge.ganada {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .badge.perdida {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* BADGES PARA NUEVOS ESTADOS */
-        .badge.nueva {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .badge.en_contacto {
-            background: #fff3e0;
-            color: #f57c00;
-        }
-
-        .badge.presupuesto_preparacion {
-            background: #f3e5f5;
-            color: #7b1fa2;
-        }
-
-        .badge.presupuesto_enviado {
-            background: #fff9c4;
-            color: #f57f17;
-        }
-
-        /* SELECTOR DE ESTADO */
+        /* Selector de estado */
         .estado-selector-container {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: var(--space-lg);
             flex-wrap: wrap;
         }
 
-        .estado-dropdown {
-            display: inline-flex;
-            align-items: center;
-        }
-
         .estado-dropdown select {
-            padding: 9px 12px;
-            border: 1px solid #e6e6e6;
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--color-border);
             border-radius: 0;
-            font-size: 13px;
+            font-size: var(--font-size-md);
             font-weight: 600;
             background: white;
             cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            transition: all 0.2s;
+            font-family: var(--font-family);
+            transition: all var(--transition-fast);
             height: 38px;
-            box-sizing: border-box;
-            line-height: 1.2;
         }
 
-        .estado-dropdown select:focus {
-            outline: none;
-            border-color: #003366;
-        }
-
+        .estado-dropdown select:focus,
         .estado-dropdown select:hover {
-            border-color: #003366;
+            outline: none;
+            border-color: var(--color-primary);
         }
 
-        /* ACCIONES LIST */
+        /* Acciones list */
         .acciones-list {
             list-style: none;
-            margin: 0 0 15px 0;
+            margin: 0 0 var(--space-lg) 0;
             padding: 0;
         }
 
         .accion-item {
-            padding: 12px 0;
-            border-bottom: 1px solid #e6e6e6;
-            display: block;
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid var(--color-border);
         }
 
         .accion-item:last-child {
@@ -223,7 +84,7 @@
         .accion-content {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
+            gap: var(--space-sm);
         }
 
         .accion-checkbox {
@@ -235,215 +96,98 @@
 
         .accion-texto {
             flex: 1;
-            font-size: 14px;
-            color: #222;
+            font-size: var(--font-size-base);
+            color: var(--color-text);
             line-height: 1.6;
         }
 
         .accion-texto.completada {
             text-decoration: line-through;
-            color: #999;
+            color: var(--color-text-muted);
         }
 
-        /* FORM ADD ACCION */
+        /* Form add accion */
         .add-accion-form {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: var(--space-sm);
+            margin-top: var(--space-lg);
         }
 
         .add-accion-form input {
             flex: 1;
-            padding: 10px 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: 'Montserrat', sans-serif;
+            padding: var(--space-sm) var(--space-md);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-base);
+            font-family: var(--font-family);
         }
 
         .add-accion-form input:focus {
             outline: none;
-            border-color: #003366;
+            border-color: var(--color-primary);
         }
 
-        .add-accion-form button {
-            background: #003c80;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 700;
-            transition: background 0.2s;
-        }
-
-        .add-accion-form button:hover {
-            background: #002f66;
-        }
-
-        .empty-state {
-            text-align: left;
-            padding: 20px;
-            color: #999;
-            font-style: italic;
-            font-size: 14px;
-        }
-
-        /* NOTAS TEXTAREA */
+        /* Notas textarea */
         .notas-area {
             width: 100%;
             min-height: 100px;
-            padding: 10px 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: 'Montserrat', sans-serif;
+            padding: var(--space-sm) var(--space-md);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-base);
+            font-family: var(--font-family);
             resize: vertical;
         }
 
         .notas-area:focus {
             outline: none;
-            border-color: #003366;
+            border-color: var(--color-primary);
         }
 
-        /* VISITAS LIST */
+        /* Visitas - TEXTO NEGRO */
         .visitas-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
 
-        .visita-item {
-            padding: 12px 0;
-            border-bottom: 1px solid #e6e6e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .visita-item-opp {
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid var(--color-border);
         }
 
-        .visita-item:last-child {
+        .visita-item-opp:last-child {
             border-bottom: none;
         }
 
-        .visita-info {
-            flex: 1;
-        }
-
-        .visita-fecha {
+        .visita-fecha-opp {
             font-weight: 700;
-            color: #003366;
+            color: var(--color-text);
             margin-bottom: 3px;
-            font-size: 14px;
+            font-size: var(--font-size-base);
         }
 
-        .visita-tipo {
-            font-size: 13px;
-            color: #555;
+        .visita-tipo-opp {
+            font-size: var(--font-size-md);
+            color: var(--color-text);
         }
 
-        .visita-observaciones {
-            font-size: 12px;
-            color: #777;
-            margin-top: 5px;
+        .visita-observaciones-opp {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-top: var(--space-xs);
         }
 
-        /* FOOTER */
+        /* Footer */
         .oportunidad-footer {
-            background: transparent;
-            padding: 0;
-            border-top: none;
-            font-size: 12px;
-            color: #999;
-            margin-top: 20px;
+            font-size: var(--font-size-sm);
+            color: var(--color-text-muted);
+            margin-top: var(--space-xl);
         }
 
-        /* ACTION BUTTONS */
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-
-        /* BOTONES - Forzar estilo corporativo */
-        .btn,
-        a.btn,
-        button.btn {
-            background: #003366 !important;
-            color: #ffffff !important;
-            border: 1px solid #003366 !important;
-            border-radius: 0 !important;
-        }
-
-        .btn:hover,
-        a.btn:hover,
-        button.btn:hover {
-            background: #002244 !important;
-            border-color: #002244 !important;
-        }
-
-        .btn-danger {
-            background: #dc3545 !important;
-            border-color: #dc3545 !important;
-        }
-
-        .btn-danger:hover {
-            background: #c82333 !important;
-            border-color: #c82333 !important;
-        }
-
-        .btn-success {
-            background: #003366 !important;
-            border-color: #003366 !important;
-        }
-
-        .btn-success:hover {
-            background: #002244 !important;
-            border-color: #002244 !important;
-        }
-
-        /* ALERTAS */
-        .alert {
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* RESPONSIVE */
         @media (max-width: 768px) {
-            main {
-                padding: 40px 20px !important;
-            }
-
-            .section-content {
-                padding: 0;
-            }
-
             .add-accion-form {
                 flex-direction: column;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                text-align: left;
             }
         }
     </style>
@@ -459,12 +203,12 @@
         </div>
     </header>
 
-    <main>
-        <div class="container">
+    <main class="main--full-width">
+        <div class="page-container">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert {{ category }}">{{ message }}</div>
+                        <div class="alert alert--{{ category }}">{{ message }}</div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
@@ -476,11 +220,11 @@
             </div>
 
             <!-- DETALLES DE LA OPORTUNIDAD -->
-            <div class="oportunidad-card">
-                <div class="section-title">Detalles de la Oportunidad</div>
-                <div class="section-content">
-                    <div class="field-group">
-                        <span class="field-label">Estado del Pipeline:</span>
+            <div class="seccion">
+                <h2>Detalles de la Oportunidad</h2>
+                <div class="info-list">
+                    <div class="info-item">
+                        <label>Estado del Pipeline</label>
                         <div class="estado-selector-container">
                             <span class="badge {{ oportunidad.estado }}" id="estado-badge-actual">
                                 {% if oportunidad.estado == 'nueva' %}🆕 Nueva
@@ -507,14 +251,14 @@
                         </div>
                     </div>
 
-                    <div class="field-group">
-                        <span class="field-label">Tipo:</span>
-                        <span class="field-value">{{ oportunidad.tipo }}</span>
+                    <div class="info-item">
+                        <label>Tipo</label>
+                        <span>{{ oportunidad.tipo }}</span>
                     </div>
 
-                    <div class="field-group">
-                        <span class="field-label">Importe:</span>
-                        <span class="field-value" style="font-weight: 700; color: #003366; font-size: 16px;">
+                    <div class="info-item">
+                        <label>Importe</label>
+                        <span class="font-bold text-primary" style="font-size: var(--font-size-xl);">
                             {% if oportunidad.valor_estimado %}
                                 {{ "{:,.2f}".format(oportunidad.valor_estimado) }} €
                             {% else %}
@@ -524,129 +268,118 @@
                     </div>
 
                     {% if oportunidad.descripcion %}
-                    <div class="field-group">
-                        <span class="field-label">Descripción:</span>
-                        <span class="field-value">{{ oportunidad.descripcion }}</span>
+                    <div class="info-item">
+                        <label>Descripción</label>
+                        <span>{{ oportunidad.descripcion }}</span>
                     </div>
                     {% endif %}
                 </div>
             </div>
 
             <!-- ACCIONES A REALIZAR -->
-            <div class="oportunidad-card">
-                <div class="section-title">✅ Acciones a Realizar</div>
-                <div class="section-content">
-                    {% if oportunidad.acciones and oportunidad.acciones|length > 0 %}
-                        <ul class="acciones-list">
-                            {% for accion in oportunidad.acciones %}
-                            <li class="accion-item">
-                                <div class="accion-content">
-                                    <div class="accion-checkbox-wrapper">
-                                        <form method="POST" action="{{ url_for('oportunidades.toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
-                                            <input type="checkbox"
-                                                   class="accion-checkbox"
-                                                   {% if accion.completada %}checked{% endif %}
-                                                   onchange="this.form.submit()">
-                                        </form>
-                                    </div>
-                                    <div class="accion-texto {% if accion.completada %}completada{% endif %}">
-                                        {{ accion.texto }}
-                                    </div>
-                                    <div class="accion-delete">
-                                        <form method="POST" action="{{ url_for('oportunidades.delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta acción?')">×</button>
-                                        </form>
-                                    </div>
+            <div class="seccion">
+                <h2>✅ Acciones a Realizar</h2>
+                {% if oportunidad.acciones and oportunidad.acciones|length > 0 %}
+                    <ul class="acciones-list">
+                        {% for accion in oportunidad.acciones %}
+                        <li class="accion-item">
+                            <div class="accion-content">
+                                <div class="accion-checkbox-wrapper">
+                                    <form method="POST" action="{{ url_for('oportunidades.toggle_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
+                                        <input type="checkbox"
+                                               class="accion-checkbox"
+                                               {% if accion.completada %}checked{% endif %}
+                                               onchange="this.form.submit()">
+                                    </form>
                                 </div>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="empty-state">No hay acciones registradas</p>
-                    {% endif %}
+                                <div class="accion-texto {% if accion.completada %}completada{% endif %}">
+                                    {{ accion.texto }}
+                                </div>
+                                <div class="accion-delete">
+                                    <form method="POST" action="{{ url_for('oportunidades.delete_accion', oportunidad_id=oportunidad.id, index=loop.index0) }}">
+                                        <button type="submit" class="btn btn--danger btn--sm btn--rounded" onclick="return confirm('¿Eliminar esta acción?')">×</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="estado-vacio">No hay acciones registradas</p>
+                {% endif %}
 
-                    <form method="POST" action="{{ url_for('oportunidades.add_accion', oportunidad_id=oportunidad.id) }}" class="add-accion-form">
-                        <input type="text" name="texto_accion" placeholder="Escribe una nueva acción..." required>
-                        <button type="submit">+ Añadir</button>
-                    </form>
-                </div>
+                <form method="POST" action="{{ url_for('oportunidades.add_accion', oportunidad_id=oportunidad.id) }}" class="add-accion-form">
+                    <input type="text" name="texto_accion" placeholder="Escribe una nueva acción..." required>
+                    <button type="submit" class="btn btn--primary btn--rounded">+ Añadir</button>
+                </form>
             </div>
 
             <!-- NOTAS -->
-            <div class="oportunidad-card">
-                <div class="section-title">📝 Notas</div>
-                <div class="section-content">
-                    <form method="POST" action="{{ url_for('oportunidades.editar_oportunidad', oportunidad_id=oportunidad.id) }}">
-                        <input type="hidden" name="tipo" value="{{ oportunidad.tipo }}">
-                        <input type="hidden" name="descripcion" value="{{ oportunidad.descripcion or '' }}">
-                        <input type="hidden" name="estado" value="{{ oportunidad.estado }}">
-                        <input type="hidden" name="estado_presupuesto" value="{{ oportunidad.estado_presupuesto or 'No' }}">
-                        {% if oportunidad.valor_estimado %}
-                        <input type="hidden" name="valor_estimado" value="{{ oportunidad.valor_estimado }}">
-                        {% endif %}
-                        <textarea name="notas" class="notas-area" placeholder="Escribe tus notas aquí...">{{ oportunidad.notas or '' }}</textarea>
-                        <button type="submit" class="btn btn-success">Guardar Notas</button>
-                    </form>
-                </div>
+            <div class="seccion">
+                <h2>📝 Notas</h2>
+                <form method="POST" action="{{ url_for('oportunidades.editar_oportunidad', oportunidad_id=oportunidad.id) }}">
+                    <input type="hidden" name="tipo" value="{{ oportunidad.tipo }}">
+                    <input type="hidden" name="descripcion" value="{{ oportunidad.descripcion or '' }}">
+                    <input type="hidden" name="estado" value="{{ oportunidad.estado }}">
+                    <input type="hidden" name="estado_presupuesto" value="{{ oportunidad.estado_presupuesto or 'No' }}">
+                    {% if oportunidad.valor_estimado %}
+                    <input type="hidden" name="valor_estimado" value="{{ oportunidad.valor_estimado }}">
+                    {% endif %}
+                    <textarea name="notas" class="notas-area" placeholder="Escribe tus notas aquí...">{{ oportunidad.notas or '' }}</textarea>
+                    <button type="submit" class="btn btn--primary btn--rounded mt-lg">Guardar Notas</button>
+                </form>
             </div>
 
             <!-- HISTORIAL DE VISITAS -->
-            <div class="oportunidad-card">
-                <div class="section-title">📅 Historial de Visitas</div>
-                <div class="section-content">
-                    {% if visitas and visitas|length > 0 %}
-                        <ul class="visitas-list">
-                            {% for visita in visitas %}
-                            <li class="visita-item">
-                                <div class="visita-info">
-                                    <div class="visita-fecha">{{ visita.fecha_visita }}</div>
-                                    <div class="visita-tipo">
-                                        {{ visita.tipo_visita }}
-                                        {% if visita.tipo == 'administrador' and visita.persona_contacto %}
-                                            - Contacto: {{ visita.persona_contacto }}
-                                        {% endif %}
-                                    </div>
-                                    {% if visita.observaciones %}
-                                    <div class="visita-observaciones">{{ visita.observaciones }}</div>
-                                    {% endif %}
-                                </div>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="empty-state">No hay visitas registradas para esta oportunidad</p>
-                    {% endif %}
+            <div class="seccion">
+                <h2>📅 Historial de Visitas</h2>
+                {% if visitas and visitas|length > 0 %}
+                    <ul class="visitas-list">
+                        {% for visita in visitas %}
+                        <li class="visita-item-opp">
+                            <div class="visita-fecha-opp">{{ visita.fecha_visita }}</div>
+                            <div class="visita-tipo-opp">
+                                {{ visita.tipo_visita }}
+                                {% if visita.tipo == 'administrador' and visita.persona_contacto %}
+                                    - Contacto: {{ visita.persona_contacto }}
+                                {% endif %}
+                            </div>
+                            {% if visita.observaciones %}
+                            <div class="visita-observaciones-opp">{{ visita.observaciones }}</div>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="estado-vacio">No hay visitas registradas para esta oportunidad</p>
+                {% endif %}
 
-                    <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-                        <a href="{{ url_for('visitas.crear_visita_seguimiento', cliente_id=oportunidad.cliente_id, oportunidad_id=oportunidad.id) }}"
-                           class="btn btn-primary">+ Registrar Visita a Instalación</a>
-                        <a href="{{ url_for('visitas.visita_administrador', oportunidad_id=oportunidad.id) }}"
-                           class="btn btn-primary">+ Registrar Visita a Administrador</a>
-                    </div>
+                <div class="d-flex gap-sm flex-wrap mt-lg">
+                    <a href="{{ url_for('visitas.crear_visita_seguimiento', cliente_id=oportunidad.cliente_id, oportunidad_id=oportunidad.id) }}"
+                       class="btn btn--primary btn--rounded">+ Registrar Visita a Instalación</a>
+                    <a href="{{ url_for('visitas.visita_administrador', oportunidad_id=oportunidad.id) }}"
+                       class="btn btn--primary btn--rounded">+ Registrar Visita a Administrador</a>
                 </div>
             </div>
 
             <!-- BOTONES DE ACCIÓN -->
-            <div class="action-buttons">
-                <a href="{{ url_for('oportunidades.editar_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn-primary">Editar Oportunidad</a>
-                <a href="{{ url_for('leads.ver', lead_id=oportunidad.cliente_id) }}" class="btn btn-primary">Ver Comunidad</a>
-                <a href="{{ url_for('oportunidades.oportunidades') }}" class="btn btn-primary">Volver a Oportunidades</a>
+            <div class="botones-accion">
+                <a href="{{ url_for('oportunidades.editar_oportunidad', oportunidad_id=oportunidad.id) }}" class="btn btn--primary btn--rounded">Editar Oportunidad</a>
+                <a href="{{ url_for('leads.ver', lead_id=oportunidad.cliente_id) }}" class="btn btn--primary btn--rounded">Ver Comunidad</a>
+                <a href="{{ url_for('oportunidades.oportunidades') }}" class="btn btn--secondary btn--rounded">Volver a Oportunidades</a>
             </div>
 
             <!-- FOOTER CON FECHA CREACIÓN -->
-            <div class="oportunidad-card" style="margin-top: 20px;">
-                <div class="oportunidad-footer">
-                    Fecha de creación: {{ oportunidad.fecha_creacion[:10] }}
-                </div>
+            <div class="oportunidad-footer">
+                Fecha de creación: {{ oportunidad.fecha_creacion[:10] }}
             </div>
         </div>
-    </main>    <!-- Inyectar permisos del usuario para JavaScript -->
+    </main>
+
     <script>
         window.userPermissions = {{ permisos_usuario_json | safe }};
         window.perfilUsuario = '{{ perfil_usuario }}';
     </script>
-
-
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
     <script>
         // Manejo de cambio de estado desde ficha de oportunidad
