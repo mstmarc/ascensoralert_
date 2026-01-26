@@ -368,6 +368,10 @@ app.register_blueprint(notificaciones_bp)
 from routes.cartera import cartera_bp
 app.register_blueprint(cartera_bp)
 
+# Blueprint de Avisos a Cliente (notificaciones de parada)
+from routes.avisos_cliente import avisos_cliente_bp
+app.register_blueprint(avisos_cliente_bp)
+
 # ============================================
 # RUTA DE DIAGNÓSTICO (temporal)
 # ============================================

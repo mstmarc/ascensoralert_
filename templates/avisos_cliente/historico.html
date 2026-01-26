@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Avisos - Fedes</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .historico-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            color: #003366;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .avisos-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .aviso-item {
+            background: #ffffff;
+            border: 1px solid #e6e6e6;
+            padding: 15px 20px;
+        }
+
+        .aviso-item:hover {
+            border-color: #003366;
+        }
+
+        .aviso-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .aviso-instalacion {
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .aviso-fecha {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .aviso-detalles {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .aviso-detalles span {
+            margin-right: 15px;
+        }
+
+        .estado-enviado {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .estado-error {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .btn-volver {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #ffffff;
+            color: #003366;
+            border: 1px solid #003366;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn-volver:hover {
+            background: #003366;
+            color: #ffffff;
+        }
+
+        .sin-avisos {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        @media (max-width: 767px) {
+            .historico-container {
+                padding: 15px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .aviso-header {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Histórico de Avisos</h1>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="historico-container">
+
+            <div class="page-header">
+                <h2 class="page-title">Últimos avisos enviados</h2>
+                <a href="{{ url_for('avisos_cliente.index') }}" class="btn-volver">Enviar nuevo aviso</a>
+            </div>
+
+            {% if avisos %}
+            <div class="avisos-lista">
+                {% for aviso in avisos %}
+                <div class="aviso-item">
+                    <div class="aviso-header">
+                        <div class="aviso-instalacion">
+                            {% if aviso.instalaciones %}
+                                {{ aviso.instalaciones.nombre }}
+                                {% if aviso.instalaciones.municipio %} - {{ aviso.instalaciones.municipio }}{% endif %}
+                            {% else %}
+                                {{ aviso.nombre_destino or 'Sin instalación' }}
+                            {% endif %}
+                        </div>
+                        <div class="aviso-fecha">{{ aviso.fecha_formateada }}</div>
+                    </div>
+                    <div class="aviso-detalles">
+                        <span>
+                            <strong>Motivo:</strong>
+                            {% if aviso.motivos_parada %}
+                                {{ aviso.motivos_parada.descripcion }}
+                            {% else %}
+                                {{ aviso.motivo_texto or '-' }}
+                            {% endif %}
+                        </span>
+                        <span><strong>Enviado a:</strong> {{ aviso.email_destino }}</span>
+                        <span><strong>Por:</strong> {{ aviso.enviado_por_nombre }}</span>
+                        <span class="{% if aviso.email_enviado %}estado-enviado{% else %}estado-error{% endif %}">
+                            {{ 'Enviado' if aviso.email_enviado else 'Error' }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="sin-avisos">
+                <p>No hay avisos registrados todavía.</p>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+
+    <script src="/static/sidebar.js"></script>
+</body>
+</html>

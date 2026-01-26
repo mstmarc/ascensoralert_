@@ -189,6 +189,11 @@
             color: #856404;
         }
 
+        .badge-tecnico {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
         .actions {
             display: flex;
             gap: 10px;
@@ -272,6 +277,7 @@
                             <select id="perfil" name="perfil" required>
                                 <option value="visualizador">Visualizador (Solo lectura)</option>
                                 <option value="gestor">Gestor (Sin inspecciones)</option>
+                                <option value="tecnico">Tecnico (Solo avisos a cliente)</option>
                                 <option value="admin">Admin (Acceso total)</option>
                             </select>
                         </div>
@@ -302,11 +308,13 @@
                             <td>{{ usuario.email or '-' }}</td>
                             <td>
                                 {% if usuario.perfil == 'admin' %}
-                                    <span class="badge badge-admin">👑 Admin</span>
+                                    <span class="badge badge-admin">Admin</span>
                                 {% elif usuario.perfil == 'gestor' %}
-                                    <span class="badge badge-gestor">🔧 Gestor</span>
+                                    <span class="badge badge-gestor">Gestor</span>
+                                {% elif usuario.perfil == 'tecnico' %}
+                                    <span class="badge badge-tecnico">Tecnico</span>
                                 {% else %}
-                                    <span class="badge badge-visualizador">👁️ Visualizador</span>
+                                    <span class="badge badge-visualizador">Visualizador</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -316,6 +324,7 @@
                                         <select name="perfil" class="perfil-select" onchange="this.form.submit()">
                                             <option value="admin" {% if usuario.perfil == 'admin' %}selected{% endif %}>Admin</option>
                                             <option value="gestor" {% if usuario.perfil == 'gestor' %}selected{% endif %}>Gestor</option>
+                                            <option value="tecnico" {% if usuario.perfil == 'tecnico' %}selected{% endif %}>Tecnico</option>
                                             <option value="visualizador" {% if usuario.perfil == 'visualizador' %}selected{% endif %}>Visualizador</option>
                                         </select>
                                     </form>

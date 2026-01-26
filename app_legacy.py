@@ -670,6 +670,10 @@ def logout():
 def home():
     """Homepage - Dashboard responsive para todos los dispositivos"""
 
+    # Redirección para técnicos: van directamente a avisos a cliente
+    if session.get('perfil') == 'tecnico':
+        return redirect('/avisos-cliente')
+
     # Dashboard responsive (funciona en desktop, tablet y móvil)
 
     # Variables de fecha usadas en varias secciones

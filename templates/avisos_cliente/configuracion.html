@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración Avisos - Fedes</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .config-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .config-card {
+            background: #ffffff;
+            border: 1px solid #e6e6e6;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .config-titulo {
+            color: #003366;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e6e6e6;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #003366;
+        }
+
+        .form-hint {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn-guardar {
+            flex: 1;
+            padding: 15px;
+            background: #003366;
+            color: #ffffff;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+        }
+
+        .btn-guardar:hover {
+            background: #002244;
+        }
+
+        .btn-volver {
+            flex: 1;
+            padding: 15px;
+            background: #ffffff;
+            color: #003366;
+            border: 1px solid #003366;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .btn-volver:hover {
+            background: #003366;
+            color: #ffffff;
+        }
+
+        .mensaje-exito {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mensaje-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 767px) {
+            .config-container {
+                padding: 15px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Configuración de Avisos</h1>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="config-container">
+
+            <!-- Mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="{% if category == 'success' %}mensaje-exito{% else %}mensaje-error{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="config-card">
+                    <h2 class="config-titulo">Configuración de emails</h2>
+
+                    <div class="form-group">
+                        <label class="form-label">Email para copias:</label>
+                        <input type="text"
+                               name="email_copia"
+                               value="{{ config.email_copia }}"
+                               class="form-input"
+                               placeholder="ejemplo@fedes.es, otro@fedes.es">
+                        <p class="form-hint">
+                            Todos los avisos enviados se copiarán a estos emails.
+                            Puedes poner varios separados por comas.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email remitente:</label>
+                        <input type="email"
+                               name="email_remitente"
+                               value="{{ config.email_remitente }}"
+                               class="form-input"
+                               placeholder="avisos@fedes.es"
+                               required>
+                        <p class="form-hint">
+                            Este email debe estar verificado en Resend.
+                            Las respuestas de los clientes llegarán aquí.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre del remitente:</label>
+                        <input type="text"
+                               name="nombre_remitente"
+                               value="{{ config.nombre_remitente }}"
+                               class="form-input"
+                               placeholder="Fedes Ascensores"
+                               required>
+                        <p class="form-hint">
+                            Nombre que verá el cliente como remitente del email.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-guardar">Guardar configuración</button>
+                    <a href="{{ url_for('avisos_cliente.index') }}" class="btn-volver">Volver</a>
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+
+    <script src="/static/sidebar.js"></script>
+</body>
+</html>

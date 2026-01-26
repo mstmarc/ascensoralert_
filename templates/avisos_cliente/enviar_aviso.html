@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avisar al Cliente - Fedes</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        /* Estilos específicos para esta página */
+        .aviso-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .aviso-card {
+            background: #ffffff;
+            border: 1px solid #e6e6e6;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .aviso-titulo {
+            color: #003366;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        /* Buscador de máquinas */
+        .buscador-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .buscador-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e6e6e6;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .buscador-input:focus {
+            outline: none;
+            border-color: #003366;
+        }
+
+        .resultados-busqueda {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1px solid #e6e6e6;
+            border-top: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .resultados-busqueda.visible {
+            display: block;
+        }
+
+        .resultado-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .resultado-item:hover {
+            background: #f8f9fa;
+        }
+
+        .resultado-item.sin-email {
+            opacity: 0.6;
+        }
+
+        .resultado-nombre {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .resultado-direccion {
+            font-size: 13px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .resultado-sin-email {
+            font-size: 12px;
+            color: #dc3545;
+            margin-top: 3px;
+        }
+
+        /* Máquina seleccionada */
+        .maquina-seleccionada {
+            background: #f8f9fa;
+            border: 1px solid #003366;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .maquina-seleccionada.visible {
+            display: block;
+        }
+
+        .maquina-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .maquina-datos h3 {
+            color: #003366;
+            margin: 0 0 5px 0;
+            font-size: 16px;
+        }
+
+        .maquina-datos p {
+            margin: 3px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .btn-cambiar {
+            background: none;
+            border: none;
+            color: #003366;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+        }
+
+        /* Motivos de parada */
+        .motivos-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .motivo-opcion {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e6e6e6;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .motivo-opcion:hover {
+            border-color: #003366;
+        }
+
+        .motivo-opcion.seleccionado {
+            border-color: #003366;
+            background: #f8f9fa;
+        }
+
+        .motivo-opcion input[type="radio"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .motivo-texto {
+            font-size: 15px;
+            color: #333;
+        }
+
+        /* Botón de envío */
+        .btn-enviar {
+            width: 100%;
+            padding: 18px;
+            background: #003366;
+            color: #ffffff;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-enviar:hover {
+            background: #002244;
+        }
+
+        .btn-enviar:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Mensajes flash */
+        .mensaje-exito {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mensaje-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Enlaces de navegación */
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .nav-links a {
+            color: #003366;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            .aviso-container {
+                padding: 15px;
+            }
+
+            .aviso-card {
+                padding: 20px;
+            }
+
+            .buscador-input {
+                padding: 18px 15px;
+            }
+
+            .motivo-opcion {
+                padding: 18px 15px;
+            }
+
+            .btn-enviar {
+                padding: 20px;
+            }
+        }
+
+        /* Ocultar header en móvil para técnicos */
+        @media (max-width: 767px) {
+            {% if perfil_usuario == 'tecnico' %}
+            header {
+                display: none !important;
+            }
+
+            main {
+                margin-left: 0 !important;
+            }
+            {% endif %}
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/home">
+                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes" class="logo">
+                </a>
+            </div>
+            <div class="title-container">
+                <h1>Avisar al Cliente</h1>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="aviso-container">
+
+            <!-- Mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="{% if category == 'success' %}mensaje-exito{% else %}mensaje-error{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Enlaces de navegación -->
+            {% if perfil_usuario != 'tecnico' %}
+            <div class="nav-links">
+                <a href="{{ url_for('avisos_cliente.historico') }}">Ver histórico</a>
+                {% if perfil_usuario == 'admin' %}
+                <a href="{{ url_for('avisos_cliente.configuracion') }}">Configuración</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <form id="formAviso" method="POST" action="{{ url_for('avisos_cliente.enviar_aviso') }}">
+                <div class="aviso-card">
+                    <h2 class="aviso-titulo">1. Seleccionar ascensor</h2>
+
+                    <!-- Buscador -->
+                    <div class="buscador-container">
+                        <input type="text"
+                               id="buscadorMaquina"
+                               class="buscador-input"
+                               placeholder="Buscar por RAE, dirección o comunidad..."
+                               autocomplete="off">
+                        <div id="resultadosBusqueda" class="resultados-busqueda"></div>
+                    </div>
+
+                    <!-- Máquina seleccionada -->
+                    <div id="maquinaSeleccionada" class="maquina-seleccionada">
+                        <div class="maquina-info">
+                            <div class="maquina-datos">
+                                <h3 id="maquinaNombre"></h3>
+                                <p id="maquinaDireccion"></p>
+                                <p id="maquinaEmail"></p>
+                            </div>
+                            <button type="button" class="btn-cambiar" onclick="limpiarSeleccion()">Cambiar</button>
+                        </div>
+                    </div>
+
+                    <!-- Campos ocultos -->
+                    <input type="hidden" name="maquina_id" id="maquinaId">
+                    <input type="hidden" name="instalacion_id" id="instalacionId">
+                    <input type="hidden" name="email_destino" id="emailDestino">
+                    <input type="hidden" name="nombre_destino" id="nombreDestino">
+                    <input type="hidden" name="instalacion_nombre" id="instalacionNombre">
+                </div>
+
+                <div class="aviso-card">
+                    <h2 class="aviso-titulo">2. Motivo de la parada</h2>
+
+                    <div class="motivos-lista">
+                        {% for motivo in motivos %}
+                        <label class="motivo-opcion" for="motivo_{{ motivo.id }}">
+                            <input type="radio"
+                                   name="motivo_id"
+                                   id="motivo_{{ motivo.id }}"
+                                   value="{{ motivo.id }}"
+                                   required>
+                            <span class="motivo-texto">{{ motivo.descripcion }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" id="btnEnviar" class="btn-enviar" disabled>
+                    Enviar aviso
+                </button>
+
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const buscador = document.getElementById('buscadorMaquina');
+        const resultados = document.getElementById('resultadosBusqueda');
+        const maquinaSeleccionada = document.getElementById('maquinaSeleccionada');
+        const btnEnviar = document.getElementById('btnEnviar');
+
+        let timeoutBusqueda = null;
+        let maquinaActual = null;
+
+        // Buscar mientras escribe
+        buscador.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            clearTimeout(timeoutBusqueda);
+
+            if (query.length < 2) {
+                resultados.classList.remove('visible');
+                return;
+            }
+
+            timeoutBusqueda = setTimeout(() => buscarMaquinas(query), 300);
+        });
+
+        // Ocultar resultados al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!buscador.contains(e.target) && !resultados.contains(e.target)) {
+                resultados.classList.remove('visible');
+            }
+        });
+
+        async function buscarMaquinas(query) {
+            try {
+                const response = await fetch(`/avisos-cliente/api/buscar-maquinas?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    resultados.innerHTML = '<div class="resultado-item">No se encontraron resultados</div>';
+                } else {
+                    resultados.innerHTML = data.map(m => `
+                        <div class="resultado-item ${m.tiene_email ? '' : 'sin-email'}"
+                             onclick="seleccionarMaquina(${JSON.stringify(m).replace(/"/g, '&quot;')})">
+                            <div class="resultado-nombre">${m.identificador || m.codigo || 'Sin identificador'}</div>
+                            <div class="resultado-direccion">${m.instalacion}${m.municipio ? ' - ' + m.municipio : ''}</div>
+                            ${!m.tiene_email ? '<div class="resultado-sin-email">Sin email configurado</div>' : ''}
+                        </div>
+                    `).join('');
+                }
+
+                resultados.classList.add('visible');
+            } catch (error) {
+                console.error('Error buscando:', error);
+            }
+        }
+
+        function seleccionarMaquina(maquina) {
+            if (!maquina.tiene_email) {
+                alert('Esta instalación no tiene email de contacto configurado.\n\nPor favor, contacta con la oficina para añadir el email.');
+                return;
+            }
+
+            maquinaActual = maquina;
+
+            // Actualizar campos ocultos
+            document.getElementById('maquinaId').value = maquina.id;
+            document.getElementById('instalacionId').value = maquina.instalacion_id || '';
+            document.getElementById('emailDestino').value = maquina.email_contacto;
+            document.getElementById('nombreDestino').value = maquina.nombre_contacto || '';
+            document.getElementById('instalacionNombre').value = maquina.instalacion;
+
+            // Mostrar info
+            document.getElementById('maquinaNombre').textContent = maquina.identificador || maquina.codigo || 'Sin identificador';
+            document.getElementById('maquinaDireccion').textContent = maquina.instalacion + (maquina.municipio ? ' - ' + maquina.municipio : '');
+            document.getElementById('maquinaEmail').textContent = 'Email: ' + maquina.email_contacto;
+
+            // Mostrar tarjeta y ocultar buscador
+            maquinaSeleccionada.classList.add('visible');
+            buscador.style.display = 'none';
+            resultados.classList.remove('visible');
+
+            // Habilitar botón si hay motivo seleccionado
+            actualizarBoton();
+        }
+
+        function limpiarSeleccion() {
+            maquinaActual = null;
+
+            // Limpiar campos
+            document.getElementById('maquinaId').value = '';
+            document.getElementById('instalacionId').value = '';
+            document.getElementById('emailDestino').value = '';
+            document.getElementById('nombreDestino').value = '';
+            document.getElementById('instalacionNombre').value = '';
+
+            // Ocultar tarjeta y mostrar buscador
+            maquinaSeleccionada.classList.remove('visible');
+            buscador.style.display = 'block';
+            buscador.value = '';
+            buscador.focus();
+
+            actualizarBoton();
+        }
+
+        // Actualizar botón cuando cambia el motivo
+        document.querySelectorAll('input[name="motivo_id"]').forEach(radio => {
+            radio.addEventListener('change', actualizarBoton);
+        });
+
+        // Resaltar motivo seleccionado
+        document.querySelectorAll('.motivo-opcion').forEach(opcion => {
+            opcion.addEventListener('click', function() {
+                document.querySelectorAll('.motivo-opcion').forEach(o => o.classList.remove('seleccionado'));
+                this.classList.add('seleccionado');
+            });
+        });
+
+        function actualizarBoton() {
+            const tieneMAquina = document.getElementById('maquinaId').value !== '';
+            const tieneMotivo = document.querySelector('input[name="motivo_id"]:checked') !== null;
+
+            btnEnviar.disabled = !(tieneMAquina && tieneMotivo);
+        }
+
+        // Confirmación antes de enviar
+        document.getElementById('formAviso').addEventListener('submit', function(e) {
+            const instalacion = document.getElementById('instalacionNombre').value;
+            const email = document.getElementById('emailDestino').value;
+
+            if (!confirm(`¿Enviar aviso de parada a ${instalacion}?\n\nSe enviará email a: ${email}`)) {
+                e.preventDefault();
+            }
+        });
+    </script>
+
+    <!-- Inyectar permisos del usuario para JavaScript -->
+    <script>
+        window.userPermissions = {{ permisos_usuario_json | safe }};
+        window.perfilUsuario = '{{ perfil_usuario }}';
+    </script>
+
+    {% if perfil_usuario != 'tecnico' %}
+    <script src="/static/sidebar.js"></script>
+    {% endif %}
+</body>
+</html>
