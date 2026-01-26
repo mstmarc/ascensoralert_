@@ -48,7 +48,8 @@ MODULOS = {
     'oportunidades': 'Oportunidades Comerciales',
     'administradores': 'Administradores de Fincas',
     'visitas': 'Visitas',
-    'home': 'Dashboard'
+    'home': 'Dashboard',
+    'notificaciones_cliente': 'Notificaciones a Clientes'
 }
 
 # Definición de permisos por perfil
@@ -62,7 +63,8 @@ PERMISOS_POR_PERFIL = {
         'oportunidades': {'read': True, 'write': True, 'delete': True},
         'administradores': {'read': True, 'write': True, 'delete': True},
         'visitas': {'read': True, 'write': True, 'delete': True},
-        'home': {'read': True, 'write': True, 'delete': True}
+        'home': {'read': True, 'write': True, 'delete': True},
+        'notificaciones_cliente': {'read': True, 'write': True, 'delete': True}
     },
     'gestor': {
         # Gestor: todo EXCEPTO inspecciones
@@ -72,7 +74,8 @@ PERMISOS_POR_PERFIL = {
         'oportunidades': {'read': True, 'write': True, 'delete': True},
         'administradores': {'read': True, 'write': True, 'delete': True},
         'visitas': {'read': True, 'write': True, 'delete': True},
-        'home': {'read': True, 'write': True, 'delete': True}
+        'home': {'read': True, 'write': True, 'delete': True},
+        'notificaciones_cliente': {'read': True, 'write': True, 'delete': True}
     },
     'visualizador': {
         # Visualizador: solo lectura, sin inspecciones
@@ -82,7 +85,19 @@ PERMISOS_POR_PERFIL = {
         'oportunidades': {'read': True, 'write': False, 'delete': False},
         'administradores': {'read': True, 'write': False, 'delete': False},
         'visitas': {'read': True, 'write': False, 'delete': False},
-        'home': {'read': True, 'write': False, 'delete': False}
+        'home': {'read': True, 'write': False, 'delete': False},
+        'notificaciones_cliente': {'read': False, 'write': False, 'delete': False}
+    },
+    'tecnico': {
+        # Técnico: solo acceso a notificaciones a clientes
+        'inspecciones': {'read': False, 'write': False, 'delete': False},
+        'clientes': {'read': False, 'write': False, 'delete': False},
+        'equipos': {'read': False, 'write': False, 'delete': False},
+        'oportunidades': {'read': False, 'write': False, 'delete': False},
+        'administradores': {'read': False, 'write': False, 'delete': False},
+        'visitas': {'read': False, 'write': False, 'delete': False},
+        'home': {'read': True, 'write': False, 'delete': False},
+        'notificaciones_cliente': {'read': True, 'write': True, 'delete': False}
     }
 }
 

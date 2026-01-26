@@ -611,7 +611,7 @@ def crear_usuario():
         flash_error("Nombre de usuario y contraseña son obligatorios")
         return redirect(url_for('admin.usuarios'))
 
-    if perfil not in ['admin', 'gestor', 'visualizador']:
+    if perfil not in ['admin', 'gestor', 'tecnico', 'visualizador']:
         flash_error("Perfil inválido")
         return redirect(url_for('admin.usuarios'))
 
@@ -645,7 +645,7 @@ def editar_usuario(usuario_id):
 
     perfil = request.form.get("perfil", "visualizador")
 
-    if perfil not in ['admin', 'gestor', 'visualizador']:
+    if perfil not in ['admin', 'gestor', 'tecnico', 'visualizador']:
         flash_error("Perfil inválido")
         return redirect(url_for('admin.usuarios'))
 
