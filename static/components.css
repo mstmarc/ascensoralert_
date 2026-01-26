@@ -543,14 +543,14 @@
 
 .timeline__label {
     font-weight: 600;
-    color: var(--color-primary);
-    font-size: var(--font-size-md);
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
     margin-bottom: 3px;
 }
 
 .timeline__date {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-base);
 }
 
 /* ============================================
@@ -915,14 +915,14 @@
 
 .timeline-label {
     font-weight: 600;
-    color: var(--color-primary);
-    font-size: var(--font-size-md);
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
     margin-bottom: 3px;
 }
 
 .timeline-date {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-base);
 }
 
 /* Badges legacy - estados de oportunidad */
