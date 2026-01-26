@@ -5,379 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Leads - AscensorAlert</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="/static/styles.css?v=6">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* NOTA: El sidebar.js maneja automáticamente el layout del sidebar y el margin-left del main */
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: #ffffff;
-            line-height: 1.5;
-        }
-
-        /* Ajustar contenedor del dashboard para ancho completo */
-        main {
-            max-width: 1400px !important;
-            margin: 0 auto !important;
-            padding: 60px 80px !important;
-            background: #ffffff;
-        }
-
-        main .menu {
-            max-width: none !important;
-            width: 100% !important;
-            margin: 0 !important;
-        }
-
-        /* HEADER DE PÁGINA */
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .page-title {
-            margin: 0;
-            color: #003366;
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        /* HEADER CENTRADO */
-        header .header-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        header .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Filtros con botones alineados horizontalmente */
-        .filtros {
-            background: transparent;
-            padding: 15px 0;
-            margin-bottom: 15px;
-        }
-
-        .filtros-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto auto auto;
-            gap: 10px;
-            align-items: start;
-        }
-
-        .filtro-grupo {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filtros .btn {
-            height: 36px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 8px 14px !important;
-            white-space: nowrap;
-            font-weight: 700;
-            border-radius: 8px;
-            margin: 0 !important;
-            width: 100%;
-            box-sizing: border-box;
-            border: none !important;
-            font-size: 14px !important;
-            line-height: 1 !important;
-            font-family: 'Montserrat', sans-serif;
-            text-decoration: none;
-            cursor: pointer;
-            min-width: auto !important;
-        }
-
-        .filtros .btn-secondary {
-            background: #003c80;
-            color: white;
-        }
-
-        .filtros .btn-secondary:hover {
-            background: #002f66;
-        }
-
-        .filtro-grupo label {
-            font-weight: 600;
-            color: #003366;
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-
-        .filtro-grupo select {
-            padding: 8px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border 0.3s;
-            height: 36px;
-            box-sizing: border-box;
-        }
-
-        .filtro-grupo select:focus {
-            outline: none;
-            border-color: #003366;
-        }
-
-        .paginacion {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin: 15px 0;
-            padding: 12px 0;
-            background: transparent;
-            flex-wrap: wrap;
-        }
-
-        .paginacion-info {
-            color: #003366;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .info-resultados {
-            text-align: center;
-            color: #003366;
-            margin: 15px 0;
-            font-weight: 600;
-            font-size: 14px;
-            background: transparent;
-            padding: 12px 0;
-        }
-        
-        .tabla-container {
-            overflow-x: auto;
-            margin-top: 10px;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid #ddd;
-            min-width: 800px;
-        }
-        
-        th {
-            background: #003366;
-            color: white;
-            padding: 10px 8px;
-            text-align: left;
-            font-weight: 600;
-            border: 1px solid #002f66;
-            position: sticky;
-            top: 0;
-            font-size: 14px;
-        }
-        
-        td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-        }
-        
-        tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-        
-        tr:hover {
-            background: #e9ecef;
-        }
-
-        .acciones-cell {
-            white-space: nowrap;
-        }
-        
-        /* LISTADO ESTILO PROFESIONAL 2025 */
-        .leads-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .lead-list-item {
-            background: #fafafa;
-            padding: 16px;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            position: relative;
-            border: 1px solid #f0f0f0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-        }
-
-        .lead-list-item:hover {
-            background: #f0f3f8;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-            border-color: #003366;
-        }
-
-        .lead-list-direccion {
-            font-size: 15px;
-            font-weight: 700;
-            color: #1a1a1a;
-            text-decoration: none;
-            display: block;
-            transition: color 0.2s ease;
-            margin-bottom: 6px;
-            text-align: center;
-        }
-
-        .lead-list-direccion:hover {
-            color: #003366;
-        }
-
-        .lead-list-info {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .lead-list-info-item {
-            font-size: 13px;
-            color: #555555;
-            font-weight: 500;
-        }
-
-        .leyenda {
-            background: transparent;
-            padding: 10px 0;
-            margin: 15px 0;
-        }
-
-        .leyenda h3 {
-            color: #003366;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .leyenda-items {
-            display: flex;
-            justify-content: flex-start;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .leyenda-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-        }
-
-        .color-box {
-            width: 20px;
-            height: 15px;
-            border-radius: 3px;
-            border: 1px solid #999;
-            flex-shrink: 0;
-        }
-
-        .color-amarillo { background-color: #FFF59D; }
-        .color-rojo { background-color: #FFCDD2; }
-
-        @media (max-width: 768px) {
-            main {
-                padding: 40px 20px !important;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .page-header .btn {
-                width: 100%;
-            }
-
-            .filtros {
-                padding: 10px 0;
-            }
-
-            .filtros-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .filtros .btn {
-                width: 100%;
-            }
-
-            /* Ajustar listado compacto en móvil */
-            .lead-list-item {
-                padding: 12px;
-            }
-
-            .lead-list-direccion {
-                font-size: 14px;
-            }
-
-            .lead-list-info {
-                gap: 8px;
-            }
-
-            .lead-list-info-item {
-                font-size: 12px;
-            }
-
-            table {
-                font-size: 13px;
-                min-width: 600px;
-            }
-
-            th, td {
-                padding: 8px 6px;
-            }
-
-            .btn-accion {
-                padding: 6px 10px;
-                font-size: 13px;
-            }
-
-            .leyenda-items {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .paginacion-info {
-                font-size: 15px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=9">
+    <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}?v=1">
 </head>
 <body>
     <header>
         <div class="header-container">
             <div class="logo-container">
                 <a href="/home">
-                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo Fedes Ascensores" class="logo">
                 </a>
             </div>
         </div>
     </header>
-    <main>
-        <div class="menu">
+
+    <main class="main--full-width">
+        <div class="page-container">
             <!-- Header de página con título y botón -->
             <div class="page-header">
-                <h2 class="page-title">Gestión de Instalaciones</h2>
-                <a href="/nuevo_lead" class="btn btn-primary">
+                <div class="page-header__left">
+                    <h1>Gestión de Instalaciones</h1>
+                </div>
+                <a href="/nuevo_lead" class="btn btn--primary btn--rounded">
                     + Nueva Instalación
                 </a>
             </div>
@@ -422,21 +71,21 @@
 
                         <div class="filtro-grupo">
                             <label>&nbsp;</label>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn--primary btn--rounded">
                                 Filtrar
                             </button>
                         </div>
 
                         <div class="filtro-grupo">
                             <label>&nbsp;</label>
-                            <a href="{{ url_for('leads.dashboard') }}" class="btn btn-secondary">
+                            <a href="{{ url_for('leads.dashboard') }}" class="btn btn--secondary btn--rounded">
                                 Limpiar
                             </a>
                         </div>
 
                         <div class="filtro-grupo">
                             <label>&nbsp;</label>
-                            <a href="{{ url_for('leads.exportar', localidad=filtro_localidad, empresa=filtro_empresa, buscar_direccion=buscar_direccion) }}" class="btn btn-success">
+                            <a href="{{ url_for('leads.exportar', localidad=filtro_localidad, empresa=filtro_empresa, buscar_direccion=buscar_direccion) }}" class="btn btn--success btn--rounded">
                                 📊 Excel
                             </a>
                         </div>
@@ -446,24 +95,24 @@
                 <input type="hidden" name="page" value="1">
             </form>
 
-            <!-- Listado Ultra-Compacto de Instalaciones -->
+            <!-- Listado de Instalaciones -->
             {% if rows %}
-                <div class="leads-list">
+                <div class="recent-list">
                     {% for row in rows %}
-                    <div class="lead-list-item">
-                        <a href="{{ url_for('leads.ver', lead_id=row.lead_id) }}" class="lead-list-direccion">
+                    <div class="recent-item">
+                        <a href="{{ url_for('leads.ver', lead_id=row.lead_id) }}" class="recent-item__title text-center">
                             {{ row.direccion }}
                         </a>
-                        <div class="lead-list-info">
-                            <span class="lead-list-info-item">{{ row.localidad }}</span>
-                            <span class="lead-list-info-item">Ascensores: {{ row.total_equipos }}</span>
-                            <span class="lead-list-info-item">{{ row.empresa_mantenedora }}</span>
+                        <div class="recent-item__meta justify-center">
+                            <span class="recent-item__meta-item">{{ row.localidad }}</span>
+                            <span class="recent-item__meta-item">Ascensores: {{ row.total_equipos }}</span>
+                            <span class="recent-item__meta-item">{{ row.empresa_mantenedora }}</span>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <div style="text-align: left; padding: 40px 0; color: #999; background: transparent; margin-top: 20px;">
+                <div class="estado-vacio">
                     No se encontraron comunidades con los filtros aplicados
                 </div>
             {% endif %}
@@ -474,30 +123,30 @@
 
             <div class="paginacion">
                 {% if page > 1 %}
-                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-primary btn-sm">Anterior</a>
+                    <a href="?page={{ page - 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn--primary btn--sm btn--rounded">Anterior</a>
                 {% else %}
-                    <button class="btn btn-primary btn-sm" disabled>Anterior</button>
+                    <button class="btn btn--primary btn--sm btn--rounded" disabled>Anterior</button>
                 {% endif %}
 
                 <span class="paginacion-info">Página {{ page }} de {{ total_pages }}</span>
 
                 {% if page < total_pages %}
-                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn-primary btn-sm">Siguiente</a>
+                    <a href="?page={{ page + 1 }}&localidad={{ filtro_localidad }}&empresa={{ filtro_empresa }}&buscar_direccion={{ buscar_direccion }}" class="btn btn--primary btn--sm btn--rounded">Siguiente</a>
                 {% else %}
-                    <button class="btn btn-primary btn-sm" disabled>Siguiente</button>
+                    <button class="btn btn--primary btn--sm btn--rounded" disabled>Siguiente</button>
                 {% endif %}
             </div>
-            
-            <br>
-            <a href="/home" class="button">Volver al Home</a>
+
+            <div class="mt-2xl">
+                <a href="/home" class="btn btn--secondary btn--rounded">Volver al Home</a>
+            </div>
         </div>
-    </main>    <!-- Inyectar permisos del usuario para JavaScript -->
+    </main>
+
     <script>
         window.userPermissions = {{ permisos_usuario_json | safe }};
         window.perfilUsuario = '{{ perfil_usuario }}';
     </script>
-
-
-    <script src="/static/sidebar.js"></script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
 </html>
