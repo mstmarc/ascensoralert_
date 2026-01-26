@@ -5,386 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle Lead</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="/static/styles.css?v=6">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        /* HEADER CENTRADO */
-        header .header-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        header .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* === ESTILO MINIMALISTA LIMPIO === */
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: #ffffff;
-            line-height: 1.5;
-        }
-        }
-
-        main {
-            max-width: 1400px !important;
-            margin: 0 auto !important;
-            padding: 60px 80px !important;
-            background: #ffffff;
-        }
-
-        main .menu {
-            max-width: none !important;
-            width: 100% !important;
-            margin: 0 !important;
-        }
-
-        /* TÍTULO PRINCIPAL */
-        .page-title {
-            color: #003366;
-            font-size: 22px;
-            font-weight: 700;
-            margin: 0 0 40px 0;
-        }
-
-        /* SECCIONES - SIN RECUADROS */
-        .seccion {
-            background: transparent;
-            padding: 0;
-            margin-top: 40px;
-            border: none;
-            box-shadow: none;
-        }
-
-        .seccion:first-of-type {
-            margin-top: 0;
-        }
-
-        /* SUBTÍTULOS DE SECCIÓN */
-        .seccion h2 {
-            color: #003366;
-            font-size: 17px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 0 0 20px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #003366;
-        }
-
-        /* INFORMACIÓN EN UNA COLUMNA VERTICAL */
-        .info-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: row;
-            gap: 12px;
-            font-size: 14px;
-        }
-
-        .info-item label {
-            font-weight: 700;
-            color: #222;
-            min-width: 200px;
-            flex-shrink: 0;
-        }
-
-        .info-item label::after {
-            content: ":";
-        }
-
-        .info-item span,
-        .info-item a {
-            color: #222;
-            font-weight: 400;
-        }
-
-        .info-item a {
-            color: #003366;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .info-item a:hover {
-            text-decoration: underline;
-        }
-
-        /* OBSERVACIONES */
-        .observaciones-block {
-            margin-top: 12px;
-        }
-
-        .observaciones-block label {
-            font-weight: 700;
-            color: #222;
-            font-size: 14px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .observaciones-content {
-            color: #222;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        }
-
-        /* SEPARADOR */
-        .separator {
-            height: 1px;
-            background: #e6e6e6;
-            margin: 40px 0;
-            border: none;
-        }
-
-        /* OPORTUNIDADES - TARJETA AÉREA (MISMO ESTILO QUE EQUIPOS) */
-        .oportunidad-item {
-            background: #ffffff;
-            padding: 16px 20px;
-            margin-bottom: 14px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s;
-            border: none !important;
-        }
-
-        .oportunidad-item:hover {
-            background: #f0f3f8;
-        }
-
-        .oportunidad-info {
-            flex: 1;
-        }
-
-        .oportunidad-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
-        }
-
-        .oportunidad-tipo {
-            font-weight: 700;
-            font-size: 15px;
-            color: #222;
-        }
-
-        .oportunidad-estado {
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #003366;
-            background: #e8eef8;
-        }
-
-        .oportunidad-detalles {
-            font-size: 13px;
-            color: #555;
-            text-align: left;
-            border: none;
-        }
-
-        .oportunidad-acciones {
-            display: flex;
-            gap: 8px;
-        }
-
-        /* VISITAS */
-        .visita-item {
-            background: transparent;
-            padding: 16px 0;
-            margin-bottom: 24px;
-        }
-
-        .visita-fecha {
-            font-weight: 700;
-            color: #222;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-
-        .visita-observaciones {
-            color: #222;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        }
-
-        .visita-oportunidad {
-            color: #777;
-            font-size: 12px;
-            margin-top: 8px;
-        }
-
-        /* EQUIPOS - TARJETA AÉREA */
-        .equipo-item {
-            background: #ffffff;
-            padding: 16px 20px;
-            margin-bottom: 14px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s;
-        }
-
-        .equipo-item:hover {
-            background: #f0f3f8;
-        }
-
-        .equipo-info {
-            flex: 1;
-        }
-
-        .equipo-nombre {
-            font-weight: 700;
-            color: #222;
-            font-size: 15px;
-            margin-bottom: 6px;
-        }
-
-        .equipo-detalles {
-            color: #555;
-            font-size: 13px;
-        }
-
-        .equipo-acciones {
-            display: flex;
-            gap: 8px;
-        }
-
-        .add-item-button {
-            text-align: left;
-            margin-top: 24px;
-        }
-
-        /* BOTONES - ESTILO CORPORATIVO LIMPIO */
-        .btn,
-        .button {
-            display: inline-block;
-            padding: 8px 14px;
-            background: #003c80;
-            color: white;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            text-align: left;
-            cursor: pointer;
-            transition: background 0.2s;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .btn:hover,
-        .button:hover {
-            background: #002f66;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-
-        .btn-success {
-            background: #003c80;
-        }
-
-        .btn-success:hover {
-            background: #002f66;
-        }
-
-        .btn-info {
-            background: #003c80;
-        }
-
-        .btn-info:hover {
-            background: #002f66;
-        }
-
-        .btn-primary {
-            background: #003c80;
-        }
-
-        .btn-primary:hover {
-            background: #002f66;
-        }
-
-        /* BOTONES DE ACCIÓN FINALES */
-        .botones-accion {
-            display: flex;
-            gap: 12px;
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 1px solid #e6e6e6;
-        }
-
-        /* ESTADO VACÍO */
-        .estado-vacio {
-            text-align: left;
-            padding: 40px 20px;
-            color: #777;
-            font-size: 14px;
-            font-style: italic;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            main {
-                padding: 40px 20px !important;
-            }
-
-            .info-item {
-                flex-direction: column;
-                gap: 4px;
-            }
-
-            .info-item label {
-                min-width: auto;
-            }
-
-            .equipo-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .botones-accion {
-                flex-direction: column;
-            }
-
-            .btn, .button {
-                width: 100%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=9">
+    <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}?v=1">
 </head>
 <body>
     <header>
         <div class="header-container">
             <div class="logo-container">
                 <a href="/home">
-                    <img src="/static/logo-fedes-ascensores.png" alt="Logo Fedes Ascensores" class="logo">
+                    <img src="{{ url_for('static', filename='logo-fedes-ascensores.png') }}" alt="Logo Fedes Ascensores" class="logo">
                 </a>
             </div>
         </div>
     </header>
-    <main>
-        <div class="menu">
-            <h1 class="page-title">Detalle de la Comunidad</h1>
+
+    <main class="main--full-width">
+        <div class="page-container">
+            <div class="page-header">
+                <div class="page-header__left">
+                    <h1>Detalle de la Comunidad</h1>
+                </div>
+            </div>
 
             <!-- INFORMACIÓN GENERAL -->
             <div class="seccion">
@@ -481,9 +122,9 @@
                     </div>
                 </div>
 
-                <div class="observaciones-block">
-                    <label>Observaciones:</label>
-                    <div class="observaciones-content">{{ lead.observaciones or 'Sin observaciones' }}</div>
+                <div class="mt-lg">
+                    <label class="font-bold text-primary">Observaciones:</label>
+                    <div class="mt-sm text-secondary">{{ lead.observaciones or 'Sin observaciones' }}</div>
                 </div>
             </div>
 
@@ -493,13 +134,13 @@
 
                 {% if equipos %}
                     {% for equipo in equipos %}
-                    <div class="equipo-item">
-                        <div class="equipo-info">
-                            <div class="equipo-nombre">{{ equipo.tipo_equipo }}</div>
-                            <div class="equipo-detalles">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima|format_fecha }}</div>
+                    <div class="list-item">
+                        <div class="list-item__info">
+                            <div class="list-item__title">{{ equipo.tipo_equipo }}</div>
+                            <div class="list-item__details">RAE: {{ equipo.rae or '-' }} • Próxima IPO: {{ equipo.ipo_proxima|format_fecha }}</div>
                         </div>
-                        <div class="equipo-acciones">
-                            <a href="{{ url_for('equipos.ver', equipo_id=equipo.id) }}" class="btn btn-sm">Ver detalle</a>
+                        <div class="list-item__actions">
+                            <a href="{{ url_for('equipos.ver', equipo_id=equipo.id) }}" class="btn btn--primary btn--sm btn--rounded">Ver detalle</a>
                         </div>
                     </div>
                     {% endfor %}
@@ -508,7 +149,7 @@
                 {% endif %}
 
                 <div class="add-item-button">
-                    <a href="{{ url_for('equipos.nuevo', lead_id=lead.id) }}" class="btn">+ Añadir Equipo</a>
+                    <a href="{{ url_for('equipos.nuevo', lead_id=lead.id) }}" class="btn btn--primary btn--rounded">+ Añadir Equipo</a>
                 </div>
             </div>
 
@@ -534,7 +175,7 @@
                 {% endif %}
 
                 <div class="add-item-button">
-                    <a href="/crear_visita_seguimiento/{{ lead.id }}" class="btn">+ Registrar Nueva Visita</a>
+                    <a href="/crear_visita_seguimiento/{{ lead.id }}" class="btn btn--primary btn--rounded">+ Registrar Nueva Visita</a>
                 </div>
             </div>
 
@@ -544,16 +185,16 @@
 
                 {% if oportunidades %}
                     {% for op in oportunidades %}
-                    <div class="oportunidad-item">
-                        <div class="oportunidad-info">
-                            <div class="oportunidad-header">
-                                <div class="oportunidad-tipo">{{ op.tipo }}</div>
-                                <span class="oportunidad-estado">{{ op.estado|upper }}</span>
+                    <div class="list-item">
+                        <div class="list-item__info">
+                            <div class="list-item__title d-flex align-center gap-sm">
+                                {{ op.tipo }}
+                                <span class="badge badge--info">{{ op.estado|upper }}</span>
                             </div>
-                            <div class="oportunidad-detalles">{{ op.descripcion or 'Sin descripción' }}</div>
+                            <div class="list-item__details">{{ op.descripcion or 'Sin descripción' }}</div>
                         </div>
-                        <div class="oportunidad-acciones">
-                            <a href="/ver_oportunidad/{{ op.id }}" class="btn btn-sm">Ver detalle</a>
+                        <div class="list-item__actions">
+                            <a href="/ver_oportunidad/{{ op.id }}" class="btn btn--primary btn--sm btn--rounded">Ver detalle</a>
                         </div>
                     </div>
                     {% endfor %}
@@ -562,7 +203,7 @@
                 {% endif %}
 
                 <div class="add-item-button">
-                    <a href="{{ url_for('oportunidades.crear_oportunidad', cliente_id=lead.id) }}" class="btn">+ Crear Oportunidad</a>
+                    <a href="{{ url_for('oportunidades.crear_oportunidad', cliente_id=lead.id) }}" class="btn btn--primary btn--rounded">+ Crear Oportunidad</a>
                 </div>
             </div>
 
@@ -572,17 +213,15 @@
 
                 {% if tareas_comerciales %}
                     {% for tarea in tareas_comerciales %}
-                    <div class="oportunidad-item">
-                        <div class="oportunidad-info">
-                            <div class="oportunidad-header">
-                                <div class="oportunidad-tipo">
-                                    {{ tarea.motivo_creacion|replace('_', ' ')|title }}
-                                </div>
-                                <span class="oportunidad-estado" style="background: {% if tarea.estado == 'abierta' %}#28a745{% else %}#6c757d{% endif %}">
+                    <div class="list-item">
+                        <div class="list-item__info">
+                            <div class="list-item__title d-flex align-center gap-sm">
+                                {{ tarea.motivo_creacion|replace('_', ' ')|title }}
+                                <span class="badge {% if tarea.estado == 'abierta' %}badge--success{% else %}badge--secondary{% endif %}">
                                     {{ tarea.estado|upper }}
                                 </span>
                             </div>
-                            <div class="oportunidad-detalles">
+                            <div class="list-item__details">
                                 <strong>Creada:</strong> {{ tarea.fecha_creacion[:10] if tarea.fecha_creacion else 'N/A' }}
 
                                 {% if tarea.estado == 'cerrada' %}
@@ -611,18 +250,17 @@
 
             <!-- BOTONES DE ACCIÓN -->
             <div class="botones-accion">
-                <a href="{{ url_for('leads.editar', lead_id=lead.id) }}" class="btn">Editar Comunidad</a>
-                <a href="{{ url_for('leads.dashboard') }}" class="btn">Volver al Dashboard</a>
+                <a href="{{ url_for('leads.editar', lead_id=lead.id) }}" class="btn btn--primary btn--rounded">Editar Comunidad</a>
+                <a href="{{ url_for('leads.dashboard') }}" class="btn btn--secondary btn--rounded">Volver al Dashboard</a>
             </div>
 
         </div>
-    </main>    <!-- Inyectar permisos del usuario para JavaScript -->
+    </main>
+
     <script>
         window.userPermissions = {{ permisos_usuario_json | safe }};
         window.perfilUsuario = '{{ perfil_usuario }}';
     </script>
-
-
-    <script src="/static/sidebar.js"></script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
 </body>
 </html>
