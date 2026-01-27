@@ -611,11 +611,12 @@ td[class*="cantidad"],
 .buscador-input {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid #e6e6e6;
-    font-size: 15px;
+    border: 2px solid #e6e6e6;
+    border-radius: 8px;
+    font-size: 14px;
     font-family: 'Montserrat', sans-serif;
     box-sizing: border-box;
-    height: 32px;
+    height: 40px;
     margin-bottom: 0 !important;
 }
 
@@ -629,15 +630,15 @@ button.btn-buscar {
     color: #ffffff !important;
     padding: 0 20px;
     border: 1px solid #003366;
-    border-radius: 0;
+    border-radius: 8px !important;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    font-size: 15px;
+    font-size: 14px;
     font-family: 'Montserrat', sans-serif;
     white-space: nowrap;
     box-sizing: border-box;
-    height: 32px;
+    height: 40px;
     margin: 0 !important;
     display: inline-flex;
     align-items: center;
