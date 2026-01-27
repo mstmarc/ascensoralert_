@@ -538,7 +538,7 @@
             </div>
 
             <div style="margin-top: 15px;">
-                <a href="/inspecciones/ver/{{ defecto.inspeccion.id }}" class="button btn-secondary">Ver Inspección Completa</a>
+                <a href="{{ url_for('inspecciones.ver', inspeccion_id=defecto.inspeccion.id) }}" class="button btn-secondary">Ver Inspección Completa</a>
             </div>
         </div>
         {% endif %}
